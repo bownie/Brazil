@@ -98,6 +98,24 @@ namespace Xyglo.Brazil
             return m_actionDictionary.Where(item => item.Key.getState() == state).ToDictionary(p => p.Key, p => p.Value);
         }
 
+        public List<Target> getTargetsForKeys(State state, List<KeyAction> keys)
+        {
+            Dictionary<StateAction, Target> dict = getActionsForState(state);
+            List<Target> rL = new List<Target>();
+
+            foreach (StateAction sA in dict.Keys)
+            {
+                //if (sA.getActions().Count == keys.Count && Enumerable.
+
+                //sA.getActions();
+            //}
+
+            //var DifferencesList = keys.Where(x => !sA.getActions().Any(x1 => x1.m_name == x.m_name))
+            //.Union(ListB.Where(x => !ListA.Any(x1 => x1.id == x.id)));
+            }
+
+            return rL;
+        }
         /// <summary>
         /// The ActionMap is basically a Dictionary for each State and Action which
         /// points to a Target - or not.

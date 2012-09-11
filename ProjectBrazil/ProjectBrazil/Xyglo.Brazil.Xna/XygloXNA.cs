@@ -3490,6 +3490,62 @@ namespace Xyglo.Brazil.Xna
         }
 
 
+        /// <summary>
+        /// Return a list of keys that have changed since last update
+        /// </summary>
+        /// <returns></returns>
+        protected List<KeyAction> getKeysChanged()
+        {
+            List<KeyAction> lKA = new List<KeyAction>();
+
+            // First off build up a map of what keys have been pressed since last state
+            //
+            if (m_lastKeyboardState != Keyboard.GetState())
+            {
+                // Some keys have been pressed
+                //
+                foreach (Keys key in Keyboard.GetState().GetPressedKeys())
+                {
+                    bool found = false;
+                    foreach (Keys lastKey in m_lastKeyboardState.GetPressedKeys())
+                    {
+                        if (lastKey == key) // still down
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found)
+                    {
+                        lKA.Add(new KeyAction(key, true));
+                    }
+                }
+
+                // Which keys have gone up since last press
+                //
+                foreach (Keys lastKey in m_lastKeyboardState.GetPressedKeys())
+                {
+                    bool found = false;
+                    foreach (Keys key in Keyboard.GetState().GetPressedKeys())
+                    {
+                        if (lastKey == key) // still down
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found)
+                    {
+                        lKA.Add(new KeyAction(lastKey, false));
+                    }
+                }
+            }
+
+
+            return lKA;
+        }
 
         /// <summary>
         /// Allows the game to run logic such as updating the world,
@@ -3506,8 +3562,13 @@ namespace Xyglo.Brazil.Xna
                 m_frustrum.Matrix = m_viewMatrix * m_projection;
             }
 
-            Dictionary<StateAction, Target> actionMap = m_actionMap.getActionsForState(m_state);
+            // Get an action list of key changes
+            //
+            List<KeyAction> keys = getKeysChanged();
 
+
+            Dictionary<StateAction, Target> actionMap = m_actionMap.getActionsForState(m_state);
+            /*
             // Build a picture of keys and mouse requirements
             //
             List<KeyAction> keys = new List<KeyAction>();
@@ -3535,7 +3596,7 @@ namespace Xyglo.Brazil.Xna
                     }
                 }
             }
-
+            */
             
 
             //actionMap.Select(item => item);

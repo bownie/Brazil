@@ -42,7 +42,11 @@ namespace Xyglo.Brazil
         /// Key constructor
         /// </summary>
         /// <param name="key"></param>
-        public KeyAction(Keys key) { m_key = key; }
+        public KeyAction(Keys key, bool down = true)
+        {
+            m_key = key;
+            m_down = down;
+        }
 
         /// <summary>
         /// Copy constructor
