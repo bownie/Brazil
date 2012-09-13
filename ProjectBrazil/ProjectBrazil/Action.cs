@@ -6,6 +6,28 @@ using System.Text;
 namespace Xyglo.Brazil
 {
     /// <summary>
+    /// Modifier from the Keyboard
+    /// </summary>
+    public enum KeyboardModifier
+    {
+        None        = 0x0,
+        Alt         = 0x1,
+        Shift       = 0x2,
+        Control     = 0x4,
+        Windows     = 0x8
+    }
+
+    /// <summary>
+    /// What is the status of the Key or Button
+    /// </summary>
+    public enum KeyButtonState
+    {
+        Pressed,
+        Released,
+        Held
+    }
+
+    /// <summary>
     /// An Action ties a UserInput to an interface element.  Let's try an example:
     /// 
     /// TextEditing:Keys.A .. Keys.Z|Shift // default action is consume on highlighted action
@@ -45,7 +67,10 @@ namespace Xyglo.Brazil
         public KeyAction(Keys key, bool down = true)
         {
             m_key = key;
-            m_down = down;
+            if (down)
+            {
+                m_state = KeyButtonState.Pressed;
+            }
         }
 
         /// <summary>
@@ -55,9 +80,64 @@ namespace Xyglo.Brazil
         public KeyAction(KeyAction kA) : base(kA)
         {
             m_key = kA.m_key;
-            m_down = kA.m_down;
+
+            m_state = kA.m_state;
         }
 
+        /// <summary>
+        /// KeyAction constructor with modifier
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="modifier"></param>
+        /// <param name="down"></param>
+        public KeyAction(Keys key, KeyboardModifier modifier, bool down = true)
+        {
+            m_key = key;
+            m_modifier = modifier;
+
+            if (down)
+            {
+                m_state = KeyButtonState.Pressed;
+            }
+        }
+
+        /// <summary>
+        /// Operator equals
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public static bool operator ==(KeyAction a, KeyAction b)
+        {
+            return (a.m_key == b.m_key && a.m_modifier == b.m_modifier &&
+                    a.m_state == b.m_state && a.m_name == b.m_name);
+        }
+
+        /// <summary>
+        /// Operator not equals
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public static bool operator !=(KeyAction a, KeyAction b)
+        {
+            return (a.m_key != b.m_key || a.m_modifier != b.m_modifier ||
+                    a.m_state != b.m_state || a.m_name != b.m_name);
+        }
+
+        // Needed to avoid warning
+        //
+        public override int GetHashCode()
+        {
+            return -1;
+        }
+
+        // Needed to avoid warning
+        //
+        public override bool Equals(object obj)
+        {
+            return base.Equals(obj);
+        }
 
         /// <summary>
         /// Key
@@ -67,7 +147,53 @@ namespace Xyglo.Brazil
         /// <summary>
         /// Key down or up event?
         /// </summary>
-        public bool m_down { get; set; }
+//        public bool m_down { get; set; }
+        public KeyButtonState m_state = KeyButtonState.Released;
+
+        /// <summary>
+        /// Is Shift set?
+        /// </summary>
+        /// <returns></returns>
+        public bool withShift()
+        {
+            return ((m_modifier & KeyboardModifier.Shift) > 0);
+        }
+
+        /// <summary>
+        /// Is Alt set?
+        /// </summary>
+        /// <returns></returns>
+        public bool withAlt()
+        {
+            return ((m_modifier & KeyboardModifier.Alt) > 0);
+        }
+
+        /// <summary>
+        /// Is Control set?
+        /// </summary>
+        /// <returns></returns>
+        public bool withControl()
+        {
+            return ((m_modifier & KeyboardModifier.Control) > 0);
+        }
+
+        /// <summary>
+        /// Test this KeyboardAction against a key and key state
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="modifier"></param>
+        /// <param name="state"></param>
+        /// <returns></returns>
+        public bool test(Keys key, KeyboardModifier modifier, KeyButtonState state = KeyButtonState.Pressed)
+        {
+            return (m_key == key && m_modifier == modifier && m_state == state);
+
+        }
+
+        /// <summary>
+        /// Shift down?
+        /// </summary>
+        public KeyboardModifier m_modifier = KeyboardModifier.None;
     }
 
     /// <summary>

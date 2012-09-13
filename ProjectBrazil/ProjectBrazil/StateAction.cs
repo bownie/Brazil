@@ -61,12 +61,75 @@ namespace Xyglo.Brazil
             return m_state;
         }
 
-        //public int CompareTo(Object obj)
-        //{
-            //StateAction sa = (StateAction)(obj);
+        /// <summary>
+        /// Can we match all actions with this StateAction?   We pass in a list
+        /// of KeyActions and convert our internal ActionList into KeyActions and
+        /// compare them.  There is probably a cleaner way of doing this but this is
+        /// at least clear.
+        /// 
+        /// At this point we ignore any modifier keys as they should already have modified
+        /// the Keys that are passed in.
+        /// 
+        /// </summary>
+        /// <param name="actions"></param>
+        /// <returns></returns>
+        public bool matchKeyActions(List<KeyAction> keyActions)
+        {
+            foreach (KeyAction keyAction in keyActions)
+            {
+                bool found = false;
 
-            //return(sa.m_state == m_state && m_action == m
-        //}
+                // skip the modifier keys
+                //
+                if (keyAction.m_key == Keys.LeftAlt ||
+                    keyAction.m_key == Keys.RightAlt ||
+                    keyAction.m_key == Keys.LeftControl ||
+                    keyAction.m_key == Keys.RightControl ||
+                    keyAction.m_key == Keys.LeftShift ||
+                    keyAction.m_key == Keys.RightShift ||
+                    keyAction.m_key == Keys.LeftWindows ||
+                    keyAction.m_key == Keys.RightWindows)
+                    continue;
+
+                foreach (Action action in m_actionList)
+                {
+                    if (action.GetType() == typeof(KeyAction))
+                    {
+                        KeyAction testKeyAction = (KeyAction)action;
+
+                        if (testKeyAction == keyAction)
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!found)
+                {
+                    return false;
+                }
+            }
+
+            //return (m_actionList.Except(keyActions).ToList().Count == 0);
+            return true;
+        }
+
+        /*
+        public int CompareTo(Object obj)
+        {
+            StateAction sA = (StateAction)(obj);
+
+            return(sA.m_state == m_state && sA.m_actionList.Union(m_actionList)
+        }
+
+        public bool compareActionsLists(List<Action> listA, List<Action> listB)
+        {
+            List<Action> tempListA = listA.;
+            List<Action> tempListB = listB.Sort();
+
+
+        }*/
 
         /// <summary>
         /// The State

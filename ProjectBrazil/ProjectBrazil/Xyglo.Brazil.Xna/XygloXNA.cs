@@ -1959,11 +1959,18 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="gameTime"></param>
         /// <returns></returns>
-        protected bool processMetaCommands(GameTime gameTime)
+        protected bool processMetaCommands(GameTime gameTime, List<KeyAction> keyActionList)
         {
+            List<Keys> keyList = new List<Keys>();
+
+            foreach (KeyAction keyAction in keyActionList)
+            {
+                keyList.Add(keyAction.m_key);
+            }
+
             // Allow the game to exit
             //
-            if (checkKeyState(Keys.Escape, gameTime))
+            if (keyList.Contains(Keys.Escape)) // && checkKeyState(Keys.Escape, gameTime))
             {
                 // Check to see if we are building something
                 //
@@ -2197,22 +2204,28 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
-        /// Process meta keys as part of our Update() 
+        /// Process meta keys as part of our Update() - return a keyboard modifier
+        /// of the current state of the modifiers.
         /// </summary>
-        protected void processMetaKeys()
+        protected KeyboardModifier processMetaKeys(List<KeyAction> keyActionList)
         {
-            /*
+            // Build Key list
+            //
+            List<Keys> keyList = new List<Keys>();
+            foreach (KeyAction keyAction in keyActionList)
+            {
+                keyList.Add(keyAction.m_key);
+            }
+
             // Control key state
             //
-            if (m_ctrlDown && Keyboard.GetState(PlayerIndex.One).IsKeyUp(Keys.LeftControl) &&
-                Keyboard.GetState(PlayerIndex.One).IsKeyUp(Keys.RightControl))
+            if (m_ctrlDown && !keyList.Contains(Keys.LeftShift) && !keyList.Contains(Keys.RightControl))
             {
                 m_ctrlDown = false;
             }
             else
             {
-                if (!m_ctrlDown && (Keyboard.GetState(PlayerIndex.One).IsKeyDown(Keys.LeftControl) ||
-                    Keyboard.GetState(PlayerIndex.One).IsKeyDown(Keys.RightControl)))
+                if (!m_ctrlDown && (keyList.Contains(Keys.LeftControl) || keyList.Contains(Keys.RightControl)))
                 {
                     m_ctrlDown = true;
                 }
@@ -2220,21 +2233,19 @@ namespace Xyglo.Brazil.Xna
 
             // Shift key state
             //
-            if (m_shiftDown && Keyboard.GetState(PlayerIndex.One).IsKeyUp(Keys.LeftShift) &&
-                Keyboard.GetState(PlayerIndex.One).IsKeyUp(Keys.RightShift))
+            if (m_shiftDown && !keyList.Contains(Keys.LeftShift) && !keyList.Contains(Keys.RightShift))
             {
-                if (Keyboard.GetState(PlayerIndex.One).IsKeyUp(Keys.LeftControl) &&
-                    Keyboard.GetState(PlayerIndex.One).IsKeyUp(Keys.RightControl) &&
-                    Keyboard.GetState(PlayerIndex.One).IsKeyUp(Keys.LeftAlt) &&
-                    Keyboard.GetState(PlayerIndex.One).IsKeyUp(Keys.RightAlt))
+                if (!keyList.Contains(Keys.LeftControl) &&
+                    !keyList.Contains(Keys.RightControl) &&
+                    !keyList.Contains(Keys.LeftAlt) &&
+                    !keyList.Contains(Keys.RightAlt))
                 {
                     m_shiftDown = false;
                 }
             }
             else
             {
-                if (!m_shiftDown && (Keyboard.GetState(PlayerIndex.One).IsKeyDown(Keys.LeftShift) ||
-                    Keyboard.GetState(PlayerIndex.One).IsKeyDown(Keys.RightShift)))
+                if (!m_shiftDown && (keyList.Contains(Keys.LeftShift) || keyList.Contains(Keys.RightShift)))
                 {
                     m_shiftDown = true;
 
@@ -2249,8 +2260,7 @@ namespace Xyglo.Brazil.Xna
 
             // Alt key state
             //
-            if (m_altDown && Keyboard.GetState(PlayerIndex.One).IsKeyUp(Keys.LeftAlt) &&
-                Keyboard.GetState(PlayerIndex.One).IsKeyUp(Keys.RightAlt))
+            if (m_altDown && !keyList.Contains(Keys.LeftAlt) && !keyList.Contains(Keys.RightAlt))
             {
                 m_altDown = false;
 
@@ -2266,8 +2276,7 @@ namespace Xyglo.Brazil.Xna
             }
             else
             {
-                if (!m_altDown && (Keyboard.GetState(PlayerIndex.One).IsKeyDown(Keys.LeftAlt) ||
-                    Keyboard.GetState(PlayerIndex.One).IsKeyDown(Keys.RightAlt)))
+                if (!m_altDown && (keyList.Contains(Keys.LeftAlt) || keyList.Contains(Keys.RightAlt)))
                 {
                     m_altDown = true;
                 }
@@ -2275,20 +2284,29 @@ namespace Xyglo.Brazil.Xna
 
             // Windows key state
             //
-            if (m_windowsDown && Keyboard.GetState(PlayerIndex.One).IsKeyUp(Keys.LeftWindows) &&
-                Keyboard.GetState(PlayerIndex.One).IsKeyUp(Keys.RightWindows))
+            if (m_windowsDown && !keyList.Contains(Keys.LeftWindows) && !keyList.Contains(Keys.RightWindows))
             {
                 m_windowsDown = false;
             }
             else
             {
-                if (!m_windowsDown && (Keyboard.GetState(PlayerIndex.One).IsKeyDown(Keys.LeftWindows) ||
-                    Keyboard.GetState(PlayerIndex.One).IsKeyDown(Keys.RightWindows)))
+                if (!m_windowsDown && (keyList.Contains(Keys.LeftWindows) || keyList.Contains(Keys.RightWindows)))
                 {
                     m_windowsDown = true;
                 }
             }
-            */
+
+
+            // Construct the return code depending on the set flags
+            //
+            KeyboardModifier rM = KeyboardModifier.None;
+
+            if (m_shiftDown) rM |= KeyboardModifier.Shift;
+            if (m_ctrlDown) rM |= KeyboardModifier.Control;
+            if (m_altDown) rM |= KeyboardModifier.Alt;
+            if (m_windowsDown) rM |= KeyboardModifier.Windows;
+
+            return rM;
         }
 
         /// <summary>
@@ -3491,10 +3509,107 @@ namespace Xyglo.Brazil.Xna
 
 
         /// <summary>
-        /// Return a list of keys that have changed since last update
+        /// Convert key mappings from rax (XNA) to framework (Brazil) - we also need to add modifier keys to actions
+        /// when checking against a StateAction list.
+        /// </summary>
+        /// <param name="keys"></param>
+        /// <returns></returns>
+        protected List<Keys> convertKeyMappings(Microsoft.Xna.Framework.Input.Keys[] keys, bool ignoreModifiers = false)
+        {
+            List<Keys> rL = new List<Keys>();
+            Keys newKey = Keys.None;
+
+            foreach (Microsoft.Xna.Framework.Input.Keys key in keys)
+            {
+                switch (key)
+                {
+                    case Microsoft.Xna.Framework.Input.Keys.A:
+                        newKey = Keys.A;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.B:
+                        newKey = Keys.B;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.O:
+                        newKey = Keys.O;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.Escape:
+                        newKey = Keys.Escape;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.LeftAlt:
+                        if (!ignoreModifiers) newKey = Keys.LeftAlt;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.RightAlt:
+                        if (!ignoreModifiers) newKey = Keys.RightAlt;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.LeftControl:
+                        if (!ignoreModifiers) newKey = Keys.LeftControl;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.RightControl:
+                        if (!ignoreModifiers) newKey = Keys.RightControl;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.LeftShift:
+                        if (!ignoreModifiers) newKey = Keys.LeftShift;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.RightShift:
+                        if (!ignoreModifiers) newKey = Keys.RightShift;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.LeftWindows:
+                        if (!ignoreModifiers) newKey = Keys.LeftWindows;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.RightWindows:
+                        if (!ignoreModifiers) newKey = Keys.RightWindows;
+                        break;
+
+                    default:
+                        newKey = Keys.None;
+                        break;
+                }
+
+                if (newKey != Keys.None)
+                {
+                    rL.Add(newKey);
+                }
+            }
+            return rL;
+        }
+
+
+        /// <summary>
+        /// Return a list of stable state keys from last time
         /// </summary>
         /// <returns></returns>
-        protected List<KeyAction> getKeysChanged()
+        protected List<KeyAction> getLastKeys(bool ignoreModifiers = false)
+        {
+            List<KeyAction> lKA = new List<KeyAction>();
+
+            foreach (Keys key in convertKeyMappings(m_lastKeyboardState.GetPressedKeys(), ignoreModifiers))
+            {
+                lKA.Add(new KeyAction(key, true));
+            }
+
+            return lKA;
+        }
+
+        /// <summary>
+        /// Return a list of keys that have changed since last update - note that we have a local type Keys which 
+        /// is the same as the XNA name but requires mapping (as we don't know the XNA enum).
+        /// 
+        /// We have to ignore modifier keys when creating this list otherwise our StateActions get confused.
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        protected List<KeyAction> getKeysChanged(bool ignoreModifiers = false)
         {
             List<KeyAction> lKA = new List<KeyAction>();
 
@@ -3504,10 +3619,10 @@ namespace Xyglo.Brazil.Xna
             {
                 // Some keys have been pressed
                 //
-                foreach (Keys key in Keyboard.GetState().GetPressedKeys())
+                foreach (Keys key in convertKeyMappings(Keyboard.GetState().GetPressedKeys(), ignoreModifiers))
                 {
                     bool found = false;
-                    foreach (Keys lastKey in m_lastKeyboardState.GetPressedKeys())
+                    foreach (Keys lastKey in convertKeyMappings(m_lastKeyboardState.GetPressedKeys(), ignoreModifiers))
                     {
                         if (lastKey == key) // still down
                         {
@@ -3518,16 +3633,18 @@ namespace Xyglo.Brazil.Xna
 
                     if (!found)
                     {
+                        // Ensure that we add any modifiers here
+                        //
                         lKA.Add(new KeyAction(key, true));
                     }
                 }
 
                 // Which keys have gone up since last press
                 //
-                foreach (Keys lastKey in m_lastKeyboardState.GetPressedKeys())
+                foreach (Keys lastKey in convertKeyMappings(m_lastKeyboardState.GetPressedKeys(), ignoreModifiers))
                 {
                     bool found = false;
-                    foreach (Keys key in Keyboard.GetState().GetPressedKeys())
+                    foreach (Keys key in convertKeyMappings(Keyboard.GetState().GetPressedKeys(), ignoreModifiers))
                     {
                         if (lastKey == key) // still down
                         {
@@ -3543,6 +3660,109 @@ namespace Xyglo.Brazil.Xna
                 }
             }
 
+            return lKA;
+        }
+
+        /// <summary>
+        /// Get all the KeyActions that are currently in progress - whether keys be newly down 
+        /// or held down or released.
+        /// </summary>
+        /// <returns></returns>
+        protected List<KeyAction> getAllKeyActions()
+        {
+            List<KeyAction> lKA = new List<KeyAction>();
+            List<Keys> newKeys = convertKeyMappings(Keyboard.GetState().GetPressedKeys());
+            List<Keys> lastKeys = convertKeyMappings(m_lastKeyboardState.GetPressedKeys());
+            KeyboardModifier modifier = KeyboardModifier.None;
+
+            // Check for modifiers - flag and remove
+            //
+            if (newKeys.Contains(Keys.LeftShift))
+            {
+                modifier |= KeyboardModifier.Shift;
+                newKeys.Remove(Keys.LeftShift);
+            }
+
+            if (newKeys.Contains(Keys.RightShift))
+            {
+                modifier |= KeyboardModifier.Shift;
+                newKeys.Remove(Keys.RightShift);
+            }
+
+            if (newKeys.Contains(Keys.LeftControl))
+            {
+                modifier |= KeyboardModifier.Control;
+                newKeys.Remove(Keys.LeftControl);
+            }
+
+            if (newKeys.Contains(Keys.RightControl))
+            {
+                modifier |= KeyboardModifier.Control;
+                newKeys.Remove(Keys.RightControl);
+            }
+
+            if (newKeys.Contains(Keys.LeftAlt))
+            {
+                modifier |= KeyboardModifier.Alt;
+                newKeys.Remove(Keys.LeftAlt);
+            }
+
+            if (newKeys.Contains(Keys.RightAlt))
+            {
+                modifier |= KeyboardModifier.Alt;
+                newKeys.Remove(Keys.RightAlt);
+            }
+
+            if (newKeys.Contains(Keys.LeftWindows))
+            {
+                modifier |= KeyboardModifier.Windows;
+                newKeys.Remove(Keys.LeftWindows);
+            }
+
+            if (newKeys.Contains(Keys.RightWindows))
+            {
+                modifier |= KeyboardModifier.Windows;
+                newKeys.Remove(Keys.RightWindows);
+            }
+
+            // At this point we can work out if we have any new keys pressed or any held
+            // 
+            foreach (Keys key in newKeys)
+            {
+                bool pressed = true;
+
+                foreach (Keys lastKey in convertKeyMappings(m_lastKeyboardState.GetPressedKeys()))
+                {
+                    if (lastKey == key) // was down last time so hasn't been pressed - is held
+                    {
+                        pressed = false;  // set flag
+                        lastKeys.Remove(lastKey); // and remove from lastKeys
+                        break;
+                    }
+                }
+
+                KeyAction keyAction = new KeyAction(key, modifier);
+
+                if (pressed)
+                {
+                    keyAction.m_state = KeyButtonState.Pressed;
+                }
+                else
+                {
+                    keyAction.m_state = KeyButtonState.Held;
+                }
+
+                lKA.Add(keyAction);
+            }
+
+            // Now any keys that are were and have been released.
+            //
+            foreach (Keys key in lastKeys)
+            {
+                KeyAction keyAction = new KeyAction(key, modifier);
+                keyAction.m_state = KeyButtonState.Released;
+                lKA.Add(keyAction);
+            }
 
             return lKA;
         }
@@ -3562,12 +3782,135 @@ namespace Xyglo.Brazil.Xna
                 m_frustrum.Matrix = m_viewMatrix * m_projection;
             }
 
-            // Get an action list of key changes
-            //
-            List<KeyAction> keys = getKeysChanged();
+            List<KeyAction> keys = getAllKeyActions();
 
+            if (keys.Count > 0)
+            {
+                // Process action keys
+                //
+                processActionKeys(gameTime);
+
+                // Get a target for this (potential) combination of keys
+                //
+                Target target = m_actionMap.getTargetForKeys(m_state, keys);
+
+                // Now fire off the keys according to the Target
+                switch (target)
+                {
+                    case Target.None:
+                        // do nothing;
+                        break;
+
+                    case Target.CurrentBufferView:
+                        // Process keys that are left over if the above is false
+                        //
+                        processKeys(gameTime, keys);
+                        processMetaCommands(gameTime, keys);
+                        break;
+
+                    // The default target will process meta key commands
+                    //
+                    case Target.Default:
+                        processMetaCommands(gameTime, keys);
+                        break;
+
+                    case Target.OpenFile:
+                        Logger.logMsg("Open file");
+                        break;
+
+                    default:
+                        // do nothing
+                        break;
+                }
+            }
+
+
+#if FIRST_ATTEMPT
+            // Get an action list of key changes - how are we going to handle repeating keys here?
+            //
+            List<KeyAction> keys = getKeysChanged(false);
+            Dictionary<Target, KeyAction> keyActionList = new Dictionary<Target, KeyAction>();
+
+            if (keys.Count > 0)
+            {
+                // Check for any mouse actions here
+                //
+                //checkMouse(gameTime);
+
+                // Process Escape keys and MetaCommands in this helper function
+                if (processMetaCommands(gameTime, keys))
+                {
+                    // If we've got a key here then spin without processing keyboard input
+                    // for 50 milliseconds
+                    //
+                    m_processKeyboardAllowed = gameTime.TotalGameTime + new TimeSpan(0, 0, 0, 0, 50);
+                    return;
+                }
+
+                // Process meta keys (Shift, Alt, Ctrl) and set flags accordingly
+                //
+                KeyboardModifier kM = processMetaKeys(keys);
+
+                // Set any modifier flags
+                //
+                foreach (KeyAction key in keys)
+                {
+                    key.m_modifier = kM;
+                }
+
+                // Process action keys
+                //
+                processActionKeys(gameTime);
+
+                // Get a target for this (potential) combination of keys
+                //
+                Target target = m_actionMap.getTargetForKeys(m_state, keys);
+
+                // Now fire off the keys according to the Target
+                switch (target)
+                {
+                    case Target.None:
+                        // do nothing;
+                        break;
+
+                    case Target.CurrentBufferView:
+                        // Process keys that are left over if the above is false
+                        //
+                        processKeys(gameTime, keys);
+                        processMetaCommands(gameTime, keys);
+                        break;
+
+                    // The default target will process meta key commands
+                    //
+                    case Target.Default:
+                        processMetaCommands(gameTime, keys);
+                        break;
+
+                    case Target.OpenFile:
+                        Logger.logMsg("Open file");
+                        break;
+
+                    default:
+                        // do nothing
+                        break;
+                }
+                //Logger.logMsg("XygloXNA::Update() - target count " + targets.Count);
+            }
+            else
+            {
+                // The keys are whatever we had last time - nothing has changed.
+                //
+                keys = getLastKeys();
+
+                // We still need to process meta keys even if we don't have anything down
+                // to clear states.
+                //
+                processMetaKeys(keys);
+            }
 
             Dictionary<StateAction, Target> actionMap = m_actionMap.getActionsForState(m_state);
+
+#endif // FIRST_ATTEMPT
             /*
             // Build a picture of keys and mouse requirements
             //
@@ -3597,7 +3940,7 @@ namespace Xyglo.Brazil.Xna
                 }
             }
             */
-            
+
 
             //actionMap.Select(item => item);
 
@@ -3606,7 +3949,7 @@ namespace Xyglo.Brazil.Xna
             //return;
             //}
 
-            /*
+
 
             // Return after these commands have been processed for the demo version
             //
@@ -3637,6 +3980,7 @@ namespace Xyglo.Brazil.Xna
             //
             m_gameTime = gameTime;
 
+            /*
             // Check for any mouse actions here
             //
             checkMouse(gameTime);
@@ -3715,14 +4059,14 @@ namespace Xyglo.Brazil.Xna
         /// Process any keys that need to be printed
         /// </summary>
         /// <param name="gameTime"></param>
-        protected void processKeys(GameTime gameTime)
+        protected void processKeys(GameTime gameTime, List<KeyAction> keyActionList)
         {
             // Do nothing if no keys are pressed except check for auto repeat and clear if necessary.
             // We have to adjust for any held down modifier keys here and also clear the variable as 
             // necessary.
             //
-            if (Keyboard.GetState().GetPressedKeys().Length == 0 ||
-                (Keyboard.GetState().GetPressedKeys().Length == 1 && (m_altDown || m_shiftDown || m_ctrlDown)))
+            if (keyActionList.Count == 0 ||
+                (keyActionList.Count == 1 && (m_altDown || m_shiftDown || m_ctrlDown)))
             {
                 //m_heldDownStartTime = gameTime.TotalGameTime.TotalSeconds;
                 //m_heldDownLastRepeatTime = gameTime.TotalGameTime.TotalSeconds;
@@ -3738,10 +4082,18 @@ namespace Xyglo.Brazil.Xna
             //Keys keyDown = new Keys();
             bool foundKey = false;
 
-            /*
+            // Turn KeyAction list to key list
+            //
+            List<Keys> keyList = new List<Keys>();
+
+            foreach (KeyAction keyAction in keyActionList)
+            {
+                keyList.Add(keyAction.m_key);
+            }
+
             // Detect a key being hit that isn't one of the meta keys
             //
-            foreach (Keys testKey in Keyboard.GetState().GetPressedKeys())
+            foreach (Keys testKey in keyList)
             {
                 // Discard any processing if a meta key is involved
                 //
@@ -4155,7 +4507,6 @@ namespace Xyglo.Brazil.Xna
                     updateSmartHelp();
                 }
             }
-             * */
         }
 
         /// <summary>

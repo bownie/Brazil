@@ -98,24 +98,36 @@ namespace Xyglo.Brazil
             return m_actionDictionary.Where(item => item.Key.getState() == state).ToDictionary(p => p.Key, p => p.Value);
         }
 
-        public List<Target> getTargetsForKeys(State state, List<KeyAction> keys)
+        /// <summary>
+        /// Get a Target for a Key combination - only one Target is allowed for a combination.
+        /// Note that this method ignores modifier keys as they should already be set in the 
+        /// KeyAction itself.
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="keys"></param>
+        /// <returns></returns>
+        public Target getTargetForKeys(State state, List<KeyAction> keys)
         {
+            // Filter the StateActions by state
+            //
             Dictionary<StateAction, Target> dict = getActionsForState(state);
-            List<Target> rL = new List<Target>();
 
+            //  Check for key actions and return list
+            //
             foreach (StateAction sA in dict.Keys)
             {
-                //if (sA.getActions().Count == keys.Count && Enumerable.
-
-                //sA.getActions();
-            //}
-
-            //var DifferencesList = keys.Where(x => !sA.getActions().Any(x1 => x1.m_name == x.m_name))
-            //.Union(ListB.Where(x => !ListA.Any(x1 => x1.id == x.id)));
+                // We only need to match keys once as we're looking up in a Dictionary that ensures
+                // there's only one result.
+                //
+                if (sA.matchKeyActions(keys))
+                {
+                    return dict[sA];
+                }
             }
 
-            return rL;
+            return Target.None;
         }
+
         /// <summary>
         /// The ActionMap is basically a Dictionary for each State and Action which
         /// points to a Target - or not.

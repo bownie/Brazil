@@ -27,14 +27,21 @@ namespace Xyglo.Brazil
     /// </summary>
     public enum Target
     {
+        None,       // set if there is nothing to return for an action
         Default,
         CurrentBufferView,
         CreateNewBufferView,
         CompileStandard,
         CompileAlternate,
         OpenFile,
+        SaveFile,
         CloseBufferView,
-        LockMove
+        LockMove,
+        CursorDown,
+        CursorUp,
+        CursorLeft,
+        CursorRight,
+        Select
     };
 
     /// <summary>

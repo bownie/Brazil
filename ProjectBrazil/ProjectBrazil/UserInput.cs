@@ -208,6 +208,17 @@ namespace Xyglo.Brazil
         Zoom,
         NoName,
         Pa1,
+        LeftControl,
+        RightControl,
+        LeftAlt,
+        RightAlt,
+        LeftShift,
+        RightShift,
+        LeftWindows,
+        RightWindows,
+        OemTilde,
+        OemPlus,
+        OemComma,
         OemClear,
         Shift,    // modifier according to spec
         Control,  // modifier according to spec
