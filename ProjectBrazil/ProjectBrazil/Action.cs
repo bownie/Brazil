@@ -71,6 +71,8 @@ namespace Xyglo.Brazil
             {
                 m_state = KeyButtonState.Pressed;
             }
+
+            m_name = "Key Action";
         }
 
         /// <summary>
@@ -80,8 +82,8 @@ namespace Xyglo.Brazil
         public KeyAction(KeyAction kA) : base(kA)
         {
             m_key = kA.m_key;
-
             m_state = kA.m_state;
+            m_name = "Key Action";
         }
 
         /// <summary>
@@ -94,6 +96,7 @@ namespace Xyglo.Brazil
         {
             m_key = key;
             m_modifier = modifier;
+            m_name = "Key Action";
 
             if (down)
             {

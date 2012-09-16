@@ -19,7 +19,7 @@ using System.Xml.Serialization;
 namespace Xyglo.Brazil.Xna
 {
     [DataContract(Name = "Friendlier", Namespace = "http://www.xyglo.com")]
-    public abstract class XygloView
+    public abstract class XygloView : DrawableComponent
     {
 
         /// <summary>
@@ -156,6 +156,22 @@ namespace Xyglo.Brazil.Xna
 
         // ----------------------------------------- METHODS ------------------------------------------------------
         //
+
+        /// <summary>
+        /// Define concrete case for abstract draw method
+        /// </summary>
+        public override void draw()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Define concrete case for abstract update method
+        /// </summary>
+        public override void update()
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Accessor for BufferShowWidth

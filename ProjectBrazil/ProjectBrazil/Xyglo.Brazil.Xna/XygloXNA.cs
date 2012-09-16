@@ -1963,7 +1963,7 @@ namespace Xyglo.Brazil.Xna
         {
             List<Keys> keyList = new List<Keys>();
 
-            foreach (KeyAction keyAction in keyActionList)
+            foreach(KeyAction keyAction in keyActionList)
             {
                 keyList.Add(keyAction.m_key);
             }
@@ -2212,7 +2212,7 @@ namespace Xyglo.Brazil.Xna
             // Build Key list
             //
             List<Keys> keyList = new List<Keys>();
-            foreach (KeyAction keyAction in keyActionList)
+            foreach(KeyAction keyAction in keyActionList)
             {
                 keyList.Add(keyAction.m_key);
             }
@@ -2314,120 +2314,183 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="gameTime"></param>
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
-        protected void processActionKeys(GameTime gameTime)
+        protected void processActionKeys(GameTime gameTime, List<KeyAction> keyActionList)
         {
-            // Main key handling statement
-            //
-            if (checkKeyState(Keys.Up, gameTime))
+            foreach (KeyAction key in keyActionList)
             {
-                if (m_state == State.FileSaveAs || m_state == State.FileOpen)
+                // Main key handling statement
+                //
+                if (key.m_key == Keys.Up)
                 {
-                    if (m_fileSystemView.getHighlightIndex() > 0)
+                    if (m_state == State.FileSaveAs || m_state == State.FileOpen)
                     {
-                        m_fileSystemView.incrementHighlightIndex(-1);
+                        if (m_fileSystemView.getHighlightIndex() > 0)
+                        {
+                            m_fileSystemView.incrementHighlightIndex(-1);
+                        }
                     }
-                }
-                else if (m_state == State.ManageProject || (m_state == State.Configuration && m_editConfigurationItem == false)) // Configuration changes
-                {
-                    if (m_configPosition > 0)
+                    else if (m_state == State.ManageProject || (m_state == State.Configuration && m_editConfigurationItem == false)) // Configuration changes
                     {
-                        m_configPosition--;
+                        if (m_configPosition > 0)
+                        {
+                            m_configPosition--;
+                        }
                     }
-                }
-                else if (m_state == State.DiffPicker)
-                {
-                    if (m_diffPosition > 0)
+                    else if (m_state == State.DiffPicker)
                     {
-                        m_diffPosition--;
-                    }
-                }
-                else
-                {
-                    if (m_altDown && m_shiftDown) // Do zoom
-                    {
-                        setZoomLevel(m_zoomLevel - m_zoomStep);
-                    }
-                    else if (m_altDown)
-                    {
-                        // Attempt to move right if there's a BufferView there
-                        //
-                        detectMove(BufferView.ViewPosition.Above, gameTime);
+                        if (m_diffPosition > 0)
+                        {
+                            m_diffPosition--;
+                        }
                     }
                     else
                     {
-                        m_project.getSelectedBufferView().moveCursorUp(m_project, false);
-
-                        if (m_shiftDown)
+                        if (m_altDown && m_shiftDown) // Do zoom
                         {
-                            m_project.getSelectedBufferView().extendHighlight();  // Extend 
+                            setZoomLevel(m_zoomLevel - m_zoomStep);
+                        }
+                        else if (m_altDown)
+                        {
+                            // Attempt to move right if there's a BufferView there
+                            //
+                            detectMove(BufferView.ViewPosition.Above, gameTime);
                         }
                         else
                         {
-                            m_project.getSelectedBufferView().noHighlight(); // Disable
+                            m_project.getSelectedBufferView().moveCursorUp(m_project, false);
+
+                            if (m_shiftDown)
+                            {
+                                m_project.getSelectedBufferView().extendHighlight();  // Extend 
+                            }
+                            else
+                            {
+                                m_project.getSelectedBufferView().noHighlight(); // Disable
+                            }
                         }
                     }
                 }
-            }
-            else if (checkKeyState(Keys.Down, gameTime))
-            {
-                if (m_state == State.FileSaveAs || m_state == State.FileOpen)
+                //else if (keyActionList.Find(item => item.m_key == Keys.Down && item.m_modifier == KeyboardModifier.None).ToString() != "")
+                else if (key.m_key == Keys.Down)
                 {
-                    if (m_fileSystemView.atDriveLevel())
+                    if (m_state == State.FileSaveAs || m_state == State.FileOpen)
                     {
-                        // Drives are highlighted slightly differently to directories as the zero index is 
-                        // counted for drives (1 for directories) hence the adjustment in the RH term
-                        //
-                        if (m_fileSystemView.getHighlightIndex() < m_fileSystemView.countActiveDrives() - 1)
+                        if (m_fileSystemView.atDriveLevel())
+                        {
+                            // Drives are highlighted slightly differently to directories as the zero index is 
+                            // counted for drives (1 for directories) hence the adjustment in the RH term
+                            //
+                            if (m_fileSystemView.getHighlightIndex() < m_fileSystemView.countActiveDrives() - 1)
+                            {
+                                m_fileSystemView.incrementHighlightIndex(1);
+                            }
+                        }
+                        else if (m_fileSystemView.getHighlightIndex() < m_fileSystemView.getDirectoryLength())
                         {
                             m_fileSystemView.incrementHighlightIndex(1);
                         }
                     }
-                    else if (m_fileSystemView.getHighlightIndex() < m_fileSystemView.getDirectoryLength())
+                    else if (m_state == State.Configuration && m_editConfigurationItem == false) // Configuration changes
                     {
-                        m_fileSystemView.incrementHighlightIndex(1);
+                        if (m_configPosition < m_project.getConfigurationListLength() - 1)
+                        {
+                            m_configPosition++;
+                        }
                     }
-                }
-                else if (m_state == State.Configuration && m_editConfigurationItem == false) // Configuration changes
-                {
-                    if (m_configPosition < m_project.getConfigurationListLength() - 1)
+                    else if (m_state == State.ManageProject)
                     {
-                        m_configPosition++;
+                        if (m_configPosition < m_modelBuilder.getLeafNodesPlaces() - 1)
+                        {
+                            m_configPosition++;
+                        }
                     }
-                }
-                else if (m_state == State.ManageProject)
-                {
-                    if (m_configPosition < m_modelBuilder.getLeafNodesPlaces() - 1)
+                    else if (m_state == State.DiffPicker)
                     {
-                        m_configPosition++;
-                    }
-                }
-                else if (m_state == State.DiffPicker)
-                {
-                    if (m_differ != null && m_diffPosition < m_differ.getMaxDiffLength())
-                    {
-                        m_diffPosition++;
-                    }
-                }
-                else
-                {
-                    if (m_altDown && m_shiftDown) // Do zoom
-                    {
-                        m_zoomLevel += m_zoomStep;
-                        setActiveBuffer();
-                    }
-                    else if (m_altDown)
-                    {
-                        // Attempt to move right if there's a BufferView there
-                        //
-                        detectMove(BufferView.ViewPosition.Below, gameTime);
+                        if (m_differ != null && m_diffPosition < m_differ.getMaxDiffLength())
+                        {
+                            m_diffPosition++;
+                        }
                     }
                     else
                     {
-                        m_project.getSelectedBufferView().moveCursorDown(false);
+                        if (m_altDown && m_shiftDown) // Do zoom
+                        {
+                            m_zoomLevel += m_zoomStep;
+                            setActiveBuffer();
+                        }
+                        else if (m_altDown)
+                        {
+                            // Attempt to move right if there's a BufferView there
+                            //
+                            detectMove(BufferView.ViewPosition.Below, gameTime);
+                        }
+                        else
+                        {
+                            m_project.getSelectedBufferView().moveCursorDown(false);
+
+                            if (m_shiftDown)
+                            {
+                                m_project.getSelectedBufferView().extendHighlight();
+                            }
+                            else
+                            {
+                                m_project.getSelectedBufferView().noHighlight(); // Disable
+                            }
+                        }
+                    }
+                }
+                else if (key.m_key == Keys.Left)
+                {
+                    if (m_state == State.FileSaveAs || m_state == State.FileOpen)
+                    {
+                        string parDirectory = "";
+
+                        // Set the directory to the sub directory and reset the highlighter
+                        //
+                        try
+                        {
+                            DirectoryInfo parentTest = m_fileSystemView.getParent();
+
+                            if (parentTest == null)
+                            {
+                                Logger.logMsg("Check devices");
+                                m_fileSystemView.setDirectory(null);
+                            }
+                            else
+                            {
+                                parDirectory = m_fileSystemView.getParent().Name;
+                                DirectoryInfo[] testAccess = m_fileSystemView.getParent().GetDirectories();
+                                FileInfo[] testFiles = m_fileSystemView.getParent().GetFiles();
+
+                                m_fileSystemView.setDirectory(m_fileSystemView.getParent().FullName);
+                                m_fileSystemView.setHighlightIndex(m_lastHighlightIndex);
+                            }
+                        }
+                        catch (Exception /*e*/)
+                        {
+                            setTemporaryMessage("Cannot access " + parDirectory.ToString(), 2, gameTime);
+                        }
+                    }
+                    else
+                    {
+                        if (m_ctrlDown)
+                        {
+                            m_project.getSelectedBufferView().wordJumpCursorLeft();
+                        }
+                        else if (m_altDown)
+                        {
+                            // Attempt to move right if there's a BufferView there
+                            //
+                            detectMove(BufferView.ViewPosition.Left, gameTime);
+                        }
+                        else
+                        {
+                            m_project.getSelectedBufferView().moveCursorLeft(m_project);
+                        }
 
                         if (m_shiftDown)
                         {
-                            m_project.getSelectedBufferView().extendHighlight();
+                            m_project.getSelectedBufferView().extendHighlight();  // Extend
                         }
                         else
                         {
@@ -2435,87 +2498,57 @@ namespace Xyglo.Brazil.Xna
                         }
                     }
                 }
-            }
-            else if (checkKeyState(Keys.Left, gameTime))
-            {
-                if (m_state == State.FileSaveAs || m_state == State.FileOpen)
+                else if (key.m_key == Keys.Right)
                 {
-                    string parDirectory = "";
-
-                    // Set the directory to the sub directory and reset the highlighter
-                    //
-                    try
+                    if (m_state == State.FileSaveAs || m_state == State.FileOpen)
                     {
-                        DirectoryInfo parentTest = m_fileSystemView.getParent();
-
-                        if (parentTest == null)
+                        traverseDirectory(gameTime);
+                    }
+                    else
+                    {
+                        if (m_ctrlDown)
                         {
-                            Logger.logMsg("Check devices");
-                            m_fileSystemView.setDirectory(null);
+                            m_project.getSelectedBufferView().wordJumpCursorRight();
+                        }
+                        else if (m_altDown)
+                        {
+                            // Attempt to move right if there's a BufferView there
+                            //
+                            detectMove(BufferView.ViewPosition.Right, gameTime);
                         }
                         else
                         {
-                            parDirectory = m_fileSystemView.getParent().Name;
-                            DirectoryInfo[] testAccess = m_fileSystemView.getParent().GetDirectories();
-                            FileInfo[] testFiles = m_fileSystemView.getParent().GetFiles();
+                            m_project.getSelectedBufferView().moveCursorRight(m_project);
+                        }
 
-                            m_fileSystemView.setDirectory(m_fileSystemView.getParent().FullName);
-                            m_fileSystemView.setHighlightIndex(m_lastHighlightIndex);
+                        if (m_shiftDown)
+                        {
+                            m_project.getSelectedBufferView().extendHighlight(); // Extend
+                        }
+                        else
+                        {
+                            m_project.getSelectedBufferView().noHighlight(); // Disable
                         }
                     }
-                    catch (Exception /*e*/)
-                    {
-                        setTemporaryMessage("Cannot access " + parDirectory.ToString(), 2, gameTime);
-                    }
                 }
-                else
+                else if (key.m_key == Keys.End)
                 {
-                    if (m_ctrlDown)
-                    {
-                        m_project.getSelectedBufferView().wordJumpCursorLeft();
-                    }
-                    else if (m_altDown)
-                    {
-                        // Attempt to move right if there's a BufferView there
-                        //
-                        detectMove(BufferView.ViewPosition.Left, gameTime);
-                    }
-                    else
-                    {
-                        m_project.getSelectedBufferView().moveCursorLeft(m_project);
-                    }
+                    ScreenPosition fp = m_project.getSelectedBufferView().getCursorPosition();
 
-                    if (m_shiftDown)
+                    // Set X and allow for tabs
+                    //
+                    if (fp.Y < m_project.getSelectedBufferView().getFileBuffer().getLineCount())
                     {
-                        m_project.getSelectedBufferView().extendHighlight();  // Extend
+                        fp.X = m_project.getSelectedBufferView().getFileBuffer().getLine(fp.Y).Replace("\t", m_project.getTab()).Length;
                     }
-                    else
+                    m_project.getSelectedBufferView().setCursorPosition(fp);
+
+                    // Change the X offset if the row is longer than the visible width
+                    //
+                    if (fp.X > m_project.getSelectedBufferView().getBufferShowWidth())
                     {
-                        m_project.getSelectedBufferView().noHighlight(); // Disable
-                    }
-                }
-            }
-            else if (checkKeyState(Keys.Right, gameTime))
-            {
-                if (m_state == State.FileSaveAs || m_state == State.FileOpen)
-                {
-                    traverseDirectory(gameTime);
-                }
-                else
-                {
-                    if (m_ctrlDown)
-                    {
-                        m_project.getSelectedBufferView().wordJumpCursorRight();
-                    }
-                    else if (m_altDown)
-                    {
-                        // Attempt to move right if there's a BufferView there
-                        //
-                        detectMove(BufferView.ViewPosition.Right, gameTime);
-                    }
-                    else
-                    {
-                        m_project.getSelectedBufferView().moveCursorRight(m_project);
+                        int bufferX = fp.X - m_project.getSelectedBufferView().getBufferShowWidth();
+                        m_project.getSelectedBufferView().setBufferShowStartX(bufferX);
                     }
 
                     if (m_shiftDown)
@@ -2526,121 +2559,19 @@ namespace Xyglo.Brazil.Xna
                     {
                         m_project.getSelectedBufferView().noHighlight(); // Disable
                     }
-                }
-            }
-            else if (checkKeyState(Keys.End, gameTime))
-            {
-                ScreenPosition fp = m_project.getSelectedBufferView().getCursorPosition();
 
-                // Set X and allow for tabs
-                //
-                if (fp.Y < m_project.getSelectedBufferView().getFileBuffer().getLineCount())
-                {
-                    fp.X = m_project.getSelectedBufferView().getFileBuffer().getLine(fp.Y).Replace("\t", m_project.getTab()).Length;
                 }
-                m_project.getSelectedBufferView().setCursorPosition(fp);
+                else if (key.m_key == Keys.Home)
+                {
+                    // Reset the cursor to zero
+                    //
+                    ScreenPosition fp = m_project.getSelectedBufferView().getFirstNonSpace(m_project);
 
-                // Change the X offset if the row is longer than the visible width
-                //
-                if (fp.X > m_project.getSelectedBufferView().getBufferShowWidth())
-                {
-                    int bufferX = fp.X - m_project.getSelectedBufferView().getBufferShowWidth();
-                    m_project.getSelectedBufferView().setBufferShowStartX(bufferX);
-                }
+                    m_project.getSelectedBufferView().setCursorPosition(fp);
 
-                if (m_shiftDown)
-                {
-                    m_project.getSelectedBufferView().extendHighlight(); // Extend
-                }
-                else
-                {
-                    m_project.getSelectedBufferView().noHighlight(); // Disable
-                }
-
-            }
-            else if (checkKeyState(Keys.Home, gameTime))
-            {
-                // Reset the cursor to zero
-                //
-                ScreenPosition fp = m_project.getSelectedBufferView().getFirstNonSpace(m_project);
-
-                m_project.getSelectedBufferView().setCursorPosition(fp);
-
-                // Reset any X offset to zero
-                //
-                m_project.getSelectedBufferView().setBufferShowStartX(0);
-
-                if (m_shiftDown)
-                {
-                    m_project.getSelectedBufferView().extendHighlight(); // Extend
-                }
-                else
-                {
-                    m_project.getSelectedBufferView().noHighlight(); // Disable
-                }
-            }
-            else if (checkKeyState(Keys.F9, gameTime)) // Spin anticlockwise though BVs
-            {
-                m_zoomLevel = 1000.0f;
-                setActiveBuffer(BufferView.ViewCycleDirection.Anticlockwise);
-            }
-            else if (checkKeyState(Keys.F10, gameTime)) // Spin clockwise through BVs
-            {
-                m_zoomLevel = 1000.0f;
-                setActiveBuffer(BufferView.ViewCycleDirection.Clockwise);
-            }
-            else if (checkKeyState(Keys.F3, gameTime))
-            {
-                doSearch(gameTime);
-            }
-            else if (checkKeyState(Keys.F4, gameTime))
-            {
-                m_project.setViewMode(Project.ViewMode.Fun);
-                m_drawingHelper.startBanner(gameTime, "Friendlier\nv1.0", 5);
-            }
-            else if (checkKeyState(Keys.F6, gameTime))
-            {
-                doBuildCommand(gameTime);
-            }
-            else if (checkKeyState(Keys.F7, gameTime))
-            {
-                string command = m_project.getConfigurationValue("ALTERNATEBUILDCOMMAND");
-                doBuildCommand(gameTime, command);
-            }
-            else if (checkKeyState(Keys.F11, gameTime)) // Toggle full screen
-            {
-                if (m_project.isFullScreen())
-                {
-                    windowedMode();
-                }
-                else
-                {
-                    fullScreenMode();
-                }
-                setSpriteFont();
-            }
-            else if (checkKeyState(Keys.F1, gameTime))  // Cycle down through BufferViews
-            {
-                int newValue = m_project.getSelectedBufferViewId() - 1;
-                if (newValue < 0)
-                {
-                    newValue += m_project.getBufferViews().Count;
-                }
-
-                m_project.setSelectedBufferViewId(newValue);
-                setActiveBuffer();
-            }
-            else if (checkKeyState(Keys.F2, gameTime)) // Cycle up through BufferViews
-            {
-                int newValue = (m_project.getSelectedBufferViewId() + 1) % m_project.getBufferViews().Count;
-                m_project.setSelectedBufferViewId(newValue);
-                setActiveBuffer();
-            }
-            else if (checkKeyState(Keys.PageDown, gameTime))
-            {
-                if (m_state == State.TextEditing)
-                {
-                    m_project.getSelectedBufferView().pageDown(m_project);
+                    // Reset any X offset to zero
+                    //
+                    m_project.getSelectedBufferView().setBufferShowStartX(0);
 
                     if (m_shiftDown)
                     {
@@ -2651,356 +2582,429 @@ namespace Xyglo.Brazil.Xna
                         m_project.getSelectedBufferView().noHighlight(); // Disable
                     }
                 }
-                else if (m_state == State.DiffPicker)
+                else if (key.m_key == Keys.F9) // Spin anticlockwise though BVs
                 {
-                    if (m_differ != null && m_diffPosition < m_differ.getMaxDiffLength())
-                    {
-                        m_diffPosition += m_project.getSelectedBufferView().getBufferShowLength();
-
-                        if (m_diffPosition >= m_differ.getMaxDiffLength())
-                        {
-                            m_diffPosition = m_differ.getMaxDiffLength() - 1;
-                        }
-                    }
+                    m_zoomLevel = 1000.0f;
+                    setActiveBuffer(BufferView.ViewCycleDirection.Anticlockwise);
                 }
-            }
-            else if (checkKeyState(Keys.PageUp, gameTime))
-            {
-                if (m_state == State.TextEditing)
+                else if (key.m_key == Keys.F10) // Spin clockwise through BVs
                 {
-                    m_project.getSelectedBufferView().pageUp(m_project);
-
-                    if (m_shiftDown)
-                    {
-                        m_project.getSelectedBufferView().extendHighlight(); // Extend
-                    }
-                    else
-                    {
-                        m_project.getSelectedBufferView().noHighlight(); // Disable
-                    }
+                    m_zoomLevel = 1000.0f;
+                    setActiveBuffer(BufferView.ViewCycleDirection.Clockwise);
                 }
-                else if (m_state == State.DiffPicker)
-                {
-                    if (m_diffPosition > 0)
-                    {
-                        m_diffPosition -= m_project.getSelectedBufferView().getBufferShowLength();
-
-                        if (m_diffPosition < 0)
-                        {
-                            m_diffPosition = 0;
-                        }
-                    }
-                }
-            }
-            else if (checkKeyState(Keys.Scroll, gameTime))
-            {
-                if (m_project.getSelectedBufferView().isLocked())
-                {
-                    m_project.getSelectedBufferView().setLock(false, 0);
-                }
-                else
-                {
-                    m_project.getSelectedBufferView().setLock(true, m_project.getSelectedBufferView().getCursorPosition().Y);
-                }
-            }
-            else if (checkKeyState(Keys.Tab, gameTime)) // Insert a tab space
-            {
-                m_project.getSelectedBufferView().insertText(m_project, "\t");
-                updateSmartHelp();
-            }
-            else if (checkKeyState(Keys.Insert, gameTime))
-            {
-                if (m_state == State.ManageProject)
-                {
-                    if (m_configPosition >= 0 && m_configPosition < m_modelBuilder.getLeafNodesPlaces())
-                    {
-                        string fileToEdit = m_modelBuilder.getSelectedModelString(m_configPosition);
-
-                        BufferView bv = m_project.getBufferView(fileToEdit);
-
-                        if (bv != null)
-                        {
-                            setActiveBuffer(bv);
-                        }
-                        else // create and activate
-                        {
-                            try
-                            {
-                                FileBuffer fb = m_project.getFileBuffer(fileToEdit);
-                                bv = new BufferView(m_project.getFontManager(), m_project.getBufferViews()[0], BufferView.ViewPosition.Left);
-                                bv.setFileBuffer(fb);
-                                int bvIndex = m_project.addBufferView(bv);
-                                setActiveBuffer(bvIndex);
-
-                                Vector3 rootPosition = m_project.getBufferViews()[0].getPosition();
-                                Vector3 newPosition2 = bv.getPosition();
-
-                                Logger.logMsg(rootPosition.ToString() + newPosition2.ToString());
-                                //bv.setFileBufferIndex(
-                                fb.loadFile(m_project.getSyntaxManager());
-
-                                if (m_project.getConfigurationValue("SYNTAXHIGHLIGHT").ToUpper() == "TRUE")
-                                {
-                                    //m_project.getSyntaxManager().generateAllHighlighting(fb, true);
-                                    m_smartHelpWorker.updateSyntaxHighlighting(m_project.getSyntaxManager(), fb);
-                                }
-
-                                // Break out of Manage mode and back to editing
-                                //
-                                Vector3 newPosition = m_project.getSelectedBufferView().getLookPosition();
-                                newPosition.Z = 500.0f;
-                                m_state = State.TextEditing;
-                                m_editConfigurationItem = false;
-                            }
-                            catch (Exception e)
-                            {
-                                setTemporaryMessage("Failed to load file " + e.Message, 2, gameTime);
-                            }
-                        }
-                    }
-                }
-
-            }
-            else if (checkKeyState(Keys.Delete, gameTime) || checkKeyState(Keys.Back, gameTime))
-            {
-
-                if (m_state == State.FileSaveAs && checkKeyState(Keys.Back, gameTime))
-                {
-                    // Delete charcters from the file name if we have one
-                    //
-                    if (m_saveFileName.Length > 0)
-                    {
-                        m_saveFileName = m_saveFileName.Substring(0, m_saveFileName.Length - 1);
-                    }
-                }
-                else if (m_state == State.FindText && checkKeyState(Keys.Back, gameTime))
-                {
-                    string searchText = m_project.getSelectedBufferView().getSearchText();
-                    // Delete charcters from the file name if we have one
-                    //
-                    if (searchText.Length > 0)
-                    {
-                        m_project.getSelectedBufferView().setSearchText(searchText.Substring(0, searchText.Length - 1));
-                    }
-                }
-                else if (m_state == State.GotoLine && checkKeyState(Keys.Back, gameTime))
-                {
-                    if (m_gotoLine.Length > 0)
-                    {
-                        m_gotoLine = m_gotoLine.Substring(0, m_gotoLine.Length - 1);
-                    }
-                }
-                else if (m_state == State.Configuration && m_editConfigurationItem && checkKeyState(Keys.Back, gameTime))
-                {
-                    if (m_editConfigurationItemValue.Length > 0)
-                    {
-                        m_editConfigurationItemValue = m_editConfigurationItemValue.Substring(0, m_editConfigurationItemValue.Length - 1);
-                    }
-                }
-                else if (m_state == State.ManageProject)
-                {
-                    if (m_configPosition >= 0 && m_configPosition < m_modelBuilder.getLeafNodesPlaces())
-                    {
-                        string fileToRemove = m_modelBuilder.getSelectedModelString(m_configPosition);
-                        if (m_project.removeFileBuffer(fileToRemove))
-                        {
-                            Logger.logMsg("Friendlier::Update() - removed FileBuffer for " + fileToRemove);
-
-                            // Update Active Buffer as necessary
-                            //
-                            setActiveBuffer();
-
-                            // Rebuild the file model
-                            //
-                            generateTreeModel();
-
-                            setTemporaryMessage("Removed " + fileToRemove + " from project", 5, m_gameTime);
-                        }
-                        else
-                        {
-                            Logger.logMsg("Friendlier::Update() - failed to remove FileBuffer for " + fileToRemove);
-                        }
-                    }
-                }
-                else if (m_project.getSelectedBufferView().gotHighlight()) // If we have a valid highlighted selection then delete it (normal editing)
-                {
-                    // All the clever stuff with the cursor is done at the BufferView level and it also
-                    // calls the command in the FileBuffer.
-                    //
-                    m_project.getSelectedBufferView().deleteCurrentSelection(m_project);
-                }
-                else // delete at cursor
-                {
-                    if (checkKeyState(Keys.Delete, gameTime))
-                    {
-                        m_project.getSelectedBufferView().deleteSingle(m_project);
-                    }
-                    else if (checkKeyState(Keys.Back, gameTime))
-                    {
-                        // Start with a file position from the screen position
-                        //
-                        FilePosition fp = m_project.getSelectedBufferView().screenToFilePosition(m_project);
-
-                        // Get the character before the current one and backspace accordingly 
-
-                        if (fp.X > 0)
-                        {
-                            string fetchLine = m_project.getSelectedBufferView().getCurrentLine();
-
-                            // Decrement and set X
-                            //
-                            fp.X--;
-
-                            // Now convert back to a screen position
-                            fp.X = fetchLine.Substring(0, fp.X).Replace("\t", m_project.getTab()).Length;
-
-                        }
-                        else if (fp.Y > 0)
-                        {
-                            fp.Y -= 1;
-
-                            // Don't forget to do tab conversions here too
-                            //
-                            fp.X = m_project.getSelectedBufferView().getFileBuffer().getLine(Convert.ToInt16(fp.Y)).Replace("\t", m_project.getTab()).Length;
-                        }
-
-                        m_project.getSelectedBufferView().setCursorPosition(new ScreenPosition(fp));
-
-                        m_project.getSelectedBufferView().deleteSingle(m_project);
-                    }
-                    updateSmartHelp();
-                }
-            }
-            else if (checkKeyState(Keys.Enter, gameTime))
-            {
-                //ScreenPosition fp = m_project.getSelectedBufferView().getCursorPosition();
-
-                if (m_state == State.FileSaveAs)
-                {
-                    // Check that the filename is valid
-                    //
-                    if (m_saveFileName != "" && m_saveFileName != null)
-                    {
-                        m_project.getSelectedBufferView().getFileBuffer().setFilepath(m_fileSystemView.getPath() + m_saveFileName);
-
-                        Logger.logMsg("Friendlier::Update() - file name = " + m_project.getSelectedBufferView().getFileBuffer().getFilepath());
-
-                        completeSaveFile(gameTime);
-
-                        // Now if we have remaining files to write then we need to carry on saving files
-                        //
-                        if (m_filesToWrite != null)
-                        {
-                            //m_filesToWrite.Remove(m_project.getSelectedBufferView().getFileBuffer());
-
-                            // If we have remaining files to edit then set the active BufferView to one that
-                            // looks over this file - then fly to it and choose and file location.
-                            //
-                            if (m_filesToWrite.Count > 0)
-                            {
-                                m_project.setSelectedBufferView(m_filesToWrite[0]);
-                                m_eye = m_project.getSelectedBufferView().getEyePosition();
-                                selectSaveFile();
-                            }
-                            else // We're done 
-                            {
-                                m_filesToWrite = null;
-                                Logger.logMsg("Friendlier::Update() - saved some files.  Quitting.");
-
-                                // Exit nicely and ensure we serialise
-                                //
-                                checkExit(gameTime);
-                            }
-                        }
-                        else
-                        {
-                            // Exit nicely and ensure we serialise
-                            //
-                            if (m_saveAsExit)
-                            {
-                                checkExit(gameTime);
-                            }
-                        }
-                    }
-                }
-                else if (m_state == State.FileOpen)
-                {
-                    traverseDirectory(gameTime);
-                }
-                else if (m_state == State.Configuration)
-                {
-                    // Set this status so that we edit the item
-                    //
-                    if (m_editConfigurationItem == false)
-                    {
-                        // Go into item edit mode and copy across the current value
-                        m_editConfigurationItem = true;
-                        m_editConfigurationItemValue = m_project.getConfigurationItem(m_configPosition).Value;
-                    }
-                    else
-                    {
-                        // Completed editing the item - now set it
-                        //
-                        m_editConfigurationItem = false;
-                        m_project.updateConfigurationItem(m_project.getConfigurationItem(m_configPosition).Name, m_editConfigurationItemValue);
-                    }
-                }
-                else if (m_state == State.FindText)
+                else if (key.m_key == Keys.F3)
                 {
                     doSearch(gameTime);
                 }
-                else if (m_state == State.GotoLine)
+                else if (key.m_key == Keys.F4)
                 {
-                    try
-                    {
-                        int gotoLine = Convert.ToInt16(m_gotoLine);
-
-                        if (gotoLine > 0)
-                        {
-                            if (gotoLine < m_project.getSelectedBufferView().getFileBuffer().getLineCount() - 1)
-                            {
-                                ScreenPosition sp = new ScreenPosition(0, gotoLine);
-                                m_project.getSelectedBufferView().setCursorPosition(sp);
-                            }
-                            else
-                            {
-                                setTemporaryMessage("Attempted to go beyond end of file.", 2, gameTime);
-                            }
-                        }
-                    }
-                    catch (Exception /* e */)
-                    {
-                        Logger.logMsg("Probably got junk in the goto line dialog");
-                        setTemporaryMessage("Lines are identified by numbers.", 2, gameTime);
-                    }
-
-                    m_gotoLine = "";
-                    m_state = State.TextEditing;
+                    m_project.setViewMode(Project.ViewMode.Fun);
+                    m_drawingHelper.startBanner(gameTime, "Friendlier\nv1.0", 5);
                 }
-                else
+                else if (key.m_key == Keys.F6)
                 {
-                    // Insert a line into the editor
-                    //
-                    string indent = "";
-
-                    try
+                    doBuildCommand(gameTime);
+                }
+                else if (key.m_key == Keys.F7)
+                {
+                    string command = m_project.getConfigurationValue("ALTERNATEBUILDCOMMAND");
+                    doBuildCommand(gameTime, command);
+                }
+                else if (key.m_key == Keys.F11) // Toggle full screen
+                {
+                    if (m_project.isFullScreen())
                     {
-                        indent = m_project.getConfigurationValue("AUTOINDENT");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.logMsg("Friendlier::Update() - couldn't get AUTOINDENT from config - " + e.Message);
-                    }
-
-                    if (m_project.getSelectedBufferView().gotHighlight())
-                    {
-                        m_project.getSelectedBufferView().replaceCurrentSelection(m_project, "\n");
+                        windowedMode();
                     }
                     else
                     {
-                        m_project.getSelectedBufferView().insertNewLine(m_project, indent);
+                        fullScreenMode();
                     }
+                    setSpriteFont();
+                }
+                else if (key.m_key == Keys.F1)  // Cycle down through BufferViews
+                {
+                    int newValue = m_project.getSelectedBufferViewId() - 1;
+                    if (newValue < 0)
+                    {
+                        newValue += m_project.getBufferViews().Count;
+                    }
+
+                    m_project.setSelectedBufferViewId(newValue);
+                    setActiveBuffer();
+                }
+                else if (key.m_key == Keys.F2) // Cycle up through BufferViews
+                {
+                    int newValue = (m_project.getSelectedBufferViewId() + 1) % m_project.getBufferViews().Count;
+                    m_project.setSelectedBufferViewId(newValue);
+                    setActiveBuffer();
+                }
+                else if (key.m_key == Keys.PageDown)
+                {
+                    if (m_state == State.TextEditing)
+                    {
+                        m_project.getSelectedBufferView().pageDown(m_project);
+
+                        if (m_shiftDown)
+                        {
+                            m_project.getSelectedBufferView().extendHighlight(); // Extend
+                        }
+                        else
+                        {
+                            m_project.getSelectedBufferView().noHighlight(); // Disable
+                        }
+                    }
+                    else if (m_state == State.DiffPicker)
+                    {
+                        if (m_differ != null && m_diffPosition < m_differ.getMaxDiffLength())
+                        {
+                            m_diffPosition += m_project.getSelectedBufferView().getBufferShowLength();
+
+                            if (m_diffPosition >= m_differ.getMaxDiffLength())
+                            {
+                                m_diffPosition = m_differ.getMaxDiffLength() - 1;
+                            }
+                        }
+                    }
+                }
+                else if (key.m_key == Keys.PageUp)
+                {
+                    if (m_state == State.TextEditing)
+                    {
+                        m_project.getSelectedBufferView().pageUp(m_project);
+
+                        if (m_shiftDown)
+                        {
+                            m_project.getSelectedBufferView().extendHighlight(); // Extend
+                        }
+                        else
+                        {
+                            m_project.getSelectedBufferView().noHighlight(); // Disable
+                        }
+                    }
+                    else if (m_state == State.DiffPicker)
+                    {
+                        if (m_diffPosition > 0)
+                        {
+                            m_diffPosition -= m_project.getSelectedBufferView().getBufferShowLength();
+
+                            if (m_diffPosition < 0)
+                            {
+                                m_diffPosition = 0;
+                            }
+                        }
+                    }
+                }
+                else if (key.m_key == Keys.Scroll)
+                {
+                    if (m_project.getSelectedBufferView().isLocked())
+                    {
+                        m_project.getSelectedBufferView().setLock(false, 0);
+                    }
+                    else
+                    {
+                        m_project.getSelectedBufferView().setLock(true, m_project.getSelectedBufferView().getCursorPosition().Y);
+                    }
+                }
+                else if (key.m_key == Keys.Tab) // Insert a tab space
+                {
+                    m_project.getSelectedBufferView().insertText(m_project, "\t");
                     updateSmartHelp();
+                }
+                else if (key.m_key == Keys.Insert)
+                {
+                    if (m_state == State.ManageProject)
+                    {
+                        if (m_configPosition >= 0 && m_configPosition < m_modelBuilder.getLeafNodesPlaces())
+                        {
+                            string fileToEdit = m_modelBuilder.getSelectedModelString(m_configPosition);
+
+                            BufferView bv = m_project.getBufferView(fileToEdit);
+
+                            if (bv != null)
+                            {
+                                setActiveBuffer(bv);
+                            }
+                            else // create and activate
+                            {
+                                try
+                                {
+                                    FileBuffer fb = m_project.getFileBuffer(fileToEdit);
+                                    bv = new BufferView(m_project.getFontManager(), m_project.getBufferViews()[0], BufferView.ViewPosition.Left);
+                                    bv.setFileBuffer(fb);
+                                    int bvIndex = m_project.addBufferView(bv);
+                                    setActiveBuffer(bvIndex);
+
+                                    Vector3 rootPosition = m_project.getBufferViews()[0].getPosition();
+                                    Vector3 newPosition2 = bv.getPosition();
+
+                                    Logger.logMsg(rootPosition.ToString() + newPosition2.ToString());
+                                    //bv.setFileBufferIndex(
+                                    fb.loadFile(m_project.getSyntaxManager());
+
+                                    if (m_project.getConfigurationValue("SYNTAXHIGHLIGHT").ToUpper() == "TRUE")
+                                    {
+                                        //m_project.getSyntaxManager().generateAllHighlighting(fb, true);
+                                        m_smartHelpWorker.updateSyntaxHighlighting(m_project.getSyntaxManager(), fb);
+                                    }
+
+                                    // Break out of Manage mode and back to editing
+                                    //
+                                    Vector3 newPosition = m_project.getSelectedBufferView().getLookPosition();
+                                    newPosition.Z = 500.0f;
+                                    m_state = State.TextEditing;
+                                    m_editConfigurationItem = false;
+                                }
+                                catch (Exception e)
+                                {
+                                    setTemporaryMessage("Failed to load file " + e.Message, 2, gameTime);
+                                }
+                            }
+                        }
+                    }
+
+                }
+                else if (key.m_key == Keys.Delete || key.m_key == Keys.Back)
+                {
+
+                    if (m_state == State.FileSaveAs && checkKeyState(Keys.Back, gameTime))
+                    {
+                        // Delete charcters from the file name if we have one
+                        //
+                        if (m_saveFileName.Length > 0)
+                        {
+                            m_saveFileName = m_saveFileName.Substring(0, m_saveFileName.Length - 1);
+                        }
+                    }
+                    else if (m_state == State.FindText && checkKeyState(Keys.Back, gameTime))
+                    {
+                        string searchText = m_project.getSelectedBufferView().getSearchText();
+                        // Delete charcters from the file name if we have one
+                        //
+                        if (searchText.Length > 0)
+                        {
+                            m_project.getSelectedBufferView().setSearchText(searchText.Substring(0, searchText.Length - 1));
+                        }
+                    }
+                    else if (m_state == State.GotoLine && checkKeyState(Keys.Back, gameTime))
+                    {
+                        if (m_gotoLine.Length > 0)
+                        {
+                            m_gotoLine = m_gotoLine.Substring(0, m_gotoLine.Length - 1);
+                        }
+                    }
+                    else if (m_state == State.Configuration && m_editConfigurationItem && checkKeyState(Keys.Back, gameTime))
+                    {
+                        if (m_editConfigurationItemValue.Length > 0)
+                        {
+                            m_editConfigurationItemValue = m_editConfigurationItemValue.Substring(0, m_editConfigurationItemValue.Length - 1);
+                        }
+                    }
+                    else if (m_state == State.ManageProject)
+                    {
+                        if (m_configPosition >= 0 && m_configPosition < m_modelBuilder.getLeafNodesPlaces())
+                        {
+                            string fileToRemove = m_modelBuilder.getSelectedModelString(m_configPosition);
+                            if (m_project.removeFileBuffer(fileToRemove))
+                            {
+                                Logger.logMsg("Friendlier::Update() - removed FileBuffer for " + fileToRemove);
+
+                                // Update Active Buffer as necessary
+                                //
+                                setActiveBuffer();
+
+                                // Rebuild the file model
+                                //
+                                generateTreeModel();
+
+                                setTemporaryMessage("Removed " + fileToRemove + " from project", 5, m_gameTime);
+                            }
+                            else
+                            {
+                                Logger.logMsg("Friendlier::Update() - failed to remove FileBuffer for " + fileToRemove);
+                            }
+                        }
+                    }
+                    else if (m_project.getSelectedBufferView().gotHighlight()) // If we have a valid highlighted selection then delete it (normal editing)
+                    {
+                        // All the clever stuff with the cursor is done at the BufferView level and it also
+                        // calls the command in the FileBuffer.
+                        //
+                        m_project.getSelectedBufferView().deleteCurrentSelection(m_project);
+                    }
+                    else // delete at cursor
+                    {
+                        if (key.m_key == Keys.Delete)
+                        {
+                            m_project.getSelectedBufferView().deleteSingle(m_project);
+                        }
+                        else if (key.m_key == Keys.Back)
+                        {
+                            // Start with a file position from the screen position
+                            //
+                            FilePosition fp = m_project.getSelectedBufferView().screenToFilePosition(m_project);
+
+                            // Get the character before the current one and backspace accordingly 
+
+                            if (fp.X > 0)
+                            {
+                                string fetchLine = m_project.getSelectedBufferView().getCurrentLine();
+
+                                // Decrement and set X
+                                //
+                                fp.X--;
+
+                                // Now convert back to a screen position
+                                fp.X = fetchLine.Substring(0, fp.X).Replace("\t", m_project.getTab()).Length;
+
+                            }
+                            else if (fp.Y > 0)
+                            {
+                                fp.Y -= 1;
+
+                                // Don't forget to do tab conversions here too
+                                //
+                                fp.X = m_project.getSelectedBufferView().getFileBuffer().getLine(Convert.ToInt16(fp.Y)).Replace("\t", m_project.getTab()).Length;
+                            }
+
+                            m_project.getSelectedBufferView().setCursorPosition(new ScreenPosition(fp));
+
+                            m_project.getSelectedBufferView().deleteSingle(m_project);
+                        }
+                        updateSmartHelp();
+                    }
+                }
+                else if (key.m_key == Keys.Enter)
+                {
+                    //ScreenPosition fp = m_project.getSelectedBufferView().getCursorPosition();
+
+                    if (m_state == State.FileSaveAs)
+                    {
+                        // Check that the filename is valid
+                        //
+                        if (m_saveFileName != "" && m_saveFileName != null)
+                        {
+                            m_project.getSelectedBufferView().getFileBuffer().setFilepath(m_fileSystemView.getPath() + m_saveFileName);
+
+                            Logger.logMsg("Friendlier::Update() - file name = " + m_project.getSelectedBufferView().getFileBuffer().getFilepath());
+
+                            completeSaveFile(gameTime);
+
+                            // Now if we have remaining files to write then we need to carry on saving files
+                            //
+                            if (m_filesToWrite != null)
+                            {
+                                //m_filesToWrite.Remove(m_project.getSelectedBufferView().getFileBuffer());
+
+                                // If we have remaining files to edit then set the active BufferView to one that
+                                // looks over this file - then fly to it and choose and file location.
+                                //
+                                if (m_filesToWrite.Count > 0)
+                                {
+                                    m_project.setSelectedBufferView(m_filesToWrite[0]);
+                                    m_eye = m_project.getSelectedBufferView().getEyePosition();
+                                    selectSaveFile();
+                                }
+                                else // We're done 
+                                {
+                                    m_filesToWrite = null;
+                                    Logger.logMsg("Friendlier::Update() - saved some files.  Quitting.");
+
+                                    // Exit nicely and ensure we serialise
+                                    //
+                                    checkExit(gameTime);
+                                }
+                            }
+                            else
+                            {
+                                // Exit nicely and ensure we serialise
+                                //
+                                if (m_saveAsExit)
+                                {
+                                    checkExit(gameTime);
+                                }
+                            }
+                        }
+                    }
+                    else if (m_state == State.FileOpen)
+                    {
+                        traverseDirectory(gameTime);
+                    }
+                    else if (m_state == State.Configuration)
+                    {
+                        // Set this status so that we edit the item
+                        //
+                        if (m_editConfigurationItem == false)
+                        {
+                            // Go into item edit mode and copy across the current value
+                            m_editConfigurationItem = true;
+                            m_editConfigurationItemValue = m_project.getConfigurationItem(m_configPosition).Value;
+                        }
+                        else
+                        {
+                            // Completed editing the item - now set it
+                            //
+                            m_editConfigurationItem = false;
+                            m_project.updateConfigurationItem(m_project.getConfigurationItem(m_configPosition).Name, m_editConfigurationItemValue);
+                        }
+                    }
+                    else if (m_state == State.FindText)
+                    {
+                        doSearch(gameTime);
+                    }
+                    else if (m_state == State.GotoLine)
+                    {
+                        try
+                        {
+                            int gotoLine = Convert.ToInt16(m_gotoLine);
+
+                            if (gotoLine > 0)
+                            {
+                                if (gotoLine < m_project.getSelectedBufferView().getFileBuffer().getLineCount() - 1)
+                                {
+                                    ScreenPosition sp = new ScreenPosition(0, gotoLine);
+                                    m_project.getSelectedBufferView().setCursorPosition(sp);
+                                }
+                                else
+                                {
+                                    setTemporaryMessage("Attempted to go beyond end of file.", 2, gameTime);
+                                }
+                            }
+                        }
+                        catch (Exception /* e */)
+                        {
+                            Logger.logMsg("Probably got junk in the goto line dialog");
+                            setTemporaryMessage("Lines are identified by numbers.", 2, gameTime);
+                        }
+
+                        m_gotoLine = "";
+                        m_state = State.TextEditing;
+                    }
+                    else
+                    {
+                        // Insert a line into the editor
+                        //
+                        string indent = "";
+
+                        try
+                        {
+                            indent = m_project.getConfigurationValue("AUTOINDENT");
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.logMsg("Friendlier::Update() - couldn't get AUTOINDENT from config - " + e.Message);
+                        }
+
+                        if (m_project.getSelectedBufferView().gotHighlight())
+                        {
+                            m_project.getSelectedBufferView().replaceCurrentSelection(m_project, "\n");
+                        }
+                        else
+                        {
+                            m_project.getSelectedBufferView().insertNewLine(m_project, indent);
+                        }
+                        updateSmartHelp();
+                    }
                 }
             }
         }
@@ -3531,8 +3535,160 @@ namespace Xyglo.Brazil.Xna
                         newKey = Keys.B;
                         break;
 
+                    case Microsoft.Xna.Framework.Input.Keys.C:
+                        newKey = Keys.C;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.D:
+                        newKey = Keys.D;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.E:
+                        newKey = Keys.E;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.F:
+                        newKey = Keys.F;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.G:
+                        newKey = Keys.G;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.H:
+                        newKey = Keys.H;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.I:
+                        newKey = Keys.I;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.J:
+                        newKey = Keys.J;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.K:
+                        newKey = Keys.K;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.L:
+                        newKey = Keys.L;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.M:
+                        newKey = Keys.N;
+                        break;
+
                     case Microsoft.Xna.Framework.Input.Keys.O:
                         newKey = Keys.O;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.P:
+                        newKey = Keys.P;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.Q:
+                        newKey = Keys.Q;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.R:
+                        newKey = Keys.R;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.S:
+                        newKey = Keys.S;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.T:
+                        newKey = Keys.T;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.U:
+                        newKey = Keys.U;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.V:
+                        newKey = Keys.V;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.W:
+                        newKey = Keys.W;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.X:
+                        newKey = Keys.X;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.Y:
+                        newKey = Keys.Y;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.Z:
+                        newKey = Keys.Z;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.D0:
+                        newKey = Keys.D0;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.D1:
+                        newKey = Keys.D1;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.D2:
+                        newKey = Keys.D2;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.D3:
+                        newKey = Keys.D3;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.D4:
+                        newKey = Keys.D4;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.D5:
+                        newKey = Keys.D5;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.D6:
+                        newKey = Keys.D6;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.D7:
+                        newKey = Keys.D7;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.D8:
+                        newKey = Keys.D8;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.D9:
+                        newKey = Keys.D9;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.Home:
+                        newKey = Keys.Home;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.End:
+                        newKey = Keys.End;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.Up:
+                        newKey = Keys.Up;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.Down:
+                        newKey = Keys.Down;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.Left:
+                        newKey = Keys.Left;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.Right:
+                        newKey = Keys.Right;
                         break;
 
                     case Microsoft.Xna.Framework.Input.Keys.Escape:
@@ -3593,7 +3749,7 @@ namespace Xyglo.Brazil.Xna
         {
             List<KeyAction> lKA = new List<KeyAction>();
 
-            foreach (Keys key in convertKeyMappings(m_lastKeyboardState.GetPressedKeys(), ignoreModifiers))
+            foreach(Keys key in convertKeyMappings(m_lastKeyboardState.GetPressedKeys(), ignoreModifiers))
             {
                 lKA.Add(new KeyAction(key, true));
             }
@@ -3704,7 +3860,7 @@ namespace Xyglo.Brazil.Xna
             if (newKeys.Contains(Keys.LeftAlt))
             {
                 modifier |= KeyboardModifier.Alt;
-                newKeys.Remove(Keys.LeftAlt);
+                //newKeys.Remove(Keys.LeftAlt);
             }
 
             if (newKeys.Contains(Keys.RightAlt))
@@ -3757,7 +3913,7 @@ namespace Xyglo.Brazil.Xna
 
             // Now any keys that are were and have been released.
             //
-            foreach (Keys key in lastKeys)
+            foreach(Keys key in lastKeys)
             {
                 KeyAction keyAction = new KeyAction(key, modifier);
                 keyAction.m_state = KeyButtonState.Released;
@@ -3786,9 +3942,13 @@ namespace Xyglo.Brazil.Xna
 
             if (keys.Count > 0)
             {
+                if (keys.Count > 1)
+                {
+                    Logger.logMsg("Got two");
+                }
                 // Process action keys
                 //
-                processActionKeys(gameTime);
+                processActionKeys(gameTime, keys);
 
                 // Get a target for this (potential) combination of keys
                 //
@@ -3814,8 +3974,32 @@ namespace Xyglo.Brazil.Xna
                         processMetaCommands(gameTime, keys);
                         break;
 
+                        // For OpenFile all we need to do is change state (for the moment)
+                        //
                     case Target.OpenFile:
-                        Logger.logMsg("Open file");
+                        m_state = State.FileOpen;
+                        break;
+
+                    case Target.SaveFile:
+                        break;
+
+                    case Target.CursorUp:
+                        switch (m_state)
+                        {
+                            case State.FileOpen:
+                                
+                            default:
+                                break;
+                        }
+                        break;
+
+                    case Target.CursorDown:
+                        break;
+
+                    case Target.CursorLeft:
+                        break;
+
+                    case Target.CursorRight:
                         break;
 
                     default:
@@ -3940,7 +4124,7 @@ namespace Xyglo.Brazil.Xna
                 }
             }
             */
-
+            
 
             //actionMap.Select(item => item);
 
@@ -3949,7 +4133,7 @@ namespace Xyglo.Brazil.Xna
             //return;
             //}
 
-
+           
 
             // Return after these commands have been processed for the demo version
             //
@@ -3964,7 +4148,7 @@ namespace Xyglo.Brazil.Xna
 
                 return;
             }
-
+            
             // Set the cursor to something useful
             //
             System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.IBeam;
@@ -6287,6 +6471,12 @@ namespace Xyglo.Brazil.Xna
             }
             else // This is where we draw Directories and Files
             {
+                if (!Directory.Exists(m_fileSystemView.getPath()))
+                {
+                    m_fileSystemView.setDirectory(@"C:\");
+                }
+
+
                 // For drives and directories we highlight item 1  - not zero
                 //
                 lineNumber = 1;

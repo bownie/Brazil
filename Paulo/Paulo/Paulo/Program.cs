@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Xyglo.Brazil;
 using Xyglo.Brazil.Xna;
 
@@ -33,16 +34,28 @@ namespace Paulo
             project.setLicenced(true);
             project.setViewMode(Project.ViewMode.Formal);
 
+            // Create and initialise viewspace
+            //
             ViewSpace viewSpace = new ViewSpace(project);
             viewSpace.initialise();
-
 
             // Connect up a key
             //
             viewSpace.connectKey(State.TextEditing, Keys.A, Target.CurrentBufferView);
             viewSpace.connectKey(State.TextEditing, Keys.B, Target.CurrentBufferView);
+            viewSpace.connectKey(State.TextEditing, Keys.Escape, Target.Default);
 
+            // Connect ALT+O to the open file mode
+            //
+            viewSpace.connect(State.TextEditing, new KeyAction(Keys.O, KeyboardModifier.Alt), Target.OpenFile);
+            viewSpace.connect(State.TextEditing, new KeyAction(Keys.S, KeyboardModifier.Alt), Target.SaveFile);
+
+            //List<Xyglo.Brazil.Action> actionList = new List<Xyglo.Brazil.Action>();
+
+            // Run the viewspace
+            //
             viewSpace.run();
+
         }
     }
 #endif

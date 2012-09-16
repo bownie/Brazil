@@ -35,7 +35,7 @@ namespace Xyglo.Brazil.Xna
     /// Does implement mutex locking for file access to ensure that this is thread safe.
     /// </summary>
     //[DataContract(Name = "Friendlier", Namespace = "http://www.xyglo.com")]
-    public class FileBuffer : IDisposable
+    public class FileBuffer : Component, IDisposable 
     {
         //////////// MEMBER VARIABLES ///////////////
 
@@ -201,8 +201,17 @@ namespace Xyglo.Brazil.Xna
             }
         }
 
-
         /////////////// METHODS ///////////////////
+        //
+        //
+
+        /// <summary>
+        /// Define concrete case for abstract update method
+        /// </summary>
+        public override void update()
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Dispose this object

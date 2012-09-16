@@ -68,6 +68,10 @@
   <ItemGroup>
     <Compile Include="Action.cs" />
     <Compile Include="ActionMap.cs" />
+    <Compile Include="Component.cs" />
+    <Compile Include="ComponentInstance.cs" />
+    <Compile Include="Core.cs" />
+    <Compile Include="DrawableComponent.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BloomComponent.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BloomSettings.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BraceDepth.cs" />
