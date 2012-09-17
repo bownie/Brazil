@@ -77,8 +77,6 @@ namespace Xyglo.Brazil
         {
             foreach (KeyAction keyAction in keyActions)
             {
-                bool found = false;
-
                 // skip the modifier keys
                 //
                 if (keyAction.m_key == Keys.LeftAlt ||
@@ -91,28 +89,32 @@ namespace Xyglo.Brazil
                     keyAction.m_key == Keys.RightWindows)
                     continue;
 
+                bool match = true;
+
                 foreach (Action action in m_actionList)
                 {
                     if (action.GetType() == typeof(KeyAction))
                     {
                         KeyAction testKeyAction = (KeyAction)action;
 
-                        if (testKeyAction == keyAction)
+                        if (testKeyAction != keyAction)
                         {
-                            found = true;
+                            match = false;
                             break;
                         }
                     }
                 }
 
-                if (!found)
+                // If we're still matching here then we can return true
+                //
+                if (match)
                 {
-                    return false;
+                    return true;
                 }
             }
 
-            //return (m_actionList.Except(keyActions).ToList().Count == 0);
-            return true;
+            // Default is not matched
+            return false;
         }
 
         /*

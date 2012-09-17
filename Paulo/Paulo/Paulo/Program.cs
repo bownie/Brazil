@@ -41,9 +41,9 @@ namespace Paulo
 
             // Connect up a key
             //
-            viewSpace.connectKey(State.TextEditing, Keys.A, Target.CurrentBufferView);
-            viewSpace.connectKey(State.TextEditing, Keys.B, Target.CurrentBufferView);
-            viewSpace.connectKey(State.TextEditing, Keys.Escape, Target.Default);
+            //viewSpace.connectKey(State.TextEditing, Keys.A, Target.CurrentBufferView);
+            //viewSpace.connectKey(State.TextEditing, Keys.B, Target.CurrentBufferView);
+            //viewSpace.connectKey(State.TextEditing, Keys.Escape, Target.Default);
 
             // Connect ALT+O to the open file mode
             //
@@ -51,6 +51,18 @@ namespace Paulo
             viewSpace.connect(State.TextEditing, new KeyAction(Keys.S, KeyboardModifier.Alt), Target.SaveFile);
 
             //List<Xyglo.Brazil.Action> actionList = new List<Xyglo.Brazil.Action>();
+
+            viewSpace.connectEditorKeys(State.TextEditing);
+            viewSpace.connectEditorKeys(State.FileSaveAs);
+            viewSpace.connectEditorKeys(State.FileOpen);
+            viewSpace.connectEditorKeys(State.PositionScreenOpen);
+            viewSpace.connectEditorKeys(State.PositionScreenNew);
+
+            // Move the selects bufferview
+            //
+            //viewSpace.connect(State.TextEditing, new KeyAction(Keys.Left, KeyboardModifier.Alt), Target.
+
+            //viewSpace.connectArrowKeys(State.
 
             // Run the viewspace
             //

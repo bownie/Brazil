@@ -217,20 +217,66 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
-        /// Connect all the normal editor keys to a target - if the target is
+        /// Connect all the "normal"editor keys to a target - if the target is
         /// not specified then we assume the default target is the focus object.
         /// </summary>
         /// <param name="state"></param>
         /// <param name="target"></param>
         public void connectEditorKeys(State state, Target target = Target.Default)
         {
-            if (target == Target.Default)
+            // Alphas
+            //
+            Keys[] alphaKeys = { Keys.A, Keys.B, Keys.C, Keys.D, Keys.E, Keys.F, Keys.F, Keys.G, Keys.H, Keys.I, Keys.J,
+                            Keys.K, Keys.L, Keys.M, Keys.N, Keys.O, Keys.P, Keys.Q, Keys.R, Keys.S, Keys.T, Keys.U,
+                            Keys.V, Keys.W, Keys.X, Keys.Y, Keys.Z };
+            foreach (Keys key in alphaKeys)
             {
-                // do something with the default target
+                connectKey(state, key, target);
             }
 
-            //m_actionMap.setAction(state, 
+            // Numbers
+            //
+            Keys[] numKeys = { Keys.D0, Keys.D1, Keys.D2, Keys.D3, Keys.D4, Keys.D5, Keys.D6, Keys.D7, Keys.D8, Keys.D9 };
+            foreach (Keys key in numKeys)
+            {
+                connectKey(state, key, target);
+            }
+
+            // Power keys - like Escape
+            //
+            Keys[] powerKeys = { Keys.Escape };
+            foreach(Keys key in powerKeys)
+            {
+                connectKey(state, key, target);
+            }
+
+            // Other keys
+            //
+            Keys[] otherKeys = { Keys.OemComma, Keys.OemPeriod, Keys.OemQuotes, Keys.OemCloseBrackets, Keys.OemOpenBrackets, Keys.OemPipe, Keys.OemMinus, Keys.OemPlus, Keys.OemQuestion, Keys.Back, Keys.Delete, Keys.Decimal, Keys.OemBackslash, Keys.LeftWindows, Keys.RightWindows, Keys.LeftControl, Keys.RightControl, Keys.RightShift, Keys.LeftShift, Keys.LeftShift, Keys.RightAlt, Keys.LeftAlt /*, Keys.Right, Keys.Left, Keys.Up, Keys.Down, Keys.PageUp, Keys.PageDown */ };
+            foreach (Keys key in otherKeys)
+            {
+                connectKey(state, key, target);
+            }
+
+            // Connect the arrow and movement keys
+            //
+            connectArrowKeys(state, target);
         }
+
+        /// <summary>
+        /// Connect arrow, page up and down and select (Enter) keys to a target
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="target"></param>
+        public void connectArrowKeys(State state, Target target = Target.Default)
+        {
+            Keys[] otherKeys = { Keys.Right, Keys.Left, Keys.Up, Keys.Down, Keys.PageUp, Keys.PageDown, Keys.Enter };
+            foreach (Keys key in otherKeys)
+            {
+                connectKey(state, key, target);
+            }
+        }
+
 
         /// <summary>
         /// Default to no input available from our world

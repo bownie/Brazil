@@ -1068,10 +1068,13 @@ namespace Xyglo.Brazil.Xna
             m_activeTime += snapshot - m_lastAccessTime;
             m_lastWriteTime = snapshot;
 
-            using (FileStream writer = new FileStream(m_projectFile, FileMode.Create))
+            if (m_projectFile != null)
             {
-                System.Runtime.Serialization.DataContractSerializer x = new System.Runtime.Serialization.DataContractSerializer(this.GetType());
-                x.WriteObject(writer, this);
+                using (FileStream writer = new FileStream(m_projectFile, FileMode.Create))
+                {
+                    System.Runtime.Serialization.DataContractSerializer x = new System.Runtime.Serialization.DataContractSerializer(this.GetType());
+                    x.WriteObject(writer, this);
+                }
             }
         }
 
