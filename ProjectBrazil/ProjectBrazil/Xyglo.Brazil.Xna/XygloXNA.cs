@@ -182,6 +182,9 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         protected string m_gotoBufferView = "";
 
+        // Stopwatch
+        //System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+
         /// <summary>
         /// The position where the project model will be viewable
         /// </summary>
@@ -539,7 +542,7 @@ namespace Xyglo.Brazil.Xna
         /// <summary>
         /// Last mouse state
         /// </summary>
-        protected MouseState m_lastMouseState = new MouseState();
+        protected MouseState m_lastMouseState;
 
         /// <summary>
         /// Time of last click
@@ -888,19 +891,13 @@ namespace Xyglo.Brazil.Xna
         /// Initialise the project - load all the FileBuffers and select the correct BufferView
         /// </summary>
         /// <param name="project"></param>
-        public void initialiseProject()
+        protected void initialiseProject()
         {
             Logger.logMsg("Friendlier::initialiseProject() - initialising fonts");
 
             // Initialise and load fonts into our Content context by family.
             //
-            //FontManager.initialise(Content, "Lucida Sans Typewriter");
-            //FontManager.initialise(Content, "Sax Mono");
-            //m_project.initialiseFonts(Content, "Proggy Clean", GraphicsDevice.Viewport.AspectRatio, "Nuclex");
-            //m_project.getFontManager().initialise(Content, "Bitstream Vera Sans Mono", GraphicsDevice.Viewport.AspectRatio);
-
             m_project.initialiseFonts(Content, "Bitstream Vera Sans Mono", GraphicsDevice.Viewport.AspectRatio, "Nuclex");
-
 
             // We need to do this to connect up all the BufferViews, FileBuffers and the other components
             // such as FontManager etc.
@@ -1969,7 +1966,7 @@ namespace Xyglo.Brazil.Xna
 
             // Allow the game to exit
             //
-            if (keyList.Contains(Keys.Escape)) // && checkKeyState(Keys.Escape, gameTime))
+            if (keyList.Contains(Keys.Escape))
             {
                 // Check to see if we are building something
                 //
@@ -2200,112 +2197,6 @@ namespace Xyglo.Brazil.Xna
             }
 
             return false;
-        }
-
-        /// <summary>
-        /// Process meta keys as part of our Update() - return a keyboard modifier
-        /// of the current state of the modifiers.
-        /// </summary>
-        protected KeyboardModifier processMetaKeys(List<KeyAction> keyActionList)
-        {
-            // Build Key list
-            //
-            List<Keys> keyList = new List<Keys>();
-            foreach(KeyAction keyAction in keyActionList)
-            {
-                keyList.Add(keyAction.m_key);
-            }
-
-            // Control key state
-            //
-            if (m_ctrlDown && !keyList.Contains(Keys.LeftShift) && !keyList.Contains(Keys.RightControl))
-            {
-                m_ctrlDown = false;
-            }
-            else
-            {
-                if (!m_ctrlDown && (keyList.Contains(Keys.LeftControl) || keyList.Contains(Keys.RightControl)))
-                {
-                    m_ctrlDown = true;
-                }
-            }
-
-            // Shift key state
-            //
-            if (m_shiftDown && !keyList.Contains(Keys.LeftShift) && !keyList.Contains(Keys.RightShift))
-            {
-                if (!keyList.Contains(Keys.LeftControl) &&
-                    !keyList.Contains(Keys.RightControl) &&
-                    !keyList.Contains(Keys.LeftAlt) &&
-                    !keyList.Contains(Keys.RightAlt))
-                {
-                    m_shiftDown = false;
-                }
-            }
-            else
-            {
-                if (!m_shiftDown && (keyList.Contains(Keys.LeftShift) || keyList.Contains(Keys.RightShift)))
-                {
-                    m_shiftDown = true;
-
-                    // Also set our current bufferview highlighting if we're not already highlighting
-                    //
-                    if (!m_project.getSelectedBufferView().gotHighlight())
-                    {
-                        m_project.getSelectedBufferView().startHighlight();
-                    }
-                }
-            }
-
-            // Alt key state
-            //
-            if (m_altDown && !keyList.Contains(Keys.LeftAlt) && !keyList.Contains(Keys.RightAlt))
-            {
-                m_altDown = false;
-
-                // Check for something in our number store
-                //
-                if (m_gotoBufferView != "")
-                {
-                    Logger.logMsg("Friendlier - got a number " + m_gotoBufferView);
-
-                    setActiveBuffer(Convert.ToInt16(m_gotoBufferView));
-                    m_gotoBufferView = "";
-                }
-            }
-            else
-            {
-                if (!m_altDown && (keyList.Contains(Keys.LeftAlt) || keyList.Contains(Keys.RightAlt)))
-                {
-                    m_altDown = true;
-                }
-            }
-
-            // Windows key state
-            //
-            if (m_windowsDown && !keyList.Contains(Keys.LeftWindows) && !keyList.Contains(Keys.RightWindows))
-            {
-                m_windowsDown = false;
-            }
-            else
-            {
-                if (!m_windowsDown && (keyList.Contains(Keys.LeftWindows) || keyList.Contains(Keys.RightWindows)))
-                {
-                    m_windowsDown = true;
-                }
-            }
-
-
-            // Construct the return code depending on the set flags
-            //
-            KeyboardModifier rM = KeyboardModifier.None;
-
-            if (m_shiftDown) rM |= KeyboardModifier.Shift;
-            if (m_ctrlDown) rM |= KeyboardModifier.Control;
-            if (m_altDown) rM |= KeyboardModifier.Alt;
-            if (m_windowsDown) rM |= KeyboardModifier.Windows;
-
-            return rM;
         }
 
         /// <summary>
@@ -3013,22 +2904,26 @@ namespace Xyglo.Brazil.Xna
 
 
         /// <summary>
-        /// Processs key combinations and commands from the keyboard - return true if we've
+        /// Process key combinations and commands from the keyboard - return true if we've
         /// captured a command so we don't print that character
         /// </summary>
         /// <param name="?"></param>
         /// <returns></returns>
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
-        protected bool processCombinationsCommands(GameTime gameTime)
+        protected bool processCombinationsCommands(GameTime gameTime, List<KeyAction> keyActionList)
         {
             bool rC = false;
+            List<Keys> keyList = new List<Keys>();
+            foreach (KeyAction keyAction in keyActionList)
+            {
+                keyList.Add(keyAction.m_key);
+            }
 
-            /*
             // Check confirm state
             //
             if (m_confirmState != ConfirmState.None)
             {
-                if (checkKeyState(Keys.Y, gameTime))
+                if (keyList.Contains(Keys.Y))
                 {
                     Logger.logMsg("Friendlier::processCombinationsCommands() - confirm y/n");
                     try
@@ -3120,7 +3015,7 @@ namespace Xyglo.Brazil.Xna
 
                     m_confirmState = ConfirmState.None;
                 }
-                else if (checkKeyState(Keys.N, gameTime))
+                else if (keyList.Contains(Keys.N))
                 {
                     // If no for single file save then continue - if no for FileSaveCancel then quit
                     //
@@ -3147,7 +3042,7 @@ namespace Xyglo.Brazil.Xna
                     }
                     rC = true; // consume this letter
                 }
-                else if (checkKeyState(Keys.C, gameTime) && m_confirmState == ConfirmState.FileSaveCancel)
+                else if (keyList.Contains(Keys.C) && m_confirmState == ConfirmState.FileSaveCancel)
                 {
                     setTemporaryMessage("Cancelled Quit.", 0.5, gameTime);
                     m_confirmState = ConfirmState.None;
@@ -3156,7 +3051,7 @@ namespace Xyglo.Brazil.Xna
             }
             else if (m_ctrlDown && !m_altDown)  // CTRL down and no ALT
             {
-                if (checkKeyState(Keys.C, gameTime)) // Copy
+                if (keyList.Contains(Keys.C)) // Copy
                 {
                     if (m_state == State.Configuration && m_editConfigurationItem)
                     {
@@ -3176,7 +3071,7 @@ namespace Xyglo.Brazil.Xna
                         rC = true;
                     }
                 }
-                else if (checkKeyState(Keys.X, gameTime)) // Cut
+                else if (keyList.Contains(Keys.X)) // Cut
                 {
                     if (m_state == State.Configuration && m_editConfigurationItem)
                     {
@@ -3193,7 +3088,7 @@ namespace Xyglo.Brazil.Xna
                         rC = true;
                     }
                 }
-                else if (checkKeyState(Keys.V, gameTime)) // Paste
+                else if (keyList.Contains(Keys.V)) // Paste
                 {
                     if (System.Windows.Forms.Clipboard.ContainsText())
                     {
@@ -3234,7 +3129,7 @@ namespace Xyglo.Brazil.Xna
                         }
                     }
                 }
-                else if (checkKeyState(Keys.Z, gameTime))  // Undo
+                else if (keyList.Contains(Keys.Z))  // Undo
                 {
                     // Undo a certain number of steps
                     //
@@ -3262,7 +3157,7 @@ namespace Xyglo.Brazil.Xna
                         setTemporaryMessage("Nothing to undo with exception.", 2, gameTime);
                     }
                 }
-                else if (checkKeyState(Keys.Y, gameTime))  // Redo
+                else if (keyList.Contains(Keys.Y))  // Redo
                 {
                     // Undo a certain number of steps
                     //
@@ -3290,12 +3185,12 @@ namespace Xyglo.Brazil.Xna
                         setTemporaryMessage("Nothing to redo.", 2, gameTime);
                     }
                 }
-                else if (checkKeyState(Keys.A, gameTime))  // Select all
+                else if (keyList.Contains(Keys.A))  // Select all
                 {
                     m_project.getSelectedBufferView().selectAll();
                     rC = true;
                 }
-                else if (checkKeyState(Keys.OemPlus, gameTime)) // increment bloom state
+                else if (keyList.Contains(Keys.OemPlus)) // increment bloom state
                 {
                     if (m_shiftDown)
                     {
@@ -3312,7 +3207,7 @@ namespace Xyglo.Brazil.Xna
                         setTemporaryMessage("Bloom set to " + BloomSettings.PresetSettings[m_bloomSettingsIndex].Name, 3, gameTime);
                     }
                 }
-                else if (checkKeyState(Keys.OemMinus, gameTime)) // decrement bloom state
+                else if (keyList.Contains(Keys.OemMinus)) // decrement bloom state
                 {
                     if (m_shiftDown)
                     {
@@ -3334,7 +3229,7 @@ namespace Xyglo.Brazil.Xna
                         setTemporaryMessage("Bloom set to " + BloomSettings.PresetSettings[m_bloomSettingsIndex].Name, 3, gameTime);
                     }
                 }
-                else if (checkKeyState(Keys.B, gameTime)) // Toggle bloom
+                else if (keyList.Contains(Keys.B)) // Toggle bloom
                 {
                     m_bloom.Visible = !m_bloom.Visible;
                     setTemporaryMessage("Bloom " + (m_bloom.Visible ? "on" : "off"), 3, gameTime);
@@ -3343,7 +3238,7 @@ namespace Xyglo.Brazil.Xna
             }
             else if (m_altDown && !m_ctrlDown) // ALT down action and no CTRL down
             {
-                if (checkKeyState(Keys.S, gameTime) && m_project.getSelectedBufferView().getFileBuffer().isModified())
+                if (keyList.Contains(Keys.S) && m_project.getSelectedBufferView().getFileBuffer().isModified())
                 {
                     // If we want to confirm save then ask
                     //
@@ -3377,28 +3272,28 @@ namespace Xyglo.Brazil.Xna
                         rC = true;
                     }
                 }
-                else if (checkKeyState(Keys.A, gameTime)) // Explicit save as
+                else if (keyList.Contains(Keys.A)) // Explicit save as
                 {
                     m_saveAsExit = false;
                     selectSaveFile();
                     rC = true;
                 }
-                else if (checkKeyState(Keys.N, gameTime)) // New BufferView on new FileBuffer
+                else if (keyList.Contains(Keys.N)) // New BufferView on new FileBuffer
                 {
                     m_state = State.PositionScreenNew;
                     rC = true;
                 }
-                else if (checkKeyState(Keys.B, gameTime)) // New BufferView on same FileBuffer (copy the existing BufferView)
+                else if (keyList.Contains(Keys.B)) // New BufferView on same FileBuffer (copy the existing BufferView)
                 {
                     m_state = State.PositionScreenCopy;
                     rC = true;
                 }
-                else if (checkKeyState(Keys.O, gameTime)) // Open a file
+                else if (keyList.Contains(Keys.O)) // Open a file
                 {
                     selectOpenFile();
                     rC = true;
                 }
-                else if (checkKeyState(Keys.H, gameTime)) // Show the help screen
+                else if (keyList.Contains(Keys.H)) // Show the help screen
                 {
                     // Reset page position and set information mode
                     //
@@ -3406,7 +3301,7 @@ namespace Xyglo.Brazil.Xna
                     m_state = State.Help;
                     rC = true;
                 }
-                else if (checkKeyState(Keys.I, gameTime)) // Show the information screen
+                else if (keyList.Contains(Keys.I)) // Show the information screen
                 {
                     // Reset page position and set information mode
                     //
@@ -3414,7 +3309,7 @@ namespace Xyglo.Brazil.Xna
                     m_state = State.Information;
                     rC = true;
                 }
-                else if (checkKeyState(Keys.G, gameTime)) // Show the config screen
+                else if (keyList.Contains(Keys.G)) // Show the config screen
                 {
                     // Reset page position and set information mode
                     //
@@ -3422,12 +3317,12 @@ namespace Xyglo.Brazil.Xna
                     showConfigurationScreen();
                     rC = true;
                 }
-                else if (checkKeyState(Keys.C, gameTime)) // Close current BufferView
+                else if (keyList.Contains(Keys.C)) // Close current BufferView
                 {
                     closeActiveBuffer(gameTime);
                     rC = true;
                 }
-                else if (checkKeyState(Keys.D, gameTime))
+                else if (keyList.Contains(Keys.D))
                 {
                     m_state = State.DiffPicker;
                     setTemporaryMessage("Pick a BufferView to diff against", 5, gameTime);
@@ -3445,7 +3340,7 @@ namespace Xyglo.Brazil.Xna
 
                     rC = true;
                 }
-                else if (checkKeyState(Keys.M, gameTime))
+                else if (keyList.Contains(Keys.M))
                 {
                     // Set the config position - we (re)use this to hold menu position in the manage
                     // project screen for removing file items.
@@ -3469,26 +3364,26 @@ namespace Xyglo.Brazil.Xna
                     flyToPosition(newPos);
                     rC = true;
                 }
-                else if (checkKeyState(Keys.D0, gameTime) ||
-                            checkKeyState(Keys.D1, gameTime) ||
-                            checkKeyState(Keys.D2, gameTime) ||
-                            checkKeyState(Keys.D3, gameTime) ||
-                            checkKeyState(Keys.D4, gameTime) ||
-                            checkKeyState(Keys.D5, gameTime) ||
-                            checkKeyState(Keys.D6, gameTime) ||
-                            checkKeyState(Keys.D7, gameTime) ||
-                            checkKeyState(Keys.D8, gameTime) ||
-                            checkKeyState(Keys.D9, gameTime))
+                else if (keyList.Contains(Keys.D0) ||
+                            keyList.Contains(Keys.D1) ||
+                            keyList.Contains(Keys.D2) ||
+                            keyList.Contains(Keys.D3) ||
+                            keyList.Contains(Keys.D4) ||
+                            keyList.Contains(Keys.D5) ||
+                            keyList.Contains(Keys.D6) ||
+                            keyList.Contains(Keys.D7) ||
+                            keyList.Contains(Keys.D8) ||
+                            keyList.Contains(Keys.D9))
                 {
                     m_gotoBufferView += getNumberKey();
                     rC = true;
                 }
-                else if (checkKeyState(Keys.F, gameTime)) // Find text
+                else if (keyList.Contains(Keys.F)) // Find text
                 {
                     Logger.logMsg("Friendlier::processCombinationsCommands() - find");
                     m_state = State.FindText;
                 }
-                else if (checkKeyState(Keys.L, gameTime)) // go to line
+                else if (keyList.Contains(Keys.L)) // go to line
                 {
                     Logger.logMsg("Friendlier::processCombinationsCommands() - goto line");
                     m_state = State.GotoLine;
@@ -3505,15 +3400,88 @@ namespace Xyglo.Brazil.Xna
                 // http://bnoerj.codeplex.com/wikipage?title=Bnoerj.Winshoked&referringTitle=Home
                 //
                 //
-                if (checkKeyState(Keys.A, gameTime))
+                if (keyList.Contains(Keys.A))
                 {
                     Logger.logMsg("RELAYOUT AND FLY");  //???
                 }
-            }*/
+            }
 
             return rC;
         }
 
+        /// <summary>
+        /// Convert the mouse mappings from XNA to framework - it appears that buttons show as released
+        /// continuously so we want to use this process to change these mappings to events.  The return
+        /// list here will give information on whether the button has been held, pressed or released 
+        /// since last Update().
+        /// </summary>
+        /// <returns></returns>
+        protected List<Mouse> convertMouseMappings(Microsoft.Xna.Framework.Input.MouseState state, Microsoft.Xna.Framework.Input.MouseState lastState)
+        {
+            List<Mouse> rL = new List<Mouse>();
+
+            // Check the left button
+            //
+            if (state.LeftButton != lastState.LeftButton)
+            {
+                if (state.LeftButton == ButtonState.Pressed)
+                {
+                    rL.Add(Mouse.LeftButtonPress);
+                }
+                else if (state.LeftButton == ButtonState.Released)
+                {
+                    rL.Add(Mouse.LeftButtonRelease);
+                }                
+            }
+            else  // possibly it's being held
+            {
+                if (state.LeftButton == ButtonState.Pressed)
+                {
+                    rL.Add(Mouse.LeftButtonHeld);
+                }
+            }
+
+
+            if (state.MiddleButton != lastState.MiddleButton)
+            {
+                if (state.MiddleButton == ButtonState.Pressed)
+                {
+                    rL.Add(Mouse.MiddleButtonPress);
+                }
+                else if (state.MiddleButton == ButtonState.Released)
+                {
+                    rL.Add(Mouse.MiddleButtonRelease);
+                }
+            }
+            else
+            {
+                if (state.MiddleButton == ButtonState.Pressed)
+                {
+                    rL.Add(Mouse.MiddleButtonHeld);
+                }
+            }
+
+            if (state.RightButton != lastState.RightButton)
+            {
+                if (state.RightButton == ButtonState.Pressed)
+                {
+                    rL.Add(Mouse.RightButtonPress);
+                }
+                else if (state.RightButton == ButtonState.Released)
+                {
+                    rL.Add(Mouse.RightButtonRelease);
+                }
+            }
+            else
+            {
+                if (state.RightButton == ButtonState.Pressed)
+                {
+                    rL.Add(Mouse.RightButtonHeld);
+                }
+            }
+
+            return rL;
+        }
 
         /// <summary>
         /// Convert key mappings from rax (XNA) to framework (Brazil) - we also need to add modifier keys to actions
@@ -3743,7 +3711,7 @@ namespace Xyglo.Brazil.Xna
             return rL;
         }
 
-
+        /*
         /// <summary>
         /// Return a list of stable state keys from last time
         /// </summary>
@@ -3820,6 +3788,71 @@ namespace Xyglo.Brazil.Xna
             }
 
             return lKA;
+        }
+        */
+
+        /// <summary>
+        /// Get a list of mouse actions since the last time we had a mouse action - create an
+        /// event based interface for the mouse.
+        /// </summary>
+        /// <returns></returns>
+        protected List<MouseAction> getAllMouseActions()
+        {
+            List<MouseAction> lMA = new List<MouseAction>();
+            MouseState mouseState = Microsoft.Xna.Framework.Input.Mouse.GetState();
+            List<Mouse> currentMouseList = convertMouseMappings(mouseState, m_lastMouseState);
+//            List<Mouse> lastMouseList = convertMouseMappings(m_lastMouseState);
+            
+            // All differences between current mouse list and last one
+            foreach (Mouse mouse in currentMouseList)
+            {
+                MouseAction mouseAction = new MouseAction(mouse);
+                mouseAction.m_position.X = mouseState.X;
+                mouseAction.m_position.Y = mouseState.Y;
+                mouseAction.m_scrollWheel = mouseState.ScrollWheelValue;
+                lMA.Add(mouseAction);
+            }
+
+            // If nothing has changed then at least update the positional information
+            //
+            if (lMA.Count == 0)
+            {
+                // No mouse action but we might have movement
+                //
+                MouseAction mouseAction = new MouseAction();
+                if (mouseState.X != m_lastMouseState.X)
+                {
+                    mouseAction.m_position.X = mouseState.X;
+                }
+
+                if (mouseState.Y != m_lastMouseState.Y)
+                {
+                    mouseAction.m_position.Y = mouseState.Y;
+                }
+
+                if (mouseState.ScrollWheelValue != m_lastMouseState.ScrollWheelValue)
+                {
+                    mouseAction.m_scrollWheel = mouseState.ScrollWheelValue;
+                }
+                lMA.Add(mouseAction);
+            }
+
+            /*
+            // Now get the inverse state
+            //
+            foreach (Mouse lastMouse in lastMouseList)
+            {
+                if (!currentMouseList.Contains(lastMouse))
+                {
+                    MouseAction mouseAction = new MouseAction(lastMouse);
+                    mouseAction.m_position.X = mouseState.X;
+                    mouseAction.m_position.Y = mouseState.Y;
+                    mouseAction.m_scrollWheel = mouseState.ScrollWheelValue;
+                    lMA.Add(mouseAction);
+                }
+            }*/
+
+            return lMA;
         }
 
         /// <summary>
@@ -3923,6 +3956,13 @@ namespace Xyglo.Brazil.Xna
                 lKA.Add(keyAction);
             }
 
+            // Finally set the convenience flags for the modifiers already worked out
+            //
+            m_shiftDown = ((modifier & KeyboardModifier.Shift ) == KeyboardModifier.Shift);
+            m_ctrlDown = ((modifier & KeyboardModifier.Control) == KeyboardModifier.Control);
+            m_altDown = ((modifier & KeyboardModifier.Alt) == KeyboardModifier.Alt);
+            m_windowsDown = ((modifier & KeyboardModifier.Windows) == KeyboardModifier.Windows);
+
             return lKA;
         }
 
@@ -3941,7 +3981,15 @@ namespace Xyglo.Brazil.Xna
                 m_frustrum.Matrix = m_viewMatrix * m_projection;
             }
 
+            // getAllKeyActions also works out the modifiers and applies them
+            // to the KeyActions in the list.  This also sets the relevant shift,
+            // alt, ctrl, windows flags.
+            //
             List<KeyAction> keyActionList = getAllKeyActions();
+
+            // Fetch all the mouse actions too
+            //
+            List<MouseAction> mouseActionList = getAllMouseActions();
 
             if (keyActionList.Count > 0)
             {
@@ -3949,6 +3997,7 @@ namespace Xyglo.Brazil.Xna
                 {
                     Logger.logMsg("Got two");
                 }
+
                 // Process action keys
                 //
                 processActionKeys(gameTime, keyActionList);
@@ -4009,132 +4058,11 @@ namespace Xyglo.Brazil.Xna
                         // do nothing
                         break;
                 }
+
+                // do any key combinations
+                //
+                processCombinationsCommands(gameTime, keyActionList);
             }
-
-
-#if FIRST_ATTEMPT
-            // Get an action list of key changes - how are we going to handle repeating keys here?
-            //
-            List<KeyAction> keys = getKeysChanged(false);
-            Dictionary<Target, KeyAction> keyActionList = new Dictionary<Target, KeyAction>();
-
-            if (keys.Count > 0)
-            {
-                // Check for any mouse actions here
-                //
-                //checkMouse(gameTime);
-
-                // Process Escape keys and MetaCommands in this helper function
-                if (processMetaCommands(gameTime, keys))
-                {
-                    // If we've got a key here then spin without processing keyboard input
-                    // for 50 milliseconds
-                    //
-                    m_processKeyboardAllowed = gameTime.TotalGameTime + new TimeSpan(0, 0, 0, 0, 50);
-                    return;
-                }
-
-                // Process meta keys (Shift, Alt, Ctrl) and set flags accordingly
-                //
-                KeyboardModifier kM = processMetaKeys(keys);
-
-                // Set any modifier flags
-                //
-                foreach (KeyAction key in keys)
-                {
-                    key.m_modifier = kM;
-                }
-
-                // Process action keys
-                //
-                processActionKeys(gameTime);
-
-                // Get a target for this (potential) combination of keys
-                //
-                Target target = m_actionMap.getTargetForKeys(m_state, keys);
-
-                // Now fire off the keys according to the Target
-                switch (target)
-                {
-                    case Target.None:
-                        // do nothing;
-                        break;
-
-                    case Target.CurrentBufferView:
-                        // Process keys that are left over if the above is false
-                        //
-                        processKeys(gameTime, keys);
-                        processMetaCommands(gameTime, keys);
-                        break;
-
-                    // The default target will process meta key commands
-                    //
-                    case Target.Default:
-                        processMetaCommands(gameTime, keys);
-                        break;
-
-                    case Target.OpenFile:
-                        Logger.logMsg("Open file");
-                        break;
-
-                    default:
-                        // do nothing
-                        break;
-                }
-                //Logger.logMsg("XygloXNA::Update() - target count " + targets.Count);
-            }
-            else
-            {
-                // The keys are whatever we had last time - nothing has changed.
-                //
-                keys = getLastKeys();
-
-                // We still need to process meta keys even if we don't have anything down
-                // to clear states.
-                //
-                processMetaKeys(keys);
-            }
-
-            Dictionary<StateAction, Target> actionMap = m_actionMap.getActionsForState(m_state);
-
-#endif // FIRST_ATTEMPT
-            /*
-            // Build a picture of keys and mouse requirements
-            //
-            List<KeyAction> keys = new List<KeyAction>();
-            List<MouseAction> mouses = new List<MouseAction>();
-
-            foreach (StateAction key in actionMap.Keys)
-            {
-                foreach (Action action in key.getActions())
-                {
-                    if (action.GetType() == typeof(KeyAction))
-                    {
-                        //keys.Add(
-                        //Logger.logMsg("Go key in action");
-                        KeyAction keyAction = (KeyAction)action;
-
-                        // Copy constructor
-                        //
-                        keys.Add(new KeyAction(keyAction));
-                    }
-
-                    if (action.GetType() == typeof(MouseAction))
-                    {
-                        MouseAction mouseAction = (MouseAction)action;
-                        mouses.Add(new MouseAction(mouseAction));
-                    }
-                }
-            }
-            */
-            
-
-            //actionMap.Select(item => item);
-
-            //            if (m_processKeyboardAllowed != TimeSpan.Zero && gameTime.TotalGameTime < m_processKeyboardAllowed)
-            //{
-            //return;
-            //}
 
             // Turn KeyAction list to key list
             //
@@ -4173,28 +4101,9 @@ namespace Xyglo.Brazil.Xna
             //
             m_gameTime = gameTime;
 
-            /*
             // Check for any mouse actions here
             //
-            checkMouse(gameTime);
-
-            // Process Escape keys and MetaCommands in this helper function
-            if (processMetaCommands(gameTime))
-            {
-                // If we've got a key here then spin without processing keyboard input
-                // for 50 milliseconds
-                //
-                m_processKeyboardAllowed = gameTime.TotalGameTime + new TimeSpan(0, 0, 0, 0, 50);
-                return;
-            }
-
-            // Process meta keys (Shift, Alt, Ctrl) and set accordingly
-            processMetaKeys();
-
-            // Process action keys
-            //
-            processActionKeys(gameTime);
-
+            checkMouse(gameTime, mouseActionList);
 
             // Don't process anything that's a runover character
             //
@@ -4206,6 +4115,7 @@ namespace Xyglo.Brazil.Xna
             // Actions bound to key combinations - if we don't consume a key here then we print it
             // inside the processKeys() method.
             //
+            /*
             if (!processCombinationsCommands(gameTime))
             {
                 // Process keys that are left over if the above is false
@@ -4219,8 +4129,10 @@ namespace Xyglo.Brazil.Xna
                 //
                 m_processKeyboardAllowed = gameTime.TotalGameTime + new TimeSpan(0, 0, 0, 0, 100);
             }
-
-             */
+            */
+            // limit number of keys
+            //
+            m_processKeyboardAllowed = gameTime.TotalGameTime + new TimeSpan(0, 0, 0, 0, 100);
 
             // Check for this change as necessary
             //
@@ -5645,18 +5557,13 @@ namespace Xyglo.Brazil.Xna
             }
         }
 
-        System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-
         /// <summary>
         /// Handle mouse click and double clicks and farm out the responsibility to other
         /// helper methods.
         /// </summary>
         /// <param name="gameTime"></param>
-        public void checkMouse(GameTime gameTime)
+        public void checkMouse(GameTime gameTime, List<MouseAction> mouseActionList)
         {
-            /*
-            MouseState mouseState = Mouse.GetState();
-
             // If our main XNA window is inactive then ignore mouse clicks
             //
             if (IsActive == false) return;
@@ -5665,33 +5572,31 @@ namespace Xyglo.Brazil.Xna
             //
             if (m_changingEyePosition) return;
 
-            // Left button
-            //
-            if (mouseState.LeftButton == ButtonState.Pressed)
+            foreach (MouseAction mouseAction in mouseActionList)
             {
-#if SAM_MOUSE_TEST
-                if (sw.IsRunning)
-                {
-                    sw.Stop();
-                    //setTemporaryMessage("Time since last mouse click was " + sw.ElapsedMilliseconds + "ms", 2, gameTime);
-                    Logger.logMsg("Time since last mouse click was " + sw.ElapsedMilliseconds + "ms");
-                }
-                else
-                {
-                    sw.Reset();
-                    sw.Start();
-                }
-#endif
-
-
-                // Get the pick ray
+                // Left button
                 //
-                Ray pickRay = getPickRay();
-                int mouseX = mouseState.X;
-                int mouseY = mouseState.Y;
-
-                if (m_lastMouseState.LeftButton == ButtonState.Released)
+                if (mouseAction.m_mouse == Mouse.LeftButtonPress)
                 {
+#if SAM_MOUSE_TEST
+                    if (sw.IsRunning)
+                    {
+                        sw.Stop();
+                        //setTemporaryMessage("Time since last mouse click was " + sw.ElapsedMilliseconds + "ms", 2, gameTime);
+                        Logger.logMsg("Time since last mouse click was " + sw.ElapsedMilliseconds + "ms");
+                    }
+                    else
+                    {
+                        sw.Reset();
+                        sw.Start();
+                    }
+#endif
+                    // Get the pick ray
+                    //
+                    Ray pickRay = getPickRay();
+                    int mouseX = (int)mouseAction.m_position.X;
+                    int mouseY = (int)mouseAction.m_position.Y;
+
                     // Handle double clicks
                     //
                     m_lastClickPosition.X = mouseX;
@@ -5706,7 +5611,7 @@ namespace Xyglo.Brazil.Xna
 
                         // If we return early then make sure we set m_lastMousState
                         //
-                        m_lastMouseState = mouseState;
+                        m_lastMouseState = Microsoft.Xna.Framework.Input.Mouse.GetState();
 
                         return;
                     }
@@ -5718,8 +5623,14 @@ namespace Xyglo.Brazil.Xna
 
                     Logger.logMsg("Friender::checkMouse() - mouse clicked");
                 }
-                else  // We have held down the left button - so pan
+                else if (mouseAction.m_mouse == Mouse.LeftButtonHeld)
                 {
+                    // Get the pick ray
+                    //
+                    Ray pickRay = getPickRay();
+                    int mouseX = (int)mouseAction.m_position.X;
+                    int mouseY = (int)mouseAction.m_position.Y;
+
                     // We are dragging - work out the rate
                     //
                     double deltaX = pickRay.Position.X - m_lastClickPosition.X;
@@ -5731,8 +5642,11 @@ namespace Xyglo.Brazil.Xna
                     double dragAngle = Math.Atan2(deltaY, deltaX);
 
                     Vector3 nowPosition = Vector3.Zero;
-                    nowPosition.X = mouseState.X;
-                    nowPosition.Y = mouseState.Y;
+
+                    nowPosition.X = mouseAction.m_position.X;
+                    nowPosition.Y = mouseAction.m_position.Y;
+                    //nowPosition.X = mouseState.X;
+                    //nowPosition.Y = mouseState.Y;
                     nowPosition.Z = 0;
 
                     Vector3 diffPosition = (nowPosition - m_lastClickPosition);
@@ -5761,11 +5675,7 @@ namespace Xyglo.Brazil.Xna
                         m_target.Y = m_eye.Y;
                     }
                 }
-
-            }
-            else if (mouseState.LeftButton == ButtonState.Released)
-            {
-                if (m_lastMouseState.LeftButton == ButtonState.Pressed) // Have just released on a single click
+                else if (mouseAction.m_mouse == Mouse.LeftButtonRelease)
                 {
                     if ((gameTime.TotalGameTime - m_lastClickTime).TotalSeconds < 0.15f)
                     {
@@ -5817,55 +5727,55 @@ namespace Xyglo.Brazil.Xna
                         System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.IBeam;
                     }
                 }
-            }
-
-            // Mouse scrollwheel
-            //
-            if (m_lastMouseWheelValue != Mouse.GetState().ScrollWheelValue)
-            {
-                //Logger.logMsg("Friendlier::checkMouse() - mouse wheel value now = " + Mouse.GetState().ScrollWheelValue);
-
-                // If shift down then scroll current view - otherwise zoom in/out
+                
+                // Mouse scrollwheel
                 //
-                if (m_shiftDown)
+                if (m_lastMouseWheelValue != mouseAction.m_scrollWheel)
                 {
-                    int linesDown = -(int)((m_lastMouseWheelValue - Mouse.GetState().ScrollWheelValue) / 120.0f);
+                    Logger.logMsg("XygloXNA::checkMouse() - mouse wheel value now = " + mouseAction.m_scrollWheel);
 
-                    if (linesDown < 0)
+                    // If shift down then scroll current view - otherwise zoom in/out
+                    //
+                    if (m_shiftDown)
                     {
-                        for (int i = 0; i < -linesDown; i++)
+                        int linesDown = -(int)((m_lastMouseWheelValue - mouseAction.m_scrollWheel) / 120.0f);
+
+                        if (linesDown < 0)
                         {
-                            m_project.getSelectedBufferView().moveCursorDown(false);
+                            for (int i = 0; i < -linesDown; i++)
+                            {
+                                m_project.getSelectedBufferView().moveCursorDown(false);
+                            }
+                        }
+                        else
+                        {
+                            for (int i = 0; i < linesDown; i++)
+                            {
+                                m_project.getSelectedBufferView().moveCursorUp(m_project, false);
+                            }
                         }
                     }
                     else
                     {
-                        for (int i = 0; i < linesDown; i++)
-                        {
-                            m_project.getSelectedBufferView().moveCursorUp(m_project, false);
-                        }
+                        float newZoomLevel = m_zoomLevel + (m_zoomStep * ((m_lastMouseWheelValue - mouseAction.m_scrollWheel) / 120.0f));
+                        setZoomLevel(newZoomLevel);
                     }
+
+                    m_lastMouseWheelValue = mouseAction.m_scrollWheel;
                 }
-                else
+                
+
+                // Check for the release of a sizing move
+                //
+                if (mouseAction.m_mouse == Mouse.LeftButtonRelease && m_isResizing)
                 {
-                    float newZoomLevel = m_zoomLevel + (m_zoomStep * ((m_lastMouseWheelValue - Mouse.GetState().ScrollWheelValue) / 120.0f));
-                    setZoomLevel(newZoomLevel);
+                    m_isResizing = false;
                 }
 
-                m_lastMouseWheelValue = Mouse.GetState().ScrollWheelValue;
+                // Store the last mouse state
+                //
+                m_lastMouseState = Microsoft.Xna.Framework.Input.Mouse.GetState();
             }
-
-            // Check for the release of a sizing move
-            //
-            if (Mouse.GetState().LeftButton == ButtonState.Released && m_isResizing)
-            {
-                m_isResizing = false;
-            }
-
-            // Store the last mouse state
-            //
-            m_lastMouseState = mouseState;
-            */
         }
 
         /// <summary>

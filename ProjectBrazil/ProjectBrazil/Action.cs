@@ -199,11 +199,39 @@ namespace Xyglo.Brazil
         public KeyboardModifier m_modifier = KeyboardModifier.None;
     }
 
+
+    /// <summary>
+    /// Project Brazil mouse actions
+    /// </summary>
+    public enum Mouse
+    {
+        None,
+        LeftButtonPress,
+        LeftButtonHeld,
+        LeftButtonRelease,
+        MiddleButtonPress,
+        MiddleButtonHeld,
+        MiddleButtonRelease,
+        RightButtonPress,
+        RightButtonHeld,
+        RightButtonRelease,
+        ScrollUp,
+        ScrollDown
+    }
+
     /// <summary>
     /// MouseAction
     /// </summary>
     public class MouseAction : Action
     {
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        public MouseAction()
+        {
+            m_mouse = Mouse.None;
+        }
+
         /// <summary>
         /// Mouse constructor
         /// </summary>
@@ -219,7 +247,19 @@ namespace Xyglo.Brazil
             m_name = m_name;
         }
 
+        /// <summary>
+        /// Mouse state
+        /// </summary>
         public Mouse m_mouse { get; set; }
-    }
 
+        /// <summary>
+        /// Mouse position
+        /// </summary>
+        public BrazilVector2 m_position = BrazilVector2.Zero;
+
+        /// <summary>
+        /// Scrollwheel value
+        /// </summary>
+        public int m_scrollWheel = 0;
+    }
 }

@@ -18,6 +18,9 @@ namespace Xyglo.Brazil
     }
     */
 
+    /// <summary>
+    /// Project Brazil Keys - this list could be cut down I think
+    /// </summary>
     public enum Keys
     {
         None,
@@ -225,18 +228,6 @@ namespace Xyglo.Brazil
         Alt       // modifier according to spec
     }
 
-    public enum Mouse
-    {
-        LeftButtonClick,
-        MiddleButtonClick,
-        RightButtonClick,
-        LeftButtonDrag,
-        MiddleButtonDrag,
-        RightButtonDrag,
-        ScrollUp,
-        ScrollDown
-    }
-
     public enum Pointer
     {
         On,
@@ -248,10 +239,50 @@ namespace Xyglo.Brazil
     {
     }
 
-    /*
-    public class Vector2
+    /// <summary>
+    /// Vector2 is based on XNA's Vector2
+    /// </summary>
+    public class BrazilVector2
     {
-        public float x;
-        public float y;
-    }*/
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        BrazilVector2()
+        {
+            X = 0.0f;
+            Y = 0.0f;
+        }
+
+        /// <summary>
+        /// Single constructor
+        /// </summary>
+        /// <param name="single"></param>
+        BrazilVector2(float single)
+        {
+            X = single;
+            Y = single;
+        }
+
+        /// <summary>
+        /// Double constructor
+        /// </summary>
+        /// <param name="x1"></param>
+        /// <param name="y1"></param>
+        BrazilVector2(float x1, float y1)
+        {
+            X = x1;
+            Y = y1;
+        }
+
+        //static Vector2()
+        //{
+        //}
+
+        public float X {get; set; } 
+        public float Y {get; set; }
+
+        public static BrazilVector2 Zero { get { return ZeroVector2; } }
+
+        static public BrazilVector2 ZeroVector2 = new BrazilVector2(0, 0);
+    }
 }

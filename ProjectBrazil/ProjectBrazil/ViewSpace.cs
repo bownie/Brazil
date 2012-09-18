@@ -307,7 +307,5 @@ namespace Xyglo.Brazil
         /// Action map
         /// </summary>
         protected ActionMap m_actionMap = new ActionMap();
-
     }
-
 }
