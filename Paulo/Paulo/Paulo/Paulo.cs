@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Xyglo.Brazil;
+
 /*using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
@@ -15,26 +17,24 @@ namespace Paulo
     /// <summary>
     /// This is the main type for your game
     /// </summary>
-    public class Paulo // : Microsoft.Xna.Framework.Game
+    public class Paulo : BrazilApp
     {
         public Paulo()
         {
-            //graphics = new GraphicsDeviceManager(this);
-            //Content.RootDirectory = "Content";
         }
 
         /// <summary>
-        /// Allows the game to perform any initialization it needs to before starting to run.
-        /// This is where it can query for any required services and load any non-graphic
-        /// related content.  Calling base.Initialize will enumerate through any components
-        /// and initialize them as well.
+        /// Allows the game to perform any initialisation of objects and positions before starting.
         /// </summary>
-        //protected override void Initialize()
-        //{
-            // TODO: Add your initialization logic here
+        public void initialise()
+        {
+            FlyingBlock block1 = new FlyingBlock(BrazilColour.Blue, new BrazilVector3(0, 0, 0));
+            block1.setVelocity(new BrazilVector3(-1, 0, 0));
 
-          //  base.Initialize();
-        //}
+            // Push onto component list
+            //
+            m_componentList.Add(block1);
+        }
 
         /// <summary>
         /// LoadContent will be called once per game and is the place to load

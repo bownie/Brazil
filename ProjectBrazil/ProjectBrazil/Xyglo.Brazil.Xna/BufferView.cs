@@ -28,6 +28,21 @@ namespace Xyglo.Brazil.Xna
     [DataContract(Name = "Friendlier", Namespace = "http://www.xyglo.com")]
     public class BufferView : XygloView
     {
+        /// <summary>
+        /// This store the place in a WrappedEndoFBuffer call that the old log file
+        /// becomes the new log file.
+        /// </summary>
+        protected int m_logRunTerminator = -1;
+
+        /// <summary>
+        /// Map of FileBuffer line to Wrapped line position - we use this to work backwards from mouse clicks
+        /// </summary>
+        protected Dictionary<int, int> m_wrappedMap = null;
+
+        /// <summary>
+        /// Adjustment to our m_wrappedMap to use when calculating file position
+        /// </summary>
+        protected int m_wrapAdjustment = 0;
 
         /// <summary>
         /// Which quadrant are we viewing
@@ -2212,12 +2227,6 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
-        /// This store the place in a WrappedEndoFBuffer call that the old log file
-        /// becomes the new log file.
-        /// </summary>
-        protected int m_logRunTerminator = -1;
-
-        /// <summary>
         /// Get the terminator between old and new log file for wrapped lines
         /// </summary>
         /// <returns></returns>
@@ -2226,15 +2235,6 @@ namespace Xyglo.Brazil.Xna
             return m_logRunTerminator;
         }
 
-        /// <summary>
-        /// Map of FileBuffer line to Wrapped line position - we use this to work backwards from mouse clicks
-        /// </summary>
-        protected Dictionary<int, int> m_wrappedMap = null;
-
-        /// <summary>
-        /// Adjustment to our m_wrappedMap to use when calculating file position
-        /// </summary>
-        protected int m_wrapAdjustment = 0;
 
         /// <summary>
         /// When we're autowrapping a BufferView we'll need to work out in advance how many rows

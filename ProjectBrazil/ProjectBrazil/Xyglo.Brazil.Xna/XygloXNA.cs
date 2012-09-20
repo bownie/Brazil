@@ -20,39 +20,17 @@ using System.Security.Permissions;
 namespace Xyglo.Brazil.Xna
 {
     /// <summary>
-    /// State stores the state of our Friendlier application.  We also use some other
-    /// sub-switches to keep a finer grain of state but these are the main modes.
-    /// </summary>
-    /*
-    public enum State
-    {
-        TextEditing,        // default mode
-        FileOpen,           // opening a file
-        FileSaveAs,         // saving a file as
-        Information,        // show an information pane
-        Help,               // show a help pane
-        Configuration,      // configuration mode
-        PositionScreenOpen, // where to position a screen when opening a file
-        PositionScreenNew,  // where to position a new screen
-        PositionScreenCopy, // where to position a copied FileBuffer/BufferView
-        FindText,           // Enter some text to find
-        ManageProject,      // View and edit the files in our project
-        SplashScreen,       // What we see when we're arriving in the application
-        DiffPicker,         // Mode for picking two files for differences checking
-        WindowsRearranging, // When windows are flying between positions themselves
-        GotoLine,           // Go to a line
-        DemoExpired         // Demo period has expired
-    };
-    */
-
-    /// <summary>
-    /// Main program is defined here based on an XNA Game class.   Friendlier works around a 
-    /// Project concept and expects the files and facilities around files to be handled through
-    /// that mechanism.
+    /// XygloXNA is defined by a XNA Game class - the core of the XNA world and the IWorld interface
+    /// which defines some additional methods we may want to implement.
     /// </summary>
     public class XygloXNA : Game, IWorld
     {
         ///////////////// MEMBER VARIABLES //////////////////
+
+        /// <summary>
+        /// Component list is passed in from the BrazilApp
+        /// </summary>
+        List<Component> m_componentList = null;
 
         // XNA stuff
         //
@@ -194,18 +172,6 @@ namespace Xyglo.Brazil.Xna
         /// Goto line string holder
         /// </summary>
         protected string m_gotoLine = "";
-
-        /// <summary>
-        /// Confirmation state 
-        /// </summary>
-        public enum ConfirmState
-        {
-            None,
-            FileSave,
-            FileSaveCancel,
-            CancelBuild,
-            ConfirmQuit
-        }
 
         /// <summary>
         /// Flag used to confirm quit
@@ -618,13 +584,26 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         protected DrawingHelper m_drawingHelper;
 
+        /// <summary>
+        /// ActionMap is a Project Brazil reference gets passed from the constructor
+        /// </summary>
+        protected ActionMap m_actionMap = null;
+
+        /// <summary>
+        /// Part of our botched keyboard managament routines
+        /// </summary>
+        protected Keys m_currentKeyDown;
+
+
         /////////////////////////////// CONSTRUCTORS ////////////////////////////
 
         /// <summary>
         /// Default constructor
         /// </summary>
-        public XygloXNA()
+        public XygloXNA(ActionMap actionMap, List<Component> componentList)
         {
+            m_actionMap = actionMap;
+            m_componentList = componentList;
             initialise();
         }
 
@@ -633,12 +612,13 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="project"></param>
         /// <param name="actionMap"></param>
-        public XygloXNA(Project project, ActionMap actionMap)
+        public XygloXNA(ActionMap actionMap, Project project, List<Component> componentList)
         {
             // Store project and actionmap
             //
             m_project = project;
             m_actionMap = actionMap;
+            m_componentList = componentList;
 
             // init
             initialise();
@@ -648,14 +628,14 @@ namespace Xyglo.Brazil.Xna
         /// Project constructor
         /// </summary>
         /// <param name="project"></param>
-        public XygloXNA(Project project)
-        {
+        //public XygloXNA(Project project)
+        //{
             // File name
             //
-            m_project = project;
+            //m_project = project;
 
-            initialise();
-        }
+            //initialise();
+        //}
 
         /////////////////////////////// METHODS //////////////////////////////////////
 
@@ -737,16 +717,11 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
-        /// ActionMap reference gets passed from the constructor
-        /// </summary>
-        protected ActionMap m_actionMap = null;
-
-        /// <summary>
         /// Initialise some stuff in the constructor
         /// </summary>
         protected void initialise()
         {
-            Logger.logMsg("Friendlier::initialise() - loading components");
+            Logger.logMsg("XygloXNA::initialise() - loading components");
 
             m_graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
@@ -775,7 +750,7 @@ namespace Xyglo.Brazil.Xna
 
             // Check the demo status and set as necessary
             //
-            if (!m_project.getLicenced())
+            if (m_project != null && !m_project.getLicenced())
             {
                 m_state = State.DemoExpired;
             }
@@ -795,7 +770,7 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         protected void windowedMode()
         {
-            // Some of the mods we've used
+            // Some of the modes we've used
             //
             //InitGraphicsMode(640, 480, false);
             //InitGraphicsMode(720, 576, false);
@@ -818,7 +793,7 @@ namespace Xyglo.Brazil.Xna
 
             // Defaults
             //
-            m_project.getFontManager().setSmallScreen(true);
+            if (m_project != null) m_project.getFontManager().setSmallScreen(true);
             int windowWidth = 640;
             int windowHeight = 480;
 
@@ -826,13 +801,12 @@ namespace Xyglo.Brazil.Xna
             {
                 windowWidth = 960;
                 windowHeight = 768;
-                m_project.getFontManager().setSmallScreen(false);
+                if (m_project != null) m_project.getFontManager().setSmallScreen(false);
             }
             else if (maxWidth >= 1280)
             {
                 windowWidth = 800;
                 windowHeight = 500;
-                //m_project.getFontManager().
             }
             else if (maxWidth >= 1024)
             {
@@ -842,8 +816,11 @@ namespace Xyglo.Brazil.Xna
 
             // Set this for storage
             //
-            m_project.setWindowSize(windowWidth, windowHeight);
-            m_project.setFullScreen(false);
+            if (m_project != null)
+            {
+                m_project.setWindowSize(windowWidth, windowHeight);
+                m_project.setFullScreen(false);
+            }
 
             // Set the graphics modes
             initGraphicsMode(windowWidth, windowHeight, false);
@@ -893,7 +870,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="project"></param>
         protected void initialiseProject()
         {
-            Logger.logMsg("Friendlier::initialiseProject() - initialising fonts");
+            Logger.logMsg("XygloXNA::initialiseProject() - initialising fonts");
 
             // Initialise and load fonts into our Content context by family.
             //
@@ -982,7 +959,6 @@ namespace Xyglo.Brazil.Xna
 #endif
             }
 
-
             // Get the BufferView id we've selected and set the BufferView
             //
             //m_activeBufferView = m_project.getSelectedBufferView();
@@ -1003,6 +979,7 @@ namespace Xyglo.Brazil.Xna
             {
                 m_project.setOpenDirectory(@"C:\");  // set Default
             }
+
             m_fileSystemView = new FileSystemView(m_project.getOpenDirectory(), new Vector3(-800.0f, 0f, 0f), m_project);
 
             // Tree builder and model builder
@@ -1015,7 +992,7 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         private void generateTreeModel()
         {
-            Logger.logMsg("Friendlier::generateTreeModel() - starting");
+            Logger.logMsg("XygloXNA::generateTreeModel() - starting");
             System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
             sw.Start();
 
@@ -1037,7 +1014,7 @@ namespace Xyglo.Brazil.Xna
             m_modelBuilder.build(rG, m_projectPosition);
 
             sw.Stop();
-            Logger.logMsg("Friendlier::generateTreeModel() - completed in " + sw.ElapsedMilliseconds + " ms");
+            Logger.logMsg("XygloXNA::generateTreeModel() - completed in " + sw.ElapsedMilliseconds + " ms");
         }
 
 
@@ -1049,7 +1026,7 @@ namespace Xyglo.Brazil.Xna
         private static void OnFileChanged(object source, FileSystemEventArgs e)
         {
             // Specify what is done when a file is changed, created, or deleted.
-            Logger.logMsg("Friendlier::OnFileChanged() - File: " + e.FullPath + " " + e.ChangeType);
+            Logger.logMsg("XygloXNA::OnFileChanged() - File: " + e.FullPath + " " + e.ChangeType);
 
             foreach (FileBuffer fb in m_project.getFileBuffers())
             {
@@ -1108,7 +1085,7 @@ namespace Xyglo.Brazil.Xna
                         Components.Add(m_bloom);
                     }
 
-                    Logger.logMsg("Friendlier::initGraphicsMode() - width = " + iWidth + ", height = " + iHeight + ", fullscreen = " + bFullScreen.ToString());
+                    Logger.logMsg("XygloXNA::initGraphicsMode() - width = " + iWidth + ", height = " + iHeight + ", fullscreen = " + bFullScreen.ToString());
                     return true;
                 }
             }
@@ -1139,7 +1116,7 @@ namespace Xyglo.Brazil.Xna
                             Components.Add(m_bloom);
                         }
 
-                        Logger.logMsg("Friendlier::initGraphicsMode() - width = " + iWidth + ", height = " + iHeight + ", fullscreen = " + bFullScreen.ToString());
+                        Logger.logMsg("XygloXNA::initGraphicsMode() - width = " + iWidth + ", height = " + iHeight + ", fullscreen = " + bFullScreen.ToString());
                         return true;
                     }
                 }
@@ -1212,76 +1189,20 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         protected override void LoadContent()
         {
-            Logger.logMsg("Friendlier::LoadContent() - loading resources");
-
-            m_splashScreen = Content.Load<Texture2D>("splash");
-
-            m_bloom.Settings = BloomSettings.PresetSettings[5];
-
-            // Start up the worker thread for the performance counters
-            //
-            m_counterWorker = new PerformanceWorker();
-            m_counterWorkerThread = new Thread(m_counterWorker.startWorking);
-            m_counterWorkerThread.Start();
-
-            m_smartHelpWorker = new SmartHelpWorker();
-            m_smartHelpWorkerThread = new Thread(m_smartHelpWorker.startWorking);
-            m_smartHelpWorkerThread.Start();
-
-            // Loop until worker thread activates.
-            //
-            while (!m_counterWorkerThread.IsAlive && !m_smartHelpWorkerThread.IsAlive) ;
-            Thread.Sleep(1);
-
-            // Start up the worker thread for Kinect integration
-            //
-            m_kinectWorker = new KinectWorker();
-            m_kinectWorkerThread = new Thread(m_kinectWorker.startWorking);
-            m_kinectWorkerThread.Start();
-
-            // Loop until worker thread activates.
-            //
-            while (!m_kinectWorkerThread.IsAlive) ;
-            Thread.Sleep(1);
-
-            // Initialise the project - do this only once and after the font maan
-            //
-            initialiseProject();
+            Logger.logMsg("XygloXNA::LoadContent() - loading resources");
 
             // Create a new SpriteBatch, which can be used to draw textures.
+            //
             m_spriteBatch = new SpriteBatch(m_graphics.GraphicsDevice);
 
             // Panner spritebatch
             //
             m_pannerSpriteBatch = new SpriteBatch(m_graphics.GraphicsDevice);
 
-            // Set up the SpriteFont for the chosen resolution
-            //
-            setSpriteFont();
-
-            // Create some textures
-            //
-            //m_dirNodeTexture = Shapes.CreateCircle(m_graphics.GraphicsDevice, 100);
-
-            // Make mouse invisible
-            //
-            IsMouseVisible = true;
-
-            // Ensure that the maximise box is shown and hook up the callback
-            //
-            System.Windows.Forms.Form f = (System.Windows.Forms.Form)System.Windows.Forms.Form.FromHandle(this.Window.Handle);
-            f.MaximizeBox = true;
-            f.Resize += Window_ResizeEvent;
-
-            // Allow user resizing if we want this
-            //
-            if (m_isResizable)
+            if (m_project != null)
             {
-                this.Window.AllowUserResizing = true;
-                this.Window.ClientSizeChanged += new EventHandler<EventArgs>(Window_ClientSizeChanged);
+                loadFriendlierContent();
             }
-
-            this.Window.Title = "Friendlier v" + VersionInformation.getProductVersion();
 
             // We have to initialise this as follows to work around CA2000 warning
             //
@@ -1321,7 +1242,10 @@ namespace Xyglo.Brazil.Xna
 
             // Set up the text scroller width
             //
-            setTextScrollerWidth(Convert.ToInt16(m_project.getFontManager().getCharWidth(FontManager.FontType.Overlay) * 32));
+            if (m_project != null)
+            {
+                setTextScrollerWidth(Convert.ToInt16(m_project.getFontManager().getCharWidth(FontManager.FontType.Overlay) * 32));
+            }
 
             // Hook up the drag and drop
             //
@@ -1337,7 +1261,80 @@ namespace Xyglo.Brazil.Xna
 
             // Initialise the DrawingHelper with this bounding box and some other stuff
             //
-            m_drawingHelper = new DrawingHelper(m_project, m_flatTexture, m_graphics.GraphicsDevice.Viewport.Width, m_graphics.GraphicsDevice.Viewport.Height);
+            if (m_project != null)
+            {
+                m_drawingHelper = new DrawingHelper(m_project, m_flatTexture, m_graphics.GraphicsDevice.Viewport.Width, m_graphics.GraphicsDevice.Viewport.Height);
+            }
+        }
+
+        /// <summary>
+        /// Content load specifically for Friendlier
+        /// </summary>
+        protected void loadFriendlierContent()
+        {
+
+            m_splashScreen = Content.Load<Texture2D>("splash");
+
+            m_bloom.Settings = BloomSettings.PresetSettings[5];
+
+            // Start up the worker thread for the performance counters
+            //
+            m_counterWorker = new PerformanceWorker();
+            m_counterWorkerThread = new Thread(m_counterWorker.startWorking);
+            m_counterWorkerThread.Start();
+
+            m_smartHelpWorker = new SmartHelpWorker();
+            m_smartHelpWorkerThread = new Thread(m_smartHelpWorker.startWorking);
+            m_smartHelpWorkerThread.Start();
+
+            // Loop until worker thread activates.
+            //
+            while (!m_counterWorkerThread.IsAlive && !m_smartHelpWorkerThread.IsAlive) ;
+            Thread.Sleep(1);
+
+            // Start up the worker thread for Kinect integration
+            //
+            m_kinectWorker = new KinectWorker();
+            m_kinectWorkerThread = new Thread(m_kinectWorker.startWorking);
+            m_kinectWorkerThread.Start();
+
+            // Loop until worker thread activates.
+            //
+            while (!m_kinectWorkerThread.IsAlive) ;
+            Thread.Sleep(1);
+
+            // Initialise the project - do this only once and after the font maan
+            //
+            if (m_project != null) initialiseProject();
+
+            // Set up the SpriteFont for the chosen resolution
+            //
+            setSpriteFont();
+
+            // Create some textures
+            //
+            //m_dirNodeTexture = Shapes.CreateCircle(m_graphics.GraphicsDevice, 100);
+
+            // Make mouse invisible
+            //
+            IsMouseVisible = true;
+
+            // Ensure that the maximise box is shown and hook up the callback
+            //
+            System.Windows.Forms.Form f = (System.Windows.Forms.Form)System.Windows.Forms.Form.FromHandle(this.Window.Handle);
+            f.MaximizeBox = true;
+            f.Resize += Window_ResizeEvent;
+
+            // Allow user resizing if we want this
+            //
+            if (m_isResizable)
+            {
+                this.Window.AllowUserResizing = true;
+                this.Window.ClientSizeChanged += new EventHandler<EventArgs>(Window_ClientSizeChanged);
+            }
+
+            this.Window.Title = "Friendlier v" + VersionInformation.getProductVersion();
+
         }
 
         /// <summary>
@@ -1355,10 +1352,16 @@ namespace Xyglo.Brazil.Xna
             }
         }
 
+
+        /// <summary>
+        /// Client is changing size event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void Window_ClientSizeChanged(object sender, EventArgs e)
         {
             // Make changes to handle the new window size.            
-            Logger.logMsg("Friendlier::Window_ClientSizeChanged() - got client resized event");
+            Logger.logMsg("XygloXNA::Window_ClientSizeChanged() - got client resized event");
 
             // Disable the callback to this method for the moment
             this.Window.ClientSizeChanged -= new EventHandler<EventArgs>(Window_ClientSizeChanged);
@@ -1449,7 +1452,7 @@ namespace Xyglo.Brazil.Xna
         {
             if (item >= 0 && item < m_project.getBufferViews().Count)
             {
-                Logger.logMsg("Friendlier::setActiveBuffer() - setting active BufferView " + item);
+                Logger.logMsg("XygloXNA::setActiveBuffer() - setting active BufferView " + item);
                 setActiveBuffer(m_project.getBufferViews()[item]);
             }
         }
@@ -1733,7 +1736,7 @@ namespace Xyglo.Brazil.Xna
                                     // remove it here but we should try to anyway.
                                     //
                                     m_filesToWrite.RemoveAt(0);
-                                    Logger.logMsg("Friendlier::traverseDirectory() - total files left to write is now " + m_filesToWrite.Count);
+                                    Logger.logMsg("XygloXNA::traverseDirectory() - total files left to write is now " + m_filesToWrite.Count);
 
                                     // If we have finished saving all of our files then we can exit (although we check once again)
                                     //
@@ -1760,7 +1763,7 @@ namespace Xyglo.Brazil.Xna
                 }
                 catch (Exception)
                 {
-                    setTemporaryMessage("Friendlier::traverseDirectory() - Cannot access \"" + subDirectory + "\"", 2, gameTime);
+                    setTemporaryMessage("XygloXNA::traverseDirectory() - Cannot access \"" + subDirectory + "\"", 2, gameTime);
                 }
             }
         }
@@ -1796,7 +1799,7 @@ namespace Xyglo.Brazil.Xna
                 if (m_filesToWrite != null && m_filesToWrite.Count > 0)
                 {
                     m_filesToWrite.RemoveAt(0);
-                    Logger.logMsg("Friendlier::completeSaveFile() - files remaining to be written " + m_filesToWrite.Count);
+                    Logger.logMsg("XygloXNA::completeSaveFile() - files remaining to be written " + m_filesToWrite.Count);
                 }
 
                 Vector3 newPosition = m_eye;
@@ -1819,7 +1822,7 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         protected void checkExit(GameTime gameTime, bool force = false)
         {
-            Logger.logMsg("Friendlier::checkExit() - checking exit with force = " + force.ToString());
+            Logger.logMsg("XygloXNA::checkExit() - checking exit with force = " + force.ToString());
 
             // Firstly check for any unsaved buffers and warn
             //
@@ -2701,7 +2704,7 @@ namespace Xyglo.Brazil.Xna
                         string fileToRemove = m_modelBuilder.getSelectedModelString(m_configPosition);
                         if (m_project.removeFileBuffer(fileToRemove))
                         {
-                            Logger.logMsg("Friendlier::Update() - removed FileBuffer for " + fileToRemove);
+                            Logger.logMsg("XygloXNA::Update() - removed FileBuffer for " + fileToRemove);
 
                             // Update Active Buffer as necessary
                             //
@@ -2715,7 +2718,7 @@ namespace Xyglo.Brazil.Xna
                         }
                         else
                         {
-                            Logger.logMsg("Friendlier::Update() - failed to remove FileBuffer for " + fileToRemove);
+                            Logger.logMsg("XygloXNA::Update() - failed to remove FileBuffer for " + fileToRemove);
                         }
                     }
                 }
@@ -2780,7 +2783,7 @@ namespace Xyglo.Brazil.Xna
                     {
                         m_project.getSelectedBufferView().getFileBuffer().setFilepath(m_fileSystemView.getPath() + m_saveFileName);
 
-                        Logger.logMsg("Friendlier::Update() - file name = " + m_project.getSelectedBufferView().getFileBuffer().getFilepath());
+                        Logger.logMsg("XygloXNA::Update() - file name = " + m_project.getSelectedBufferView().getFileBuffer().getFilepath());
 
                         completeSaveFile(gameTime);
 
@@ -2802,7 +2805,7 @@ namespace Xyglo.Brazil.Xna
                             else // We're done 
                             {
                                 m_filesToWrite = null;
-                                Logger.logMsg("Friendlier::Update() - saved some files.  Quitting.");
+                                Logger.logMsg("XygloXNA::Update() - saved some files.  Quitting.");
 
                                 // Exit nicely and ensure we serialise
                                 //
@@ -2886,7 +2889,7 @@ namespace Xyglo.Brazil.Xna
                     }
                     catch (Exception e)
                     {
-                        Logger.logMsg("Friendlier::Update() - couldn't get AUTOINDENT from config - " + e.Message);
+                        Logger.logMsg("XygloXNA::Update() - couldn't get AUTOINDENT from config - " + e.Message);
                     }
 
                     if (m_project.getSelectedBufferView().gotHighlight())
@@ -2925,7 +2928,7 @@ namespace Xyglo.Brazil.Xna
             {
                 if (keyList.Contains(Keys.Y))
                 {
-                    Logger.logMsg("Friendlier::processCombinationsCommands() - confirm y/n");
+                    Logger.logMsg("XygloXNA::processCombinationsCommands() - confirm y/n");
                     try
                     {
                         if (m_confirmState == ConfirmState.FileSave)
@@ -2997,7 +3000,7 @@ namespace Xyglo.Brazil.Xna
                         }
                         else if (m_confirmState == ConfirmState.CancelBuild)
                         {
-                            Logger.logMsg("Friendlier::processCombinationsCommands() - cancel build");
+                            Logger.logMsg("XygloXNA::processCombinationsCommands() - cancel build");
                             m_buildProcess.Close();
                             m_buildProcess = null;
                         }
@@ -3055,12 +3058,12 @@ namespace Xyglo.Brazil.Xna
                 {
                     if (m_state == State.Configuration && m_editConfigurationItem)
                     {
-                        Logger.logMsg("Friendlier::processCombinationsCommands() - copying from configuration");
+                        Logger.logMsg("XygloXNA::processCombinationsCommands() - copying from configuration");
                         System.Windows.Forms.Clipboard.SetText(m_editConfigurationItemValue);
                     }
                     else
                     {
-                        Logger.logMsg("Friendlier::processCombinationsCommands() - copying to clipboard");
+                        Logger.logMsg("XygloXNA::processCombinationsCommands() - copying to clipboard");
                         string text = m_project.getSelectedBufferView().getSelection(m_project).getClipboardString();
 
                         // We can only set this is the text is not empty
@@ -3075,13 +3078,13 @@ namespace Xyglo.Brazil.Xna
                 {
                     if (m_state == State.Configuration && m_editConfigurationItem)
                     {
-                        Logger.logMsg("Friendlier::processCombinationsCommands() - cutting from configuration");
+                        Logger.logMsg("XygloXNA::processCombinationsCommands() - cutting from configuration");
                         System.Windows.Forms.Clipboard.SetText(m_editConfigurationItemValue);
                         m_editConfigurationItemValue = "";
                     }
                     else
                     {
-                        Logger.logMsg("Friendlier::processCombinationsCommands() - cut");
+                        Logger.logMsg("XygloXNA::processCombinationsCommands() - cut");
 
                         System.Windows.Forms.Clipboard.SetText(m_project.getSelectedBufferView().getSelection(m_project).getClipboardString());
                         m_project.getSelectedBufferView().deleteCurrentSelection(m_project);
@@ -3094,7 +3097,7 @@ namespace Xyglo.Brazil.Xna
                     {
                         if (m_state == State.Configuration && m_editConfigurationItem)
                         {
-                            Logger.logMsg("Friendlier::processCombinationsCommands() - pasting into configuration");
+                            Logger.logMsg("XygloXNA::processCombinationsCommands() - pasting into configuration");
 
                             // Ensure that we only get one line out of the clipboard and make sure
                             // it's the last meaningful one.
@@ -3112,7 +3115,7 @@ namespace Xyglo.Brazil.Xna
                         }
                         else
                         {
-                            Logger.logMsg("Friendlier::processCombinationsCommands() - pasting text");
+                            Logger.logMsg("XygloXNA::processCombinationsCommands() - pasting text");
                             // If we have a selection then replace it - else insert
                             //
                             if (m_project.getSelectedBufferView().gotHighlight())
@@ -3145,7 +3148,6 @@ namespace Xyglo.Brazil.Xna
                         }
                         else
                         {
-                            //Logger.logMsg("Friendlier::Update() - nothing to undo");
                             setTemporaryMessage("Nothing to undo.", 0.3, gameTime);
                         }
                         rC = true;
@@ -3153,7 +3155,7 @@ namespace Xyglo.Brazil.Xna
                     catch (Exception e)
                     {
                         //System.Windows.Forms.MessageBox.Show("Undo stack is empty - " + e.Message);
-                        Logger.logMsg("Friendlier::processCombinationsCommands() - got exception " + e.Message);
+                        Logger.logMsg("XygloXNA::processCombinationsCommands() - got exception " + e.Message);
                         setTemporaryMessage("Nothing to undo with exception.", 2, gameTime);
                     }
                 }
@@ -3181,7 +3183,7 @@ namespace Xyglo.Brazil.Xna
                     catch (Exception e)
                     {
                         //System.Windows.Forms.MessageBox.Show("Undo stack is empty - " + e.Message);
-                        Logger.logMsg("Friendlier::processCombinationsCommands() - got exception " + e.Message);
+                        Logger.logMsg("XygloXNA::processCombinationsCommands() - got exception " + e.Message);
                         setTemporaryMessage("Nothing to redo.", 2, gameTime);
                     }
                 }
@@ -3380,12 +3382,12 @@ namespace Xyglo.Brazil.Xna
                 }
                 else if (keyList.Contains(Keys.F)) // Find text
                 {
-                    Logger.logMsg("Friendlier::processCombinationsCommands() - find");
+                    Logger.logMsg("XygloXNA::processCombinationsCommands() - find");
                     m_state = State.FindText;
                 }
                 else if (keyList.Contains(Keys.L)) // go to line
                 {
-                    Logger.logMsg("Friendlier::processCombinationsCommands() - goto line");
+                    Logger.logMsg("XygloXNA::processCombinationsCommands() - goto line");
                     m_state = State.GotoLine;
                 }
             }
@@ -4013,19 +4015,14 @@ namespace Xyglo.Brazil.Xna
                         // do nothing;
                         break;
 
+                    case Target.Default:
                     case Target.CurrentBufferView:
-                        // Process keys that are left over if the above is false
+                        // The default target will process meta key commands
                         //
                         processKeys(gameTime, keyActionList);
                         processMetaCommands(gameTime, keyActionList);
                         break;
-
-                    // The default target will process meta key commands
-                    //
-                    case Target.Default:
-                        processMetaCommands(gameTime, keyActionList);
-                        break;
-
+                    
                         // For OpenFile all we need to do is change state (for the moment)
                         //
                     case Target.OpenFile:
@@ -4074,7 +4071,7 @@ namespace Xyglo.Brazil.Xna
 
             // Return after these commands have been processed for the demo version
             //
-            if (!m_project.getLicenced())
+            if (m_project != null && !m_project.getLicenced())
             {
                 // Allow the game to exit
                 //
@@ -4092,7 +4089,7 @@ namespace Xyglo.Brazil.Xna
 
             // Set the startup banner on the first pass through
             //
-            if (m_gameTime == null)
+            if (m_project != null & m_gameTime == null)
             {
                 m_drawingHelper.startBanner(gameTime, VersionInformation.getProductName() + "\n" + VersionInformation.getProductVersion(), 5);
             }
@@ -4154,11 +4151,6 @@ namespace Xyglo.Brazil.Xna
 
             base.Update(gameTime);
         }
-
-        /// <summary>
-        /// Part of our botched keyboard managament routines
-        /// </summary>
-        protected Keys m_currentKeyDown;
 
         /// <summary>
         /// Process any keys that need to be printed
@@ -4253,7 +4245,7 @@ namespace Xyglo.Brazil.Xna
                 m_heldDownLastRepeatTime = gameTime.TotalGameTime.TotalSeconds;
                 // If we're repeating then don't repeat too fast
                 //
-                Logger.logMsg("Friendlier::processKeys() - got key repeat");
+                Logger.logMsg("XygloXNA::processKeys() - got key repeat");
             }
 
             // At this point any held down key is valid for the next iteration
@@ -4570,14 +4562,14 @@ namespace Xyglo.Brazil.Xna
                 //
                 default:
                     key = "";
-                    //Logger.logMsg("Friendlier::update() - got key = " + keyDown.ToString());
+                    //Logger.logMsg("XygloXNA::update() - got key = " + keyDown.ToString());
                     break;
             }
 
 
             if (key != "")
             {
-                //Logger.logMsg("Friendlier::processKeys() - processing key " + key);
+                //Logger.logMsg("XygloXNA::processKeys() - processing key " + key);
 
                 if (m_state == State.FileSaveAs) // File name
                 {
@@ -5028,8 +5020,8 @@ namespace Xyglo.Brazil.Xna
                         m_changingPositionLastGameTime = gameTime.TotalGameTime;
                         //m_view = Matrix.CreateLookAt(m_eye, Vector3.Zero, Vector3.Up);
 #if DEBUG_FLYING
-                        Logger.logMsg("Friendlier::changeEyePosition() - eye is now at " + m_eye.ToString());
-                        Logger.logMsg("Friendlier::changeEyePosition() - final position is " + m_newEyePosition.ToString());
+                        Logger.logMsg("XygloXNA::changeEyePosition() - eye is now at " + m_eye.ToString());
+                        Logger.logMsg("XygloXNA::changeEyePosition() - final position is " + m_newEyePosition.ToString());
 #endif
                     }
 
@@ -5147,7 +5139,7 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         protected void handleDoubleClick()
         {
-            Logger.logMsg("Friendlier::checkMouse() - got double click");
+            Logger.logMsg("XygloXNA::checkMouse() - got double click");
             Pair<BufferView, Pair<ScreenPosition, ScreenPosition>> testFind = m_project.testRayIntersection(getPickRay());
 
             BufferView bv = (BufferView)testFind.First;
@@ -5178,7 +5170,7 @@ namespace Xyglo.Brazil.Xna
         {
             Pair<BufferView, Pair<ScreenPosition, ScreenPosition>> testFind = m_project.testRayIntersection(getPickRay());
 
-            Logger.logMsg("Friendlier::handleDiffPick() - got diff pick request");
+            Logger.logMsg("XygloXNA::handleDiffPick() - got diff pick request");
 
             // We're only really interesed in the BufferView
             //
@@ -5228,7 +5220,7 @@ namespace Xyglo.Brazil.Xna
                     m_differ.setBufferViews(bv1, bv2);
 
 
-                    Logger.logMsg("Friendlier::handleDiffPick() - starting diff pick process");
+                    Logger.logMsg("XygloXNA::handleDiffPick() - starting diff pick process");
                     System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
                     sw.Start();
 
@@ -5294,7 +5286,7 @@ namespace Xyglo.Brazil.Xna
                     //
                     System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.IBeam;
 
-                    Logger.logMsg("Friendlier::handleDiffPick() - diff pick took " + sw.ElapsedMilliseconds + " ms to run");
+                    Logger.logMsg("XygloXNA::handleDiffPick() - diff pick took " + sw.ElapsedMilliseconds + " ms to run");
                 }
                 else
                 {
@@ -5352,7 +5344,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="screenRelativePosition"></param>
         protected void handleStandardDoubleClick(BufferView bv, ScreenPosition fp, ScreenPosition screenRelativePosition)
         {
-            Logger.logMsg("Friendlier::handleStandardDoubleClick()");
+            Logger.logMsg("XygloXNA::handleStandardDoubleClick()");
 
             // We need to identify a valid line
             //
@@ -5415,12 +5407,12 @@ namespace Xyglo.Brazil.Xna
         /// <param name="screenRelativePosition"></param>
         protected void handleTailingDoubleClick(BufferView bv, ScreenPosition fp, ScreenPosition screenRelativePosition)
         {
-            Logger.logMsg("Friendlier::handleTailingDoubleClick()");
+            Logger.logMsg("XygloXNA::handleTailingDoubleClick()");
             ScreenPosition testSp = bv.testCursorPosition(new FilePosition(fp));
 
             if (testSp.X == -1 && testSp.Y == -1)
             {
-                Logger.logMsg("Friendlier::handleTailingDoubleClick() - failed in testCursorPosition");
+                Logger.logMsg("XygloXNA::handleTailingDoubleClick() - failed in testCursorPosition");
             }
             else
             {
@@ -5430,11 +5422,11 @@ namespace Xyglo.Brazil.Xna
                 try
                 {
                     line = bv.getFileBuffer().getLine(fp.Y);
-                    Logger.logMsg("Friendlier::handleTailingDoubleClick() - got a line = " + line);
+                    Logger.logMsg("XygloXNA::handleTailingDoubleClick() - got a line = " + line);
                 }
                 catch (Exception)
                 {
-                    Logger.logMsg("Friendlier::handleTailingDoubleClick() - couldn't fetch line " + fp.Y);
+                    Logger.logMsg("XygloXNA::handleTailingDoubleClick() - couldn't fetch line " + fp.Y);
                 }
 
 
@@ -5466,12 +5458,12 @@ namespace Xyglo.Brazil.Xna
                     {
                         try
                         {
-                            Logger.logMsg("Friendlier::handleTailingDoubleClick() - trying to active BufferView and zap to line");
+                            Logger.logMsg("XygloXNA::handleTailingDoubleClick() - trying to active BufferView and zap to line");
                             setHighlightAndCenter(bv, sp);
                         }
                         catch (Exception)
                         {
-                            Logger.logMsg("Friendlier::handleTailingDoubleClick() - couldn't activate and zap to line in file");
+                            Logger.logMsg("XygloXNA::handleTailingDoubleClick() - couldn't activate and zap to line in file");
                         }
                     }
                     else
@@ -5498,7 +5490,7 @@ namespace Xyglo.Brazil.Xna
                 }
                 else // not found anything - look on the filesystem
                 {
-                    Logger.logMsg("Friendlier::handleTailingDoubleClick() - inspecting filesystem");
+                    Logger.logMsg("XygloXNA::handleTailingDoubleClick() - inspecting filesystem");
 
                     // By default get the build directory - we'll probably want to change ths
                     //
@@ -5529,7 +5521,7 @@ namespace Xyglo.Brazil.Xna
 
                             if (rL.Count > 0)
                             {
-                                Logger.logMsg("Friendlier::handleTailingDoubleClick() - got " + rL.Count + " matches for file " + fpEntry.First);
+                                Logger.logMsg("XygloXNA::handleTailingDoubleClick() - got " + rL.Count + " matches for file " + fpEntry.First);
 
                                 // Set a highlight on the current BufferView
                                 //
@@ -5661,7 +5653,7 @@ namespace Xyglo.Brazil.Xna
                         System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Hand;
                     }
 
-                    //Logger.logMsg("Friendlier::checkMouse() - mouse dragged: X = " + diffPosition.X + ", Y = " + diffPosition.Y);
+                    //Logger.logMsg("XygloXNA::checkMouse() - mouse dragged: X = " + diffPosition.X + ", Y = " + diffPosition.Y);
 
                     float multiplier = m_zoomLevel / m_zoomLevel;
                     m_eye.X = m_lastClickEyePosition.X - diffPosition.X * multiplier;
@@ -5709,7 +5701,7 @@ namespace Xyglo.Brazil.Xna
 
                         if (newView != null)
                         {
-                            //Logger.logMsg("Friendlier::checkMouse() - switching to new buffer view");
+                            //Logger.logMsg("XygloXNA::checkMouse() - switching to new buffer view");
                             setActiveBuffer(newView);
                         }
                         else
@@ -5779,46 +5771,29 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
-        /// This is called when the game should draw itself.
+        /// The XNA Draw override used to draw the game
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            // Draw onto the Bloom component - this is the only modification we need to make
-            //
-            m_bloom.BeginDraw();
-
-            // If we're not licenced then render this
-            //
-            if (!m_project.getLicenced())
+            if (m_project != null)
             {
-                if (gameTime.TotalGameTime.TotalSeconds > m_nextLicenceMessage)
-                {
-                    if (m_flipFlop)
-                    {
-                        setTemporaryMessage("Friendlier demo period has expired.", 3, gameTime);
-                    }
-                    else
-                    {
-                        setTemporaryMessage("Please see www.xyglo.com for licencing details.", 3, gameTime);
-                    }
-
-                    m_flipFlop = !m_flipFlop;
-                    m_nextLicenceMessage = gameTime.TotalGameTime.TotalSeconds + 5;
-                }
-                //renderTextScroller();
+                drawFriendlier(gameTime);
             }
             else
             {
-                // Set the welcome message once
-                //
-                if (m_flipFlop)
-                {
-                    setTemporaryMessage(VersionInformation.getProductName() + " " + VersionInformation.getProductVersion(), 3, gameTime);
-                    m_flipFlop = false;
-                }
+                drawXyglo(gameTime);
             }
 
+            base.Draw(gameTime);
+        }
+
+        /// <summary>
+        /// Setup the world view and projection matrices
+        /// </summary>
+        /// <param name="gameTime"></param>
+        protected void setupDrawWorld(GameTime gameTime)
+        {
             // Set background colour
             //
             m_graphics.GraphicsDevice.Clear(Color.Black);
@@ -5869,6 +5844,96 @@ namespace Xyglo.Brazil.Xna
             m_lineEffect.View = m_viewMatrix;
             m_lineEffect.Projection = m_projection;
             m_lineEffect.World = Matrix.CreateScale(1, -1, 1);
+        }
+        /// <summary>
+        /// Draw the Xyglo Components
+        /// </summary>
+        /// <param name="gameTime"></param>
+        protected void drawXyglo(GameTime gameTime)
+        {
+            // Draw onto the Bloom component - this is the only modification we need to make
+            //
+            m_bloom.BeginDraw();
+
+            setupDrawWorld(gameTime);
+
+            m_spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.DepthRead, RasterizerState.CullNone, m_basicEffect);
+
+            // Draw the components
+            //
+            foreach (Component component in m_componentList)
+            {
+                if (component.GetType() == typeof(FlyingBlock))
+                {
+                    drawFlyingBlock((FlyingBlock)component);
+                }
+            }
+
+            m_spriteBatch.End();
+
+        }
+
+        /// <summary>
+        /// Draw a FlyingBlock
+        /// </summary>
+        /// <param name="block"></param>
+        protected void drawFlyingBlock(FlyingBlock block)
+        {
+            // Have a look at this
+            //
+
+            //http://www.switchonthecode.com/tutorials/creating-a-textured-box-in-xna
+
+
+        }
+
+
+
+
+        /// <summary>
+        /// Draw specific code for Friendlier special case
+        /// </summary>
+        /// <param name="gameTime"></param>
+        protected void drawFriendlier(GameTime gameTime)
+        {
+            // Draw onto the Bloom component - this is the only modification we need to make
+            //
+            m_bloom.BeginDraw();
+
+            // If we're not licenced then render this
+            //
+            if (!m_project.getLicenced())
+            {
+                if (gameTime.TotalGameTime.TotalSeconds > m_nextLicenceMessage)
+                {
+                    if (m_flipFlop)
+                    {
+                        setTemporaryMessage("Friendlier demo period has expired.", 3, gameTime);
+                    }
+                    else
+                    {
+                        setTemporaryMessage("Please see www.xyglo.com for licencing details.", 3, gameTime);
+                    }
+
+                    m_flipFlop = !m_flipFlop;
+                    m_nextLicenceMessage = gameTime.TotalGameTime.TotalSeconds + 5;
+                }
+                //renderTextScroller();
+            }
+            else
+            {
+                // Set the welcome message once
+                //
+                if (m_flipFlop)
+                {
+                    setTemporaryMessage(VersionInformation.getProductName() + " " + VersionInformation.getProductVersion(), 3, gameTime);
+                    m_flipFlop = false;
+                }
+            }
+
+            // Call setup for the projection matrix and frustrum etc.
+            //
+            setupDrawWorld(gameTime);
 
             // In the manage project mode we zoom off into the distance
             //
@@ -6022,9 +6087,8 @@ namespace Xyglo.Brazil.Xna
             // Any Kinect information to share
             //
             drawKinectInformation();
-
-            base.Draw(gameTime);
         }
+
 
         protected void drawKinectInformation()
         {
@@ -6091,9 +6155,9 @@ namespace Xyglo.Brazil.Xna
                 m_lastSystemFetch = mySpan;
 
 #if SYTEM_DEBUG
-                Logger.logMsg("Friendlier::drawSystemLoad() - load is now " + m_systemLoad);
-                Logger.logMsg("Friendlier::drawSystemLoad() - memory is now " + m_memoryAvailable);
-                Logger.logMsg("Friendlier::drawSystemLoad() - physical memory available is " + m_physicalMemory);
+                Logger.logMsg("XygloXNA::drawSystemLoad() - load is now " + m_systemLoad);
+                Logger.logMsg("XygloXNA::drawSystemLoad() - memory is now " + m_memoryAvailable);
+                Logger.logMsg("XygloXNA::drawSystemLoad() - physical memory available is " + m_physicalMemory);
 #endif
             }
 
@@ -6887,13 +6951,13 @@ namespace Xyglo.Brazil.Xna
 
             if (m_buildProcess != null)
             {
-                Logger.logMsg("Friendlier::doBuildCommand() - build in progress");
+                Logger.logMsg("XygloXNA::doBuildCommand() - build in progress");
                 setActiveBuffer(m_buildStdOutView);
                 setTemporaryMessage("Checking build status", 3, m_gameTime);
                 return;
             }
 
-            Logger.logMsg("Friendlier::doBuildCommand() - attempting to run build command");
+            Logger.logMsg("XygloXNA::doBuildCommand() - attempting to run build command");
 
             // Check that we can find the build command
             //
@@ -7066,9 +7130,9 @@ namespace Xyglo.Brazil.Xna
 
                         m_buildProcess.EnableRaisingEvents = true;
 
-                        Logger.logMsg("Friendlier::doBuildCommand() - working directory = " + info.WorkingDirectory);
-                        Logger.logMsg("Friendlier::doBuildCommand() - filename = " + info.FileName);
-                        Logger.logMsg("Friendlier::doBuildCommand() - arguments = " + info.Arguments);
+                        Logger.logMsg("XygloXNA::doBuildCommand() - working directory = " + info.WorkingDirectory);
+                        Logger.logMsg("XygloXNA::doBuildCommand() - filename = " + info.FileName);
+                        Logger.logMsg("XygloXNA::doBuildCommand() - arguments = " + info.Arguments);
 
                         // Start the external build command and check the logs
                         //
@@ -7086,11 +7150,11 @@ namespace Xyglo.Brazil.Xna
                         //
                         if (m_buildProcess.ExitCode != 0)
                         {
-                            Logger.logMsg("Friendlier::doBuildCommand() - build process failed with code " + m_buildProcess.ExitCode);
+                            Logger.logMsg("XygloXNA::doBuildCommand() - build process failed with code " + m_buildProcess.ExitCode);
                         }
                         else
                         {
-                            Logger.logMsg("Friendlier::doBuildCommand() - started build command succesfully");
+                            Logger.logMsg("XygloXNA::doBuildCommand() - started build command succesfully");
                         }
                          * */
                     }
@@ -7125,7 +7189,7 @@ namespace Xyglo.Brazil.Xna
         {
             if (e.Data == null)
             {
-                Logger.logMsg("Friendlier::logBuildStdOut() - got null data");
+                Logger.logMsg("XygloXNA::logBuildStdOut() - got null data");
                 return;
             }
 
@@ -7162,7 +7226,7 @@ namespace Xyglo.Brazil.Xna
         {
             if (e.Data == null)
             {
-                Logger.logMsg("Friendlier::logBuildStdErr() - got null data");
+                Logger.logMsg("XygloXNA::logBuildStdErr() - got null data");
                 return;
             }
 
@@ -7231,7 +7295,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="e"></param>
         private void friendlierDragEnter(object sender, System.Windows.Forms.DragEventArgs e)
         {
-            Logger.logMsg("Friendlier::friendlierDragEnter() - dragging entered " + e.Data.GetType().ToString());
+            Logger.logMsg("XygloXNA::friendlierDragEnter() - dragging entered " + e.Data.GetType().ToString());
 
 
             //if (!e.Data.GetDataPresent(typeof(System.Windows.Forms.DataObject)))
@@ -7253,7 +7317,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="e"></param>
         private void friendlierDragDrop(object sender, System.Windows.Forms.DragEventArgs e)
         {
-            Logger.logMsg("Friendlier::friendlierDragEnter() - drop event fired of type " + e.Data.ToString());
+            Logger.logMsg("XygloXNA::friendlierDragEnter() - drop event fired of type " + e.Data.ToString());
 
             if (e.Data.GetType() == typeof(System.Windows.Forms.DataObject))
             {
@@ -7276,13 +7340,13 @@ namespace Xyglo.Brazil.Xna
                     //
                     if (Directory.Exists(newFile))
                     {
-                        Logger.logMsg("Friendlier::friendlierDragDrop() - adding directory = " + newFile);
+                        Logger.logMsg("XygloXNA::friendlierDragDrop() - adding directory = " + newFile);
                         addNewDirectory(newFile);
                         dirsAdded.Add(newFile);
                     }
                     else
                     {
-                        Logger.logMsg("Friendlier::friendlierDragDrop() - adding file " + newFile);
+                        Logger.logMsg("XygloXNA::friendlierDragDrop() - adding file " + newFile);
                         newView = addNewFileBuffer(newFile);
                         filesAdded.Add(newFile);
                     }
@@ -7357,7 +7421,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="dirPath"></param>
         protected void addNewDirectory(string dirPath)
         {
-            Logger.logMsg("Friendlier::addNewDirectory() - adding directory " + dirPath);
+            Logger.logMsg("XygloXNA::addNewDirectory() - adding directory " + dirPath);
         }
     }
 }

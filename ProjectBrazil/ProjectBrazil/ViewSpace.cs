@@ -70,15 +70,6 @@ namespace Xyglo.Brazil
     };
 
     /// <summary>
-    /// We will use these to define the default states for a ViewSpace. ?????
-    /// </summary>
-    public enum DefaultStates
-    {
-        FreeSpaceStill,
-        FreeSpaceWobbling
-    }
-
-    /// <summary>
     /// Confirmation state 
     /// </summary>
     public enum ConfirmState
@@ -90,6 +81,14 @@ namespace Xyglo.Brazil
         ConfirmQuit
     }
 
+    /// <summary>
+    /// We will use these to define the default states for a ViewSpace. ?????
+    /// </summary>
+    public enum DefaultStates
+    {
+        FreeSpaceStill,
+        FreeSpaceWobbling
+    }
 
     /// <summary>
     /// What mode is the ViewSpace in?
@@ -101,7 +100,7 @@ namespace Xyglo.Brazil
     }
 
     /// <summary>
-    /// ViewSpace is the world that our Xyglot objects live in.  The ViewSpace wraps any of the platform specific functionality that we want to implement
+    /// ViewSpace is the world that our Xyglo objects live in.  The ViewSpace wraps any of the platform specific functionality that we want to implement
     /// therefore it contains any technology specific objects we need to initialise to provide a presentation.  Think of Xyglot as part game engine, part
     /// window manager - we are providing a framework in which to present items as well as some of the building blocks (widgets if you like) that can be
     /// used to create an application.  These widgets aim to be as consistent as possible across platforms hence the building of this abstration - once
@@ -111,16 +110,32 @@ namespace Xyglo.Brazil
     /// responsible for its interfaces and not responsible for game or application logic aside from that.
     /// 
     /// </summary>
-    public class ViewSpace
+    public class ViewSpace : IDisposable
     {
-        public ViewSpace(Project project)
+        /// <summary>
+        /// Default ViewSpace with nothing attached
+        /// </summary>
+        public ViewSpace()
         {
-            m_project = project;
         }
 
-        public void initialise()
+        /// <summary>
+        /// Initialise with a Friendlier Project
+        /// </summary>
+        /// <param name="actionMap"></param>
+        /// <param name="project"></param>
+        public void initialise(ActionMap actionMap, Project project, List<Component> componentList)
         {
-            m_xna = new XygloXNA(m_project, m_actionMap);
+            m_xna = new XygloXNA(actionMap, project, componentList);
+        }
+
+        /// <summary>
+        /// Default initialise with just an ActionMap
+        /// </summary>
+        /// <param name="actionMap"></param>
+        public void initialise(ActionMap actionMap, List<Component> componentList)
+        {
+            m_xna = new XygloXNA(actionMap, componentList);
 
             /*
             // Get the features of the input
@@ -180,113 +195,17 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
-        /// Connect a Key to a Target in a State
+        /// Implement the Dispose method
         /// </summary>
-        /// <param name="state"></param>
-        /// <param name="key"></param>
-        /// <param name="target"></param>
-        public void connectKey(State state, Keys key, Target target = Target.Default)
+        public void Dispose()
         {
-            m_actionMap.setAction(state, new KeyAction(key), target);
+            throw new NotImplementedException();
         }
-
-        /// <summary>
-        /// Connect up States, generic Action and Targets
-        /// </summary>
-        /// <param name="state"></param>
-        /// <param name="actions"></param>
-        /// <param name="target"></param>
-        public void connect(State state, Action action, Target target = Target.Default)
-        {
-            m_actionMap.setAction(state, action, target);
-        }
-
-        /// <summary>
-        /// We use connect to define states, actions and targets for those actions
-        /// </summary>
-        /// <param name="state"></param>
-        /// <param name="actions"></param>
-        /// <param name="target"></param>
-        public void connect(State state, List<Action> actions, Target target = Target.Default)
-        {
-            // Roll through all the actions 
-            foreach (Action action in actions)
-            {
-                m_actionMap.setAction(state, action, target);
-            }
-        }
-
-        /// <summary>
-        /// Connect all the "normal"editor keys to a target - if the target is
-        /// not specified then we assume the default target is the focus object.
-        /// </summary>
-        /// <param name="state"></param>
-        /// <param name="target"></param>
-        public void connectEditorKeys(State state, Target target = Target.Default)
-        {
-            // Alphas
-            //
-            Keys[] alphaKeys = { Keys.A, Keys.B, Keys.C, Keys.D, Keys.E, Keys.F, Keys.F, Keys.G, Keys.H, Keys.I, Keys.J,
-                            Keys.K, Keys.L, Keys.M, Keys.N, Keys.O, Keys.P, Keys.Q, Keys.R, Keys.S, Keys.T, Keys.U,
-                            Keys.V, Keys.W, Keys.X, Keys.Y, Keys.Z };
-            foreach (Keys key in alphaKeys)
-            {
-                connectKey(state, key, target);
-            }
-
-            // Numbers
-            //
-            Keys[] numKeys = { Keys.D0, Keys.D1, Keys.D2, Keys.D3, Keys.D4, Keys.D5, Keys.D6, Keys.D7, Keys.D8, Keys.D9 };
-            foreach (Keys key in numKeys)
-            {
-                connectKey(state, key, target);
-            }
-
-            // Power keys - like Escape
-            //
-            Keys[] powerKeys = { Keys.Escape };
-            foreach(Keys key in powerKeys)
-            {
-                connectKey(state, key, target);
-            }
-
-            // Other keys
-            //
-            Keys[] otherKeys = { Keys.OemComma, Keys.OemPeriod, Keys.OemQuotes, Keys.OemCloseBrackets, Keys.OemOpenBrackets, Keys.OemPipe, Keys.OemMinus, Keys.OemPlus, Keys.OemQuestion, Keys.Back, Keys.Delete, Keys.Decimal, Keys.OemBackslash, Keys.LeftWindows, Keys.RightWindows, Keys.LeftControl, Keys.RightControl, Keys.RightShift, Keys.LeftShift, Keys.LeftShift, Keys.RightAlt, Keys.LeftAlt /*, Keys.Right, Keys.Left, Keys.Up, Keys.Down, Keys.PageUp, Keys.PageDown */ };
-            foreach (Keys key in otherKeys)
-            {
-                connectKey(state, key, target);
-            }
-
-            // Connect the arrow and movement keys
-            //
-            connectArrowKeys(state, target);
-        }
-
-        /// <summary>
-        /// Connect arrow, page up and down and select (Enter) keys to a target
-        /// </summary>
-        /// <param name="state"></param>
-        /// <param name="target"></param>
-        public void connectArrowKeys(State state, Target target = Target.Default)
-        {
-            Keys[] otherKeys = { Keys.Right, Keys.Left, Keys.Up, Keys.Down, Keys.PageUp, Keys.PageDown, Keys.Enter };
-            foreach (Keys key in otherKeys)
-            {
-                connectKey(state, key, target);
-            }
-        }
-
 
         /// <summary>
         /// Default to no input available from our world
         /// </summary>
         //protected InputFeatures m_inputFeatures = InputFeatures.Dumb;
-
-        /// <summary>
-        /// A project containing stuff
-        /// </summary>
-        protected Project m_project = null;
 
         /// <summary>
         /// An XNA handle to display stuff
@@ -303,9 +222,5 @@ namespace Xyglo.Brazil
         /// </summary>
         protected ViewSpaceMode m_windowMode = ViewSpaceMode.Window;
 
-        /// <summary>
-        /// Action map
-        /// </summary>
-        protected ActionMap m_actionMap = new ActionMap();
     }
 }

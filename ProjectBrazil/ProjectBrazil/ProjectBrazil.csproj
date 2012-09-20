@@ -68,10 +68,16 @@
   <ItemGroup>
     <Compile Include="Action.cs" />
     <Compile Include="ActionMap.cs" />
+    <Compile Include="BrazilApp.cs" />
+    <Compile Include="BrazilColour.cs" />
+    <Compile Include="BrazilVector2.cs" />
+    <Compile Include="BrazilVector3.cs" />
     <Compile Include="Component.cs" />
+    <Compile Include="Component3D.cs" />
     <Compile Include="ComponentInstance.cs" />
     <Compile Include="Core.cs" />
     <Compile Include="DrawableComponent.cs" />
+    <Compile Include="FlyingBlock.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BloomComponent.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BloomSettings.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BraceDepth.cs" />
