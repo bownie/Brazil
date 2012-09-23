@@ -262,6 +262,14 @@ namespace Xyglo.Brazil.Xna
                                                  quadColour);
         }
 
+        static public void renderQuadStatic(Texture2D texture, Vector3 topLeft, Vector3 bottomRight, Color quadColour, SpriteBatch spriteBatch)
+        {
+            spriteBatch.Draw(texture, new Rectangle(Convert.ToInt16(topLeft.X),
+                                                 Convert.ToInt16(topLeft.Y),
+                                                 Convert.ToInt16(bottomRight.X) - Convert.ToInt16(topLeft.X),
+                                                 Convert.ToInt16(bottomRight.Y) - Convert.ToInt16(topLeft.Y)),
+                                                 quadColour);
+        }
 
         /// <summary>
         /// This draws a highlight area on the screen when we hold shift down

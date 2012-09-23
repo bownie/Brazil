@@ -37,8 +37,17 @@ namespace Xyglo.Brazil
             throw new NotImplementedException();
         }
 
+        public BrazilVector3 getSize()
+        {
+            return m_dimensions;
+        }
+
         protected BrazilVector3 m_dimensions = new BrazilVector3();
 
         protected BrazilColour m_colour;
+
+
+
+
     }
 }

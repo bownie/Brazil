@@ -5855,9 +5855,36 @@ namespace Xyglo.Brazil.Xna
             //
             m_bloom.BeginDraw();
 
-            setupDrawWorld(gameTime);
+            //setupDrawWorld(gameTime);
+            m_graphics.GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            m_spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.DepthRead, RasterizerState.CullNone, m_basicEffect);
+            /*
+            SpriteBatch spriteBatch = new SpriteBatch(m_graphics.GraphicsDevice);
+            spriteBatch.Begin();
+            Vector3 v1 = new Vector3(0, 0, 0);
+            Vector3 v2 = new Vector3(100, 200, 200);
+            DrawingHelper.renderQuadStatic(m_flatTexture, v1, v2, Color.Red, spriteBatch);
+            spriteBatch.End();
+            */
+
+            m_graphics.GraphicsDevice.RasterizerState = RasterizerState.CullNone;  // vertex order doesn't matter
+            m_graphics.GraphicsDevice.BlendState = BlendState.NonPremultiplied;    // use alpha blending
+            m_graphics.GraphicsDevice.DepthStencilState = DepthStencilState.None;  // don't bother with the depth/stencil buffer
+            m_graphics.GraphicsDevice.SamplerStates[0] = SamplerState.LinearClamp;
+
+            //Matrix viewMatrix = Matrix.Identity;
+            //Matrix projectionMatrix = Matrix.CreateOrthographic(Window.ClientBounds.Width, Window.ClientBounds.Height, -1.0f, 1.0f);
+
+            //m_lineEffect.View = viewMatrix;
+            //m_lineEffect.Projection = projectionMatrix;
+            m_lineEffect.World = Matrix.CreateScale(1, -1, 1);
+            m_lineEffect.Texture = m_flatTexture;
+            m_lineEffect.TextureEnabled = true;
+            m_lineEffect.DiffuseColor = Color.White.ToVector3();
+            m_lineEffect.CurrentTechnique.Passes[0].Apply();
+
+
+            //m_graphics.GraphicsDevice.ver
 
             // Draw the components
             //
@@ -5869,9 +5896,31 @@ namespace Xyglo.Brazil.Xna
                 }
             }
 
-            m_spriteBatch.End();
+            GraphicsDevice.RasterizerState = XygloFlyingBlock.WIREFRAME_RASTERIZER_STATE;    // draw in wireframe
+            GraphicsDevice.BlendState = BlendState.Opaque;                  // no alpha this time
+            m_lineEffect.TextureEnabled = false;
+            m_lineEffect.DiffuseColor = Color.White.ToVector3();
+            m_lineEffect.CurrentTechnique.Passes[0].Apply();
 
+            // Draw the components
+            //
+            foreach (Component component in m_componentList)
+            {
+                if (component.GetType() == typeof(FlyingBlock))
+                {
+                    drawFlyingBlock((FlyingBlock)component);
+                }
+            }
+            //GraphicsDevice.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, vertexData, 0, 4, indexData, 0, 2);
+
+            //base.Draw(gameTime);
+
+            //m_spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.DepthRead, RasterizerState.CullNone, m_basicEffect);
+            //m_spriteBatch.End();
         }
+
+
+
 
         /// <summary>
         /// Draw a FlyingBlock
@@ -5884,7 +5933,9 @@ namespace Xyglo.Brazil.Xna
 
             //http://www.switchonthecode.com/tutorials/creating-a-textured-box-in-xna
 
+            XygloFlyingBlock fBlock = new XygloFlyingBlock(block.getPosition(), block.getSize());
 
+            fBlock.draw(m_graphics.GraphicsDevice);
         }
 
 

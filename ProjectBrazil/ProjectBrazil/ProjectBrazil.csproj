@@ -116,6 +116,7 @@
     <Compile Include="Xyglo.Brazil.Xna\VersionInformation.cs" />
     <Compile Include="ViewSpace.cs" />
     <Compile Include="IWorld.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\XygloFlyingBlock.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloKinectHelper.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloKinectManager.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloObject.cs" />

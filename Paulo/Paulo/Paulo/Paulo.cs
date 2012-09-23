@@ -28,7 +28,7 @@ namespace Paulo
         /// </summary>
         public void initialise()
         {
-            FlyingBlock block1 = new FlyingBlock(BrazilColour.Blue, new BrazilVector3(0, 0, 0));
+            FlyingBlock block1 = new FlyingBlock(BrazilColour.Blue, new BrazilVector3(10, 0, 0));
             block1.setVelocity(new BrazilVector3(-1, 0, 0));
 
             // Push onto component list
