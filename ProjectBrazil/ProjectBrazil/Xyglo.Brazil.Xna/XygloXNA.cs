@@ -32,6 +32,11 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         List<Component> m_componentList = null;
 
+        /// <summary>
+        /// A drawable component dictionary
+        /// </summary>
+        Dictionary<Component, XygloXnaDrawable> m_drawableComponent = new Dictionary<Component, XygloXnaDrawable>();
+
         // XNA stuff
         //
         GraphicsDeviceManager m_graphics;
@@ -1184,12 +1189,63 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
-        /// LoadContent will be called once per game and is the place to load
-        /// all of your content.
+        /// Set up all of our one shot translations
         /// </summary>
-        protected override void LoadContent()
+        protected override void Initialize()
         {
-            Logger.logMsg("XygloXNA::LoadContent() - loading resources");
+            base.Initialize();
+            initializeWorld();
+        }
+
+        /// <summary>
+        /// Initialise our world
+        /// </summary>
+        public void initializeWorld()
+        {
+            /*
+            cameraMatrix = Matrix.CreateLookAt(
+                new Vector3(0, 30, 20), new Vector3(0, 0, 0), new Vector3(0, 1, 0));
+            projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
+                Window.ClientBounds.Width / Window.ClientBounds.Height, 1.0f, 50.0f);
+            float tilt = MathHelper.ToRadians(22.5f);
+            worldMatrix = Matrix.CreateRotationX(tilt) * Matrix.CreateRotationY(tilt);
+
+            cubeEffect = new BasicEffect(GraphicsDevice, null);
+            cubeEffect.World = worldMatrix;
+            cubeEffect.View = cameraMatrix;
+            cubeEffect.Projection = projectionMatrix;
+            cubeEffect.TextureEnabled = true;
+             * */
+            
+            // Construct our view and projection matrices
+            //
+            // See here for alternatives:
+            // 
+            // http://www.toymaker.info/Games/XNA/html/xna_camera.html
+            // 
+            m_viewMatrix = Matrix.CreateLookAt(m_eye, m_target, Vector3.Up);
+            m_projection = Matrix.CreateTranslation(-0.5f, -0.5f, 0) * Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, GraphicsDevice.Viewport.AspectRatio, 0.1f, 10000f);
+
+            // Generate frustrum
+            //
+            if (m_frustrum == null)
+            {
+                m_frustrum = new BoundingFrustum(m_viewMatrix * m_projection);
+            }
+            else
+            {
+                // You can also update frustrum matrix like this
+                //
+                m_frustrum.Matrix = m_viewMatrix * m_projection;
+            }
+
+            m_basicEffect.World = Matrix.CreateScale(1, -1, 1);
+            m_basicEffect.View = m_viewMatrix;
+            m_basicEffect.Projection = m_projection;
+
+            m_lineEffect.View = m_viewMatrix;
+            m_lineEffect.Projection = m_projection;
+            m_lineEffect.World = Matrix.CreateScale(1, -1, 1);
 
             // Create a new SpriteBatch, which can be used to draw textures.
             //
@@ -1198,6 +1254,16 @@ namespace Xyglo.Brazil.Xna
             // Panner spritebatch
             //
             m_pannerSpriteBatch = new SpriteBatch(m_graphics.GraphicsDevice);
+        }
+
+
+        /// <summary>
+        /// LoadContent will be called once per game and is the place to load
+        /// all of your content.
+        /// </summary>
+        protected override void LoadContent()
+        {
+            Logger.logMsg("XygloXNA::LoadContent() - loading resources");
 
             if (m_project != null)
             {
@@ -1267,9 +1333,6 @@ namespace Xyglo.Brazil.Xna
             }
         }
 
-        /// <summary>
-        /// Content load specifically for Friendlier
-        /// </summary>
         protected void loadFriendlierContent()
         {
 
@@ -3485,233 +3548,7 @@ namespace Xyglo.Brazil.Xna
             return rL;
         }
 
-        /// <summary>
-        /// Convert key mappings from rax (XNA) to framework (Brazil) - we also need to add modifier keys to actions
-        /// when checking against a StateAction list.
-        /// </summary>
-        /// <param name="keys"></param>
-        /// <returns></returns>
-        protected List<Keys> convertKeyMappings(Microsoft.Xna.Framework.Input.Keys[] keys, bool ignoreModifiers = false)
-        {
-            List<Keys> rL = new List<Keys>();
-            Keys newKey = Keys.None;
 
-            foreach (Microsoft.Xna.Framework.Input.Keys key in keys)
-            {
-                switch (key)
-                {
-                    case Microsoft.Xna.Framework.Input.Keys.A:
-                        newKey = Keys.A;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.B:
-                        newKey = Keys.B;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.C:
-                        newKey = Keys.C;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.D:
-                        newKey = Keys.D;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.E:
-                        newKey = Keys.E;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.F:
-                        newKey = Keys.F;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.G:
-                        newKey = Keys.G;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.H:
-                        newKey = Keys.H;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.I:
-                        newKey = Keys.I;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.J:
-                        newKey = Keys.J;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.K:
-                        newKey = Keys.K;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.L:
-                        newKey = Keys.L;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.M:
-                        newKey = Keys.N;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.O:
-                        newKey = Keys.O;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.P:
-                        newKey = Keys.P;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.Q:
-                        newKey = Keys.Q;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.R:
-                        newKey = Keys.R;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.S:
-                        newKey = Keys.S;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.T:
-                        newKey = Keys.T;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.U:
-                        newKey = Keys.U;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.V:
-                        newKey = Keys.V;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.W:
-                        newKey = Keys.W;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.X:
-                        newKey = Keys.X;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.Y:
-                        newKey = Keys.Y;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.Z:
-                        newKey = Keys.Z;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.D0:
-                        newKey = Keys.D0;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.D1:
-                        newKey = Keys.D1;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.D2:
-                        newKey = Keys.D2;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.D3:
-                        newKey = Keys.D3;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.D4:
-                        newKey = Keys.D4;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.D5:
-                        newKey = Keys.D5;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.D6:
-                        newKey = Keys.D6;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.D7:
-                        newKey = Keys.D7;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.D8:
-                        newKey = Keys.D8;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.D9:
-                        newKey = Keys.D9;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.Home:
-                        newKey = Keys.Home;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.End:
-                        newKey = Keys.End;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.Up:
-                        newKey = Keys.Up;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.Down:
-                        newKey = Keys.Down;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.Left:
-                        newKey = Keys.Left;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.Right:
-                        newKey = Keys.Right;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.Escape:
-                        newKey = Keys.Escape;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.LeftAlt:
-                        if (!ignoreModifiers) newKey = Keys.LeftAlt;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.RightAlt:
-                        if (!ignoreModifiers) newKey = Keys.RightAlt;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.LeftControl:
-                        if (!ignoreModifiers) newKey = Keys.LeftControl;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.RightControl:
-                        if (!ignoreModifiers) newKey = Keys.RightControl;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.LeftShift:
-                        if (!ignoreModifiers) newKey = Keys.LeftShift;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.RightShift:
-                        if (!ignoreModifiers) newKey = Keys.RightShift;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.LeftWindows:
-                        if (!ignoreModifiers) newKey = Keys.LeftWindows;
-                        break;
-
-                    case Microsoft.Xna.Framework.Input.Keys.RightWindows:
-                        if (!ignoreModifiers) newKey = Keys.RightWindows;
-                        break;
-
-                    default:
-                        newKey = Keys.None;
-                        break;
-                }
-
-                if (newKey != Keys.None)
-                {
-                    rL.Add(newKey);
-                }
-            }
-            return rL;
-        }
 
         /*
         /// <summary>
@@ -3865,8 +3702,8 @@ namespace Xyglo.Brazil.Xna
         protected List<KeyAction> getAllKeyActions()
         {
             List<KeyAction> lKA = new List<KeyAction>();
-            List<Keys> newKeys = convertKeyMappings(Keyboard.GetState().GetPressedKeys());
-            List<Keys> lastKeys = convertKeyMappings(m_lastKeyboardState.GetPressedKeys());
+            List<Keys> newKeys = XygloConvert.keyMappings(Keyboard.GetState().GetPressedKeys());
+            List<Keys> lastKeys =XygloConvert.keyMappings(m_lastKeyboardState.GetPressedKeys());
             KeyboardModifier modifier = KeyboardModifier.None;
 
             // Check for modifiers - flag and remove
@@ -3925,7 +3762,7 @@ namespace Xyglo.Brazil.Xna
             {
                 bool pressed = true;
 
-                foreach (Keys lastKey in convertKeyMappings(m_lastKeyboardState.GetPressedKeys()))
+                foreach (Keys lastKey in XygloConvert.keyMappings(m_lastKeyboardState.GetPressedKeys()))
                 {
                     if (lastKey == key) // was down last time so hasn't been pressed - is held
                     {
@@ -4127,6 +3964,7 @@ namespace Xyglo.Brazil.Xna
                 m_processKeyboardAllowed = gameTime.TotalGameTime + new TimeSpan(0, 0, 0, 0, 100);
             }
             */
+
             // limit number of keys
             //
             m_processKeyboardAllowed = gameTime.TotalGameTime + new TimeSpan(0, 0, 0, 0, 100);
@@ -4147,6 +3985,30 @@ namespace Xyglo.Brazil.Xna
             if (m_processKeyboardAllowed < gameTime.TotalGameTime)
             {
                 m_processKeyboardAllowed = gameTime.TotalGameTime;
+            }
+
+            // Now we can update any components that need moving
+            //
+            foreach (Component component in m_componentList)
+            {
+                // Has this component already been added to the drawableComponent dictionary?
+                //
+                if (m_drawableComponent.ContainsKey(component))
+                {
+                    // If not then is it a drawable type? 
+                    //
+                    if (component.GetType() == typeof(Xyglo.Brazil.FlyingBlock))
+                    {
+                        // Found a FlyingBlock - initialise it and add it to the dictionary
+                        //
+                        FlyingBlock fb = (Xyglo.Brazil.FlyingBlock)component;
+
+                        // Move any update any buffers
+                        //
+                        m_drawableComponent[component].move(XygloConvert.getVector3(fb.getVelocity()));
+                        m_drawableComponent[component].buildBuffers(m_graphics.GraphicsDevice);
+                    }
+                }
             }
 
             base.Update(gameTime);
@@ -5815,12 +5677,8 @@ namespace Xyglo.Brazil.Xna
                 m_eye.Z = (float)Math.Sin(angle * .5f) * 12f;
             }
 
-            // Construct our view and projection matrices
+            // Duplicate of what we have in the Initialize()
             //
-            // See here for alternatives:
-            // 
-            // http://www.toymaker.info/Games/XNA/html/xna_camera.html
-            // 
             m_viewMatrix = Matrix.CreateLookAt(m_eye, m_target, Vector3.Up);
             m_projection = Matrix.CreateTranslation(-0.5f, -0.5f, 0) * Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, GraphicsDevice.Viewport.AspectRatio, 0.1f, 10000f);
 
@@ -5845,6 +5703,8 @@ namespace Xyglo.Brazil.Xna
             m_lineEffect.Projection = m_projection;
             m_lineEffect.World = Matrix.CreateScale(1, -1, 1);
         }
+
+
         /// <summary>
         /// Draw the Xyglo Components
         /// </summary>
@@ -5855,91 +5715,80 @@ namespace Xyglo.Brazil.Xna
             //
             m_bloom.BeginDraw();
 
-            //setupDrawWorld(gameTime);
-            m_graphics.GraphicsDevice.Clear(Color.CornflowerBlue);
+            setupDrawWorld(gameTime);
 
-            /*
-            SpriteBatch spriteBatch = new SpriteBatch(m_graphics.GraphicsDevice);
-            spriteBatch.Begin();
-            Vector3 v1 = new Vector3(0, 0, 0);
-            Vector3 v2 = new Vector3(100, 200, 200);
-            DrawingHelper.renderQuadStatic(m_flatTexture, v1, v2, Color.Red, spriteBatch);
-            spriteBatch.End();
-            */
+#if NEW_ATTEMPT
+            foreach (Component component in m_componentList)
+            {
+                if (component.GetType() == typeof(Xyglo.Brazil.FlyingBlock))
+                {
 
-            m_graphics.GraphicsDevice.RasterizerState = RasterizerState.CullNone;  // vertex order doesn't matter
-            m_graphics.GraphicsDevice.BlendState = BlendState.NonPremultiplied;    // use alpha blending
-            m_graphics.GraphicsDevice.DepthStencilState = DepthStencilState.None;  // don't bother with the depth/stencil buffer
-            m_graphics.GraphicsDevice.SamplerStates[0] = SamplerState.LinearClamp;
+                    FlyingBlock block = getDrawableFlyingBlock((Xyglo.Brazil.FlyingBlock)component);
+                    m_graphics.GraphicsDevice.SetVertexBuffer(block.getVertexBuffer());
 
-            //Matrix viewMatrix = Matrix.Identity;
-            //Matrix projectionMatrix = Matrix.CreateOrthographic(Window.ClientBounds.Width, Window.ClientBounds.Height, -1.0f, 1.0f);
+                    foreach (EffectPass pass in m_basicEffect.CurrentTechnique.Passes)
+                    {
 
-            //m_lineEffect.View = viewMatrix;
-            //m_lineEffect.Projection = projectionMatrix;
-            m_lineEffect.World = Matrix.CreateScale(1, -1, 1);
-            m_lineEffect.Texture = m_flatTexture;
-            m_lineEffect.TextureEnabled = true;
-            m_lineEffect.DiffuseColor = Color.White.ToVector3();
-            m_lineEffect.CurrentTechnique.Passes[0].Apply();
+                        int _iVertexOffset = -4; // we default to array index 0 within the following loop as 0 += 4 ... 
+
+                        //for (int i = 0; i < textureList.Count; ++i)
+                        //{
+
+                            //m_lineEffect.Texture = textureList[i];
+
+                            //pass.Apply();
+                            //GraphicsDevice.DrawUserIndexedPrimitives<VertexPositionNormalTexture>(PrimitiveType.TriangleList, block.getVertices(), _iVertexOffset += 4, 4, Indices, 0, 2);
+
+                        //}
 
 
-            //m_graphics.GraphicsDevice.ver
 
-            // Draw the components
+                        
+                        //m_basicEffect.Texture = cube.shapeTexture;
+                        //cube.RenderShape(GraphicsDevice);
+                        //pass.End();
+                    }
+                }
+                //cubeEffect.End();
+            }
+
+#else
+            //m_spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.DepthRead, RasterizerState.CullNone, m_lineEffect);
+
+            
+            // Draw the components - note that we have two components called the same in different
+            // areas of the framework - we should disambiguate to make sure this distinction between
+            // API levels is clear.
             //
             foreach (Component component in m_componentList)
             {
-                if (component.GetType() == typeof(FlyingBlock))
+                // Has this component already been added to the drawableComponent dictionary?
+                //
+                if (!m_drawableComponent.ContainsKey(component))
                 {
-                    drawFlyingBlock((FlyingBlock)component);
+                    // If not then is it a drawable type? 
+                    //
+                    if (component.GetType() == typeof(Xyglo.Brazil.FlyingBlock))
+                    {
+                        // Found a FlyingBlock - initialise it and add it to the dictionary
+                        //
+                        FlyingBlock fb = (Xyglo.Brazil.FlyingBlock)component;
+                        XygloFlyingBlock drawBlock = new XygloFlyingBlock(Color.DarkGray, m_lineEffect, fb.getPosition(), fb.getSize());
+                        m_drawableComponent[component] = drawBlock;
+                        drawBlock.buildBuffers(m_graphics.GraphicsDevice);
+                        drawBlock.draw(m_graphics.GraphicsDevice);
+                    }
                 }
+                else
+                {
+                    m_drawableComponent[component].draw(m_graphics.GraphicsDevice);
+                }
+
             }
 
-            GraphicsDevice.RasterizerState = XygloFlyingBlock.WIREFRAME_RASTERIZER_STATE;    // draw in wireframe
-            GraphicsDevice.BlendState = BlendState.Opaque;                  // no alpha this time
-            m_lineEffect.TextureEnabled = false;
-            m_lineEffect.DiffuseColor = Color.White.ToVector3();
-            m_lineEffect.CurrentTechnique.Passes[0].Apply();
-
-            // Draw the components
-            //
-            foreach (Component component in m_componentList)
-            {
-                if (component.GetType() == typeof(FlyingBlock))
-                {
-                    drawFlyingBlock((FlyingBlock)component);
-                }
-            }
-            //GraphicsDevice.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, vertexData, 0, 4, indexData, 0, 2);
-
-            //base.Draw(gameTime);
-
-            //m_spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.DepthRead, RasterizerState.CullNone, m_basicEffect);
             //m_spriteBatch.End();
+#endif
         }
-
-
-
-
-        /// <summary>
-        /// Draw a FlyingBlock
-        /// </summary>
-        /// <param name="block"></param>
-        protected void drawFlyingBlock(FlyingBlock block)
-        {
-            // Have a look at this
-            //
-
-            //http://www.switchonthecode.com/tutorials/creating-a-textured-box-in-xna
-
-            XygloFlyingBlock fBlock = new XygloFlyingBlock(block.getPosition(), block.getSize());
-
-            fBlock.draw(m_graphics.GraphicsDevice);
-        }
-
-
-
 
         /// <summary>
         /// Draw specific code for Friendlier special case

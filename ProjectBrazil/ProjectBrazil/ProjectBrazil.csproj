@@ -66,15 +66,15 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BrazilColour.cs" />
+    <Compile Include="BrazilVector2.cs" />
+    <Compile Include="Component3D.cs" />
     <Compile Include="Action.cs" />
     <Compile Include="ActionMap.cs" />
     <Compile Include="BrazilApp.cs" />
-    <Compile Include="BrazilColour.cs" />
-    <Compile Include="BrazilVector2.cs" />
-    <Compile Include="BrazilVector3.cs" />
-    <Compile Include="Component.cs" />
-    <Compile Include="Component3D.cs" />
+    <Compile Include="CollectionComparer.cs" />
     <Compile Include="ComponentInstance.cs" />
+    <Compile Include="BrazilVector3.cs" />
     <Compile Include="Core.cs" />
     <Compile Include="DrawableComponent.cs" />
     <Compile Include="FlyingBlock.cs" />
@@ -83,6 +83,7 @@
     <Compile Include="Xyglo.Brazil.Xna\BraceDepth.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BufferView.cs" />
     <Compile Include="Xyglo.Brazil.Xna\Command.cs" />
+    <Compile Include="Component.cs" />
     <Compile Include="Xyglo.Brazil.Xna\CppSyntaxManager.cs" />
     <Compile Include="Xyglo.Brazil.Xna\DeleteTextCommand.cs" />
     <Compile Include="Xyglo.Brazil.Xna\Differ.cs" />
@@ -91,6 +92,9 @@
     <Compile Include="Xyglo.Brazil.Xna\FileBuffer.cs" />
     <Compile Include="Xyglo.Brazil.Xna\FilePosition.cs" />
     <Compile Include="Xyglo.Brazil.Xna\FileSystemView.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\XygloConvert.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\XygloXnaDrawable.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\XygloFlyingBlock.cs" />
     <Compile Include="Xyglo.Brazil.Xna\FontManager.cs" />
     <Compile Include="Xyglo.Brazil.Xna\Highlight.cs" />
     <Compile Include="Xyglo.Brazil.Xna\InsertTextCommand.cs" />
@@ -116,7 +120,6 @@
     <Compile Include="Xyglo.Brazil.Xna\VersionInformation.cs" />
     <Compile Include="ViewSpace.cs" />
     <Compile Include="IWorld.cs" />
-    <Compile Include="Xyglo.Brazil.Xna\XygloFlyingBlock.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloKinectHelper.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloKinectManager.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloObject.cs" />

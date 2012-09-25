@@ -15,10 +15,11 @@ namespace Xyglo.Brazil
         /// </summary>
         /// <param name="colour"></param>
         /// <param name="position"></param>
-        public FlyingBlock(BrazilColour colour, BrazilVector3 position)
+        public FlyingBlock(BrazilColour colour, BrazilVector3 position, BrazilVector3 size)
         {
             m_colour = colour;
             m_position = position;
+            m_dimensions = size;
         }
 
         /// <summary>
@@ -37,17 +38,40 @@ namespace Xyglo.Brazil
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Get the Size
+        /// </summary>
+        /// <returns></returns>
         public BrazilVector3 getSize()
         {
             return m_dimensions;
         }
 
+        /// <summary>
+        /// Set the Size
+        /// </summary>
+        /// <param name="size"></param>
+        public void setSize(BrazilVector3 size)
+        {
+            m_dimensions = size;
+        }
+
+        /// <summary>
+        /// Other setting method
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="z"></param>
+        public void setSize(float x, float y, float z)
+        {
+            m_dimensions.X = x;
+            m_dimensions.Y = y;
+            m_dimensions.Z = z;
+        }
+
         protected BrazilVector3 m_dimensions = new BrazilVector3();
 
         protected BrazilColour m_colour;
-
-
-
 
     }
 }

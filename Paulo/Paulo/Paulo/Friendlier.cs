@@ -17,7 +17,7 @@ namespace Paulo
         {
         }
 
-        public void initialise()
+        public override void initialise()
         {
             // Create a FontManager
             //

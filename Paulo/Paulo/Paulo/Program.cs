@@ -1,4 +1,5 @@
 using System;
+using Xyglo.Brazil;
 
 namespace Paulo
 {
@@ -12,22 +13,25 @@ namespace Paulo
         static void Main(string[] args)
         {
             bool friendler = false;
+            BrazilApp app = null;
 
             if (friendler)
             {
-                // We can run our Friendlier
+                // We can create a Friendlier
                 //
-                Friendlier friendlier = new Friendlier();
-                friendlier.initialise();
-                friendlier.run();
+                app = new Friendlier();
             }
             else
             {
-                // Or we run our Paulo
+                // Or we create a Paulo
                 //
-                Paulo paulo = new Paulo();
-                paulo.initialise();
-                paulo.run();
+                app = new Paulo();
+            }
+
+            if (app != null)
+            {
+                app.initialise();
+                app.run();
             }
         }
     }
