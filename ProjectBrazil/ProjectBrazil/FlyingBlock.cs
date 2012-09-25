@@ -69,9 +69,10 @@ namespace Xyglo.Brazil
             m_dimensions.Z = z;
         }
 
+        /// <summary>
+        /// The size of this goddamn FlyingBlock
+        /// </summary>
         protected BrazilVector3 m_dimensions = new BrazilVector3();
-
-        protected BrazilColour m_colour;
 
     }
 }

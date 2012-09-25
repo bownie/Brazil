@@ -58,36 +58,58 @@ namespace Xyglo.Brazil.Xna
             if (m_vertices == null)
             {
                 m_vertices = new VertexPositionColorTexture[8];
+                m_vertices[0].TextureCoordinate = new Vector2(0, 0);
+                m_vertices[1].TextureCoordinate = new Vector2(0, 1);
+                m_vertices[2].TextureCoordinate = new Vector2(1, 0);
+                m_vertices[3].TextureCoordinate = new Vector2(1, 1);
+                m_vertices[4].TextureCoordinate = new Vector2(1, 1);
+                m_vertices[5].TextureCoordinate = new Vector2(0, 1);
+                m_vertices[6].TextureCoordinate = new Vector2(1, 0);
+                m_vertices[7].TextureCoordinate = new Vector2(0, 0);
             }
 
-            m_vertices[0].Position = m_position;
-            m_vertices[0].Color = m_colour;
-            m_vertices[0].TextureCoordinate = new Vector2(0, 0);
+            Matrix worldMatrix = Matrix.CreateRotationX((float)m_rotation);
 
             // front left top
             //
             //m_vertices[0] = new VertexPositionColorTexture(m_position, m_colour, new Vector2(0, 0));
+            m_vertices[0].Position = m_position + Vector3.Transform(new Vector3(-m_blockSize.X / 2, m_blockSize.Y / 2, m_blockSize.Z / 2), worldMatrix);
+            m_vertices[0].Color = m_colour;
 
             // front left bottom
-            m_vertices[1] = new VertexPositionColorTexture(m_position + new Vector3(0, -m_blockSize.Y, 0), m_colour, new Vector2(0, 1));
+            //m_vertices[1] = new VertexPositionColorTexture(m_position + new Vector3(0, -m_blockSize.Y, 0), m_colour, new Vector2(0, 1));
+            m_vertices[1].Position = m_position + Vector3.Transform(new Vector3(-m_blockSize.X / 2, -m_blockSize.Y / 2, m_blockSize.Z / 2), worldMatrix);
+            m_vertices[1].Color = m_colour;
 
             // front right top
-            m_vertices[2] = new VertexPositionColorTexture(m_position + new Vector3(m_blockSize.X, 0, 0), m_colour, new Vector2(1, 0));
+            //m_vertices[2] = new VertexPositionColorTexture(m_position + new Vector3(m_blockSize.X, 0, 0), m_colour, new Vector2(1, 0));
+            m_vertices[2].Position = m_position + Vector3.Transform(new Vector3(m_blockSize.X / 2, m_blockSize.Y / 2, m_blockSize.Z / 2), worldMatrix);
+            m_vertices[2].Color = m_colour;
 
             // front right bottom
-            m_vertices[3] = new VertexPositionColorTexture(m_position + new Vector3(m_blockSize.X, -m_blockSize.Y, 0), m_colour, new Vector2(1, 1));
+            //m_vertice[3] = new VertexPositionColorTexture(m_position + new Vector3(m_blockSize.X, -m_blockSize.Y, 0), m_colour, new Vector2(1, 1));
+            m_vertices[3].Position = m_position + Vector3.Transform(new Vector3(m_blockSize.X / 2, -m_blockSize.Y / 2, m_blockSize.Z / 2), worldMatrix);
+            m_vertices[3].Color = m_colour;
 
             // back left top reversing the UV ordering for the back
-            m_vertices[4] = new VertexPositionColorTexture(m_position + new Vector3(0, 0, -m_blockSize.Z), m_colour, new Vector2(1, 1));
+            //m_vertices[4] = new VertexPositionColorTexture(m_position + new Vector3(0, 0, -m_blockSize.Z), m_colour, new Vector2(1, 1));
+            m_vertices[4].Position = m_position + Vector3.Transform(new Vector3(-m_blockSize.X / 2, m_blockSize.Y / 2, -m_blockSize.Z / 2), worldMatrix);
+            m_vertices[4].Color = m_colour;
 
             // back right top
-            m_vertices[5] = new VertexPositionColorTexture(m_position + new Vector3(m_blockSize.X, 0, -m_blockSize.Z), m_colour, new Vector2(0, 1));
+            //m_vertices[5] = new VertexPositionColorTexture(m_position + new Vector3(m_blockSize.X, 0, -m_blockSize.Z), m_colour, new Vector2(0, 1));
+            m_vertices[5].Position = m_position + Vector3.Transform(new Vector3(m_blockSize.X / 2, m_blockSize.Y / 2, -m_blockSize.Z / 2), worldMatrix);
+            m_vertices[5].Color = m_colour;
 
             // back left bottom
-            m_vertices[6] = new VertexPositionColorTexture(m_position + new Vector3(0, -m_blockSize.Y, -m_blockSize.Z), m_colour, new Vector2(1, 0));
+            //m_vertices[6] = new VertexPositionColorTexture(m_position + new Vector3(0, -m_blockSize.Y, -m_blockSize.Z), m_colour, new Vector2(1, 0));
+            m_vertices[6].Position = m_position + Vector3.Transform(new Vector3(-m_blockSize.X / 2, -m_blockSize.Y / 2, -m_blockSize.Z / 2), worldMatrix);
+            m_vertices[6].Color = m_colour;
 
             // back right bottom
-            m_vertices[7] = new VertexPositionColorTexture(m_position + new Vector3(m_blockSize.X, -m_blockSize.Y, -m_blockSize.Z), m_colour, new Vector2(0, 0));
+            //m_vertices[7] = new VertexPositionColorTexture(m_position + new Vector3(m_blockSize.X, -m_blockSize.Y, -m_blockSize.Z), m_colour, new Vector2(0, 0));
+            m_vertices[7].Position = m_position + Vector3.Transform(new Vector3(m_blockSize.X / 2, -m_blockSize.Y / 2, -m_blockSize.Z / 2), worldMatrix);
+            m_vertices[7].Color = m_colour;
 
             // Now we need to describe 32 vertices
             //
@@ -196,16 +218,6 @@ namespace Xyglo.Brazil.Xna
         {
             return m_vertexBuffer;
         }
-
-        /// <summary>
-        /// Get the Shape Vertices
-        /// </summary>
-        /// <returns></returns>
-        //public VertexPositionNormalTexture[] getVertices()
-        //{
-            //return shapeVertices;
-        //}
-
 
         /// <summary>
         /// Size of this block

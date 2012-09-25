@@ -37,7 +37,17 @@ namespace Paulo
             m_componentList.Add(block1);
 
             FlyingBlock block2 = new FlyingBlock(BrazilColour.Brown, new BrazilVector3(0, 0, 0), new BrazilVector3(100, 20, 20));
+            block2.setVelocity(new BrazilVector3(0.5f, 0, 0.1f));
             m_componentList.Add(block2);
+
+            FlyingBlock block3 = new FlyingBlock(BrazilColour.Orange, new BrazilVector3(-30, 50, 200), new BrazilVector3(20, 5, 10));
+            block3.setRotation(0.01);
+            m_componentList.Add(block3);
+
+            FlyingBlock block4 = new FlyingBlock(BrazilColour.Green, new BrazilVector3(50, -50, -800), new BrazilVector3(20, 20, 200));
+            block4.setRotation(0.03);
+            block4.setVelocity(new BrazilVector3(-0.5f, -1f, -0.4f));
+            m_componentList.Add(block4);
         }
 
 

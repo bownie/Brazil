@@ -8,6 +8,9 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Xyglo.Brazil.Xna
 {
+    /// <summary>
+    /// Some convenience functions for converting between XNA and Brazil worlds
+    /// </summary>
     static public class XygloConvert
     {
         /// <summary>

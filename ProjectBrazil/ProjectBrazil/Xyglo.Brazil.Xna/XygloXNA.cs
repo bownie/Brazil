@@ -4006,6 +4006,13 @@ namespace Xyglo.Brazil.Xna
                         // Move any update any buffers
                         //
                         m_drawableComponent[component].move(XygloConvert.getVector3(fb.getVelocity()));
+
+                        // Apply any rotation if we have one
+                        if (fb.getRotation() != 0)
+                        {
+                            m_drawableComponent[component].incrementRotation(fb.getRotation());
+                        }
+
                         m_drawableComponent[component].buildBuffers(m_graphics.GraphicsDevice);
                     }
                 }
@@ -5773,7 +5780,11 @@ namespace Xyglo.Brazil.Xna
                         // Found a FlyingBlock - initialise it and add it to the dictionary
                         //
                         FlyingBlock fb = (Xyglo.Brazil.FlyingBlock)component;
-                        XygloFlyingBlock drawBlock = new XygloFlyingBlock(Color.DarkGray, m_lineEffect, fb.getPosition(), fb.getSize());
+                        XygloFlyingBlock drawBlock = new XygloFlyingBlock(XygloConvert.getColour(fb.getColour()), m_lineEffect, fb.getPosition(), fb.getSize());
+
+                        // Set any rotation amount
+                        drawBlock.setRotation(fb.getRotation());
+
                         m_drawableComponent[component] = drawBlock;
                         drawBlock.buildBuffers(m_graphics.GraphicsDevice);
                         drawBlock.draw(m_graphics.GraphicsDevice);

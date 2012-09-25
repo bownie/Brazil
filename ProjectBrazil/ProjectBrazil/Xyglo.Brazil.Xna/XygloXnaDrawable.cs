@@ -38,10 +38,47 @@ namespace Xyglo.Brazil.Xna
         /// <summary>
         /// Add a vector3 to our position
         /// </summary>
-        /// <param name="movement"></param>
-        public void move(Vector3 movement)
+        /// <param name="translation"></param>
+        public void move(Vector3 translation)
         {
-            m_position += movement;
+            m_position += translation;
+        }
+
+        /// <summary>
+        /// Set the rotation
+        /// </summary>
+        /// <param name="rotation"></param>
+        public void setRotation(double rotation)
+        {
+            m_rotation = rotation;
+        }
+
+        /// <summary>
+        /// Incremenet a rotation
+        /// </summary>
+        /// <param name="rotation"></param>
+        public void incrementRotation(double rotation)
+        {
+            m_rotation += rotation;
+
+            // Check bounds
+            if (m_rotation > 2 * Math.PI)
+            {
+                m_rotation -= 2 * Math.PI;
+            }
+            else if (m_rotation < -2 * Math.PI)
+            {
+                m_rotation += 2 * Math.PI;
+            }
+        }
+
+        /// <summary>
+        /// Get the rotation
+        /// </summary>
+        /// <returns></returns>
+        public double getRotation()
+        {
+            return m_rotation;
         }
 
         /// <summary>
@@ -58,5 +95,10 @@ namespace Xyglo.Brazil.Xna
         /// Store locally our colour
         /// </summary>
         protected Color m_colour;
+
+        /// <summary>
+        /// Rotation angle per frame
+        /// </summary>
+        protected double m_rotation = 0.0;
     }
 }

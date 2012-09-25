@@ -54,6 +54,42 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
+        /// Get the Colour
+        /// </summary>
+        /// <returns></returns>
+        public BrazilColour getColour()
+        {
+            return m_colour;
+        }
+
+        /// <summary>
+        /// Set the Colour
+        /// </summary>
+        /// <param name="colour"></param>
+        public void setColour(BrazilColour colour)
+        {
+            m_colour = colour;
+        }
+
+        /// <summary>
+        /// Get any rotation
+        /// </summary>
+        /// <returns></returns>
+        public double getRotation()
+        {
+            return m_rotation;
+        }
+
+        /// <summary>
+        /// Set any rotation
+        /// </summary>
+        /// <param name="rotation"></param>
+        public void setRotation(double rotation)
+        {
+            m_rotation = rotation;
+        }
+
+        /// <summary>
         /// Position
         /// </summary>
         protected BrazilVector3 m_position;
@@ -62,5 +98,15 @@ namespace Xyglo.Brazil
         /// Give a velocity vector
         /// </summary>
         protected BrazilVector3 m_velocity;
+
+        /// <summary>
+        /// A rotation angle (per frame currently)
+        /// </summary>
+        protected double m_rotation = 0.0f;
+
+        /// <summary>
+        /// A colour associated with our 3D component
+        /// </summary>
+        protected BrazilColour m_colour;
     }
 }

@@ -75,6 +75,7 @@
     <Compile Include="CollectionComparer.cs" />
     <Compile Include="ComponentInstance.cs" />
     <Compile Include="BrazilVector3.cs" />
+    <Compile Include="BrazilMatrix3.cs" />
     <Compile Include="Core.cs" />
     <Compile Include="DrawableComponent.cs" />
     <Compile Include="FlyingBlock.cs" />
