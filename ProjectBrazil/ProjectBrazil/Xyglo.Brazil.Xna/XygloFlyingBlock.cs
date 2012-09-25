@@ -25,6 +25,8 @@ namespace Xyglo.Brazil.Xna
 
             m_blockSize = size;
             m_position = position;
+
+            if (m_alphaBlendingTest) m_colour.A = 10;
         }
 
         /// <summary>
@@ -47,6 +49,8 @@ namespace Xyglo.Brazil.Xna
             m_position.X = position.X;
             m_position.Y = position.Y;
             m_position.Z = position.Z;
+
+            if (m_alphaBlendingTest) m_colour.A = 10;
         }
 
         /// <summary>
@@ -197,9 +201,13 @@ namespace Xyglo.Brazil.Xna
             device.Indices = m_indexBuffer;
             device.SetVertexBuffer(m_vertexBuffer);
 
+            if (m_alphaBlendingTest) device.BlendState = BlendState.AlphaBlend;
+
             RasterizerState rasterizerState = new RasterizerState();
             rasterizerState.CullMode = CullMode.None;
+           
             device.RasterizerState = rasterizerState;
+
 
             foreach (EffectPass pass in m_effect.CurrentTechnique.Passes)
             {
@@ -248,6 +256,11 @@ namespace Xyglo.Brazil.Xna
         /// Our texture
         /// </summary>
         public Texture2D m_shapeTexture;
+
+        /// <summary>
+        /// Alpha Blend text
+        /// </summary>
+        protected bool m_alphaBlendingTest = false;
 
     }
 }
