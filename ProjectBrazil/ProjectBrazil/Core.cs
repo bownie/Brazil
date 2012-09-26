@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+
 namespace Xyglo.Brazil
 {
-    public enum States
-    {
-    }
-
-
+    // Deprecated by BrazilApp
+    //
+    // DO NOT USE
+    //
 
     /// <summary>
     /// A Core is inherited by the main engine of the implementing technology and

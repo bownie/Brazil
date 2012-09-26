@@ -17,7 +17,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="effect"></param>
         /// <param name="size"></param>
         /// <param name="position"></param>
-        public XygloFlyingBlock(Color colour, BasicEffect effect, Vector3 size, Vector3 position)
+        public XygloFlyingBlock(Color colour, BasicEffect effect, Vector3 position, Vector3 size)
         {
             // Store the effect
             m_effect = effect;
@@ -178,7 +178,7 @@ namespace Xyglo.Brazil.Xna
                 m_indices[28] = 4;
                 m_indices[29] = 5;
 
-                // Bottom
+                // Bottom - might need to reverse these?
                 //
                 m_indices[30] = 1;
                 m_indices[31] = 3;
@@ -196,6 +196,10 @@ namespace Xyglo.Brazil.Xna
         }
 
 
+        /// <summary>
+        /// Draw this FlyingBlock by setting and swriting the 
+        /// </summary>
+        /// <param name="device"></param>
         public override void draw(GraphicsDevice device)
         {
             device.Indices = m_indexBuffer;
@@ -208,13 +212,11 @@ namespace Xyglo.Brazil.Xna
            
             device.RasterizerState = rasterizerState;
 
-
             foreach (EffectPass pass in m_effect.CurrentTechnique.Passes)
             {
                 pass.Apply();
                 //device.DrawPrimitives(PrimitiveType.TriangleList, 0, 1);
                 device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, m_vertices.Length, 0, m_indices.Length / 3);
-
             }
         }
 
@@ -231,26 +233,6 @@ namespace Xyglo.Brazil.Xna
         /// Size of this block
         /// </summary>
         public Vector3 m_blockSize;
-
-        /// <summary>
-        /// All the vertices of the block
-        /// </summary>
-        protected VertexPositionColorTexture[] m_vertices = null;
-
-        /// <summary>
-        /// Indexes of all the vertices
-        /// </summary>
-        protected short[] m_indices = null;
-
-        /// <summary>
-        /// The index buffer
-        /// </summary>
-        protected IndexBuffer m_indexBuffer;
-
-        /// <summary>
-        /// The vertex buffer
-        /// </summary>
-        protected VertexBuffer m_vertexBuffer;
 
         /// <summary>
         /// Our texture

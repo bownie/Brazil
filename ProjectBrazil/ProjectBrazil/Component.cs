@@ -5,6 +5,10 @@ using System.Text;
 
 namespace Xyglo.Brazil
 {
+    public enum Behaviour
+    {
+    }
+
     /// <summary>
     /// A Component is something that can be represented in the ViewSpace and
     /// is managed by the Core in terms of update and drawing.

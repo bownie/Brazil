@@ -79,6 +79,7 @@
     <Compile Include="Core.cs" />
     <Compile Include="DrawableComponent.cs" />
     <Compile Include="FlyingBlock.cs" />
+    <Compile Include="Interloper.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BloomComponent.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BloomSettings.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BraceDepth.cs" />
@@ -93,7 +94,10 @@
     <Compile Include="Xyglo.Brazil.Xna\FileBuffer.cs" />
     <Compile Include="Xyglo.Brazil.Xna\FilePosition.cs" />
     <Compile Include="Xyglo.Brazil.Xna\FileSystemView.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\XygloComponentGroup.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloConvert.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\XygloHud.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\XygloSphere.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloXnaDrawable.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloFlyingBlock.cs" />
     <Compile Include="Xyglo.Brazil.Xna\FontManager.cs" />

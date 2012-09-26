@@ -3,15 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Xyglo.Brazil;
 
-/*using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.GamerServices;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Media;
-*/
-
 namespace Paulo
 {
     /// <summary>
@@ -28,6 +19,18 @@ namespace Paulo
         /// Allows the game to perform any initialisation of objects and positions before starting.
         /// </summary>
         public override void initialise()
+        {
+            connectEditorKeys(State.TextEditing);
+
+            testBlocks();
+
+            Interloper paulo = new Interloper(BrazilColour.White, new BrazilVector3(0, 0, 0), new BrazilVector3(100, 100, 100));
+            paulo.setVelocity(new BrazilVector3(0.1f, 0, 0));
+            m_componentList.Add(paulo);
+        }
+
+
+        protected void testBlocks()
         {
             FlyingBlock block1 = new FlyingBlock(BrazilColour.Blue, new BrazilVector3(-10, -100, 0), new BrazilVector3(100.0f, 100.0f, 10.0f));
             block1.setVelocity(new BrazilVector3(-1, 0, 0));
@@ -49,7 +52,6 @@ namespace Paulo
             block4.setVelocity(new BrazilVector3(-0.5f, -1f, -0.4f));
             m_componentList.Add(block4);
         }
-
 
     }
 }

@@ -1891,9 +1891,17 @@ namespace Xyglo.Brazil.Xna
             //
             bool unsaved = false;
 
+            // Immediate exit for no project (not Friendlier)
+            //
+            if (m_project == null)
+            {
+                this.Exit();
+                return;
+            }
+
             // Use this somewhere probably
             //
-            // m_project.getLicenced() 
+            // _project.getLicenced() 
 
             // Only check BufferViews status if we're not forcing an exit
             //
@@ -4015,6 +4023,22 @@ namespace Xyglo.Brazil.Xna
 
                         m_drawableComponent[component].buildBuffers(m_graphics.GraphicsDevice);
                     }
+                    else if (component.GetType() == typeof(Xyglo.Brazil.Interloper))
+                    {
+                        Interloper il = (Xyglo.Brazil.Interloper)component;
+
+                        // Move any update any buffers
+                        //
+                        m_drawableComponent[component].move(XygloConvert.getVector3(il.getVelocity()));
+
+                        // Apply any rotation if we have one
+                        if (il.getRotation() != 0)
+                        {
+                            m_drawableComponent[component].incrementRotation(il.getRotation());
+                        }
+
+                        m_drawableComponent[component].buildBuffers(m_graphics.GraphicsDevice);
+                    }
                 }
             }
 
@@ -5174,6 +5198,11 @@ namespace Xyglo.Brazil.Xna
         /// <param name="gameTime"></param>
         protected void handleSingleClick(GameTime gameTime)
         {
+            if (m_project == null)
+            {
+                return;
+            }
+
             Pair<BufferView, Pair<ScreenPosition, ScreenPosition>> testFind = m_project.testRayIntersection(getPickRay());
 
             // Have we got a valid intersection?
@@ -5763,9 +5792,13 @@ namespace Xyglo.Brazil.Xna
             //m_spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.DepthRead, RasterizerState.CullNone, m_lineEffect);
 
             
-            // Draw the components - note that we have two components called the same in different
+            // Create/draw the components - note that we have two components called the same in different
             // areas of the framework - we should disambiguate to make sure this distinction between
             // API levels is clear.
+            //
+            // This loop generates the XNA level component to match the framework/Brazil level component
+            // only if it doesn't already exist in the m_drawableComponent dictionary. If it does already
+            // exist it just calls redraw on it.
             //
             foreach (Component component in m_componentList)
             {
@@ -5785,9 +5818,38 @@ namespace Xyglo.Brazil.Xna
                         // Set any rotation amount
                         drawBlock.setRotation(fb.getRotation());
 
-                        m_drawableComponent[component] = drawBlock;
+                        // Initial build and draw
+                        //
                         drawBlock.buildBuffers(m_graphics.GraphicsDevice);
                         drawBlock.draw(m_graphics.GraphicsDevice);
+
+                        // Push to dictionary
+                        //
+                        m_drawableComponent[component] = drawBlock;
+                        
+                    } else if (component.GetType() == typeof(Xyglo.Brazil.Interloper))
+                    {
+                        Interloper il = (Xyglo.Brazil.Interloper)component;
+#if ATTEMPT_ONE
+                        XygloSphere drawSphere = new XygloSphere(XygloConvert.getColour(il.getColour()), m_lineEffect, il.getPosition(), 10.0f);
+                        drawSphere.setRotation(il.getRotation());
+#else
+                        XygloComponentGroup group = new XygloComponentGroup(m_lineEffect, Vector3.Zero);
+                        XygloFlyingBlock drawBlock = new XygloFlyingBlock(XygloConvert.getColour(il.getColour()), m_lineEffect, il.getPosition(), il.getSize());
+                        group.addComponent(drawBlock);
+
+                        XygloSphere drawSphere = new XygloSphere(XygloConvert.getColour(il.getColour()), m_lineEffect, il.getPosition(), il.getSize().X);
+                        drawSphere.setRotation(il.getRotation());
+                        group.addComponentRelative(drawSphere, new Vector3(0, - (float)il.getSize().X, 0));
+
+                        group.buildBuffers(m_graphics.GraphicsDevice);
+                        group.draw(m_graphics.GraphicsDevice);
+
+                        //group.setVelocity(new Vector3(0.01f, 0, 0));
+
+
+                        m_drawableComponent[component] = group;
+#endif
                     }
                 }
                 else

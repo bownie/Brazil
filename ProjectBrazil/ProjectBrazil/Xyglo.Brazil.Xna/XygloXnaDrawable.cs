@@ -36,10 +36,11 @@ namespace Xyglo.Brazil.Xna
         public abstract void buildBuffers(GraphicsDevice device);
 
         /// <summary>
-        /// Add a vector3 to our position
+        /// Add a Vector3 to our position - make this virtual so we can override it
+        /// in some base classes as required.
         /// </summary>
         /// <param name="translation"></param>
-        public void move(Vector3 translation)
+        public virtual void move(Vector3 translation)
         {
             m_position += translation;
         }
@@ -100,5 +101,25 @@ namespace Xyglo.Brazil.Xna
         /// Rotation angle per frame
         /// </summary>
         protected double m_rotation = 0.0;
+
+        /// <summary>
+        /// The index buffer
+        /// </summary>
+        protected IndexBuffer m_indexBuffer;
+
+        /// <summary>
+        /// The vertex buffer
+        /// </summary>
+        protected VertexBuffer m_vertexBuffer;
+
+        /// <summary>
+        /// All the vertices of the block
+        /// </summary>
+        protected VertexPositionColorTexture[] m_vertices = null;
+
+        /// <summary>
+        /// Indexes of all the vertices
+        /// </summary>
+        protected short[] m_indices = null;
     }
 }
