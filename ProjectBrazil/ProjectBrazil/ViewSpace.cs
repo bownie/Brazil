@@ -104,8 +104,6 @@ namespace Xyglo.Brazil
     /// BrazilApp and allows the componentList generated at the BrazilApp level to be passed down to the world below where it 
     /// can be realised (XygloXNA for example).
     /// 
-    /// 
-    /// 
     /// </summary>
     public class ViewSpace : IDisposable
     {

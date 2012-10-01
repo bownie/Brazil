@@ -7300,8 +7300,7 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void 
-            DragDrop(object sender, System.Windows.Forms.DragEventArgs e)
+        private void friendlierDragDrop(object sender, System.Windows.Forms.DragEventArgs e)
         {
             Logger.logMsg("XygloXNA::friendlierDragEnter() - drop event fired of type " + e.Data.ToString());
 

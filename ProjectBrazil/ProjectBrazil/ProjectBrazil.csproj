@@ -67,6 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BrazilColour.cs" />
+    <Compile Include="BrazilState.cs" />
     <Compile Include="BrazilVector2.cs" />
     <Compile Include="Component3D.cs" />
     <Compile Include="Action.cs" />
