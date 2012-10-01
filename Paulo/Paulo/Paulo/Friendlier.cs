@@ -38,24 +38,17 @@ namespace Paulo
             project.setLicenced(true);
             project.setViewMode(Project.ViewMode.Formal);
 
-            // Create and initialise viewspace
+            // Set the project
             //
-            ViewSpace viewSpace = new ViewSpace();
-            viewSpace.initialise(m_actionMap, project, m_componentList);
-
-            // Connect up a key
-            //
-            //viewSpace.connectKey(State.TextEditing, Keys.A, Target.CurrentBufferView);
-            //viewSpace.connectKey(State.TextEditing, Keys.B, Target.CurrentBufferView);
-            //viewSpace.connectKey(State.TextEditing, Keys.Escape, Target.Default);
+            m_viewSpace.setProject(project);
 
             // Connect ALT+O to the open file mode
             //
             connect(State.TextEditing, new KeyAction(Keys.O, KeyboardModifier.Alt), Target.OpenFile);
             connect(State.TextEditing, new KeyAction(Keys.S, KeyboardModifier.Alt), Target.SaveFile);
 
-            //List<Xyglo.Brazil.Action> actionList = new List<Xyglo.Brazil.Action>();
-
+            // Connect some standard editor keys to states
+            //
             connectEditorKeys(State.TextEditing);
             connectEditorKeys(State.FileSaveAs);
             connectEditorKeys(State.FileOpen);

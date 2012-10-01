@@ -76,6 +76,7 @@
     <Compile Include="ComponentInstance.cs" />
     <Compile Include="BrazilVector3.cs" />
     <Compile Include="BrazilMatrix3.cs" />
+    <Compile Include="BrazilBoundingBox.cs" />
     <Compile Include="Core.cs" />
     <Compile Include="DrawableComponent.cs" />
     <Compile Include="FlyingBlock.cs" />
@@ -83,9 +84,11 @@
     <Compile Include="Xyglo.Brazil.Xna\BloomComponent.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BloomSettings.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BraceDepth.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\BrazilWorld.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BufferView.cs" />
     <Compile Include="Xyglo.Brazil.Xna\Command.cs" />
     <Compile Include="Component.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\Component.cs" />
     <Compile Include="Xyglo.Brazil.Xna\CppSyntaxManager.cs" />
     <Compile Include="Xyglo.Brazil.Xna\DeleteTextCommand.cs" />
     <Compile Include="Xyglo.Brazil.Xna\Differ.cs" />

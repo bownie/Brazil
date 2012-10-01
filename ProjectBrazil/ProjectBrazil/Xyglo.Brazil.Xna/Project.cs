@@ -19,49 +19,6 @@ using System.Text.RegularExpressions;
 
 namespace Xyglo.Brazil.Xna
 {
-
-    /// <summary>
-    /// A Configuration item
-    /// </summary>
-    [DataContract(Name = "Friendlier", Namespace = "http://www.xyglo.com")]
-    public sealed class Configuration : IComparable
-    {
-        /// <summary>
-        /// The name of this configuration item
-        /// </summary>
-        [DataMember]
-        public string Name;
-
-        /// <summary>
-        /// The value of this configuration item
-        /// </summary>
-        [DataMember]
-        public string Value;
-
-        public Configuration(string name, string value)
-        {
-            Name = name;
-            Value = value;
-        }
-
-        // Implement the generic CompareTo method with the Temperature 
-        // class as the Type parameter. 
-        //
-        int IComparable.CompareTo(object obj)
-        {
-            Configuration config = (Configuration)(obj);
-
-            // If other is not a valid object reference, this instance is greater.
-            if (config == null) return 1;
-
-            // The temperature comparison depends on the comparison of 
-            // the underlying Double values. 
-            return Name.CompareTo(config.Name);
-        }
-
-
-    }
-
     /// <summary>
     /// A Friendlier project file - contains a list of BufferViews and FileBuffers and these
     /// two could be (but don't have to be) related.   We also expose some interfaces for doing

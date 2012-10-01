@@ -6,7 +6,13 @@ using System.Text;
 namespace Xyglo.Brazil
 {
     /// <summary>
-    /// A BrazilApp has to implement one of these things
+    /// A BrazilApp has to inherit and implement this class.  This is the proper - outside world view
+    /// of our application.  At this class we create and hold various other components which we
+    /// need to pass into the implementation of this world.  We use the ViewSpace as the actual
+    /// interface into the graphics and user interface interaction layer.
+    /// 
+    /// Note that this namespace is uncontaminated by Xyglo.Brazil.Xna as it should stay that way.
+    /// 
     /// </summary>
     public abstract class BrazilApp
     {
@@ -15,7 +21,7 @@ namespace Xyglo.Brazil
         /// </summary>
         public BrazilApp()
         {
-            m_viewSpace.initialise(m_actionMap, m_componentList);
+            m_viewSpace.initialise(m_actionMap, m_componentList, m_world);
         }
 
         /// <summary>
@@ -130,9 +136,35 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
-        /// ViewSpace object - created at construction
+        /// Set gravity in our World
+        /// </summary>
+        /// <param name="gravity"></param>
+        public void setGravity(BrazilVector3 gravity)
+        {
+            m_world.setGravity(gravity);
+        }
+
+        /// <summary>
+        /// Set the bounds of our world
+        /// </summary>
+        /// <param name="bb"></param>
+        public void setWorldBounds(BrazilBoundingBox bb)
+        {
+            m_world.setBounds(bb);
+        }
+
+        /// <summary>
+        /// ViewSpace object - created at construction.   The Viewspace will define what we can
+        /// see for this moment in our space.   It will be rebuilt on each 'level' according to how
+        /// the application/game is structued.
         /// </summary>
         protected ViewSpace m_viewSpace = new ViewSpace();
+
+        /// <summary>
+        /// A BrazilWorld object that defines size, shape, colour gravity etc at a World level.  This
+        /// can be changed but will most likely stay constant over rebuilds of the ViewSpace.
+        /// </summary>
+        protected BrazilWorld m_world = new BrazilWorld();
 
         /// <summary>
         /// Action map object - created at construction

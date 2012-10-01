@@ -100,14 +100,11 @@ namespace Xyglo.Brazil
     }
 
     /// <summary>
-    /// ViewSpace is the world that our Xyglo objects live in.  The ViewSpace wraps any of the platform specific functionality that we want to implement
-    /// therefore it contains any technology specific objects we need to initialise to provide a presentation.  Think of Xyglot as part game engine, part
-    /// window manager - we are providing a framework in which to present items as well as some of the building blocks (widgets if you like) that can be
-    /// used to create an application.  These widgets aim to be as consistent as possible across platforms hence the building of this abstration - once
-    /// you learn to use Xyglot once you can use it on other platforms with similar results.
-    ///
-    /// Additional benefit to seperating the device specific graphics from the core engine of the application is for clarity.  Xyglot will only be 
-    /// responsible for its interfaces and not responsible for game or application logic aside from that.
+    /// ViewSpace is the interface to the graphical world that our Brazil objects live in.  The ViewSpace itself resides within a
+    /// BrazilApp and allows the componentList generated at the BrazilApp level to be passed down to the world below where it 
+    /// can be realised (XygloXNA for example).
+    /// 
+    /// 
     /// 
     /// </summary>
     public class ViewSpace : IDisposable
@@ -124,18 +121,27 @@ namespace Xyglo.Brazil
         /// </summary>
         /// <param name="actionMap"></param>
         /// <param name="project"></param>
-        public void initialise(ActionMap actionMap, Project project, List<Component> componentList)
+        //public void initialise(ActionMap actionMap, Project project, List<Component> componentList, BrazilWorld  world)
+        //{
+            //m_xna = new XygloXNA(actionMap, project, componentList, world);
+        //}
+
+        /// <summary>
+        /// Set the project in the XNA 
+        /// </summary>
+        /// <param name="project"></param>
+        public void setProject(Project project)
         {
-            m_xna = new XygloXNA(actionMap, project, componentList);
+            m_xna.setProject(project);
         }
 
         /// <summary>
         /// Default initialise with just an ActionMap
         /// </summary>
         /// <param name="actionMap"></param>
-        public void initialise(ActionMap actionMap, List<Component> componentList)
+        public void initialise(ActionMap actionMap, List<Component> componentList, BrazilWorld world)
         {
-            m_xna = new XygloXNA(actionMap, componentList);
+            m_xna = new XygloXNA(actionMap, componentList, world);
 
             /*
             // Get the features of the input
@@ -201,11 +207,6 @@ namespace Xyglo.Brazil
         {
             throw new NotImplementedException();
         }
-
-        /// <summary>
-        /// Default to no input available from our world
-        /// </summary>
-        //protected InputFeatures m_inputFeatures = InputFeatures.Dumb;
 
         /// <summary>
         /// An XNA handle to display stuff

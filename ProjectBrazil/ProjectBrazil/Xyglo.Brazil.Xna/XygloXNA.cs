@@ -33,6 +33,11 @@ namespace Xyglo.Brazil.Xna
         List<Component> m_componentList = null;
 
         /// <summary>
+        /// BrazilWorld holds some Worldly information for us
+        /// </summary>
+        BrazilWorld m_world = null;
+
+        /// <summary>
         /// A drawable component dictionary
         /// </summary>
         Dictionary<Component, XygloXnaDrawable> m_drawableComponent = new Dictionary<Component, XygloXnaDrawable>();
@@ -605,10 +610,11 @@ namespace Xyglo.Brazil.Xna
         /// <summary>
         /// Default constructor
         /// </summary>
-        public XygloXNA(ActionMap actionMap, List<Component> componentList)
+        public XygloXNA(ActionMap actionMap, List<Component> componentList, BrazilWorld world)
         {
             m_actionMap = actionMap;
             m_componentList = componentList;
+            m_world = world;
             initialise();
         }
 
@@ -617,32 +623,38 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="project"></param>
         /// <param name="actionMap"></param>
-        public XygloXNA(ActionMap actionMap, Project project, List<Component> componentList)
+        public XygloXNA(ActionMap actionMap, Project project, List<Component> componentList, BrazilWorld world)
         {
             // Store project and actionmap
             //
             m_project = project;
             m_actionMap = actionMap;
             m_componentList = componentList;
+            m_world = world;
 
             // init
             initialise();
         }
 
+        /////////////////////////////// METHODS //////////////////////////////////////
+
         /// <summary>
-        /// Project constructor
+        /// Set the project
         /// </summary>
         /// <param name="project"></param>
-        //public XygloXNA(Project project)
-        //{
-            // File name
-            //
-            //m_project = project;
+        public void setProject(Project project)
+        {
+            m_project = project;
+        }
 
-            //initialise();
-        //}
-
-        /////////////////////////////// METHODS //////////////////////////////////////
+        /// <summary>
+        /// Get the project
+        /// </summary>
+        /// <returns></returns>
+        public Project getProject()
+        {
+            return m_project;
+        }
 
         /// <summary>
         /// Implement for IWorld interface - gets the list of features that this world
@@ -7288,7 +7300,8 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void friendlierDragDrop(object sender, System.Windows.Forms.DragEventArgs e)
+        private void 
+            DragDrop(object sender, System.Windows.Forms.DragEventArgs e)
         {
             Logger.logMsg("XygloXNA::friendlierDragEnter() - drop event fired of type " + e.Data.ToString());
 
