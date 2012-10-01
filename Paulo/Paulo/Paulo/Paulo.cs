@@ -24,7 +24,7 @@ namespace Paulo
 
             testBlocks();
 
-            Interloper paulo = new Interloper(BrazilColour.White, new BrazilVector3(0, 0, 0), new BrazilVector3(100, 100, 100));
+            Interloper paulo = new Interloper(BrazilColour.White, new BrazilVector3(0, 0, 0), new BrazilVector3(10, 10, 10));
             paulo.setVelocity(new BrazilVector3(0.1f, 0, 0));
             m_componentList.Add(paulo);
         }

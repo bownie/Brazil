@@ -206,14 +206,6 @@ namespace Xyglo.Brazil.Xna
         //
 
         /// <summary>
-        /// Define concrete case for abstract update method
-        /// </summary>
-        public override void update()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
         /// Dispose this object
         /// </summary>
         public void Dispose()

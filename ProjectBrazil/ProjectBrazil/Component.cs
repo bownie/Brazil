@@ -15,7 +15,7 @@ namespace Xyglo.Brazil
     /// </summary>
     public abstract class Component
     {
-        public abstract void update();
+        //public abstract void update();
 
         /// <summary>
         /// List of sub-components

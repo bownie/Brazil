@@ -23,22 +23,6 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
-        /// Update override - handle any modifications to this object
-        /// </summary>
-        public override void update()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Draw override - draw this object
-        /// </summary>
-        public override void draw()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
         /// Get the Size
         /// </summary>
         /// <returns></returns>
