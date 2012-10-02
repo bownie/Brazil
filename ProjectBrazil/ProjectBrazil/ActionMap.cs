@@ -133,7 +133,5 @@ namespace Xyglo.Brazil
         /// points to a Target - or not.
         /// </summary>
         protected Dictionary<StateAction, Target> m_actionDictionary = new Dictionary<StateAction, Target>();
-
-
     }
 }

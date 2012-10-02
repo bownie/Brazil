@@ -532,7 +532,7 @@ namespace Xyglo.Brazil.Xna
         {
             Color bufferColour = view.getTextColour();
 
-            if (state != State.TextEditing && state != State.GotoLine && state != State.FindText && state != State.DiffPicker)
+            if (state != State.Test("TextEditing") && state != State.Test("GotoLine") && state != State.Test("FindText") && state != State.Test("DiffPicker"))
             {
                 bufferColour = m_greyedColour;
             }
@@ -830,7 +830,7 @@ namespace Xyglo.Brazil.Xna
             // Set our colour according to the state of Friendlier
             //
             Color overlayColour = Color.White;
-            if (state != State.TextEditing && state != State.GotoLine && state != State.FindText && state != State.DiffPicker)
+            if (state != State.Test("TextEditing") && state != State.Test("GotoLine") && state != State.Test("FindText") && state != State.Test("DiffPicker"))
             {
                 overlayColour = m_greyedColour;
             }
@@ -846,12 +846,12 @@ namespace Xyglo.Brazil.Xna
             //
             string fileName = "";
 
-            if (state == State.FindText)
+            if (state == State.Test("FindText"))
             {
                 // Draw the search string down there
                 fileName = "Search: " + m_project.getSelectedBufferView().getSearchText();
             }
-            else if (state == State.GotoLine)
+            else if (state == State.Test("GotoLine"))
             {
                 fileName = "Goto line: " + gotoLine;
             }
@@ -918,21 +918,21 @@ namespace Xyglo.Brazil.Xna
 
             string modeString = "none";
 
-            switch (state)
+            switch (state.m_name)
             {
-                case State.TextEditing:
+                case "TextEditing":
                     modeString = "edit";
                     break;
 
-                case State.FileOpen:
+                case "FileOpen":
                     modeString = "browsing";
                     break;
 
-                case State.FileSaveAs:
+                case "FileSaveAs":
                     modeString = "saving file";
                     break;
 
-                case State.DiffPicker:
+                case "DiffPicker":
                     modeString = "performing diff";
                     break;
 

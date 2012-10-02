@@ -44,16 +44,16 @@ namespace Paulo
 
             // Connect ALT+O to the open file mode
             //
-            connect(State.TextEditing, new KeyAction(Keys.O, KeyboardModifier.Alt), Target.OpenFile);
-            connect(State.TextEditing, new KeyAction(Keys.S, KeyboardModifier.Alt), Target.SaveFile);
+            //connect(State.Test("TextEditing"), new KeyAction(Keys.O, KeyboardModifier.Alt), Target.Test("OpenFile"));
+            //connect(State.Test("TextEditing"), new KeyAction(Keys.S, KeyboardModifier.Alt), Target.Test("SaveFile"));
 
             // Connect some standard editor keys to states
             //
-            connectEditorKeys(State.TextEditing);
-            connectEditorKeys(State.FileSaveAs);
-            connectEditorKeys(State.FileOpen);
-            connectEditorKeys(State.PositionScreenOpen);
-            connectEditorKeys(State.PositionScreenNew);
+            //connectEditorKeys(State.TextEditing);
+            //connectEditorKeys(State.FileSaveAs);
+            //connectEditorKeys(State.FileOpen);
+            //connectEditorKeys(State.PositionScreenOpen);
+            //connectEditorKeys(State.PositionScreenNew);
 
             // Move the selects bufferview
             //

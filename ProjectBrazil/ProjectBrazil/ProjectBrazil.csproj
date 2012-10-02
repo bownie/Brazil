@@ -78,10 +78,13 @@
     <Compile Include="BrazilVector3.cs" />
     <Compile Include="BrazilMatrix3.cs" />
     <Compile Include="BrazilBoundingBox.cs" />
+    <Compile Include="ConfirmState.cs" />
+    <Compile Include="Target.cs" />
     <Compile Include="Core.cs" />
     <Compile Include="DrawableComponent.cs" />
     <Compile Include="FlyingBlock.cs" />
     <Compile Include="Interloper.cs" />
+    <Compile Include="State.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BloomComponent.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BloomSettings.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BraceDepth.cs" />

@@ -21,9 +21,10 @@ namespace Xyglo.Brazil
         Gesture
     };
 
+    /*
     /// <summary>
     /// Targets are things that the World implements and can be connected to actions
-    /// from InputFeatures
+    /// from InputFeatures.  These will be superceded.
     /// </summary>
     public enum Target
     {
@@ -47,7 +48,7 @@ namespace Xyglo.Brazil
     /// <summary>
     /// State is where the World can find itself either as the direct Action of an 
     /// Input or through some other aspect of interaction with the system or outside
-    /// influence.
+    /// influence.  These will be superceded.
     /// </summary>
     public enum State
     {
@@ -70,7 +71,7 @@ namespace Xyglo.Brazil
     };
 
     /// <summary>
-    /// Confirmation state 
+    /// Confirmation state  - These will be superceded.
     /// </summary>
     public enum ConfirmState
     {
@@ -80,9 +81,10 @@ namespace Xyglo.Brazil
         CancelBuild,
         ConfirmQuit
     }
+     * */
 
     /// <summary>
-    /// We will use these to define the default states for a ViewSpace. ?????
+    /// We will use these to define the default states for a ViewSpace. ?????  Probably won't be usedd.
     /// </summary>
     public enum DefaultStates
     {

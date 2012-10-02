@@ -43,8 +43,9 @@ namespace Xyglo.Brazil
         /// <param name="state"></param>
         /// <param name="key"></param>
         /// <param name="target"></param>
-        public void connectKey(State state, Keys key, Target target = Target.Default)
+        public void connectKey(State state, Keys key, Target target = null)
         {
+            if (target == null) target = Target.Default;
             m_actionMap.setAction(state, new KeyAction(key), target);
         }
 
@@ -54,8 +55,9 @@ namespace Xyglo.Brazil
         /// <param name="state"></param>
         /// <param name="actions"></param>
         /// <param name="target"></param>
-        public void connect(State state, Action action, Target target = Target.Default)
+        public void connect(State state, Action action, Target target = null)
         {
+            if (target == null) target = Target.Default;
             m_actionMap.setAction(state, action, target);
         }
 
@@ -65,8 +67,10 @@ namespace Xyglo.Brazil
         /// <param name="state"></param>
         /// <param name="actions"></param>
         /// <param name="target"></param>
-        public void connect(State state, List<Action> actions, Target target = Target.Default)
+        public void connect(State state, List<Action> actions, Target target = null)
         {
+            if (target == null) target = Target.Default;
+
             // Roll through all the actions 
             foreach (Action action in actions)
             {
@@ -80,8 +84,10 @@ namespace Xyglo.Brazil
         /// </summary>
         /// <param name="state"></param>
         /// <param name="target"></param>
-        public void connectEditorKeys(State state, Target target = Target.Default)
+        public void connectEditorKeys(State state, Target target = null)
         {
+            if (target == null) target = Target.Default;
+
             // Alphas
             //
             Keys[] alphaKeys = { Keys.A, Keys.B, Keys.C, Keys.D, Keys.E, Keys.F, Keys.F, Keys.G, Keys.H, Keys.I, Keys.J,
@@ -126,8 +132,10 @@ namespace Xyglo.Brazil
         /// </summary>
         /// <param name="state"></param>
         /// <param name="target"></param>
-        public void connectArrowKeys(State state, Target target = Target.Default)
+        public void connectArrowKeys(State state, Target target = null)
         {
+            if (target == null) target = Target.Default;
+
             Keys[] otherKeys = { Keys.Right, Keys.Left, Keys.Up, Keys.Down, Keys.PageUp, Keys.PageDown, Keys.Enter };
             foreach (Keys key in otherKeys)
             {
@@ -154,6 +162,43 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
+        /// Add a State to this App
+        /// </summary>
+        /// <param name="state"></param>
+        public void addState(string state)
+        {
+            m_states.Add(new State(state));
+        }
+
+        /// <summary>
+        /// Add a Target to this App
+        /// </summary>
+        /// <param name="target"></param>
+        public void addTarget(string target)
+        {
+            m_targets.Add(new Target(target));
+        }
+
+        /// <summary>
+        /// Add a ConfirmState to this App
+        /// </summary>
+        /// <param name="confirmState"></param>
+        public void addConfirmState(string confirmState)
+        {
+            m_confirmStates.Add(new ConfirmState(confirmState));
+        }
+
+        /// <summary>
+        /// Add a Component with a given State
+        /// </summary>
+        /// <param name="component"></param>
+        public void addComponent(State state, Component component)
+        {
+            component.addState(state);
+            m_componentList.Add(component);
+        }
+
+        /// <summary>
         /// ViewSpace object - created at construction.   The Viewspace will define what we can
         /// see for this moment in our space.   It will be rebuilt on each 'level' according to how
         /// the application/game is structued.
@@ -172,8 +217,24 @@ namespace Xyglo.Brazil
         protected ActionMap m_actionMap = new ActionMap();
 
         /// <summary>
-        /// List of Components that our app holds - these could be Drawable components
+        /// List of States our application can be in
         /// </summary>
-        protected List<Component> m_componentList = new List<Component>();
+        protected List<State> m_states = new List<State>();
+
+        /// <summary>
+        /// List of Targets our states we can send events to 
+        /// </summary>
+        protected List<Target> m_targets = new List<Target>();
+
+        /// <summary>
+        /// List of ConfirmStates
+        /// </summary>
+        protected List<ConfirmState> m_confirmStates = new List<ConfirmState>();
+
+        /// <summary>
+        /// List of Components that our app holds - these could be Drawable components or anything.  We keep this 
+        /// List private so we have to use accessors
+        /// </summary>
+        private List<Component> m_componentList = new List<Component>();
     }
 }

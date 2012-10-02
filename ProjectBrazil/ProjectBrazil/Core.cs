@@ -48,8 +48,9 @@ namespace Xyglo.Brazil
         /// <param name="state"></param>
         /// <param name="key"></param>
         /// <param name="target"></param>
-        public void connectKey(State state, Keys key, Target target = Target.Default)
+        public void connectKey(State state, Keys key, Target target = null)
         {
+            if (target == null) target = Target.Default;
             m_actionMap.setAction(state, new KeyAction(key), target);
         }
 
@@ -59,8 +60,9 @@ namespace Xyglo.Brazil
         /// <param name="state"></param>
         /// <param name="actions"></param>
         /// <param name="target"></param>
-        public void connect(State state, Action action, Target target = Target.Default)
+        public void connect(State state, Action action, Target target = null)
         {
+            if (target == null) target = Target.Default;
             m_actionMap.setAction(state, action, target);
         }
 
@@ -70,8 +72,10 @@ namespace Xyglo.Brazil
         /// <param name="state"></param>
         /// <param name="actions"></param>
         /// <param name="target"></param>
-        public void connect(State state, List<Action> actions, Target target = Target.Default)
+        public void connect(State state, List<Action> actions, Target target = null)
         {
+            if (target == null) target = Target.Default;
+
             // Roll through all the actions 
             foreach (Action action in actions)
             {
@@ -85,8 +89,10 @@ namespace Xyglo.Brazil
         /// </summary>
         /// <param name="state"></param>
         /// <param name="target"></param>
-        public void connectEditorKeys(State state, Target target = Target.Default)
+        public void connectEditorKeys(State state, Target target = null)
         {
+            if (target == null) target = Target.Default;
+
             if (target == Target.Default)
             {
                 // do something with the default target
