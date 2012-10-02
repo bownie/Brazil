@@ -15,6 +15,37 @@ namespace Paulo
         {
         }
 
+        /// <summary>
+        /// Allows the game to perform any initialisation of objects and positions before starting.
+        /// </summary>
+        public override void initialise()
+        {
+            // Initialise the states
+            //
+            initialiseStates();
+
+            // Connect some keys
+            //
+            //connectEditorKeys(State.Test("TextEditing"));
+
+            // Connect up a specific transition
+            //
+            connectKey(State.Test("Menu"), Keys.D2, Target.getTarget("StartPlaying"));
+
+            // Set up some test blocks
+            //
+            testBlocks();
+
+            // Set up an interloper
+            //
+            Interloper paulo = new Interloper(BrazilColour.White, new BrazilVector3(0, 0, 0), new BrazilVector3(10, 10, 10));
+            //paulo.setVelocity(new BrazilVector3(0.1f, 0, 0));
+            addComponent(State.Test("PlayingGame"), paulo);
+
+            BannerText menuScreen = new BannerText(BrazilColour.Blue, BrazilVector3.Zero, 10.0, "Paulo");
+            addComponent(State.Test("Menu"), menuScreen);
+        }
+
 
         /// <summary>
         /// Initialise the states - might find a way to genericise this
@@ -33,7 +64,7 @@ namespace Paulo
             // Targets are actions we can perform in the application - a default target will usually mean the object
             // in focus within the current State.  This should be defined by the component.
             //
-            string[] targets = { "Exit", "MoveLeft", "MoveRight", "Jump", "MoveForward", "MoveBack" };
+            string[] targets = { "StartPlaying", "Exit", "MoveLeft", "MoveRight", "Jump", "MoveForward", "MoveBack" };
             foreach (string target in targets)
             {
                 addTarget(target);
@@ -48,30 +79,6 @@ namespace Paulo
                 addConfirmState(confirmState);
             }
         }
-
-        /// <summary>
-        /// Allows the game to perform any initialisation of objects and positions before starting.
-        /// </summary>
-        public override void initialise()
-        {
-            // Initialise the states
-            //
-            initialiseStates();
-
-
-            connectEditorKeys(State.Test("TextEditing"));
-
-            // Set up some test blocks
-            //
-            testBlocks();
-
-            // Set up an interloper
-            //
-            Interloper paulo = new Interloper(BrazilColour.White, new BrazilVector3(0, 0, 0), new BrazilVector3(10, 10, 10));
-            //paulo.setVelocity(new BrazilVector3(0.1f, 0, 0));
-            addComponent(State.Test("PlayingGame"), paulo);
-        }
-
 
         /// <summary>
         /// Set up some test blocks

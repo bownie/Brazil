@@ -8,7 +8,7 @@ namespace Xyglo.Brazil.Xna
     /// <summary>
     /// Head up display
     /// </summary>
-    public class XygloHud : XygloXnaDrawable
+    public class XygloHud : XygloXnaDrawableShape
     {
         public XygloHud()
         {

@@ -175,29 +175,26 @@ namespace Xyglo.Brazil
             return m_xna.getInputFeatures();
         }
 
-        /// <summary>
-        /// Return the State
-        /// </summary>
-        /// <returns></returns>
-        public List<String> getStates()
-        {
-            return m_xna.getStates();
-        }
-
-        /// <summary>
-        /// Return the Targets
-        /// </summary>
-        /// <returns></returns>
-        public List<string> getTargets()
-        {
-            return m_xna.getTargets();
-        }
-
         // Run the main loop
         //
         public void run()
         {
             m_xna.Run();
+        }
+
+        /// <summary>
+        /// Set the State of the app
+        /// </summary>
+        /// <param name="state"></param>
+        public void setState(State state)
+        {
+            
+            m_xna.setState(state);
+        }
+
+        public State getState()
+        {
+            return m_xna.getState();
         }
 
         /// <summary>

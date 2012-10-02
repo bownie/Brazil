@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Xyglo.Brazil.Xna
 {
-    public class XygloFlyingBlock : XygloXnaDrawable
+    public class XygloFlyingBlock : XygloXnaDrawableShape
     {
         /// <summary>
         /// Positional constructor

@@ -14,7 +14,7 @@ namespace Xyglo.Brazil.Xna
     /// also.  It is also a type of XygloXnaDrawable itself so it can be treated just like
     /// one.
     /// </summary>
-    public class XygloComponentGroup : XygloXnaDrawable
+    public class XygloComponentGroup : XygloXnaDrawableShape
     {
         /// <summary>
         /// Constructor with the minimum information we need - effect and position
@@ -54,7 +54,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="device"></param>
         public override void buildBuffers(GraphicsDevice device)
         {
-            foreach (XygloXnaDrawable component in m_componentList)
+            foreach (XygloXnaDrawableShape component in m_componentList)
             {
                 component.buildBuffers(device);
             }
@@ -66,7 +66,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="device"></param>
         public override void draw(GraphicsDevice device)
         {
-            foreach (XygloXnaDrawable component in m_componentList)
+            foreach (XygloXnaDrawableShape component in m_componentList)
             {
                 component.draw(device);
             }

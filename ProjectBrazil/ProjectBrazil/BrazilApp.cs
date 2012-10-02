@@ -14,7 +14,7 @@ namespace Xyglo.Brazil
     /// Note that this namespace is uncontaminated by Xyglo.Brazil.Xna as it should stay that way.
     /// 
     /// </summary>
-    public abstract class BrazilApp
+    public abstract class BrazilApp : IWorld
     {
         /// <summary>
         /// Default constructor
@@ -46,6 +46,12 @@ namespace Xyglo.Brazil
         public void connectKey(State state, Keys key, Target target = null)
         {
             if (target == null) target = Target.Default;
+
+            // Check for valid State and Target
+            //
+            checkState(state);
+            checkTarget(target);
+
             m_actionMap.setAction(state, new KeyAction(key), target);
         }
 
@@ -58,6 +64,12 @@ namespace Xyglo.Brazil
         public void connect(State state, Action action, Target target = null)
         {
             if (target == null) target = Target.Default;
+
+            // Check for valid State and Target
+            //
+            checkState(state);
+            checkTarget(target);
+
             m_actionMap.setAction(state, action, target);
         }
 
@@ -70,6 +82,11 @@ namespace Xyglo.Brazil
         public void connect(State state, List<Action> actions, Target target = null)
         {
             if (target == null) target = Target.Default;
+
+            // Check for valid State and Target
+            //
+            checkState(state);
+            checkTarget(target);
 
             // Roll through all the actions 
             foreach (Action action in actions)
@@ -87,6 +104,11 @@ namespace Xyglo.Brazil
         public void connectEditorKeys(State state, Target target = null)
         {
             if (target == null) target = Target.Default;
+
+            // Check for valid State and Target
+            //
+            checkState(state);
+            checkTarget(target);
 
             // Alphas
             //
@@ -135,6 +157,11 @@ namespace Xyglo.Brazil
         public void connectArrowKeys(State state, Target target = null)
         {
             if (target == null) target = Target.Default;
+
+            // Check for valid State and Target
+            //
+            checkState(state);
+            checkTarget(target);
 
             Keys[] otherKeys = { Keys.Right, Keys.Left, Keys.Up, Keys.Down, Keys.PageUp, Keys.PageDown, Keys.Enter };
             foreach (Keys key in otherKeys)
@@ -196,6 +223,64 @@ namespace Xyglo.Brazil
         {
             component.addState(state);
             m_componentList.Add(component);
+        }
+
+        /// <summary>
+        /// Get the list of States to satisfy our interface
+        /// </summary>
+        /// <returns></returns>
+        public List<State> getStates()
+        {
+            return m_states;
+        }
+
+        /// <summary>
+        /// Get the list of Targets to satisfy our IWorld interface
+        /// </summary>
+        /// <returns></returns>
+        public List<Target> getTargets()
+        {
+            return m_targets;
+        }
+
+        /// <summary>
+        /// Check a State exists
+        /// </summary>
+        /// <param name="state"></param>
+        protected void checkState(State state)
+        {
+            if (!m_states.Contains(state))
+            {
+                throw new Exception("Unrecognized state " + state.m_name);
+            }
+        }
+
+        /// <summary>
+        /// Check a Target exists
+        /// </summary>
+        /// <param name="target"></param>
+        protected void checkTarget(Target target)
+        {
+            if (!m_targets.Contains(target))
+            {
+                throw new Exception("Unrecognised target " + target.m_name);
+            }
+        }
+
+        /// <summary>
+        /// We can initialise our world using this method
+        /// </summary>
+        /// <param name="initialState"></param>
+        public void setInitialState(State initialState)
+        {
+            // First check to see if this state is valid
+            //
+            if (!m_states.Contains(initialState))
+            {
+                throw new Exception("Unrecognized initial state " + initialState.m_name);
+            }
+
+            m_viewSpace.setState(initialState);
         }
 
         /// <summary>

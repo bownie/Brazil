@@ -20,10 +20,9 @@ using System.Security.Permissions;
 namespace Xyglo.Brazil.Xna
 {
     /// <summary>
-    /// XygloXNA is defined by a XNA Game class - the core of the XNA world and the IWorld interface
-    /// which defines some additional methods we may want to implement.
+    /// XygloXNA is defined by a XNA Game class - the core of the XNA world.
     /// </summary>
-    public class XygloXNA : Game, IWorld
+    public class XygloXNA : Game
     {
         ///////////////// MEMBER VARIABLES //////////////////
 
@@ -688,51 +687,6 @@ namespace Xyglo.Brazil.Xna
             return rL;
         }
 
-
-        /// <summary>
-        /// Implement states for IWorld interface - the number of states that this
-        /// world can be in.
-        /// </summary>
-        /// <returns></returns>
-        public List<string> getStates()
-        {
-            List<string> rL = new List<string>();
-
-            rL.Add("TextEditing");        // default mode
-            rL.Add("FileOpen");           // opening a file
-            rL.Add("FileSaveAs");         // saving a file as
-            rL.Add("Information");        // show an information pane
-            rL.Add("Help");               // show a help pane
-            rL.Add("Configuration");      // configuration mode
-            rL.Add("PositionScreenOpen"); // where to position a screen when opening a file
-            rL.Add("PositionScreenNew");  // where to position a new screen
-            rL.Add("PositionScreenCopy"); // where to position a copied FileBuffer/BufferView
-            rL.Add("FindText");           // Enter some text to find
-            rL.Add("ManageProject");      // View and edit the files in our project
-            rL.Add("SplashScreen");       // What we see when we're arriving in the application
-            rL.Add("DiffPicker");         // Mode for picking two files for differences checking
-            rL.Add("WindowsRearranging"); // When windows are flying between positions themselves
-            rL.Add("GotoLine");           // Go to a line
-            rL.Add("DemoExpired");         // Demo period has expired
-
-            return rL;
-        }
-
-        public List<string> getTargets()
-        {
-            List<string> rL = new List<string>();
-
-            rL.Add("CurrentBufferView");
-            rL.Add("CreateNewBufferView");
-            rL.Add("CompileStandard");
-            rL.Add("CompileAlternate");
-            rL.Add("OpenFile");
-            rL.Add("CloseBufferView");
-            rL.Add("LockMove");         // Move eye and target in a new direction
-
-            return rL;
-        }
-
         /// <summary>
         /// Initialise some stuff in the constructor
         /// </summary>
@@ -781,6 +735,26 @@ namespace Xyglo.Brazil.Xna
         {
             return m_project.getFileBuffers().IndexOf(m_project.getSelectedBufferView().getFileBuffer());
         }
+
+        /// <summary>
+        /// Get the current application State
+        /// </summary>
+        /// <returns></returns>
+        public State getState()
+        {
+            return m_state;
+        }
+
+        /// <summary>
+        /// Set the State - we usually only do this once per instantiation and then let the world
+        /// just live.
+        /// </summary>
+        /// <param name="state"></param>
+        public void setState(State state)
+        {
+            m_state = state;
+        }
+
 
         /// <summary>
         /// Enable windowed mode
@@ -5821,6 +5795,11 @@ namespace Xyglo.Brazil.Xna
             //
             foreach (Component component in m_componentList)
             {
+                // Check that this component should be showing for this State
+                //
+                if (!component.getStates().Contains(m_state))
+                    continue;
+
                 // Has this component already been added to the drawableComponent dictionary?
                 //
                 if (!m_drawableComponent.ContainsKey(component))
@@ -5870,6 +5849,14 @@ namespace Xyglo.Brazil.Xna
                         m_drawableComponent[component] = group;
 #endif
                     }
+                    else if (component.GetType() == typeof(Xyglo.Brazil.BannerText))
+                    {
+                        BannerText bt = (Xyglo.Brazil.BannerText)component;
+
+                        XygloBannerText bannerText = new XygloBannerText(XygloConvert.getColour(bt.getColour()), bt.getPosition(), bt.getSize(), bt.getText());
+                        bannerText.draw(m_graphics.GraphicsDevice);
+                    }
+
                 }
                 else
                 {

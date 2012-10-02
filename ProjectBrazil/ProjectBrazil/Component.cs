@@ -50,8 +50,6 @@ namespace Xyglo.Brazil
             return m_stateList;
         }
 
-        //public abstract void update();
-
         /// <summary>
         /// List of sub-components
         /// </summary>

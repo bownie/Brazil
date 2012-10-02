@@ -90,7 +90,7 @@ namespace Xyglo.Brazil.Xna
         /// <summary>
         /// Store locally our effect
         /// </summary>
-        protected BasicEffect m_effect;
+        //protected BasicEffect m_effect;
 
         /// <summary>
         /// Store locally our colour
@@ -105,21 +105,21 @@ namespace Xyglo.Brazil.Xna
         /// <summary>
         /// The index buffer
         /// </summary>
-        protected IndexBuffer m_indexBuffer;
+        //protected IndexBuffer m_indexBuffer;
 
         /// <summary>
         /// The vertex buffer
         /// </summary>
-        protected VertexBuffer m_vertexBuffer;
+        //protected VertexBuffer m_vertexBuffer;
 
         /// <summary>
         /// All the vertices of the block
         /// </summary>
-        protected VertexPositionColorTexture[] m_vertices = null;
+        //protected VertexPositionColorTexture[] m_vertices = null;
 
         /// <summary>
         /// Indexes of all the vertices
         /// </summary>
-        protected short[] m_indices = null;
+        //protected short[] m_indices = null;
     }
 }

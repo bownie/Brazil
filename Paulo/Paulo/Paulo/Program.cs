@@ -31,6 +31,7 @@ namespace Paulo
             if (app != null)
             {
                 app.initialise();
+                app.setInitialState(State.Test("PlayingGame"));
                 app.run();
             }
         }

@@ -14,7 +14,7 @@ namespace Xyglo.Brazil.Xna
     /// http://thver.blogspot.nl/2012/07/how-to-create-sphere-programmatically.html
     /// 
     /// </summary>
-    public class XygloSphere : XygloXnaDrawable
+    public class XygloSphere : XygloXnaDrawableShape
     {
         //VertexPositionColor[] vertices; //later, I will provide another example with VertexPositionNormalTexture
         //VertexBuffer vbuffer;

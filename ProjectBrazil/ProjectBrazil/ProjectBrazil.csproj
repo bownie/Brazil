@@ -79,6 +79,7 @@
     <Compile Include="BrazilMatrix3.cs" />
     <Compile Include="BrazilBoundingBox.cs" />
     <Compile Include="ConfirmState.cs" />
+    <Compile Include="BannerText.cs" />
     <Compile Include="Target.cs" />
     <Compile Include="Core.cs" />
     <Compile Include="DrawableComponent.cs" />
@@ -93,6 +94,8 @@
     <Compile Include="Xyglo.Brazil.Xna\Command.cs" />
     <Compile Include="Component.cs" />
     <Compile Include="Xyglo.Brazil.Xna\Component.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\XygloXnaDrawableShape.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\XygloBannerText.cs" />
     <Compile Include="Xyglo.Brazil.Xna\CppSyntaxManager.cs" />
     <Compile Include="Xyglo.Brazil.Xna\DeleteTextCommand.cs" />
     <Compile Include="Xyglo.Brazil.Xna\Differ.cs" />
