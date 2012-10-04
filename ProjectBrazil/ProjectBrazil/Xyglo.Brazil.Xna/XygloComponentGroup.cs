@@ -85,6 +85,31 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Trickle
+        /// </summary>
+        /// <param name="x"></param>
+        public override void moveLeft(float x)
+        {
+            foreach (XygloXnaDrawable component in m_componentList)
+            {
+                component.moveLeft(x);
+            }
+        }
+
+        /// <summary>
+        /// Trickle
+        /// </summary>
+        /// <param name="x"></param>
+        public override void moveRight(float x)
+        {
+            foreach (XygloXnaDrawable component in m_componentList)
+            {
+                component.moveRight(x);
+            }
+        }
+
+
+        /// <summary>
         /// Set the Velocity
         /// </summary>
         /// <param name="velocity"></param>

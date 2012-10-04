@@ -32,13 +32,7 @@ namespace Paulo
 
             // Connect some keys
             //
-            //connectEditorKeys(State.Test("TextEditing"));
-
-            // Connect up a specific transition
-            //
-            connectKey(State.Test("Menu"), Keys.D2, Target.getTarget("StartPlaying"));
-
-            connectKey(State.Test("Menu"), Keys.Escape, Target.getTarget("Exit"));
+            setupConnections();
 
             // Set up some test blocks
             //
@@ -50,8 +44,19 @@ namespace Paulo
             //paulo.setVelocity(new BrazilVector3(0.1f, 0, 0));
             addComponent(State.Test("PlayingGame"), paulo);
 
-            BannerText menuScreen = new BannerText(BrazilColour.Blue, BrazilVector3.Zero, 10.0, "Paulo");
+            // Banner screen
+            //
+            BannerText menuScreen = new BannerText(BrazilColour.Blue, new BrazilVector3(360.0f, 240.0f, 0), 4.0, "Paulo");
             addComponent(State.Test("Menu"), menuScreen);
+
+            BannerText byLine = new BannerText(BrazilColour.Yellow, new BrazilVector3(340.0f, 345.0f, 0), 1.0, "By Richard Bown (@xyglo)");
+            addComponent(State.Test("Menu"), byLine);
+
+            BannerText toPlay = new BannerText(BrazilColour.White, new BrazilVector3(380.0f, 500.0f, 0), 1.0, "Hit '1' to Play");
+            addComponent(State.Test("Menu"), toPlay);
+
+            //BannerText toPlay = new BannerText(BrazilColour.White, new BrazilVector3(350.0f, 500.0f, 0), 1.0, "1 - Play the Game");
+            //addComponent(State.Test("Menu"), toPlay);
         }
 
 
@@ -72,7 +77,7 @@ namespace Paulo
             // Targets are actions we can perform in the application - a default target will usually mean the object
             // in focus within the current State.  This should be defined by the component.
             //
-            string[] targets = { "StartPlaying", "Exit", "MoveLeft", "MoveRight", "Jump", "MoveForward", "MoveBack" };
+            string[] targets = { "StartPlaying", "QuitToMenu", "Exit", "MoveLeft", "MoveRight", "Jump", "MoveForward", "MoveBack" };
             foreach (string target in targets)
             {
                 addTarget(target);
@@ -87,6 +92,29 @@ namespace Paulo
                 addConfirmState(confirmState);
             }
         }
+
+        /// <summary>
+        /// Set up the key and mouse connections
+        /// </summary>
+        protected void setupConnections()
+        {
+            // Connect up a transition - this key connection starts the game for us
+            //
+            connectKey(State.Test("Menu"), Keys.D1, Target.getTarget("StartPlaying"));
+
+            // Connect up the escape key to exit the game or into the menu
+            //
+            connectKey(State.Test("Menu"), Keys.Escape, Target.getTarget("Exit"));
+            connectKey(State.Test("PlayingGame"), Keys.Escape, Target.getTarget("QuitToMenu"));
+
+            // Connect up the Interloper
+            //
+            connectKey(State.Test("PlayingGame"), Keys.Left, Target.getTarget("MoveLeft"));
+            connectKey(State.Test("PlayingGame"), Keys.Right, Target.getTarget("MoveRight"));
+            connectKey(State.Test("PlayingGame"), Keys.Up, Target.getTarget("MoveForward"));
+            connectKey(State.Test("PlayingGame"), Keys.Down, Target.getTarget("MoveBack"));
+        }
+
 
         /// <summary>
         /// Set up some test blocks

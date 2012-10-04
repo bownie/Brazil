@@ -83,6 +83,24 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Make this a virtual method
+        /// </summary>
+        /// <param name="x"></param>
+        public virtual void moveLeft(float x)
+        {
+            m_position.X -= x;
+        }
+
+        /// <summary>
+        /// Make this a virtual method 
+        /// </summary>
+        /// <param name="x"></param>
+        public virtual void moveRight(float x)
+        {
+            m_position.X += x;
+        }
+
+        /// <summary>
         /// Position of this block
         /// </summary>
         public Vector3 m_position;

@@ -67,7 +67,7 @@ namespace Xyglo.Brazil.Xna
                     return Color.White;
 
                 case BrazilColour.Yellow:
-                    return Color.White;
+                    return Color.Yellow;
 
                 default:
                     return Color.White;

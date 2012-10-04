@@ -110,6 +110,11 @@ namespace Xyglo.Brazil.Xna
         protected Differ m_differ = null;
 
         /// <summary>
+        /// Interloper object - our game 
+        /// </summary>
+        Interloper m_interloper = null;
+
+        /// <summary>
         /// Position we are in the diff
         /// </summary>
         protected int m_diffPosition = 0;
@@ -118,6 +123,11 @@ namespace Xyglo.Brazil.Xna
         /// Current project
         /// </summary>
         static protected Project m_project;
+
+        /// <summary>
+        /// We need a FontManager at this level now (not project)
+        /// </summary>
+        protected FontManager m_fontManager = new FontManager();
 
         /// <summary>
         /// Last keyboard state so that we can compare with current
@@ -1255,6 +1265,13 @@ namespace Xyglo.Brazil.Xna
             {
                 loadFriendlierContent();
             }
+            else
+            {
+                // For everything else we need to initialise the FontManager properly - so
+                // we borrow from initialiseProject
+                //
+                m_fontManager.initialise(Content, "Bitstream Vera Sans Mono", GraphicsDevice.Viewport.AspectRatio, "Nuclex");
+            }
 
             // We have to initialise this as follows to work around CA2000 warning
             //
@@ -1354,7 +1371,10 @@ namespace Xyglo.Brazil.Xna
 
             // Initialise the project - do this only once and after the font maan
             //
-            if (m_project != null) initialiseProject();
+            if (m_project != null)
+            {
+                initialiseProject();
+            }
 
             // Set up the SpriteFont for the chosen resolution
             //
@@ -3845,7 +3865,10 @@ namespace Xyglo.Brazil.Xna
 
                 // Process action keys
                 //
-                processActionKeys(gameTime, keyActionList);
+                if (m_project != null)
+                {
+                    processActionKeys(gameTime, keyActionList);
+                }
 
                 // Get a target for this (potential) combination of keys
                 //
@@ -3912,6 +3935,29 @@ namespace Xyglo.Brazil.Xna
                         //
                         processKeys(gameTime, keyActionList);
                         processMetaCommands(gameTime, keyActionList);
+                        break;
+
+                        // If we hit this target then transition to PlayingGame
+                    case "StartPlaying":
+                        m_state = State.Test("PlayingGame");
+                        break;
+
+                    case "QuitToMenu":
+                        m_state = State.Test("Menu");
+                        break;
+
+                    case "MoveLeft":
+                        m_drawableComponent[m_interloper].moveLeft(1.0f);
+                        //m_interloper.moveLeft(1.0f);
+                        break;
+
+                    case "MoveRight":
+                        m_drawableComponent[m_interloper].moveRight(1.0f);
+                        //m_interloper.moveRight(1.0f);
+                        break;
+
+                    case "MoveForward":
+                    case "MoveBack":
                         break;
 
                     default:
@@ -4056,6 +4102,13 @@ namespace Xyglo.Brazil.Xna
                         }
 
                         m_drawableComponent[component].buildBuffers(m_graphics.GraphicsDevice);
+
+                        // Store our interloper object
+                        //
+                        if (m_interloper == null)
+                        {
+                            m_interloper = il;
+                        }
                     }
                 }
             }
@@ -5878,7 +5931,7 @@ namespace Xyglo.Brazil.Xna
                     {
                         BannerText bt = (Xyglo.Brazil.BannerText)component;
 
-                        XygloBannerText bannerText = new XygloBannerText(XygloConvert.getColour(bt.getColour()), bt.getPosition(), bt.getSize(), bt.getText());
+                        XygloBannerText bannerText = new XygloBannerText(m_overlaySpriteBatch, m_fontManager.getOverlayFont(), XygloConvert.getColour(bt.getColour()), bt.getPosition(), bt.getSize(), bt.getText());
                         bannerText.draw(m_graphics.GraphicsDevice);
                     }
 

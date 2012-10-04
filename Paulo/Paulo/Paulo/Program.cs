@@ -20,6 +20,9 @@ namespace Paulo
                 // We can create a Friendlier
                 //
                 app = new Friendlier();
+
+                // And initiliase with default state of TextEditing
+                //
                 app.initialise(State.Test("TextEditing"));
             }
             else
@@ -27,9 +30,14 @@ namespace Paulo
                 // Or we create a Paulo
                 //
                 app = new Paulo();
+
+                // Initialise with default state
+                //
                 app.initialise(State.Test("Menu"));
             }
 
+            // If we have something then run it
+            //
             if (app != null)
             {
                 app.run();
