@@ -8,7 +8,7 @@ namespace Xyglo.Brazil
     /// <summary>
     /// The State of a BrazilApp application
     /// </summary>
-    public class State : IComparable
+    public class State : IComparable //, IComparer<State>
     {
         public State()
         {

@@ -2053,6 +2053,8 @@ namespace Xyglo.Brazil.Xna
 
                 switch (m_state.m_name)
                 {
+                        // These are FRIENDLIER states
+                        //
                     case "TextEditing":
                         checkExit(gameTime);
                         break;
@@ -2142,9 +2144,19 @@ namespace Xyglo.Brazil.Xna
                     case "PositionScreenNew":
                     case "PositionScreenCopy":
                     case "SplashScreen":
-                    default:
                         m_state = State.Test("TextEditing");
                         m_editConfigurationItem = false;
+                        break;
+
+                        /// These are PAULO states
+                        /// 
+                    case "Menu":
+                        checkExit(gameTime);
+                        break;
+
+                    default:
+                        // Ummmm??
+                        //
                         break;
                 }
 
@@ -3842,6 +3854,9 @@ namespace Xyglo.Brazil.Xna
                 // Now fire off the keys according to the Target
                 switch (target.m_name)
                 {
+                        // --- FRIENDLIER cases ---
+                        //
+
                     //case Target.None:
                     case "None":
                         // do nothing;
@@ -3888,6 +3903,16 @@ namespace Xyglo.Brazil.Xna
 
                     //case Target.CursorRight:
                         //break;
+
+
+                        // --- PAULO cases ---
+                        //
+                    case "Exit":
+                        // The default target will process meta key commands
+                        //
+                        processKeys(gameTime, keyActionList);
+                        processMetaCommands(gameTime, keyActionList);
+                        break;
 
                     default:
                         // do nothing

@@ -11,18 +11,24 @@ namespace Paulo
     /// </summary>
     public class Paulo : BrazilApp
     {
+        /// <summary>
+        /// Default constructor
+        /// </summary>
         public Paulo():base()
         {
+            // Initialise the states
+            //
+            initialiseStates();
         }
 
         /// <summary>
         /// Allows the game to perform any initialisation of objects and positions before starting.
         /// </summary>
-        public override void initialise()
+        public override void initialise(State state)
         {
-            // Initialise the states
+            // Now set the initial state
             //
-            initialiseStates();
+            setInitialState(state);
 
             // Connect some keys
             //
@@ -31,6 +37,8 @@ namespace Paulo
             // Connect up a specific transition
             //
             connectKey(State.Test("Menu"), Keys.D2, Target.getTarget("StartPlaying"));
+
+            connectKey(State.Test("Menu"), Keys.Escape, Target.getTarget("Exit"));
 
             // Set up some test blocks
             //

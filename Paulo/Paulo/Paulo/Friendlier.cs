@@ -15,13 +15,22 @@ namespace Paulo
     {
         public Friendlier() 
         {
+            initialiseStates();
         }
 
-        public override void initialise()
+        /// <summary>
+        /// Initialise the state list
+        /// </summary>
+        protected void initialiseStates()
+        {
+        }
+
+        public override void initialise(State state)
         {
             // Create a FontManager
             //
             FontManager fontManager = new FontManager();
+
 
             Project project;
             string projectFile = Project.getUserDataPath() + "default_project.xml";

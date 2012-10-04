@@ -89,13 +89,13 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
-        /// Filter the dictionary by state
+        /// Filter the dictionary by state - match state on name
         /// </summary>
         /// <param name="state"></param>
         /// <returns></returns>
         public Dictionary<StateAction, Target> getActionsForState(State state)
         {
-            return m_actionDictionary.Where(item => item.Key.getState() == state).ToDictionary(p => p.Key, p => p.Value);
+            return m_actionDictionary.Where(item => item.Key.getState().m_name == state.m_name).ToDictionary(p => p.Key, p => p.Value);
         }
 
         /// <summary>

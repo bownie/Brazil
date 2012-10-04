@@ -35,7 +35,7 @@ namespace Xyglo.Brazil
         /// <summary>
         /// Initialise abstract
         /// </summary>
-        public abstract void initialise();
+        public abstract void initialise(State state);
 
         /// <summary>
         /// Connect a Key to a Target in a State
