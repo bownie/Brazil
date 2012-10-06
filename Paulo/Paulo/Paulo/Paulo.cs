@@ -14,8 +14,10 @@ namespace Paulo
         /// <summary>
         /// Default constructor
         /// </summary>
-        public Paulo():base()
+        public Paulo(BrazilVector3 gravity):base()
         {
+            m_world.setGravity(gravity);
+
             // Initialise the states
             //
             initialiseStates();
@@ -34,13 +36,13 @@ namespace Paulo
             //
             setupConnections();
 
-            // Set up some test blocks
+            // Generate our components for our levels and other things blocks
             //
-            testBlocks();
+            generateComponents();
 
             // Set up an interloper
             //
-            Interloper paulo = new Interloper(BrazilColour.White, new BrazilVector3(0, 0, 0), new BrazilVector3(10, 10, 10));
+            BrazilInterloper paulo = new BrazilInterloper(BrazilColour.White, new BrazilVector3(0, 0, 0), new BrazilVector3(10, 10, 10));
             //paulo.setVelocity(new BrazilVector3(0.1f, 0, 0));
             addComponent(State.Test("PlayingGame"), paulo);
 
@@ -113,15 +115,20 @@ namespace Paulo
             connectKey(State.Test("PlayingGame"), Keys.Right, Target.getTarget("MoveRight"));
             connectKey(State.Test("PlayingGame"), Keys.Up, Target.getTarget("MoveForward"));
             connectKey(State.Test("PlayingGame"), Keys.Down, Target.getTarget("MoveBack"));
+
+            connectKey(State.Test("PlayingGame"), Keys.Left, KeyButtonState.Held, Target.getTarget("MoveLeft"));
+            connectKey(State.Test("PlayingGame"), Keys.Right, KeyButtonState.Held, Target.getTarget("MoveRight"));
+
+            connectKey(State.Test("PlayingGame"), Keys.Space, Target.getTarget("Jump"));
         }
 
 
         /// <summary>
         /// Set up some test blocks
         /// </summary>
-        protected void testBlocks()
+        protected void generateComponents()
         {
-            FlyingBlock block1 = new FlyingBlock(BrazilColour.Blue, new BrazilVector3(-10, -100, 0), new BrazilVector3(100.0f, 100.0f, 10.0f));
+            FlyingBlock block1 = new FlyingBlock(BrazilColour.Blue, new BrazilVector3(-10, -100, 0), new BrazilVector3(200.0f, 100.0f, 10.0f));
             //block1.setVelocity(new BrazilVector3(-1, 0, 0));
 
             // Push onto component list
@@ -134,7 +141,7 @@ namespace Paulo
             //m_componentList.Add(block2);
             addComponent(State.Test("PlayingGame"), block2);
 
-            FlyingBlock block3 = new FlyingBlock(BrazilColour.Orange, new BrazilVector3(-30, 50, 200), new BrazilVector3(20, 5, 10));
+            FlyingBlock block3 = new FlyingBlock(BrazilColour.Orange, new BrazilVector3(-30, 50, 200), new BrazilVector3(200, 5, 10));
             block3.setRotation(0.01);
             //m_componentList.Add(block3);
             addComponent(State.Test("PlayingGame"), block3);
@@ -144,6 +151,11 @@ namespace Paulo
             //block4.setVelocity(new BrazilVector3(-0.5f, -1f, -0.4f));
             //m_componentList.Add(block4);
             addComponent(State.Test("PlayingGame"), block4);
+
+            // Setup the HUD
+            //
+            BrazilHud hud = new BrazilHud(BrazilColour.White, BrazilVector3.Zero, 1.0, "HUD");
+            addComponent(State.Test("PlayingGame"), hud);
         }
 
     }

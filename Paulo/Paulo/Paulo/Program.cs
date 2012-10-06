@@ -29,7 +29,7 @@ namespace Paulo
             {
                 // Or we create a Paulo
                 //
-                app = new Paulo();
+                app = new Paulo(new BrazilVector3(0, 0.1f, 0));
 
                 // Initialise with default state
                 //

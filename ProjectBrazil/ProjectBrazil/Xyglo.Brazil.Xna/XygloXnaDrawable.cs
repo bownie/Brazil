@@ -101,6 +101,13 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// What we do to jump - add some impetus in the non gravitational direction
+        /// </summary>
+        public virtual void jump()
+        {
+        }
+
+        /// <summary>
         /// Position of this block
         /// </summary>
         public Vector3 m_position;

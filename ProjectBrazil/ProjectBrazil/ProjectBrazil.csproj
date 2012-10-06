@@ -81,11 +81,12 @@
     <Compile Include="BrazilBoundingBox.cs" />
     <Compile Include="ConfirmState.cs" />
     <Compile Include="BannerText.cs" />
+    <Compile Include="BrazilHud.cs" />
     <Compile Include="Target.cs" />
     <Compile Include="Core.cs" />
     <Compile Include="DrawableComponent.cs" />
     <Compile Include="FlyingBlock.cs" />
-    <Compile Include="Interloper.cs" />
+    <Compile Include="BrazilInterloper.cs" />
     <Compile Include="State.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BloomComponent.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BloomSettings.cs" />

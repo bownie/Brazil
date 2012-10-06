@@ -76,6 +76,18 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
+        /// State constructor
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="state"></param>
+        public KeyAction(Keys key, KeyButtonState state)
+        {
+            m_key = key;
+            m_state = state;
+            m_name = "Key Action";
+        }
+
+        /// <summary>
         /// Copy constructor
         /// </summary>
         /// <param name="kA"></param>

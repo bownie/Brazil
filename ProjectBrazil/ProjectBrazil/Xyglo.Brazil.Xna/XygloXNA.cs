@@ -8,6 +8,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 using System.Threading;
 using Microsoft.Xna.Framework;
@@ -112,7 +113,7 @@ namespace Xyglo.Brazil.Xna
         /// <summary>
         /// Interloper object - our game 
         /// </summary>
-        Interloper m_interloper = null;
+        BrazilInterloper m_interloper = null;
 
         /// <summary>
         /// Position we are in the diff
@@ -612,6 +613,22 @@ namespace Xyglo.Brazil.Xna
         /// Part of our botched keyboard managament routines
         /// </summary>
         protected Keys m_currentKeyDown;
+
+
+        /// <summary>
+        /// Frame rate
+        /// </summary>
+        int m_frameRate = 0;
+
+        /// <summary>
+        /// Frame counter
+        /// </summary>
+        int m_frameCounter = 0;
+
+        /// <summary>
+        /// Elapse time to help calculate frame rate
+        /// </summary>
+        TimeSpan m_elapsedTime = TimeSpan.Zero;
 
 
         /////////////////////////////// CONSTRUCTORS ////////////////////////////
@@ -3839,6 +3856,15 @@ namespace Xyglo.Brazil.Xna
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         protected override void Update(GameTime gameTime)
         {
+            m_elapsedTime += gameTime.ElapsedGameTime;
+
+            if (m_elapsedTime > TimeSpan.FromSeconds(1))
+            {
+                m_elapsedTime -= TimeSpan.FromSeconds(1);
+                m_frameRate = m_frameCounter;
+                m_frameCounter = 0;
+            }
+
             // Update the frustrum matrix
             //
             if (m_frustrum != null)
@@ -3956,6 +3982,10 @@ namespace Xyglo.Brazil.Xna
                         //m_interloper.moveRight(1.0f);
                         break;
 
+                    case "Jump":
+                        m_drawableComponent[m_interloper].jump();
+                        break;
+
                     case "MoveForward":
                     case "MoveBack":
                         break;
@@ -4059,6 +4089,10 @@ namespace Xyglo.Brazil.Xna
                 m_processKeyboardAllowed = gameTime.TotalGameTime;
             }
 
+            // We can add gravity or other stuff to this component as required 
+            //
+            //BrazilVector3 acceleration = BrazilVector3.Zero;
+
             // Now we can update any components that need moving
             //
             foreach (Component component in m_componentList)
@@ -4075,6 +4109,13 @@ namespace Xyglo.Brazil.Xna
                         //
                         FlyingBlock fb = (Xyglo.Brazil.FlyingBlock)component;
 
+                        // Check and accelerate as needed
+                        //
+                        if (fb.isAffectedByGravity())
+                        {
+                            fb.accelerate(m_world.getGravity());
+                        }
+
                         // Move any update any buffers
                         //
                         m_drawableComponent[component].move(XygloConvert.getVector3(fb.getVelocity()));
@@ -4087,13 +4128,24 @@ namespace Xyglo.Brazil.Xna
 
                         m_drawableComponent[component].buildBuffers(m_graphics.GraphicsDevice);
                     }
-                    else if (component.GetType() == typeof(Xyglo.Brazil.Interloper))
+                    else if (component.GetType() == typeof(Xyglo.Brazil.BrazilInterloper))
                     {
-                        Interloper il = (Xyglo.Brazil.Interloper)component;
+                        BrazilInterloper il = (Xyglo.Brazil.BrazilInterloper)component;
+
+                        // Accelerate this object if there is gravity
+                        //
+                        if (il.isAffectedByGravity())
+                        {
+                            il.accelerate(m_world.getGravity());
+                        }
 
                         // Move any update any buffers
                         //
                         m_drawableComponent[component].move(XygloConvert.getVector3(il.getVelocity()));
+
+                        // Check for collisions and adjust the position and velocity accordingly before drawing this
+                        //
+                        checkCollisions();
 
                         // Apply any rotation if we have one
                         if (il.getRotation() != 0)
@@ -4115,6 +4167,29 @@ namespace Xyglo.Brazil.Xna
 
             base.Update(gameTime);
         }
+
+        /// <summary>
+        /// Check for collisions in m_drawableComponents that have some form (hardness != 0)
+        /// </summary>
+        protected void checkCollisions()
+        {
+            // We'll have to iterate the realDict twice
+            //
+            Dictionary<Component, XygloXnaDrawable> realDict = m_drawableComponent.Where(item => item.Key.isCorporeal()).ToDictionary(p => p.Key, p => p.Value);
+
+            foreach (Component realComp in realDict.Keys)
+            {
+                foreach (Component testComp in realDict.Keys)
+                {
+                    if (testComp == realComp)
+                        continue;
+
+
+                }
+                
+            }
+        }
+
 
         /// <summary>
         /// Process any keys that need to be printed
@@ -5745,6 +5820,10 @@ namespace Xyglo.Brazil.Xna
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
+            // Increment the frame counter
+            //
+            m_frameCounter++;
+
             if (m_project != null)
             {
                 drawFriendlier(gameTime);
@@ -5903,9 +5982,9 @@ namespace Xyglo.Brazil.Xna
                         //
                         m_drawableComponent[component] = drawBlock;
                         
-                    } else if (component.GetType() == typeof(Xyglo.Brazil.Interloper))
+                    } else if (component.GetType() == typeof(Xyglo.Brazil.BrazilInterloper))
                     {
-                        Interloper il = (Xyglo.Brazil.Interloper)component;
+                        BrazilInterloper il = (Xyglo.Brazil.BrazilInterloper)component;
 #if ATTEMPT_ONE
                         XygloSphere drawSphere = new XygloSphere(XygloConvert.getColour(il.getColour()), m_lineEffect, il.getPosition(), 10.0f);
                         drawSphere.setRotation(il.getRotation());
@@ -5932,6 +6011,14 @@ namespace Xyglo.Brazil.Xna
                         BannerText bt = (Xyglo.Brazil.BannerText)component;
 
                         XygloBannerText bannerText = new XygloBannerText(m_overlaySpriteBatch, m_fontManager.getOverlayFont(), XygloConvert.getColour(bt.getColour()), bt.getPosition(), bt.getSize(), bt.getText());
+                        bannerText.draw(m_graphics.GraphicsDevice);
+                    }
+                    else if (component.GetType() == typeof(Xyglo.Brazil.BrazilHud))
+                    {
+                        BrazilHud bh = (Xyglo.Brazil.BrazilHud)component;
+
+                        string fpsText = "FPS = " + m_frameRate;
+                        XygloBannerText bannerText = new XygloBannerText(m_overlaySpriteBatch, m_fontManager.getOverlayFont(), XygloConvert.getColour(bh.getColour()), bh.getPosition(), bh.getSize(), fpsText);
                         bannerText.draw(m_graphics.GraphicsDevice);
                     }
 

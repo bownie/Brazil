@@ -54,6 +54,26 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
+        /// Accelerate this object by a Vector if it is affected by gravity and has a velocity
+        /// </summary>
+        /// <param name="acceleration"></param>
+        public void accelerate(BrazilVector3 acceleration)
+        {
+            // Check for null velocity - a lot of objects won't need this at all so
+            // a valid check.
+            //
+            if (m_velocity == null)
+            {
+                m_velocity = BrazilVector3.Zero;
+            }
+
+            m_velocity.X += acceleration.X;
+            m_velocity.Y += acceleration.Y;
+            m_velocity.Z += acceleration.Z;
+        }
+
+
+        /// <summary>
         /// Get the Colour
         /// </summary>
         /// <returns></returns>

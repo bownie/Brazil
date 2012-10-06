@@ -51,6 +51,57 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
+        /// Is this class affected by gravity?
+        /// </summary>
+        /// <returns></returns>
+        public bool isAffectedByGravity()
+        {
+            return m_gravityAffected;
+        }
+
+        /// <summary>
+        /// Return the mass of this object
+        /// </summary>
+        /// <returns></returns>
+        public double getMass()
+        {
+            return m_mass;
+        }
+
+        /// <summary>
+        /// Get the hardness of this object
+        /// </summary>
+        /// <returns></returns>
+        public double getHardness()
+        {
+            return m_hardness;
+        }
+
+        /// <summary>
+        /// Has substance if it has some hardness
+        /// </summary>
+        /// <returns></returns>
+        public bool isCorporeal()
+        {
+            return (m_hardness > 0);
+        }
+
+        /// <summary>
+        /// Affected by gravity?
+        /// </summary>
+        protected bool m_gravityAffected = false;
+
+        /// <summary>
+        /// Mass of this object
+        /// </summary>
+        protected double m_mass = 0;
+
+        /// <summary>
+        /// Hardness of this object
+        /// </summary>
+        protected double m_hardness = 0;
+
+        /// <summary>
         /// List of sub-components
         /// </summary>
         List<Component> m_components = new List<Component>();

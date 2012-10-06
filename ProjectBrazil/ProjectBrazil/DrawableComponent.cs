@@ -10,7 +10,7 @@ namespace Xyglo.Brazil
     /// </summary>
     public abstract class DrawableComponent : Component
     {
-        //public abstract void draw();
+        // At the moment this abstract class doesn't add any value
     }
 }
 

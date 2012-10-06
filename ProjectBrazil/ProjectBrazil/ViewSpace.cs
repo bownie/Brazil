@@ -21,68 +21,6 @@ namespace Xyglo.Brazil
         Gesture
     };
 
-    /*
-    /// <summary>
-    /// Targets are things that the World implements and can be connected to actions
-    /// from InputFeatures.  These will be superceded.
-    /// </summary>
-    public enum Target
-    {
-        None,       // set if there is nothing to return for an action
-        Default,
-        CurrentBufferView,
-        CreateNewBufferView,
-        CompileStandard,
-        CompileAlternate,
-        OpenFile,
-        SaveFile,
-        CloseBufferView,
-        LockMove,
-        CursorDown,
-        CursorUp,
-        CursorLeft,
-        CursorRight,
-        Select
-    };
-
-    /// <summary>
-    /// State is where the World can find itself either as the direct Action of an 
-    /// Input or through some other aspect of interaction with the system or outside
-    /// influence.  These will be superceded.
-    /// </summary>
-    public enum State
-    {
-        TextEditing,        // default mode
-        FileOpen,           // opening a file
-        FileSaveAs,         // saving a file as
-        Information,        // show an information pane
-        Help,               // show a help pane
-        Configuration,      // configuration mode
-        PositionScreenOpen, // where to position a screen when opening a file
-        PositionScreenNew,  // where to position a new screen
-        PositionScreenCopy, // where to position a copied FileBuffer/BufferView
-        FindText,           // Enter some text to find
-        ManageProject,      // View and edit the files in our project
-        SplashScreen,       // What we see when we're arriving in the application
-        DiffPicker,         // Mode for picking two files for differences checking
-        WindowsRearranging, // When windows are flying between positions themselves
-        GotoLine,           // Go to a line
-        DemoExpired         // Demo period has expired
-    };
-
-    /// <summary>
-    /// Confirmation state  - These will be superceded.
-    /// </summary>
-    public enum ConfirmState
-    {
-        None,
-        FileSave,
-        FileSaveCancel,
-        CancelBuild,
-        ConfirmQuit
-    }
-     * */
-
     /// <summary>
     /// We will use these to define the default states for a ViewSpace. ?????  Probably won't be usedd.
     /// </summary>

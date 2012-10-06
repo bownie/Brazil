@@ -56,6 +56,25 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
+        /// Connect a Key to a Target - ensure we specify a Button State for that key too
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="key"></param>
+        /// <param name="buttonState"></param>
+        /// <param name="target"></param>
+        public void connectKey(State state, Keys key, KeyButtonState buttonState, Target target = null)
+        {
+            if (target == null) target = Target.Default;
+
+            // Check for valid State and Target
+            //
+            checkState(state);
+            checkTarget(target);
+
+            m_actionMap.setAction(state, new KeyAction(key, buttonState), target);
+        }
+
+        /// <summary>
         /// Connect up States, generic Action and Targets
         /// </summary>
         /// <param name="state"></param>
