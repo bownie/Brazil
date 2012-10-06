@@ -54,6 +54,26 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
+        /// Override the virtual bounding box - note that we draw things from the m_position at a size around that
+        /// point and not starting at that point - hence the BoundingBox has to match
+        /// </summary>
+        /// <returns></returns>
+        public override BrazilBoundingBox getBoundingBox()
+        {
+            BrazilVector3 tl = m_position;
+            tl.X -= m_dimensions.X / 2;
+            tl.Y -= m_dimensions.Y / 2;
+            tl.Z -= m_dimensions.Z / 2;
+
+            BrazilVector3 br = m_position;
+            br.X += m_dimensions.X / 2;
+            br.Y += m_dimensions.Y / 2;
+            br.Z += m_dimensions.Z / 2;
+
+            return new BrazilBoundingBox(tl, br);
+        }
+
+        /// <summary>
         /// The size of this goddamn FlyingBlock
         /// </summary>
         protected BrazilVector3 m_dimensions = new BrazilVector3();

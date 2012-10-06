@@ -4177,14 +4177,25 @@ namespace Xyglo.Brazil.Xna
             //
             Dictionary<Component, XygloXnaDrawable> realDict = m_drawableComponent.Where(item => item.Key.isCorporeal()).ToDictionary(p => p.Key, p => p.Value);
 
+            // Everything we're interating over has hardness - so they could potentially interact 
+            //
             foreach (Component realComp in realDict.Keys)
             {
                 foreach (Component testComp in realDict.Keys)
                 {
+                    // Ignore self
                     if (testComp == realComp)
                         continue;
 
+                    BoundingBox bb1 = XygloConvert.getBoundingBox(realComp.getBoundingBox());
+                    BoundingBox bb2 = XygloConvert.getBoundingBox(testComp.getBoundingBox());
 
+                    if (bb1.Intersects(bb2))
+                    {
+                        // Work out the vectors and the rebound angle
+                        //
+                        Logger.logMsg("Got a collision");
+                    }
                 }
                 
             }

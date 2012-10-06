@@ -141,8 +141,9 @@ namespace Paulo
             //m_componentList.Add(block2);
             addComponent(State.Test("PlayingGame"), block2);
 
-            FlyingBlock block3 = new FlyingBlock(BrazilColour.Orange, new BrazilVector3(-30, 50, 200), new BrazilVector3(200, 5, 10));
-            block3.setRotation(0.01);
+            FlyingBlock block3 = new FlyingBlock(BrazilColour.Orange, new BrazilVector3(0, 150, 0), new BrazilVector3(200, 50, 0));
+            //block3.setRotation(0.01);
+            block3.setHardness(10);
             //m_componentList.Add(block3);
             addComponent(State.Test("PlayingGame"), block3);
 

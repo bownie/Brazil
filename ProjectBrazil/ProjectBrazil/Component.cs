@@ -78,6 +78,25 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
+        /// Set the hardness
+        /// </summary>
+        /// <param name="hardness"></param>
+        public void setHardness(double hardness)
+        {
+            m_hardness = hardness;
+        }
+
+
+        /// <summary>
+        /// Get a BoundingBox for this Component - to be overridden
+        /// </summary>
+        /// <returns></returns>
+        public virtual BrazilBoundingBox getBoundingBox()
+        {
+            return null;
+        }
+
+        /// <summary>
         /// Has substance if it has some hardness
         /// </summary>
         /// <returns></returns>
