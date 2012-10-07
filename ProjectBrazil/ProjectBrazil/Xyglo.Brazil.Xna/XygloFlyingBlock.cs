@@ -230,6 +230,15 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Override the getBoundingBox call
+        /// </summary>
+        /// <returns></returns>
+        public override BoundingBox getBoundingBox()
+        {
+            return new BoundingBox(m_position - m_blockSize / 2, m_position + m_blockSize / 2);
+        }
+
+        /// <summary>
         /// Size of this block
         /// </summary>
         public Vector3 m_blockSize;

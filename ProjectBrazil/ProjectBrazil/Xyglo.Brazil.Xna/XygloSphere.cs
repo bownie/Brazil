@@ -51,6 +51,16 @@ namespace Xyglo.Brazil.Xna
         }
 
 
+        /// <summary>
+        /// Override the getBoundingBox call
+        /// </summary>
+        /// <returns></returns>
+        public override BoundingBox getBoundingBox()
+        {
+            Vector3 radius = new Vector3(m_radius, m_radius, m_radius);
+            return new BoundingBox(m_position - radius, m_position + radius);
+        }
+
         /*
         protected Vector3 m_blockSize = new Vector3(10, 10, 10);
         /// <summary>

@@ -46,6 +46,12 @@ namespace Xyglo.Brazil.Xna
             // Set position relative to this group and store the component
             newComponent.m_position = m_position + relativePosition;
             m_componentList.Add(newComponent);
+
+            // Store the position we've used for this relative add - it's assumed that
+            // this will be the relative centre from which all componets are measured
+            // when doing an absolute move of this componentgroup later on.
+            //
+            m_groupCentrePosition = m_position;
         }
 
         /// <summary>
@@ -73,6 +79,37 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Set the position of this group - keeping relative placements..
+        /// </summary>
+        /// <param name="position"></param>
+        public override void setPosition(Vector3 position)
+        {
+            Vector3 offset = m_groupCentrePosition - position;
+
+            foreach (XygloXnaDrawable component in m_componentList)
+            {
+                component.move(offset);
+            }
+            m_position = position;
+        }
+
+        /// <summary>
+        /// Change velocity of group
+        /// </summary>
+        /// <param name="movement"></param>
+        public override void setVelocity(Vector3 velocity)
+        {
+            foreach (XygloXnaDrawable component in m_componentList)
+            {
+                component.setVelocity(velocity);
+            }
+
+            // And set the velocity of this group
+            //
+            m_velocity = velocity;
+        }
+
+        /// <summary>
         /// Trickle down any movement into the components
         /// </summary>
         /// <param name="movement"></param>
@@ -82,6 +119,62 @@ namespace Xyglo.Brazil.Xna
             {
                 component.move(movement);
             }
+
+            // And move ourself
+            m_position += movement;
+            m_groupCentrePosition += movement;
+        }
+
+        /// <summary>
+        /// Override the getBoundingBox call
+        /// </summary>
+        /// <returns></returns>
+        public override BoundingBox getBoundingBox()
+        {
+            
+            if (m_componentList.Count == 0)
+                return new BoundingBox(Vector3.Zero, Vector3.Zero);
+
+            Vector3 min = m_componentList[0].getBoundingBox().Min, max = m_componentList[0].getBoundingBox().Max;
+
+            foreach (XygloXnaDrawable component in m_componentList)
+            {
+                if (component.getBoundingBox().Min.X < min.X ) min.X = component.getBoundingBox().Min.X;
+                if (component.getBoundingBox().Min.Y < min.Y) min.Y = component.getBoundingBox().Min.Y;
+                if (component.getBoundingBox().Min.Z < min.Z) min.Y = component.getBoundingBox().Min.Z;
+
+                if (component.getBoundingBox().Max.X > max.X) max.X = component.getBoundingBox().Max.X;
+                if (component.getBoundingBox().Max.Y > max.Y) max.Y = component.getBoundingBox().Max.Y;
+                if (component.getBoundingBox().Max.Z > max.Z) max.Z = component.getBoundingBox().Max.Z;
+                
+            //component.move(movement);
+            }
+
+            return new BoundingBox(min, max);
+        }
+
+        /// <summary>
+        /// Trickle down the moveDefault into sub components
+        /// </summary>
+        /// <param name="movement"></param>
+        public override void moveDefault()
+        {
+            foreach (XygloXnaDrawable component in m_componentList)
+            {
+                component.move(m_velocity);
+            }
+
+            m_position += m_velocity;
+            m_groupCentrePosition += m_velocity;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="accelerationVector"></param>
+        public override void accelerate(Vector3 accelerationVector)
+        {
+            m_velocity += accelerationVector;
         }
 
         /// <summary>
@@ -94,6 +187,9 @@ namespace Xyglo.Brazil.Xna
             {
                 component.moveLeft(x);
             }
+
+            m_position.X -= x;
+            m_groupCentrePosition.X -= x;
         }
 
         /// <summary>
@@ -106,26 +202,20 @@ namespace Xyglo.Brazil.Xna
             {
                 component.moveRight(x);
             }
-        }
 
-
-        /// <summary>
-        /// Set the Velocity
-        /// </summary>
-        /// <param name="velocity"></param>
-        public void setVelocity(Vector3 velocity)
-        {
-            m_velocity = velocity;
+            m_position.X += x;
+            m_groupCentrePosition.X += x;
         }
-            
-        /// <summary>
-        /// Velocity of this ComponentGroup
-        /// </summary>
-        protected Vector3 m_velocity;
 
         /// <summary>
         /// List of the XygloXnaDrawable components
         /// </summary>
         protected List<XygloXnaDrawable> m_componentList = new List<XygloXnaDrawable>();
+
+        /// <summary>
+        /// Where this group is centred - this is set to the m_postion the last time a
+        /// sub-component was added.
+        /// </summary>
+        protected Vector3 m_groupCentrePosition = Vector3.Zero;
     }
 }

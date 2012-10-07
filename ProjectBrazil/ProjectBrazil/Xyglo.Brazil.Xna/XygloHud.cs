@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Xna.Framework;
 
 namespace Xyglo.Brazil.Xna
 {
@@ -14,6 +15,13 @@ namespace Xyglo.Brazil.Xna
         {
         }
 
+        /// Override the getBoundingBox call
+        /// </summary>
+        /// <returns></returns>
+        public override BoundingBox getBoundingBox()
+        {
+            throw new NotImplementedException();
+        }
 
         public override void draw(Microsoft.Xna.Framework.Graphics.GraphicsDevice device)
         {

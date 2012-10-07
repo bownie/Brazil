@@ -65,6 +65,15 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Override the getBoundingBox call
+        /// </summary>
+        /// <returns></returns>
+        public override BoundingBox getBoundingBox()
+        {
+            return new BoundingBox();
+        }
+
+        /// <summary>
         /// Draw this FlyingBlock by setting and swriting the 
         /// </summary>
         /// <param name="device"></param>

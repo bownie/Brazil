@@ -3969,6 +3969,9 @@ namespace Xyglo.Brazil.Xna
                         break;
 
                     case "QuitToMenu":
+                        // Before we quit to menu we want to remove all of our drawing shapes
+                        //
+                        m_drawableComponent.Clear();
                         m_state = State.Test("Menu");
                         break;
 
@@ -4109,16 +4112,17 @@ namespace Xyglo.Brazil.Xna
                         //
                         FlyingBlock fb = (Xyglo.Brazil.FlyingBlock)component;
 
-                        // Check and accelerate as needed
+                        // Check and accelerate the drawable as needed
                         //
                         if (fb.isAffectedByGravity())
                         {
-                            fb.accelerate(m_world.getGravity());
+                            m_drawableComponent[component].accelerate(XygloConvert.getVector3(m_world.getGravity()));
                         }
 
                         // Move any update any buffers
                         //
-                        m_drawableComponent[component].move(XygloConvert.getVector3(fb.getVelocity()));
+                        //m_drawableComponent[component].move(XygloConvert.getVector3(fb.getVelocity()));
+                        m_drawableComponent[component].moveDefault();
 
                         // Apply any rotation if we have one
                         if (fb.getRotation() != 0)
@@ -4136,12 +4140,13 @@ namespace Xyglo.Brazil.Xna
                         //
                         if (il.isAffectedByGravity())
                         {
-                            il.accelerate(m_world.getGravity());
+                            m_drawableComponent[component].accelerate(XygloConvert.getVector3(m_world.getGravity()));
                         }
 
                         // Move any update any buffers
                         //
-                        m_drawableComponent[component].move(XygloConvert.getVector3(il.getVelocity()));
+                        //m_drawableComponent[component].move(XygloConvert.getVector3(il.getVelocity()));
+                        m_drawableComponent[component].moveDefault();
 
                         // Check for collisions and adjust the position and velocity accordingly before drawing this
                         //
@@ -4150,7 +4155,7 @@ namespace Xyglo.Brazil.Xna
                         // Apply any rotation if we have one
                         if (il.getRotation() != 0)
                         {
-                            m_drawableComponent[component].incrementRotation(il.getRotation());
+                            m_drawableComponent[component].incrementRotation(il.getRotation());  // this is initial rotation only
                         }
 
                         m_drawableComponent[component].buildBuffers(m_graphics.GraphicsDevice);
@@ -4169,6 +4174,95 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Given two components that have collided - play back the velocities of these components until
+        /// we discover the collision point
+        /// </summary>
+        /// <param name="comp1"></param>
+        /// <param name="comp2"></param>
+        protected Vector3 getCollisionPoint(XygloXnaDrawable comp1, XygloXnaDrawable comp2)
+        {
+            if (!comp1.getBoundingBox().Intersects(comp2.getBoundingBox()))
+            {
+                throw new Exception("getCollisionPoint - Testing for a collision that doesn't appear to have happened.");
+            }
+
+            BoundingBox b1 = comp1.getBoundingBox();
+            BoundingBox b2 = comp2.getBoundingBox();
+
+            Vector3 v1 = comp1.getVelocity();
+            Vector3 v2 = comp2.getVelocity();
+            /*
+            Ray ray = new Ray(comp1.getPosition(), comp2.getPosition());
+
+            // This defines the plane we're trying to penetrate with our ray
+            //
+            Plane intPlane = new Plane(0, 1, 0, comp2.getBoundingBox().Max.Y);
+
+            float? planeIntersection = ray.Intersects(intPlane);
+
+            if (planeIntersection != null)
+            {
+                Logger.logMsg("Got PLANE intersect");
+            }*/
+
+            // Normalise both vectors and we start playing the boundingbox backwards
+            //
+            if (v1 != Vector3.Zero)
+            {
+                v1.Normalize();
+            }
+
+            if (v2 != Vector3.Zero)
+            {
+                v2.Normalize();
+            }
+
+            // We are playing these unit vectors backwards against the intersecting positions until
+            // they separate.
+            //
+            while(b1.Intersects(b2))
+            {
+                b1.Min -= v1;
+                b1.Max -= v1;
+                b2.Min -= v2;
+                b2.Max -= v2;
+            }
+
+
+            // At this point we need to work out _where_ they are seperating from - try all the options
+            //
+            b1.Min += v1;
+
+            if (b1.Intersects(b2))
+            {
+                return b1.Min;
+            }
+            
+            b1.Max += v1;
+
+            if (b1.Intersects(b2))
+            {
+                return b1.Max;
+            }
+
+            b2.Min += v2;
+
+            if (b1.Intersects(b2))
+            {
+                return b2.Max;
+            }
+
+            b2.Max += v2;
+
+            if (b1.Intersects(b2))
+            {
+                return b2.Max;
+            }
+
+            throw new Exception("Failed to find the collision boundary");
+        }
+
+        /// <summary>
         /// Check for collisions in m_drawableComponents that have some form (hardness != 0)
         /// </summary>
         protected void checkCollisions()
@@ -4177,24 +4271,78 @@ namespace Xyglo.Brazil.Xna
             //
             Dictionary<Component, XygloXnaDrawable> realDict = m_drawableComponent.Where(item => item.Key.isCorporeal()).ToDictionary(p => p.Key, p => p.Value);
 
+            // Keep a list of all elements we've applied collisions to
+            //
+            List<XygloXnaDrawable> collisionList = new List<XygloXnaDrawable>();
+
             // Everything we're interating over has hardness - so they could potentially interact 
             //
-            foreach (Component realComp in realDict.Keys)
+            foreach (Component realKey in realDict.Keys)
             {
-                foreach (Component testComp in realDict.Keys)
+                foreach (Component testKey in realDict.Keys)
                 {
                     // Ignore self
-                    if (testComp == realComp)
+                    if (testKey == realKey)
                         continue;
 
-                    BoundingBox bb1 = XygloConvert.getBoundingBox(realComp.getBoundingBox());
-                    BoundingBox bb2 = XygloConvert.getBoundingBox(testComp.getBoundingBox());
+                    XygloXnaDrawable realComp = realDict[realKey];
+                    XygloXnaDrawable testComp = realDict[testKey];
 
-                    if (bb1.Intersects(bb2))
+                    //realComp.
+                    BoundingBox bb1 = realComp.getBoundingBox();
+                    BoundingBox bb2 = testComp.getBoundingBox();
+
+                    if (realComp.getBoundingBox().Intersects(testComp.getBoundingBox()))
                     {
                         // Work out the vectors and the rebound angle
                         //
                         Logger.logMsg("Got a collision");
+
+                        // Then testKey has mass and realKey doesn't - give testKey a bounce
+                        //
+                        Vector3 testVely = testComp.getVelocity();
+                        Vector3 realVely = realComp.getVelocity();
+
+                        // If they both have mass then do an elastic collision.
+                        //
+                        if (testKey.getMass() > 0 && realKey.getMass() > 0)
+                        {
+                            // Elastic collision undefined
+                            //
+                            Logger.logMsg("Elastic collision");
+                        }
+                        else
+                        {
+                            if (testKey.getMass() > 0)
+                            {
+                                if (!collisionList.Contains(testComp))
+                                {
+                                    // Get the point at which they collided
+                                    //
+                                    Vector3 collisionPoint = getCollisionPoint(testComp, realComp);
+
+                                    // Invert the velocity and modify by a factor
+                                    testComp.setVelocity(-testVely * (float) testKey.getHardness() );
+                                    //testComp.se
+
+                                    // Move the testComp by the difference from the surface to the new position below the 
+                                    // surface.
+                                    //
+                                    testComp.move(collisionPoint - testComp.getPosition());
+                                    //testComp.setPosition(collisionPoint);
+
+                                    collisionList.Add(testComp);
+                                }
+                            }
+                            else // realKey.getMass() > 0
+                            {
+                                if (!collisionList.Contains(realComp))
+                                {
+                                    realComp.setVelocity(-realVely);
+                                    collisionList.Add(realComp);
+                                }
+                            }
+                        }
                     }
                 }
                 
@@ -5980,6 +6128,7 @@ namespace Xyglo.Brazil.Xna
                         //
                         FlyingBlock fb = (Xyglo.Brazil.FlyingBlock)component;
                         XygloFlyingBlock drawBlock = new XygloFlyingBlock(XygloConvert.getColour(fb.getColour()), m_lineEffect, fb.getPosition(), fb.getSize());
+                        drawBlock.setVelocity(XygloConvert.getVector3(fb.getVelocity()));
 
                         // Set any rotation amount
                         drawBlock.setRotation(fb.getRotation());
@@ -6013,7 +6162,7 @@ namespace Xyglo.Brazil.Xna
 
                         //group.setVelocity(new Vector3(0.01f, 0, 0));
 
-
+                        group.setVelocity(XygloConvert.getVector3(il.getVelocity()));
                         m_drawableComponent[component] = group;
 #endif
                     }

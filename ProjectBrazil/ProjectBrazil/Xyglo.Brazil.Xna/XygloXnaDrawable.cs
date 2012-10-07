@@ -36,6 +36,24 @@ namespace Xyglo.Brazil.Xna
         public abstract void buildBuffers(GraphicsDevice device);
 
         /// <summary>
+        /// Set the position
+        /// </summary>
+        /// <param name="position"></param>
+        public virtual void setPosition(Vector3 position)
+        {
+            m_position = position;
+        }
+
+        /// <summary>
+        /// Get the position
+        /// </summary>
+        /// <returns></returns>
+        public virtual Vector3 getPosition()
+        {
+            return m_position;
+        }
+
+        /// <summary>
         /// Add a Vector3 to our position - make this virtual so we can override it
         /// in some base classes as required.
         /// </summary>
@@ -43,6 +61,14 @@ namespace Xyglo.Brazil.Xna
         public virtual void move(Vector3 translation)
         {
             m_position += translation;
+        }
+
+        /// <summary>
+        /// Default move is just to add velocity on to position
+        /// </summary>
+        public virtual void moveDefault()
+        {
+            m_position += m_velocity;
         }
 
         /// <summary>
@@ -108,14 +134,43 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Get the velocity
+        /// </summary>
+        /// <returns></returns>
+        public Vector3 getVelocity()
+        {
+            return m_velocity;
+        }
+
+        /// <summary>
+        /// Set the velocity
+        /// </summary>
+        /// <param name="velocity"></param>
+        public virtual void setVelocity(Vector3 velocity)
+        {
+            m_velocity = velocity;
+        }
+
+        /// <summary>
+        /// Accelerate the velocity vector
+        /// </summary>
+        /// <param name="accelerationVector"></param>
+        public virtual void accelerate(Vector3 accelerationVector)
+        {
+            m_velocity += accelerationVector;
+        }
+
+
+        /// <summary>
+        /// We need to define a bounding box for any component we're interested in
+        /// </summary>
+        /// <returns></returns>
+        public abstract BoundingBox getBoundingBox();
+
+        /// <summary>
         /// Position of this block
         /// </summary>
         public Vector3 m_position;
-
-        /// <summary>
-        /// Store locally our effect
-        /// </summary>
-        //protected BasicEffect m_effect;
 
         /// <summary>
         /// Store locally our colour
@@ -128,23 +183,8 @@ namespace Xyglo.Brazil.Xna
         protected double m_rotation = 0.0;
 
         /// <summary>
-        /// The index buffer
+        /// Store the velocity at the XygloXnaDrawable as a copy of the initial state of the components
         /// </summary>
-        //protected IndexBuffer m_indexBuffer;
-
-        /// <summary>
-        /// The vertex buffer
-        /// </summary>
-        //protected VertexBuffer m_vertexBuffer;
-
-        /// <summary>
-        /// All the vertices of the block
-        /// </summary>
-        //protected VertexPositionColorTexture[] m_vertices = null;
-
-        /// <summary>
-        /// Indexes of all the vertices
-        /// </summary>
-        //protected short[] m_indices = null;
+        protected Vector3 m_velocity = Vector3.Zero;
     }
 }
