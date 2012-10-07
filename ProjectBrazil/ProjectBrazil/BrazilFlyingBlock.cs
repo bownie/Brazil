@@ -8,14 +8,14 @@ namespace Xyglo.Brazil
     /// <summary>
     /// A Flying Block - of course
     /// </summary>
-    public class FlyingBlock : Component3D
+    public class BrazilFlyingBlock : Component3D
     {
         /// <summary>
         /// FlyingBlock constructor
         /// </summary>
         /// <param name="colour"></param>
         /// <param name="position"></param>
-        public FlyingBlock(BrazilColour colour, BrazilVector3 position, BrazilVector3 size)
+        public BrazilFlyingBlock(BrazilColour colour, BrazilVector3 position, BrazilVector3 size)
         {
             m_colour = colour;
             m_position = position;

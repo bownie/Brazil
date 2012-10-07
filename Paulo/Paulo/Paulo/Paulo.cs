@@ -128,7 +128,7 @@ namespace Paulo
         /// </summary>
         protected void generateComponents()
         {
-            FlyingBlock block1 = new FlyingBlock(BrazilColour.Blue, new BrazilVector3(-10, -100, 0), new BrazilVector3(200.0f, 100.0f, 10.0f));
+            BrazilFlyingBlock block1 = new BrazilFlyingBlock(BrazilColour.Blue, new BrazilVector3(-10, -100, 0), new BrazilVector3(200.0f, 100.0f, 10.0f));
             //block1.setVelocity(new BrazilVector3(-1, 0, 0));
 
             // Push onto component list
@@ -136,18 +136,18 @@ namespace Paulo
             //m_componentList.Add(block1);
             addComponent(State.Test("PlayingGame"), block1);
 
-            FlyingBlock block2 = new FlyingBlock(BrazilColour.Brown, new BrazilVector3(0, 0, 0), new BrazilVector3(100, 20, 20));
+            BrazilFlyingBlock block2 = new BrazilFlyingBlock(BrazilColour.Brown, new BrazilVector3(0, 0, 0), new BrazilVector3(100, 20, 20));
             //block2.setVelocity(new BrazilVector3(0.5f, 0, 0.1f));
             //m_componentList.Add(block2);
             addComponent(State.Test("PlayingGame"), block2);
 
-            FlyingBlock block3 = new FlyingBlock(BrazilColour.Orange, new BrazilVector3(0, 150, 0), new BrazilVector3(200, 50, 0));
+            BrazilFlyingBlock block3 = new BrazilFlyingBlock(BrazilColour.Orange, new BrazilVector3(0, 150, 0), new BrazilVector3(200, 50, 0));
             //block3.setRotation(0.01);
             block3.setHardness(10);
             //m_componentList.Add(block3);
             addComponent(State.Test("PlayingGame"), block3);
 
-            FlyingBlock block4 = new FlyingBlock(BrazilColour.Green, new BrazilVector3(50, -50, -800), new BrazilVector3(20, 20, 200));
+            BrazilFlyingBlock block4 = new BrazilFlyingBlock(BrazilColour.Green, new BrazilVector3(50, -50, -800), new BrazilVector3(20, 20, 200));
             block4.setRotation(0.03);
             //block4.setVelocity(new BrazilVector3(-0.5f, -1f, -0.4f));
             //m_componentList.Add(block4);

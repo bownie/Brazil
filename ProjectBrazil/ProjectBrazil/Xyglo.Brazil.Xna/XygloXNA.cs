@@ -3976,12 +3976,19 @@ namespace Xyglo.Brazil.Xna
                         break;
 
                     case "MoveLeft":
-                        m_drawableComponent[m_interloper].moveLeft(1.0f);
+
+                        //m_drawableComponent[m_interloper].moveLeft(1.0f);
+                        Vector3 leftVector = new Vector3(-1, 0, 0);
+                        m_drawableComponent[m_interloper].accelerate(leftVector);
                         //m_interloper.moveLeft(1.0f);
                         break;
 
                     case "MoveRight":
-                        m_drawableComponent[m_interloper].moveRight(1.0f);
+                        //m_drawableComponent[m_interloper].moveRight(1.0f);
+                        
+                        Vector3 rightVector = new Vector3(1, 0, 0);
+                        m_drawableComponent[m_interloper].accelerate(rightVector);
+
                         //m_interloper.moveRight(1.0f);
                         break;
 
@@ -4106,11 +4113,11 @@ namespace Xyglo.Brazil.Xna
                 {
                     // If not then is it a drawable type? 
                     //
-                    if (component.GetType() == typeof(Xyglo.Brazil.FlyingBlock))
+                    if (component.GetType() == typeof(Xyglo.Brazil.BrazilFlyingBlock))
                     {
                         // Found a FlyingBlock - initialise it and add it to the dictionary
                         //
-                        FlyingBlock fb = (Xyglo.Brazil.FlyingBlock)component;
+                        BrazilFlyingBlock fb = (Xyglo.Brazil.BrazilFlyingBlock)component;
 
                         // Check and accelerate the drawable as needed
                         //
@@ -4319,7 +4326,7 @@ namespace Xyglo.Brazil.Xna
                                 {
                                     // Get the point at which they collided
                                     //
-                                    Vector3 collisionPoint = getCollisionPoint(testComp, realComp);
+                                    //Vector3 collisionPoint = getCollisionPoint(testComp, realComp);
 
                                     // Invert the velocity and modify by a factor
                                     testComp.setVelocity(-testVely * (float) testKey.getHardness() );
@@ -4328,7 +4335,14 @@ namespace Xyglo.Brazil.Xna
                                     // Move the testComp by the difference from the surface to the new position below the 
                                     // surface.
                                     //
-                                    testComp.move(collisionPoint - testComp.getPosition());
+                                    /*
+                                    Vector3 depthDiff = realComp.getBoundingBox().Max;// - testComp.getPosition().Y;
+                                    depthDiff.X = 0;
+                                    depthDiff.Z = 0;
+                                    depthDiff.Y += testComp.getPosition().Y;
+                                    testComp.move(depthDiff);
+                                    */
+
                                     //testComp.setPosition(collisionPoint);
 
                                     collisionList.Add(testComp);
@@ -6122,11 +6136,11 @@ namespace Xyglo.Brazil.Xna
                 {
                     // If not then is it a drawable type? 
                     //
-                    if (component.GetType() == typeof(Xyglo.Brazil.FlyingBlock))
+                    if (component.GetType() == typeof(Xyglo.Brazil.BrazilFlyingBlock))
                     {
                         // Found a FlyingBlock - initialise it and add it to the dictionary
                         //
-                        FlyingBlock fb = (Xyglo.Brazil.FlyingBlock)component;
+                        BrazilFlyingBlock fb = (Xyglo.Brazil.BrazilFlyingBlock)component;
                         XygloFlyingBlock drawBlock = new XygloFlyingBlock(XygloConvert.getColour(fb.getColour()), m_lineEffect, fb.getPosition(), fb.getSize());
                         drawBlock.setVelocity(XygloConvert.getVector3(fb.getVelocity()));
 
