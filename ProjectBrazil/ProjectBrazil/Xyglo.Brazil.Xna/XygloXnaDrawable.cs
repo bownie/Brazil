@@ -60,6 +60,11 @@ namespace Xyglo.Brazil.Xna
         /// <param name="translation"></param>
         public virtual void move(Vector3 translation)
         {
+            if (m_name == "LandingBlock1" && m_velocity != Vector3.Zero)
+            {
+                Logger.logMsg("LandingBlock1");
+            }
+
             m_position += translation;
         }
 
@@ -68,6 +73,10 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         public virtual void moveDefault()
         {
+            if (m_name == "LandingBlock1" && m_velocity != Vector3.Zero)
+            {
+                Logger.logMsg("LandingBlock1");
+            }
             m_position += m_velocity;
         }
 
@@ -182,6 +191,23 @@ namespace Xyglo.Brazil.Xna
             m_velocity.Z += accelerationVector.Z;
         }
 
+        /// <summary>
+        /// Get the name
+        /// </summary>
+        /// <returns></returns>
+        public string getName()
+        {
+            return m_name;
+        }
+
+        /// <summary>
+        /// Set the name
+        /// </summary>
+        /// <param name="name"></param>
+        public void setName(string name)
+        {
+            m_name = name;
+        }
 
         /// <summary>
         /// We need to define a bounding box for any component we're interested in
@@ -213,5 +239,10 @@ namespace Xyglo.Brazil.Xna
         /// Define a set of max velocities (-+) for our drawable
         /// </summary>
         protected Vector3 m_maxVelocity = new Vector3(3, 0, 0);
+
+        /// <summary>
+        /// Name for this component just in case we want to track it easily for some insane reason
+        /// </summary>
+        protected string m_name;
     }
 }

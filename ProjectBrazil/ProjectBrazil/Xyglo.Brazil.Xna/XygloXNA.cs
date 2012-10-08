@@ -3979,6 +3979,7 @@ namespace Xyglo.Brazil.Xna
                         Vector3 leftVector = new Vector3(-1, 0, 0);
                         // accelerate will accelerate in mid air or move
 
+
                         Pair<XygloXnaDrawable, Vector3> coll = checkCollisions(m_interloper);
 
                         // If there is an X component to the checkCollisions call then we're on an object
@@ -4130,7 +4131,7 @@ namespace Xyglo.Brazil.Xna
             {
                 // Has this component already been added to the drawableComponent dictionary?
                 //
-                if (m_drawableComponent.ContainsKey(component))
+                if (m_drawableComponent.ContainsKey(component)) // && m_drawableComponent[component].getVelocity() != Vector3.Zero)
                 {
                     // If not then is it a drawable type? 
                     //
@@ -4333,12 +4334,12 @@ namespace Xyglo.Brazil.Xna
                     // Only reset the position if the X axis is unmoved
                     // otherwise we've arrived.
                     //
-                    if (collisionPoint.X == testComp.getPosition().X)
+                    if (collisionPoint.X == checkComp.getPosition().X)
                     {
-                        testComp.setPosition(collisionPoint);
+                        checkComp.setPosition(collisionPoint);
                     }
 
-                    collisionList.Add(testComp);
+                    collisionList.Add(checkComp);
 
                     return new Pair<XygloXnaDrawable, Vector3>(testComp, collisionPoint);
                 }
@@ -4384,7 +4385,7 @@ namespace Xyglo.Brazil.Xna
                     {
                         // Work out the vectors and the rebound angle
                         //
-                        Logger.logMsg("Got a collision");
+                        //Logger.logMsg("computeCollisions - Got a collision");
 
                         // Then testKey has mass and realKey doesn't - give testKey a bounce
                         //
@@ -4397,7 +4398,7 @@ namespace Xyglo.Brazil.Xna
                         {
                             // Elastic collision undefined
                             //
-                            Logger.logMsg("Elastic collision");
+                            Logger.logMsg("computeCollisions- Elastic collision");
                         }
                         else
                         {
@@ -4436,17 +4437,34 @@ namespace Xyglo.Brazil.Xna
                                     testComp.move(depthDiff);
                                     */
 
+                                    /*
+                                    try
+                                    {
+                                        BrazilFlyingBlock xfb = (BrazilFlyingBlock)testKey;
+
+                                        if (testKey != null) //.GetType() == typeof(XygloFlyingBlock))
+                                        {
+                                            Logger.logMsg("Trying to do somethign weird");
+                                        }
+                                    }
+                                    catch (Exception)
+                                    {
+                                    }*/
+
                                     // Only reset the position if the X axis is unmoved
                                     // otherwise we've arrived.
                                     //
                                     if (collisionPoint.X == testComp.getPosition().X)
                                     {
-                                        testComp.setPosition(collisionPoint);    
+                                        Logger.logMsg("computeCollisions - moving position of interloper");
+
+                                        testComp.setPosition(collisionPoint);
                                     }
 
                                     collisionList.Add(testComp);
                                 }
                             }
+                                /*
                             else // realKey.getMass() > 0
                             {
                                 if (!collisionList.Contains(realComp))
@@ -4454,7 +4472,7 @@ namespace Xyglo.Brazil.Xna
                                     realComp.setVelocity(-realVely);
                                     collisionList.Add(realComp);
                                 }
-                            }
+                            }*/
                         }
                     }
                 }
@@ -6248,6 +6266,9 @@ namespace Xyglo.Brazil.Xna
                         BrazilFlyingBlock fb = (Xyglo.Brazil.BrazilFlyingBlock)component;
                         XygloFlyingBlock drawBlock = new XygloFlyingBlock(XygloConvert.getColour(fb.getColour()), m_lineEffect, fb.getPosition(), fb.getSize());
                         drawBlock.setVelocity(XygloConvert.getVector3(fb.getVelocity()));
+
+                        // Naming is useful for tracking these blocks
+                        drawBlock.setName(fb.getName());
 
                         // Set any rotation amount
                         drawBlock.setRotation(fb.getRotation());

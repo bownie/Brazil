@@ -145,6 +145,7 @@ namespace Paulo
             //block3.setRotation(0.01);
             block3.setHardness(10);
             //m_componentList.Add(block3);
+            block3.setName("LandingBlock1");
             addComponent(State.Test("PlayingGame"), block3);
 
             BrazilFlyingBlock block4 = new BrazilFlyingBlock(BrazilColour.Green, new BrazilVector3(-170, 170, 0), new BrazilVector3(70, 20, 10));
@@ -152,6 +153,7 @@ namespace Paulo
             //block4.setVelocity(new BrazilVector3(-0.5f, -1f, -0.4f));
             //m_componentList.Add(block4);
             block4.setHardness(10);
+            block4.setName("LandingBlock2");
             addComponent(State.Test("PlayingGame"), block4);
 
             // Setup the HUD

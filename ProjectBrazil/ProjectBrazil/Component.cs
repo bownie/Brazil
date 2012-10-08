@@ -105,6 +105,23 @@ namespace Xyglo.Brazil
             return (m_hardness > 0);
         }
 
+        /// Get the name
+        /// </summary>
+        /// <returns></returns>
+        public string getName()
+        {
+            return m_name;
+        }
+
+        /// <summary>
+        /// Set the name
+        /// </summary>
+        /// <param name="name"></param>
+        public void setName(string name)
+        {
+            m_name = name;
+        }
+
         /// <summary>
         /// Affected by gravity?
         /// </summary>
@@ -130,5 +147,10 @@ namespace Xyglo.Brazil
         /// don't get duplicates in this list.
         /// </summary>
         HashSet<State> m_stateList = new HashSet<State>();
+
+        /// <summary>
+        /// Name for this component just in case we want to track it easily for some insane reason
+        /// </summary>
+        protected string m_name;
     }
 }
