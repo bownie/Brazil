@@ -3973,6 +3973,9 @@ namespace Xyglo.Brazil.Xna
                         //
                         m_drawableComponent.Clear();
                         m_state = State.Test("Menu");
+
+                        // Clear this global
+                        m_interloper = null;
                         break;
 
                     case "MoveLeft":
@@ -4015,7 +4018,7 @@ namespace Xyglo.Brazil.Xna
                         break;
 
                     case "Jump":
-                        m_drawableComponent[m_interloper].jump(new Vector3(0, 10, 0));
+                        m_drawableComponent[m_interloper].jump(new Vector3(0, -10, 0));
                         break;
 
                     case "MoveForward":
@@ -6320,8 +6323,15 @@ namespace Xyglo.Brazil.Xna
                         string fpsText = "FPS = " + m_frameRate;
                         XygloBannerText bannerText = new XygloBannerText(m_overlaySpriteBatch, m_fontManager.getOverlayFont(), XygloConvert.getColour(bh.getColour()), bh.getPosition(), bh.getSize(), fpsText);
                         bannerText.draw(m_graphics.GraphicsDevice);
-                    }
 
+                        if (m_interloper != null)
+                        {
+                            Vector3 ipPos = m_drawableComponent[m_interloper].getPosition();
+                            string ipText = "Interloper Position X = " + ipPos.X + ", Y = " + ipPos.Y + ", Z = " + ipPos.Z;
+                            XygloBannerText ipBanner = new XygloBannerText(m_overlaySpriteBatch, m_fontManager.getOverlayFont(), XygloConvert.getColour(BrazilColour.Blue), new Vector3(0, m_fontManager.getOverlayFont().LineSpacing, 0), 1.0f, ipText);
+                            ipBanner.draw(m_graphics.GraphicsDevice);
+                        }
+                    }
                 }
                 else
                 {
