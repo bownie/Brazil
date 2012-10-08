@@ -169,12 +169,46 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// What we do to jump - add some impetus in the non gravitational direction
+        /// </summary>
+        public override void jump(Vector3 impulse)
+        {
+            foreach (XygloXnaDrawable component in m_componentList)
+            {
+                component.jump(impulse);
+            }
+            m_velocity += impulse;
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="accelerationVector"></param>
         public override void accelerate(Vector3 accelerationVector)
         {
-            m_velocity += accelerationVector;
+            //m_velocity += accelerationVector;
+            if (m_maxVelocity.X == 0) // no limit on X
+            {
+                m_velocity.X += accelerationVector.X;
+            }
+            else if (accelerationVector.X > 0)
+            {
+                if (m_velocity.X < m_maxVelocity.X)
+                {
+                    // Incremement with a maxiumum
+                    m_velocity.X = Math.Min(m_velocity.X + accelerationVector.X, m_maxVelocity.X);
+                }
+            }
+            else if (accelerationVector.X < 0)
+            {
+                if (m_velocity.X > -m_maxVelocity.X)
+                {
+                    m_velocity.X = Math.Max(m_velocity.X + accelerationVector.X, -m_maxVelocity.X);
+                }
+            }
+
+            m_velocity.Y += accelerationVector.Y;
+            m_velocity.Z += accelerationVector.Z;
         }
 
         /// <summary>

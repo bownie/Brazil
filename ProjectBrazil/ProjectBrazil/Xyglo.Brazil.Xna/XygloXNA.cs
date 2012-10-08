@@ -3976,24 +3976,45 @@ namespace Xyglo.Brazil.Xna
                         break;
 
                     case "MoveLeft":
-
-                        //m_drawableComponent[m_interloper].moveLeft(1.0f);
                         Vector3 leftVector = new Vector3(-1, 0, 0);
-                        m_drawableComponent[m_interloper].accelerate(leftVector);
-                        //m_interloper.moveLeft(1.0f);
+                        // accelerate will accelerate in mid air or move
+
+                        Pair<XygloXnaDrawable, Vector3> coll = checkCollisions(m_interloper);
+
+                        // If there is an X component to the checkCollisions call then we're on an object
+                        // or so we guess at the moment until proven otherwise.
+                        //
+                        if (coll.Second.X != 0)
+                        {
+                            m_drawableComponent[m_interloper].moveLeft(1);
+                        }
+                        else // we're in free flight
+                        {
+                            m_drawableComponent[m_interloper].accelerate(leftVector);
+                        }
                         break;
 
                     case "MoveRight":
-                        //m_drawableComponent[m_interloper].moveRight(1.0f);
-                        
                         Vector3 rightVector = new Vector3(1, 0, 0);
-                        m_drawableComponent[m_interloper].accelerate(rightVector);
+                        // accelerate will accelerate in mid air or move
 
-                        //m_interloper.moveRight(1.0f);
+                        Pair<XygloXnaDrawable, Vector3> colr = checkCollisions(m_interloper);
+
+                        // If there is an X component to the checkCollisions call then we're on an object
+                        // or so we guess at the moment until proven otherwise.
+                        //
+                        if (colr.Second.X != 0)
+                        {
+                            m_drawableComponent[m_interloper].moveRight(1);
+                        }
+                        else // we're in free flight
+                        {
+                            m_drawableComponent[m_interloper].accelerate(rightVector);
+                        }
                         break;
 
                     case "Jump":
-                        m_drawableComponent[m_interloper].jump();
+                        m_drawableComponent[m_interloper].jump(new Vector3(0, 10, 0));
                         break;
 
                     case "MoveForward":
@@ -4150,14 +4171,15 @@ namespace Xyglo.Brazil.Xna
                             m_drawableComponent[component].accelerate(XygloConvert.getVector3(m_world.getGravity()));
                         }
 
-                        // Move any update any buffers
-                        //
-                        //m_drawableComponent[component].move(XygloConvert.getVector3(il.getVelocity()));
-                        m_drawableComponent[component].moveDefault();
-
                         // Check for collisions and adjust the position and velocity accordingly before drawing this
                         //
-                        checkCollisions();
+                        if (!computeCollisions())
+                        {
+                            // Move any update any buffers
+                            //
+                            //m_drawableComponent[component].move(XygloConvert.getVector3(il.getVelocity()));
+                            m_drawableComponent[component].moveDefault();
+                        }
 
                         // Apply any rotation if we have one
                         if (il.getRotation() != 0)
@@ -4198,19 +4220,27 @@ namespace Xyglo.Brazil.Xna
 
             Vector3 v1 = comp1.getVelocity();
             Vector3 v2 = comp2.getVelocity();
-            /*
-            Ray ray = new Ray(comp1.getPosition(), comp2.getPosition());
+
+            if (comp1.getPosition().Y == comp2.getPosition().Y)
+            {
+                return comp1.getPosition();
+            }
+
+            // Draw ray from last last to current position (from where we're not intersecting to where we are intersecting)
+            //
+            Ray ray = new Ray(comp1.getPosition() - comp1.getVelocity(), comp1.getPosition());
 
             // This defines the plane we're trying to penetrate with our ray
             //
-            Plane intPlane = new Plane(0, 1, 0, comp2.getBoundingBox().Max.Y);
+            Plane intPlane = new Plane(0, -1, 0, comp2.getBoundingBox().Min.Y);
 
             float? planeIntersection = ray.Intersects(intPlane);
 
             if (planeIntersection != null)
             {
                 Logger.logMsg("Got PLANE intersect");
-            }*/
+                return ray.Position + ray.Direction * planeIntersection.Value;
+            }
 
             // Normalise both vectors and we start playing the boundingbox backwards
             //
@@ -4270,9 +4300,60 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
-        /// Check for collisions in m_drawableComponents that have some form (hardness != 0)
+        /// Return a collision point and a component that we've collided with
         /// </summary>
-        protected void checkCollisions()
+        /// <param name="checkComponent"></param>
+        /// <returns></returns>
+        protected Pair<XygloXnaDrawable, Vector3> checkCollisions(Component checkComponent)
+        {
+            // We'll have to iterate the real dictionary for all items that aren't passed in and have something to them
+            //
+            Dictionary<Component, XygloXnaDrawable> testDict = m_drawableComponent.Where(item => item.Key.isCorporeal() && item.Key != checkComponent).ToDictionary(p => p.Key, p => p.Value);
+
+            XygloXnaDrawable checkComp = m_drawableComponent[checkComponent];
+
+            //realComp.
+            BoundingBox bb1 = checkComp.getBoundingBox();
+
+            // Keep a list of all elements we've applied collisions to
+            //
+            List<XygloXnaDrawable> collisionList = new List<XygloXnaDrawable>();
+
+            foreach (Component testKey in testDict.Keys)
+            {
+                XygloXnaDrawable testComp = testDict[testKey];
+                BoundingBox bb2 = testComp.getBoundingBox();
+
+                if (testComp.getBoundingBox().Intersects(checkComp.getBoundingBox()) && !collisionList.Contains(testComp))
+                {
+                    // Get the point at which they collided
+                    //
+                    Vector3 collisionPoint = getCollisionPoint(checkComp, testComp);
+
+                    // Only reset the position if the X axis is unmoved
+                    // otherwise we've arrived.
+                    //
+                    if (collisionPoint.X == testComp.getPosition().X)
+                    {
+                        testComp.setPosition(collisionPoint);
+                    }
+
+                    collisionList.Add(testComp);
+
+                    return new Pair<XygloXnaDrawable, Vector3>(testComp, collisionPoint);
+                }
+            }
+
+            return new Pair<XygloXnaDrawable, Vector3>(null, Vector3.Zero);
+
+        }
+
+        /// <summary>
+        /// Check for collisions in m_drawableComponents that have some form (hardness != 0).   Return true
+        /// if we have a collision and we're also modifying the drawables to have correct velocity
+        /// changes.
+        /// </summary>
+        protected bool computeCollisions()
         {
             // We'll have to iterate the realDict twice
             //
@@ -4326,10 +4407,22 @@ namespace Xyglo.Brazil.Xna
                                 {
                                     // Get the point at which they collided
                                     //
-                                    //Vector3 collisionPoint = getCollisionPoint(testComp, realComp);
+                                    Vector3 collisionPoint = getCollisionPoint(testComp, realComp);
+
+                                    // Get the gravity vector, normalize and use to invert
+                                    //
+                                    Vector3 unitGravity = XygloConvert.getVector3(m_world.getGravity());
+                                    unitGravity.Normalize();
+
+                                    // Invert our velocity by multiplying each element by gravity
+                                    if (unitGravity.X > 0) testVely.X *= - unitGravity.X;
+                                    if (unitGravity.Y > 0) testVely.Y *= - unitGravity.Y;
+                                    if (unitGravity.Z > 0) testVely.Z *= - unitGravity.Z;
 
                                     // Invert the velocity and modify by a factor
-                                    testComp.setVelocity(-testVely * (float) testKey.getHardness() );
+                                    //
+                                    testComp.setVelocity(testVely * (float) testKey.getHardness() );
+
                                     //testComp.se
 
                                     // Move the testComp by the difference from the surface to the new position below the 
@@ -4343,7 +4436,13 @@ namespace Xyglo.Brazil.Xna
                                     testComp.move(depthDiff);
                                     */
 
-                                    //testComp.setPosition(collisionPoint);
+                                    // Only reset the position if the X axis is unmoved
+                                    // otherwise we've arrived.
+                                    //
+                                    if (collisionPoint.X == testComp.getPosition().X)
+                                    {
+                                        testComp.setPosition(collisionPoint);    
+                                    }
 
                                     collisionList.Add(testComp);
                                 }
@@ -4359,8 +4458,9 @@ namespace Xyglo.Brazil.Xna
                         }
                     }
                 }
-                
             }
+
+            return (collisionList.Count > 0);
         }
 
 
@@ -5773,6 +5873,11 @@ namespace Xyglo.Brazil.Xna
         /// <param name="gameTime"></param>
         public void checkMouse(GameTime gameTime, List<MouseAction> mouseActionList)
         {
+            // Ignore an empty project for the moment
+            //
+            if (m_project == null)
+                return;
+
             // If our main XNA window is inactive then ignore mouse clicks
             //
             if (IsActive == false) return;

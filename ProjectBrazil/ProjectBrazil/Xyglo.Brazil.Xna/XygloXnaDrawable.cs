@@ -129,8 +129,9 @@ namespace Xyglo.Brazil.Xna
         /// <summary>
         /// What we do to jump - add some impetus in the non gravitational direction
         /// </summary>
-        public virtual void jump()
+        public virtual void jump(Vector3 impulse)
         {
+            m_velocity += impulse;
         }
 
         /// <summary>
@@ -157,7 +158,28 @@ namespace Xyglo.Brazil.Xna
         /// <param name="accelerationVector"></param>
         public virtual void accelerate(Vector3 accelerationVector)
         {
-            m_velocity += accelerationVector;
+            if (m_maxVelocity.X == 0) // no limit on X
+            {
+                m_velocity.X += accelerationVector.X;
+            }
+            else if (accelerationVector.X > 0)
+            {
+                if (m_velocity.X < m_maxVelocity.X)
+                {
+                    // Incremement with a maxiumum
+                    m_velocity.X = Math.Min(m_velocity.X + accelerationVector.X, m_maxVelocity.X);
+                }
+            }
+            else if (accelerationVector.X < 0)
+            {
+                if (m_velocity.X > -m_maxVelocity.X)
+                {
+                    m_velocity.X = Math.Max(m_velocity.X + accelerationVector.X, -m_maxVelocity.X);
+                }
+            }
+
+            m_velocity.Y += accelerationVector.Y;
+            m_velocity.Z += accelerationVector.Z;
         }
 
 
@@ -186,5 +208,10 @@ namespace Xyglo.Brazil.Xna
         /// Store the velocity at the XygloXnaDrawable as a copy of the initial state of the components
         /// </summary>
         protected Vector3 m_velocity = Vector3.Zero;
+
+        /// <summary>
+        /// Define a set of max velocities (-+) for our drawable
+        /// </summary>
+        protected Vector3 m_maxVelocity = new Vector3(3, 0, 0);
     }
 }

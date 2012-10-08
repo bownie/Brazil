@@ -299,6 +299,10 @@ namespace Xyglo.Brazil.Xna
                         if (!ignoreModifiers) newKey = Keys.RightWindows;
                         break;
 
+                    case Microsoft.Xna.Framework.Input.Keys.Space:
+                        if (!ignoreModifiers) newKey = Keys.Space;
+                        break;
+
                     default:
                         newKey = Keys.None;
                         break;

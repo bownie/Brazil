@@ -51,7 +51,7 @@ namespace Paulo
             BannerText menuScreen = new BannerText(BrazilColour.Blue, new BrazilVector3(360.0f, 240.0f, 0), 4.0, "Paulo");
             addComponent(State.Test("Menu"), menuScreen);
 
-            BannerText byLine = new BannerText(BrazilColour.Yellow, new BrazilVector3(340.0f, 345.0f, 0), 1.0, "By Richard Bown (@xyglo)");
+            BannerText byLine = new BannerText(BrazilColour.Yellow, new BrazilVector3(430.0f, 345.0f, 0), 1.0, "@xyglo");
             addComponent(State.Test("Menu"), byLine);
 
             BannerText toPlay = new BannerText(BrazilColour.White, new BrazilVector3(380.0f, 500.0f, 0), 1.0, "Hit '1' to Play");
@@ -147,10 +147,11 @@ namespace Paulo
             //m_componentList.Add(block3);
             addComponent(State.Test("PlayingGame"), block3);
 
-            BrazilFlyingBlock block4 = new BrazilFlyingBlock(BrazilColour.Green, new BrazilVector3(50, -50, -800), new BrazilVector3(20, 20, 200));
-            block4.setRotation(0.03);
+            BrazilFlyingBlock block4 = new BrazilFlyingBlock(BrazilColour.Green, new BrazilVector3(-170, 170, 0), new BrazilVector3(70, 20, 10));
+            //block4.setRotation(0.03);
             //block4.setVelocity(new BrazilVector3(-0.5f, -1f, -0.4f));
             //m_componentList.Add(block4);
+            block4.setHardness(10);
             addComponent(State.Test("PlayingGame"), block4);
 
             // Setup the HUD
@@ -158,6 +159,5 @@ namespace Paulo
             BrazilHud hud = new BrazilHud(BrazilColour.White, BrazilVector3.Zero, 1.0, "HUD");
             addComponent(State.Test("PlayingGame"), hud);
         }
-
     }
 }
