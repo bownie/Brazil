@@ -18,8 +18,13 @@ using System.Xml.Serialization;
 
 namespace Xyglo.Brazil.Xna
 {
+    
+    /// <summary>
+    /// At the XygloView level we want to start building up the XygloXnaDrawable abstraction
+    /// - for a later date.
+    /// </summary>
     [DataContract(Name = "Friendlier", Namespace = "http://www.xyglo.com")]
-    public abstract class XygloView : DrawableComponent
+    public abstract class XygloView //: DrawableComponent
     {
 
         /// <summary>

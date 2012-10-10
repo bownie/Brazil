@@ -72,7 +72,7 @@ namespace Xyglo.Brazil.Xna
                 m_vertices[7].TextureCoordinate = new Vector2(0, 0);
             }
 
-            Matrix worldMatrix = Matrix.CreateRotationX((float)m_rotation);
+            Matrix worldMatrix = Matrix.CreateRotationZ((float)m_rotation);
 
             // front left top
             //
@@ -117,7 +117,7 @@ namespace Xyglo.Brazil.Xna
 
             // Now we need to describe 32 vertices
             //
-            m_vertexBuffer = new VertexBuffer(device, typeof(VertexPositionColorTexture), m_vertices.Count(), BufferUsage.WriteOnly);
+            m_vertexBuffer = new VertexBuffer(device, typeof(VertexPositionColorTexture), m_vertices.Count(), BufferUsage.None);
             m_vertexBuffer.SetData(m_vertices);
 
             // Total number of indices - these don't change so only set them up once.
@@ -230,12 +230,19 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
-        /// Override the getBoundingBox call
+        /// Override the getBoundingBox call - examine vertex data and return a bounding box
+        /// based on that.
         /// </summary>
         /// <returns></returns>
         public override BoundingBox getBoundingBox()
         {
-            return new BoundingBox(m_position - m_blockSize / 2, m_position + m_blockSize / 2);
+            Vector3 [] vertices = new Vector3[m_vertexBuffer.VertexCount];
+            m_vertexBuffer.GetData<Vector3>(vertices);
+
+            // Assuming that m_position is within our shape we always find min and max
+            // based from this point.
+            //
+            return BoundingBox.CreateFromPoints(vertices); //(m_position - m_blockSize / 2, m_position + m_blockSize / 2);
         }
 
         /// <summary>

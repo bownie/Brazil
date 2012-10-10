@@ -110,6 +110,24 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
+        /// Get initial angle
+        /// </summary>
+        /// <returns></returns>
+        public double getInitialAngle()
+        {
+            return m_initialAngle;
+        }
+
+        /// <summary>
+        /// Set initial angle
+        /// </summary>
+        /// <param name="rotation"></param>
+        public void setInitialAngle(double rotation)
+        {
+            m_initialAngle = rotation;
+        }
+
+        /// <summary>
         /// Position
         /// </summary>
         protected BrazilVector3 m_position;
@@ -123,6 +141,11 @@ namespace Xyglo.Brazil
         /// A rotation angle (per frame currently)
         /// </summary>
         protected double m_rotation = 0.0f;
+
+        /// <summary>
+        /// An initial angle for this element (in one dimension only)
+        /// </summary>
+        protected double m_initialAngle = 0.0f;
 
         /// <summary>
         /// A colour associated with our 3D component

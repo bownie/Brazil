@@ -6,11 +6,11 @@ using System.Text;
 namespace Xyglo.Brazil
 {
     /// <summary>
-    /// The Interloper is our hero
+    /// The Baddy is one of our villians
     /// </summary>
-    public class BrazilInterloper : Component3D
+    public class BrazilBaddy : Component3D
     {
-        public BrazilInterloper(BrazilColour colour, BrazilVector3 position, BrazilVector3 size)
+        public BrazilBaddy(BrazilColour colour, BrazilVector3 position, BrazilVector3 size)
         {
             m_colour = colour;
             m_position = position;

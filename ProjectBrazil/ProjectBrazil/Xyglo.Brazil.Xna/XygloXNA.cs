@@ -6274,7 +6274,7 @@ namespace Xyglo.Brazil.Xna
                         drawBlock.setName(fb.getName());
 
                         // Set any rotation amount
-                        drawBlock.setRotation(fb.getRotation());
+                        drawBlock.setRotation(fb.getInitialAngle());
 
                         // Initial build and draw
                         //

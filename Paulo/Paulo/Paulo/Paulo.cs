@@ -154,6 +154,7 @@ namespace Paulo
             //m_componentList.Add(block4);
             block4.setHardness(10);
             block4.setName("LandingBlock2");
+            block4.setInitialAngle(Math.PI / 8);
             addComponent(State.Test("PlayingGame"), block4);
 
             // Setup the HUD

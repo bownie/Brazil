@@ -13,4 +13,3 @@ namespace Xyglo.Brazil
         // At the moment this abstract class doesn't add any value
     }
 }
-

@@ -30,6 +30,12 @@ namespace Xyglo.Brazil.Xna
         public abstract void draw(GraphicsDevice device);
 
         /// <summary>
+        /// We need to define a bounding box for any component we're interested in
+        /// </summary>
+        /// <returns></returns>
+        public abstract BoundingBox getBoundingBox();
+
+        /// <summary>
         /// Build the Vertex and Index buffers
         /// </summary>
         /// <param name="device"></param>
@@ -60,11 +66,12 @@ namespace Xyglo.Brazil.Xna
         /// <param name="translation"></param>
         public virtual void move(Vector3 translation)
         {
+#if SPECIFIC_DEBUG
             if (m_name == "LandingBlock1" && m_velocity != Vector3.Zero)
             {
                 Logger.logMsg("LandingBlock1");
             }
-
+#endif
             m_position += translation;
         }
 
@@ -73,10 +80,12 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         public virtual void moveDefault()
         {
+#if SPECIFIC_DEBUG
             if (m_name == "LandingBlock1" && m_velocity != Vector3.Zero)
             {
                 Logger.logMsg("LandingBlock1");
             }
+#endif
             m_position += m_velocity;
         }
 
@@ -208,12 +217,6 @@ namespace Xyglo.Brazil.Xna
         {
             m_name = name;
         }
-
-        /// <summary>
-        /// We need to define a bounding box for any component we're interested in
-        /// </summary>
-        /// <returns></returns>
-        public abstract BoundingBox getBoundingBox();
 
         /// <summary>
         /// Position of this block

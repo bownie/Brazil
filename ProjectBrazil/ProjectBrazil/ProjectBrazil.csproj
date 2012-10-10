@@ -66,9 +66,12 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BrazilBaddy.cs" />
     <Compile Include="BrazilColour.cs" />
     <Compile Include="BrazilFlyingBlock.cs" />
+    <Compile Include="BrazilGoody.cs" />
     <Compile Include="BrazilPosition.cs" />
+    <Compile Include="BrazilRay.cs" />
     <Compile Include="BrazilState.cs" />
     <Compile Include="BrazilVector2.cs" />
     <Compile Include="Component3D.cs" />
