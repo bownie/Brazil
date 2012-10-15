@@ -682,6 +682,7 @@ namespace Xyglo.Brazil.Xna
             return m_project;
         }
 
+        /*
         /// <summary>
         /// Implement for IWorld interface - gets the list of features that this world
         /// exposes.
@@ -713,7 +714,7 @@ namespace Xyglo.Brazil.Xna
 
             return rL;
         }
-
+        */
         /// <summary>
         /// Initialise some stuff in the constructor
         /// </summary>

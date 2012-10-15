@@ -103,7 +103,7 @@ namespace Xyglo.Brazil
              * */
         }
 
-
+        /*
         /// <summary>
         /// Return the input features
         /// </summary>
@@ -111,7 +111,7 @@ namespace Xyglo.Brazil
         public List<string> getInputFeatures()
         {
             return m_xna.getInputFeatures();
-        }
+        }*/
 
         // Run the main loop
         //

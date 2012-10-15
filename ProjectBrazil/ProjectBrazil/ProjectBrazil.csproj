@@ -66,12 +66,9 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BrazilBaddy.cs" />
     <Compile Include="BrazilColour.cs" />
     <Compile Include="BrazilFlyingBlock.cs" />
-    <Compile Include="BrazilGoody.cs" />
     <Compile Include="BrazilPosition.cs" />
-    <Compile Include="BrazilRay.cs" />
     <Compile Include="BrazilState.cs" />
     <Compile Include="BrazilVector2.cs" />
     <Compile Include="Component3D.cs" />
@@ -86,6 +83,9 @@
     <Compile Include="ConfirmState.cs" />
     <Compile Include="BannerText.cs" />
     <Compile Include="BrazilHud.cs" />
+    <Compile Include="BrazilRay.cs" />
+    <Compile Include="BrazilBaddy.cs" />
+    <Compile Include="BrazilGoody.cs" />
     <Compile Include="Target.cs" />
     <Compile Include="Core.cs" />
     <Compile Include="DrawableComponent.cs" />
@@ -94,7 +94,7 @@
     <Compile Include="Xyglo.Brazil.Xna\BloomComponent.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BloomSettings.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BraceDepth.cs" />
-    <Compile Include="Xyglo.Brazil.Xna\BrazilWorld.cs" />
+    <Compile Include="BrazilWorld.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BufferView.cs" />
     <Compile Include="Xyglo.Brazil.Xna\Command.cs" />
     <Compile Include="Component.cs" />
