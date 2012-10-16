@@ -1756,7 +1756,7 @@ namespace Xyglo.Brazil.Xna
                 }
                 catch (Exception /* e */)
                 {
-                    Logger.logMsg("Friendlier:: couldn't jump");
+                    Logger.logMsg("XygloXNA:: couldn't jump");
                     fp.X++;
                 }
             }

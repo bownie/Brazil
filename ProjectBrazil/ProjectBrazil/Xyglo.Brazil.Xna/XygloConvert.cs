@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -313,6 +314,80 @@ namespace Xyglo.Brazil.Xna
                     rL.Add(newKey);
                 }
             }
+            return rL;
+        }
+
+        /// <summary>
+        /// Convert the mouse mappings from XNA to framework - it appears that buttons show as released
+        /// continuously so we want to use this process to change these mappings to events.  The return
+        /// list here will give information on whether the button has been held, pressed or released 
+        /// since last Update().
+        /// </summary>
+        /// <returns></returns>
+        static public List<Mouse> convertMouseMappings(Microsoft.Xna.Framework.Input.MouseState state, Microsoft.Xna.Framework.Input.MouseState lastState)
+        {
+            List<Mouse> rL = new List<Mouse>();
+
+            // Check the left button
+            //
+            if (state.LeftButton != lastState.LeftButton)
+            {
+                if (state.LeftButton == ButtonState.Pressed)
+                {
+                    rL.Add(Mouse.LeftButtonPress);
+                }
+                else if (state.LeftButton == ButtonState.Released)
+                {
+                    rL.Add(Mouse.LeftButtonRelease);
+                }
+            }
+            else  // possibly it's being held
+            {
+                if (state.LeftButton == ButtonState.Pressed)
+                {
+                    rL.Add(Mouse.LeftButtonHeld);
+                }
+            }
+
+
+            if (state.MiddleButton != lastState.MiddleButton)
+            {
+                if (state.MiddleButton == ButtonState.Pressed)
+                {
+                    rL.Add(Mouse.MiddleButtonPress);
+                }
+                else if (state.MiddleButton == ButtonState.Released)
+                {
+                    rL.Add(Mouse.MiddleButtonRelease);
+                }
+            }
+            else
+            {
+                if (state.MiddleButton == ButtonState.Pressed)
+                {
+                    rL.Add(Mouse.MiddleButtonHeld);
+                }
+            }
+
+            if (state.RightButton != lastState.RightButton)
+            {
+                if (state.RightButton == ButtonState.Pressed)
+                {
+                    rL.Add(Mouse.RightButtonPress);
+                }
+                else if (state.RightButton == ButtonState.Released)
+                {
+                    rL.Add(Mouse.RightButtonRelease);
+                }
+            }
+            else
+            {
+                if (state.RightButton == ButtonState.Pressed)
+                {
+                    rL.Add(Mouse.RightButtonHeld);
+                }
+            }
+
             return rL;
         }
     }

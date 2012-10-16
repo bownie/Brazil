@@ -38,6 +38,32 @@ namespace Xyglo.Brazil
         public abstract void initialise(State state);
 
         /// <summary>
+        /// Connect a key by named state and target
+        /// </summary>
+        /// <param name="stateName"></param>
+        /// <param name="key"></param>
+        /// <param name="targetName"></param>
+        public void connectKey(string stateName, Keys key, string targetName = "")
+        {
+            Target target;
+            if (targetName == "")
+            {
+                target = null;
+            }
+            else
+            {
+                target = getTarget(targetName);
+            }
+
+            // Get state
+            //
+            State state = getState(stateName);
+
+            connectKey(state, key, target);
+        }
+
+
+        /// <summary>
         /// Connect a Key to a Target in a State
         /// </summary>
         /// <param name="state"></param>
@@ -53,6 +79,33 @@ namespace Xyglo.Brazil
             checkTarget(target);
 
             m_actionMap.setAction(state, new KeyAction(key), target);
+        }
+
+        /// <summary>
+        /// Connect a Key to a Target - ensure we specify a Button State for that key too.
+        /// Connecting by string state and target.
+        /// </summary>
+        /// <param name="stateName"></param>
+        /// <param name="key"></param>
+        /// <param name="buttonState"></param>
+        /// <param name="targetName"></param>
+        public void connectKey(string stateName, Keys key, KeyButtonState buttonState, string targetName = "")
+        {
+            Target target;
+            if (targetName == "")
+            {
+                target = null;
+            }
+            else
+            {
+                target = getTarget(targetName);
+            }
+
+            // Get state
+            //
+            State state = getState(stateName);
+
+            connectKey(state, key, buttonState, target);
         }
 
         /// <summary>
@@ -72,6 +125,36 @@ namespace Xyglo.Brazil
             checkTarget(target);
 
             m_actionMap.setAction(state, new KeyAction(key, buttonState), target);
+        }
+
+        /// <summary>
+        /// Connect up by 
+        /// </summary>
+        /// <param name="stateName"></param>
+        /// <param name="action"></param>
+        /// <param name="targetName"></param>
+        public void connect(string stateName, Action action, string targetName = "")
+        {
+            Target target;
+            if (targetName == "")
+            {
+                target = new Target(); // default
+            }
+            else
+            {
+                target = getTarget(targetName);
+            }
+
+            // Get state
+            //
+            State state = getState(stateName);
+
+            // Check for valid State and Target - should always pass
+            //
+            checkState(state);
+            checkTarget(target);
+
+            m_actionMap.setAction(state, action, target);
         }
 
         /// <summary>
@@ -112,6 +195,30 @@ namespace Xyglo.Brazil
             {
                 m_actionMap.setAction(state, action, target);
             }
+        }
+
+        /// <summary>
+        /// Connect EditorKeys by name
+        /// </summary>
+        /// <param name="stateName"></param>
+        /// <param name="targetName"></param>
+        public void connectEditorKeys(string stateName, string targetName = "")
+        {
+            Target target;
+            if (targetName == "")
+            {
+                target = null;
+            }
+            else
+            {
+                target = getTarget(targetName);
+            }
+
+            // Get state
+            //
+            State state = getState(stateName);
+
+            connectEditorKeys(state, target);
         }
 
         /// <summary>
@@ -235,11 +342,58 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
+        /// Get a state
+        /// </summary>
+        /// <param name="stateName"></param>
+        /// <returns></returns>
+        public State getState(string stateName)
+        {
+            foreach(State state in m_states)
+            {
+                if (state.m_name == stateName)
+                {
+                    return state;
+                }
+            }
+
+            throw new Exception("BrazilApp: state not defined " + stateName);
+        }
+
+        /// <summary>
+        /// Get a target from our target list
+        /// </summary>
+        /// <param name="targetName"></param>
+        /// <returns></returns>
+        public Target getTarget(string targetName)
+        {
+            foreach (Target target in m_targets)
+            {
+                if (target.m_name == targetName)
+                {
+                    return target;
+                }
+            }
+
+            throw new Exception("BrazilApp: target not defined " + targetName);
+        }
+
+        /// <summary>
+        /// Add a Component with a given State - by state name
+        /// </summary>
+        /// <param name="component"></param>
+        public void addComponent(string stateName, Component component)
+        {
+            State state = getState(stateName);
+            addComponent(state, component);
+        }
+
+        /// <summary>
         /// Add a Component with a given State
         /// </summary>
         /// <param name="component"></param>
         public void addComponent(State state, Component component)
         {
+            checkState(state);
             component.addState(state);
             m_componentList.Add(component);
         }

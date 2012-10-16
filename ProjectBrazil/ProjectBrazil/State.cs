@@ -20,6 +20,31 @@ namespace Xyglo.Brazil
             m_name = value;
         }
 
+        /// <summary>
+        /// Check to see if this state is called that name
+        /// </summary>
+        /// <param name="checkState"></param>
+        /// <returns></returns>
+        public bool equals(string checkState)
+        {
+            return (m_name == checkState);
+        }
+
+        /// <summary>
+        /// Is this State not called that?
+        /// </summary>
+        /// <param name="checkState"></param>
+        /// <returns></returns>
+        public bool notEquals(string checkState)
+        {
+            return (m_name != checkState);
+        }
+
+        /// <summary>
+        /// Generate a test state
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         static public State Test(string value)
         {
             return new State(value);

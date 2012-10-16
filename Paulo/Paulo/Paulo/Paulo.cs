@@ -44,18 +44,18 @@ namespace Paulo
             //
             BrazilInterloper paulo = new BrazilInterloper(BrazilColour.White, new BrazilVector3(0, 0, 0), new BrazilVector3(10, 10, 10));
             //paulo.setVelocity(new BrazilVector3(0.1f, 0, 0));
-            addComponent(State.Test("PlayingGame"), paulo);
+            addComponent("PlayingGame", paulo);
 
             // Banner screen
             //
             BannerText menuScreen = new BannerText(BrazilColour.Blue, new BrazilVector3(360.0f, 240.0f, 0), 4.0, "Paulo");
-            addComponent(State.Test("Menu"), menuScreen);
+            addComponent("Menu", menuScreen);
 
             BannerText byLine = new BannerText(BrazilColour.Yellow, new BrazilVector3(430.0f, 345.0f, 0), 1.0, "@xyglo");
-            addComponent(State.Test("Menu"), byLine);
+            addComponent("Menu", byLine);
 
             BannerText toPlay = new BannerText(BrazilColour.White, new BrazilVector3(380.0f, 500.0f, 0), 1.0, "Hit '1' to Play");
-            addComponent(State.Test("Menu"), toPlay);
+            addComponent("Menu", toPlay);
 
             //BannerText toPlay = new BannerText(BrazilColour.White, new BrazilVector3(350.0f, 500.0f, 0), 1.0, "1 - Play the Game");
             //addComponent(State.Test("Menu"), toPlay);
@@ -102,24 +102,24 @@ namespace Paulo
         {
             // Connect up a transition - this key connection starts the game for us
             //
-            connectKey(State.Test("Menu"), Keys.D1, Target.getTarget("StartPlaying"));
+            connectKey("Menu", Keys.D1, "StartPlaying");
 
             // Connect up the escape key to exit the game or into the menu
             //
-            connectKey(State.Test("Menu"), Keys.Escape, Target.getTarget("Exit"));
-            connectKey(State.Test("PlayingGame"), Keys.Escape, Target.getTarget("QuitToMenu"));
+            connectKey("Menu", Keys.Escape, "Exit");
+            connectKey("PlayingGame", Keys.Escape, "QuitToMenu");
 
             // Connect up the Interloper
             //
-            connectKey(State.Test("PlayingGame"), Keys.Left, Target.getTarget("MoveLeft"));
-            connectKey(State.Test("PlayingGame"), Keys.Right, Target.getTarget("MoveRight"));
-            connectKey(State.Test("PlayingGame"), Keys.Up, Target.getTarget("MoveForward"));
-            connectKey(State.Test("PlayingGame"), Keys.Down, Target.getTarget("MoveBack"));
+            connectKey("PlayingGame", Keys.Left, "MoveLeft");
+            connectKey("PlayingGame", Keys.Right, "MoveRight");
+            connectKey("PlayingGame", Keys.Up, "MoveForward");
+            connectKey("PlayingGame", Keys.Down, "MoveBack");
 
-            connectKey(State.Test("PlayingGame"), Keys.Left, KeyButtonState.Held, Target.getTarget("MoveLeft"));
-            connectKey(State.Test("PlayingGame"), Keys.Right, KeyButtonState.Held, Target.getTarget("MoveRight"));
+            connectKey("PlayingGame", Keys.Left, KeyButtonState.Held, "MoveLeft");
+            connectKey("PlayingGame", Keys.Right, KeyButtonState.Held, "MoveRight");
 
-            connectKey(State.Test("PlayingGame"), Keys.Space, Target.getTarget("Jump"));
+            connectKey("PlayingGame", Keys.Space, "Jump");
         }
 
 
@@ -134,19 +134,19 @@ namespace Paulo
             // Push onto component list
             //
             //m_componentList.Add(block1);
-            addComponent(State.Test("PlayingGame"), block1);
+            addComponent("PlayingGame", block1);
 
             BrazilFlyingBlock block2 = new BrazilFlyingBlock(BrazilColour.Brown, new BrazilVector3(0, 0, 0), new BrazilVector3(100, 20, 20));
             //block2.setVelocity(new BrazilVector3(0.5f, 0, 0.1f));
             //m_componentList.Add(block2);
-            addComponent(State.Test("PlayingGame"), block2);
+            addComponent("PlayingGame", block2);
 
             BrazilFlyingBlock block3 = new BrazilFlyingBlock(BrazilColour.Orange, new BrazilVector3(0, 150, 0), new BrazilVector3(200, 50, 0));
             //block3.setRotation(0.01);
             block3.setHardness(10);
             //m_componentList.Add(block3);
             block3.setName("LandingBlock1");
-            addComponent(State.Test("PlayingGame"), block3);
+            addComponent("PlayingGame", block3);
 
             BrazilFlyingBlock block4 = new BrazilFlyingBlock(BrazilColour.Green, new BrazilVector3(-170, 170, 0), new BrazilVector3(70, 20, 10));
             //block4.setRotation(0.03);
@@ -155,12 +155,12 @@ namespace Paulo
             block4.setHardness(10);
             block4.setName("LandingBlock2");
             block4.setInitialAngle(Math.PI / 8);
-            addComponent(State.Test("PlayingGame"), block4);
+            addComponent("PlayingGame", block4);
 
             // Setup the HUD
             //
             BrazilHud hud = new BrazilHud(BrazilColour.White, BrazilVector3.Zero, 1.0, "HUD");
-            addComponent(State.Test("PlayingGame"), hud);
+            addComponent("PlayingGame", hud);
         }
     }
 }

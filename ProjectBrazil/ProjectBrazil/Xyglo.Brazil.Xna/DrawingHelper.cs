@@ -532,7 +532,7 @@ namespace Xyglo.Brazil.Xna
         {
             Color bufferColour = view.getTextColour();
 
-            if (state != State.Test("TextEditing") && state != State.Test("GotoLine") && state != State.Test("FindText") && state != State.Test("DiffPicker"))
+            if (state.notEquals("TextEditing") && state.notEquals("GotoLine") && state.notEquals("FindText") && state.notEquals("DiffPicker"))
             {
                 bufferColour = m_greyedColour;
             }
@@ -826,7 +826,6 @@ namespace Xyglo.Brazil.Xna
             //
             bool drawScrollingText = false;
 #endif
-
             // Set our colour according to the state of Friendlier
             //
             Color overlayColour = Color.White;

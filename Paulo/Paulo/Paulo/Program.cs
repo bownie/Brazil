@@ -12,7 +12,7 @@ namespace Paulo
         [STAThread]// Setting this as single threaded for cut and paste of all things to work
         static void Main(string[] args)
         {
-            bool friendlier = false;
+            bool friendlier = true;
             BrazilApp app = null;
 
             if (friendlier)
@@ -27,7 +27,7 @@ namespace Paulo
             }
             else
             {
-                // Or we create a Paulo
+                // Or we create a Paulo with an initial gravity vector
                 //
                 app = new Paulo(new BrazilVector3(0, 0.1f, 0));
 

@@ -35,7 +35,7 @@ namespace Xyglo.Brazil.Xna
 
             if (!m_kinectManager.initialise())
             {
-                Logger.logMsg("Friendlier::initialiseProject() - no kinect device found");
+                Logger.logMsg("XygloXNA::initialiseProject() - no kinect device found");
             }
 #endif
         }

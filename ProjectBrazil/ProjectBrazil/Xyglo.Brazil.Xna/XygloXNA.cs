@@ -229,11 +229,6 @@ namespace Xyglo.Brazil.Xna
         protected Texture2D m_textScrollTexture;
 
         /// <summary>
-        /// Rotations are stored in this vector
-        /// </summary>
-        Vector3 m_rotations = new Vector3();
-
-        /// <summary>
         /// Our view matrix
         /// </summary>
         Matrix m_viewMatrix = new Matrix();
@@ -614,7 +609,6 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         protected Keys m_currentKeyDown;
 
-
         /// <summary>
         /// Frame rate
         /// </summary>
@@ -630,9 +624,7 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         TimeSpan m_elapsedTime = TimeSpan.Zero;
 
-
         /////////////////////////////// CONSTRUCTORS ////////////////////////////
-
         /// <summary>
         /// Default constructor
         /// </summary>
@@ -663,7 +655,6 @@ namespace Xyglo.Brazil.Xna
         }
 
         /////////////////////////////// METHODS //////////////////////////////////////
-
         /// <summary>
         /// Set the project
         /// </summary>
@@ -682,39 +673,6 @@ namespace Xyglo.Brazil.Xna
             return m_project;
         }
 
-        /*
-        /// <summary>
-        /// Implement for IWorld interface - gets the list of features that this world
-        /// exposes.
-        /// </summary>
-        /// <returns></returns>
-        public List<string> getFeatures()
-        {
-            List<string> rL = new List<string>();
-
-            rL.Add("BufferView");
-            rL.Add("FileBuffer");
-            rL.Add("DiffView");
-            rL.Add("Etc");
-
-            return rL;
-        }
-
-        /// <summary>
-        /// Implement the getInputFeatures of the IWorld interface.
-        /// </summary>
-        /// <returns></returns>
-        public List<string> getInputFeatures()
-        {
-            List<string> rL = new List<string>();
-
-            rL.Add("Keyboard");
-            rL.Add("Mouse");
-            rL.Add("Gesture");
-
-            return rL;
-        }
-        */
         /// <summary>
         /// Initialise some stuff in the constructor
         /// </summary>
@@ -736,7 +694,7 @@ namespace Xyglo.Brazil.Xna
 
             // Set the editing state
             //
-            m_state = State.Test("TextEditing");
+            //m_state = State.Test("TextEditing");
 
             // Set physical memory
             //
@@ -782,7 +740,6 @@ namespace Xyglo.Brazil.Xna
         {
             m_state = state;
         }
-
 
         /// <summary>
         /// Enable windowed mode
@@ -939,43 +896,6 @@ namespace Xyglo.Brazil.Xna
                 // catch all method.
                 //
                 bv.setDefaults();
-#if FILESYSTEMWATCHER
-                string name = bv.getFileBuffer().getFilepath();
-                DateTime lastModTime = File.GetLastWriteTime(bv.getFileBuffer().getFilepath());
-
-                // If this BufferView is tailing a file then find out what file it is and watch it
-                //
-                if (bv.isTailing())
-                {
-                    string dirName = System.IO.Path.GetDirectoryName(bv.getFileBuffer().getFilepath());
-                    string fileName = System.IO.Path.GetFileName(bv.getFileBuffer().getFilepath());
-
-                    bool alreadyWatching = false;
-                    foreach (FileSystemWatcher fw in m_watcherList)
-                    {
-                        if (fw.Path == dirName && fw.Filter == fileName)
-                        {
-                            alreadyWatching = true;
-                            break;
-                        }
-                    }
-
-                    if (!alreadyWatching)
-                    {
-                        FileSystemWatcher watch = new FileSystemWatcher(dirName);
-                        watch.Filter = fileName;
-                        watch.Changed += new FileSystemEventHandler(OnFileChanged);
-
-                        // Push to m_watcherlist to keep it alive
-                        //
-                        m_watcherList.Add(watch);
-
-                        // Begin watching
-                        //
-                        watch.EnableRaisingEvents = true;
-                    }
-                }
-#endif
             }
 
             // Get the BufferView id we've selected and set the BufferView
@@ -1054,20 +974,6 @@ namespace Xyglo.Brazil.Xna
                     fb.forceRefetchFile(m_project.getSyntaxManager());
                 }
             }
-
-            /*
-            foreach(FileSystemWatcher fsw in m_watcherList)
-            {
-                string fullPath = fsw.Path + @"\" + fsw.Filter;
-
-                if (fullPath == e.FullPath)
-                {
-                    fsw.EnableRaisingEvents = true;
-                }
-            }
-             * */
-
-            //FileSystemWatcher watcher = FileSystemWatcher(source);
         }
 
 
@@ -1153,42 +1059,24 @@ namespace Xyglo.Brazil.Xna
             if (m_graphics.GraphicsDevice.Viewport.Width < 960)
             {
                 m_project.getFontManager().setFontState(FontManager.FontType.Small);
-                Logger.logMsg("Friendlier:setSpriteFont() - using Small Window font");
+                Logger.logMsg("XygloXNA:setSpriteFont() - using Small Window font");
             }
             else if (m_graphics.GraphicsDevice.Viewport.Width < 1024)
             {
                 m_project.getFontManager().setFontState(FontManager.FontType.Medium);
-                Logger.logMsg("Friendlier:setSpriteFont() - using Window font");
+                Logger.logMsg("XygloXNA:setSpriteFont() - using Window font");
             }
             else
             {
-                Logger.logMsg("Friendlier:setSpriteFont() - using Full font");
+                Logger.logMsg("XygloXNA:setSpriteFont() - using Full font");
                 m_project.getFontManager().setFontState(FontManager.FontType.Large);
             }
 
             // to handle tabs for the moment convert them to single spaces
             //
-            Logger.logMsg("Friendlier:setSpriteFont() - you must get these three variables correct for each position to avoid nasty looking fonts:");
-            Logger.logMsg("Friendlier:setSpriteFont() - zoom level = " + m_zoomLevel);
-
-            // Log these sizes 
-            //
-            //Logger.logMsg("Friendlier:setSpriteFont() - Font getCharWidth = " + m_project.getFontManager().getCharWidth());
-            //Logger.logMsg("Friendlier:setSpriteFont() - Font getCharHeight = " + m_project.getFontManager().getCharHeight());
-            //Logger.logMsg("Friendlier:setSpriteFont() - Font getLineSpacing = " + m_project.getFontManager().getLineSpacing());
-            //Logger.logMsg("Friendlier:setSpriteFont() - Font getTextScale = " + m_project.getFontManager().getTextScale());
-
-            /*
-            // Now we need to make all of our BufferViews have this setting too
-            //
-            foreach (BufferView bv in m_project.getBufferViews())
-            {
-                bv.setCharWidth(m_project.getFontManager().getCharWidth());
-                bv.setLineHeight(m_project.getFontManager().getLineSpacing());
-            }
-             * */
-
-            Logger.logMsg("Friendlier:setSpriteFont() - recalculating relative positions");
+            Logger.logMsg("XygloXNA:setSpriteFont() - you must get these three variables correct for each position to avoid nasty looking fonts:");
+            Logger.logMsg("XygloXNA:setSpriteFont() - zoom level = " + m_zoomLevel);
+            Logger.logMsg("XygloXNA:setSpriteFont() - recalculating relative positions");
 
             // Now recalculate positions
             //
@@ -1196,10 +1084,6 @@ namespace Xyglo.Brazil.Xna
             {
                 bv.calculateMyRelativePosition();
             }
-
-            // Reset the active BufferView
-            //
-            //setActiveBuffer();
         }
 
         /// <summary>
@@ -1216,24 +1100,7 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         public void initializeWorld()
         {
-            /*
-            cameraMatrix = Matrix.CreateLookAt(
-                new Vector3(0, 30, 20), new Vector3(0, 0, 0), new Vector3(0, 1, 0));
-            projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
-                Window.ClientBounds.Width / Window.ClientBounds.Height, 1.0f, 50.0f);
-            float tilt = MathHelper.ToRadians(22.5f);
-            worldMatrix = Matrix.CreateRotationX(tilt) * Matrix.CreateRotationY(tilt);
-
-            cubeEffect = new BasicEffect(GraphicsDevice, null);
-            cubeEffect.World = worldMatrix;
-            cubeEffect.View = cameraMatrix;
-            cubeEffect.Projection = projectionMatrix;
-            cubeEffect.TextureEnabled = true;
-             * */
-            
-            // Construct our view and projection matrices
-            //
-            // See here for alternatives:
+            // Construct our view and projection matrices.  See here for alternatives:
             // 
             // http://www.toymaker.info/Games/XNA/html/xna_camera.html
             // 
@@ -1297,17 +1164,6 @@ namespace Xyglo.Brazil.Xna
             m_basicEffect.TextureEnabled = true;
             m_basicEffect.VertexColorEnabled = true;
 
-            /*
-            {
-                TextureEnabled = true,
-                VertexColorEnabled = true,
-                //Alpha = 0.5f,
-                //LightingEnabled = true
-                //World = Matrix.Identity,
-                //DiffuseColor = Vector3.One
-            };
-             * */
-
             // Create and initialize our effect
             //
             m_lineEffect = new BasicEffect(m_graphics.GraphicsDevice);
@@ -1354,6 +1210,9 @@ namespace Xyglo.Brazil.Xna
             }
         }
 
+        /// <summary>
+        /// Specific FriendlierContent to load
+        /// </summary>
         protected void loadFriendlierContent()
         {
 
@@ -1398,10 +1257,6 @@ namespace Xyglo.Brazil.Xna
             //
             setSpriteFont();
 
-            // Create some textures
-            //
-            //m_dirNodeTexture = Shapes.CreateCircle(m_graphics.GraphicsDevice, 100);
-
             // Make mouse invisible
             //
             IsMouseVisible = true;
@@ -1421,7 +1276,6 @@ namespace Xyglo.Brazil.Xna
             }
 
             this.Window.Title = "Friendlier v" + VersionInformation.getProductVersion();
-
         }
 
         /// <summary>
@@ -1438,7 +1292,6 @@ namespace Xyglo.Brazil.Xna
                 fullScreenMode();
             }
         }
-
 
         /// <summary>
         /// Client is changing size event
@@ -1551,21 +1404,10 @@ namespace Xyglo.Brazil.Xna
         /// <param name="view"></param>
         protected void setActiveBuffer(XygloView view)
         {
-            //m_project.setSelectedView(view);
-
-            // Now recalculate positions
-            //
-            //foreach (BufferView bv in m_project.getBufferViews())
-            //{
-            //bv.calculateMyRelativePosition();
-            //}
-
             // All the maths is done in the Buffer View
             //
             Vector3 eyePos = view.getEyePosition(m_zoomLevel);
             flyToPosition(eyePos);
-
-
         }
 
         /// <summary>
@@ -1602,7 +1444,7 @@ namespace Xyglo.Brazil.Xna
                 return;
             }
 
-            Logger.logMsg("Friendlier:setActiveBuffer() - active buffer view is " + m_project.getSelectedBufferViewId());
+            Logger.logMsg("XygloXNA:setActiveBuffer() - active buffer view is " + m_project.getSelectedBufferViewId());
 
             // Set the font manager up with a zoom level
             //
@@ -1624,47 +1466,6 @@ namespace Xyglo.Brazil.Xna
             // Set title to include current filename
             // (this is not thread safe - we need to synchronise)
             //this.Window.Title = "Friendlier v" + VersionInformation.getProductVersion() + " - " + m_project.getSelectedBufferView().getFileBuffer().getShortFileName();
-
-#if ACTIVE_BUFFER_DEBUG
-            Logger.logMsg("Friendlier:setActiveBuffer() - buffer position = " + m_activeBufferView.getPosition());
-            Logger.logMsg("Friendlier:setActiveBuffer() - look position = " + m_target);
-            Logger.logMsg("Friendlier:setActiveBuffer() - eye position = " + m_eye);
-#endif
-        }
-
-        // Y axis rotation - also known as Yaw
-        //
-        private void RotateAroundY(float angle)
-        {
-            m_rotations.Y += angle;
-
-            // keep the value in the range 0-360 (0 - 2 PI radians)
-            if (m_rotations.Y > Math.PI * 2)
-                m_rotations.Y -= MathHelper.Pi * 2;
-            else if (m_rotations.Y < 0)
-                m_rotations.Y += MathHelper.Pi * 2;
-        }
-
-        private void RotateAroundX(float angle)
-        {
-            m_rotations.X += angle;
-
-            // keep the value in the range 0-360 (0 - 2 PI radians)
-            if (m_rotations.X > Math.PI * 2)
-                m_rotations.X -= MathHelper.Pi * 2;
-            else if (m_rotations.Y < 0)
-                m_rotations.X += MathHelper.Pi * 2;
-        }
-
-        private void RotateAroundZ(float angle)
-        {
-            m_rotations.Z += angle;
-
-            // keep the value in the range 0-360 (0 - 2 PI radians)
-            if (m_rotations.Z > Math.PI * 2)
-                m_rotations.Z -= MathHelper.Pi * 2;
-            else if (m_rotations.Y < 0)
-                m_rotations.Z += MathHelper.Pi * 2;
         }
 
         // Set up the file save mode
@@ -1679,15 +1480,6 @@ namespace Xyglo.Brazil.Xna
             // Clear the filename
             //
             m_saveFileName = "";
-
-            // Set temporary bird's eye view
-            //
-            //Vector3 newPosition = m_eye;
-            //newPosition.Z = 600.0f;
-
-            // Fly there
-            //
-            //            flyToPosition(newPosition);
         }
 
         /// <summary>
@@ -1700,15 +1492,6 @@ namespace Xyglo.Brazil.Xna
             //
             m_state = State.Test("FileOpen");
             m_temporaryMessage = "";
-
-            // Set temporary bird's eye view if we're in close
-            //
-            //Vector3 newPosition = m_eye;
-            //newPosition.Z = 600.0f;
-
-            // Fly there
-            //
-            //flyToPosition(newPosition);
         }
 
         /// <summary>
@@ -1803,13 +1586,13 @@ namespace Xyglo.Brazil.Xna
                         m_fileIsTailing = tailFile;
                         m_selectedFile = fileInfo.FullName;
 
-                        if (m_state == State.Test("FileOpen"))
+                        if (m_state.equals("FileOpen"))
                         {
                             // Now we need to choose a position for the new file we're opening
                             //
                             m_state = State.Test("PositionScreenOpen");
                         }
-                        else if (m_state == State.Test("FileSaveAs"))
+                        else if (m_state.equals("FileSaveAs"))
                         {
                             // Set the FileBuffer path
                             //
@@ -1931,10 +1714,10 @@ namespace Xyglo.Brazil.Xna
             //
             if (!force && m_saveAsExit == false && m_project.getConfigurationValue("CONFIRMQUIT").ToUpper() == "TRUE")
             {
-                if (m_confirmState != ConfirmState.Test("ConfirmQuit"))
+                if (m_confirmState.notEquals("ConfirmQuit"))
                 {
                     setTemporaryMessage("Confirm quit? Y/N", 0, gameTime);
-                    m_confirmState = ConfirmState.Test("ConfirmQuit");
+                    m_confirmState.set("ConfirmQuit");
                 }
 
                 if (m_confirmQuit == false)
@@ -1959,16 +1742,16 @@ namespace Xyglo.Brazil.Xna
             //
             if (unsaved && !force)
             {
-                if (m_confirmState == ConfirmState.Test("FileSaveCancel"))
+                if (m_confirmState.equals("FileSaveCancel"))
                 {
                     setTemporaryMessage("", 1, gameTime);
-                    m_confirmState = ConfirmState.Test("None");
+                    m_confirmState.set("None");
                     return;
                 }
                 else
                 {
                     setTemporaryMessage("Unsaved Buffers.  Save?  Y/N/C", 0, gameTime);
-                    m_confirmState = ConfirmState.Test("FileSaveCancel");
+                    m_confirmState.set("FileSaveCancel");
                     m_saveAsExit = true;
                     //m_state = State.FileSaveAs;
                 }
@@ -2071,13 +1854,13 @@ namespace Xyglo.Brazil.Xna
                 if (m_buildProcess != null)
                 {
                     setTemporaryMessage("Cancel build? (Y/N)", 0, m_gameTime);
-                    m_confirmState = ConfirmState.Test("CancelBuild");
+                    m_confirmState.set("CancelBuild");
                     return true;
                 }
 
-                if (m_confirmState == ConfirmState.Test("ConfirmQuit"))
+                if (m_confirmState.equals("ConfirmQuit"))
                 {
-                    m_confirmState = ConfirmState.Test("None");
+                    m_confirmState.set("None");
                     setTemporaryMessage("Cancelled quit.", 1.0, gameTime);
                     m_state = State.Test("TextEditing");
                     return true;
@@ -2087,19 +1870,17 @@ namespace Xyglo.Brazil.Xna
                 //
                 Vector3 newPosition = m_eye;
 
-                //newPosition.Z = 500.0f;
-
                 switch (m_state.m_name)
                 {
-                        // These are FRIENDLIER states
-                        //
+                    // These are FRIENDLIER states
+                    //
                     case "TextEditing":
                         checkExit(gameTime);
                         break;
 
                     case "FileSaveAs":
                         setTemporaryMessage("Cancelled quit.", 0.5, gameTime);
-                        m_confirmState = ConfirmState.Test("None");
+                        m_confirmState.set("None");
                         m_state = State.Test("TextEditing");
                         m_saveAsExit = false;
                         m_filesToWrite = null;
@@ -2186,8 +1967,8 @@ namespace Xyglo.Brazil.Xna
                         m_editConfigurationItem = false;
                         break;
 
-                        /// These are PAULO states
-                        /// 
+                    // These are PAULO states
+                    // 
                     case "Menu":
                         checkExit(gameTime);
                         break;
@@ -2211,7 +1992,7 @@ namespace Xyglo.Brazil.Xna
             // of this mode.  Note that we also have to mind any animations so we
             // also want to ensure that m_changingEyePosition is not true.
             //
-            if ((m_state == State.Test("Information") || m_state == State.Test("Help") /* || m_state == State.ManageProject */ ) && m_changingEyePosition == false)
+            if ((m_state.equals("Information") || m_state.equals("Help") /* || m_state == State.ManageProject */ ) && m_changingEyePosition == false)
             {
                 if (keyList.Contains(Keys.PageDown))
                 {
@@ -2242,7 +2023,7 @@ namespace Xyglo.Brazil.Xna
             // For PositionScreen state we want not handle events here other than direction keys - this section
             // decides where to place a new, opened or copied BufferView.
             //
-            if (m_state == State.Test("PositionScreenOpen") || m_state == State.Test("PositionScreenNew") || m_state == State.Test("PositionScreenCopy"))
+            if (m_state.equals("PositionScreenOpen") || m_state.equals("PositionScreenNew") || m_state.equals("PositionScreenCopy"))
             {
                 bool gotSelection = false;
 
@@ -2275,7 +2056,7 @@ namespace Xyglo.Brazil.Xna
                 //
                 if (gotSelection)
                 {
-                    if (m_state == State.Test("PositionScreenOpen"))
+                    if (m_state.equals("PositionScreenOpen"))
                     {
                         // Open the file 
                         //
@@ -2283,7 +2064,7 @@ namespace Xyglo.Brazil.Xna
                         setActiveBuffer(newBV);
                         m_state = State.Test("TextEditing");
                     }
-                    else if (m_state == State.Test("PositionScreenNew"))
+                    else if (m_state.equals("PositionScreenNew"))
                     {
                         // Use the convenience function
                         //
@@ -2291,7 +2072,7 @@ namespace Xyglo.Brazil.Xna
                         setActiveBuffer(newBV);
                         m_state = State.Test("TextEditing");
                     }
-                    else if (m_state == State.Test("PositionScreenCopy"))
+                    else if (m_state.equals("PositionScreenCopy"))
                     {
                         // Use the copy constructor
                         //
@@ -2326,21 +2107,21 @@ namespace Xyglo.Brazil.Xna
             //
             if (keyList.Contains(Keys.Up))
             {
-                if (m_state == State.Test("FileSaveAs") || m_state == State.Test("FileOpen"))
+                if (m_state.equals("FileSaveAs") || m_state.equals("FileOpen"))
                 {
                     if (m_fileSystemView.getHighlightIndex() > 0)
                     {
                         m_fileSystemView.incrementHighlightIndex(-1);
                     }
                 }
-                else if (m_state == State.Test("ManageProject") || (m_state == State.Test("Configuration") && m_editConfigurationItem == false)) // Configuration changes
+                else if (m_state.equals("ManageProject") || (m_state.equals("Configuration") && m_editConfigurationItem == false)) // Configuration changes
                 {
                     if (m_configPosition > 0)
                     {
                         m_configPosition--;
                     }
                 }
-                else if (m_state == State.Test("DiffPicker"))
+                else if (m_state.equals("DiffPicker"))
                 {
                     if (m_diffPosition > 0)
                     {
@@ -2377,7 +2158,7 @@ namespace Xyglo.Brazil.Xna
             //else if (keyActionList.Find(item => item.m_key == Keys.Down && item.m_modifier == KeyboardModifier.None).ToString() != "")
             else if (keyList.Contains(Keys.Down))
             {
-                if (m_state == State.Test("FileSaveAs") || m_state == State.Test("FileOpen"))
+                if (m_state.equals("FileSaveAs") || m_state.equals("FileOpen"))
                 {
                     if (m_fileSystemView.atDriveLevel())
                     {
@@ -2394,21 +2175,21 @@ namespace Xyglo.Brazil.Xna
                         m_fileSystemView.incrementHighlightIndex(1);
                     }
                 }
-                else if (m_state == State.Test("Configuration") && m_editConfigurationItem == false) // Configuration changes
+                else if (m_state.equals("Configuration") && m_editConfigurationItem == false) // Configuration changes
                 {
                     if (m_configPosition < m_project.getConfigurationListLength() - 1)
                     {
                         m_configPosition++;
                     }
                 }
-                else if (m_state == State.Test("ManageProject"))
+                else if (m_state.equals("ManageProject"))
                 {
                     if (m_configPosition < m_modelBuilder.getLeafNodesPlaces() - 1)
                     {
                         m_configPosition++;
                     }
                 }
-                else if (m_state == State.Test("DiffPicker"))
+                else if (m_state.equals("DiffPicker"))
                 {
                     if (m_differ != null && m_diffPosition < m_differ.getMaxDiffLength())
                     {
@@ -2445,7 +2226,7 @@ namespace Xyglo.Brazil.Xna
             }
             else if (keyList.Contains(Keys.Left))
             {
-                if (m_state == State.Test("FileSaveAs") || m_state == State.Test("FileOpen"))
+                if (m_state.equals("FileSaveAs") || m_state.equals("FileOpen"))
                 {
                     string parDirectory = "";
 
@@ -2504,7 +2285,7 @@ namespace Xyglo.Brazil.Xna
             }
             else if (keyList.Contains(Keys.Right))
             {
-                if (m_state == State.Test("FileSaveAs") || m_state == State.Test("FileOpen"))
+                if (m_state.equals("FileSaveAs") || m_state.equals("FileOpen"))
                 {
                     traverseDirectory(gameTime);
                 }
@@ -2645,7 +2426,7 @@ namespace Xyglo.Brazil.Xna
             }
             else if (keyList.Contains(Keys.PageDown))
             {
-                if (m_state == State.Test("TextEditing"))
+                if (m_state.equals("TextEditing"))
                 {
                     m_project.getSelectedBufferView().pageDown(m_project);
 
@@ -2658,7 +2439,7 @@ namespace Xyglo.Brazil.Xna
                         m_project.getSelectedBufferView().noHighlight(); // Disable
                     }
                 }
-                else if (m_state == State.Test("DiffPicker"))
+                else if (m_state.equals("DiffPicker"))
                 {
                     if (m_differ != null && m_diffPosition < m_differ.getMaxDiffLength())
                     {
@@ -2673,7 +2454,7 @@ namespace Xyglo.Brazil.Xna
             }
             else if (keyList.Contains(Keys.PageUp))
             {
-                if (m_state == State.Test("TextEditing"))
+                if (m_state.equals("TextEditing"))
                 {
                     m_project.getSelectedBufferView().pageUp(m_project);
 
@@ -2686,7 +2467,7 @@ namespace Xyglo.Brazil.Xna
                         m_project.getSelectedBufferView().noHighlight(); // Disable
                     }
                 }
-                else if (m_state == State.Test("DiffPicker"))
+                else if (m_state.equals("DiffPicker"))
                 {
                     if (m_diffPosition > 0)
                     {
@@ -2717,7 +2498,7 @@ namespace Xyglo.Brazil.Xna
             }
             else if (keyList.Contains(Keys.Insert))
             {
-                if (m_state == State.Test("ManageProject"))
+                if (m_state.equals("ManageProject"))
                 {
                     if (m_configPosition >= 0 && m_configPosition < m_modelBuilder.getLeafNodesPlaces())
                     {
@@ -2771,7 +2552,7 @@ namespace Xyglo.Brazil.Xna
             else if (keyList.Contains(Keys.Delete) || keyList.Contains(Keys.Back))
             {
 
-                if (m_state == State.Test("FileSaveAs") && keyList.Contains(Keys.Back))
+                if (m_state.equals("FileSaveAs") && keyList.Contains(Keys.Back))
                 {
                     // Delete charcters from the file name if we have one
                     //
@@ -2780,7 +2561,7 @@ namespace Xyglo.Brazil.Xna
                         m_saveFileName = m_saveFileName.Substring(0, m_saveFileName.Length - 1);
                     }
                 }
-                else if (m_state == State.Test("FindText") && keyList.Contains(Keys.Back))
+                else if (m_state.equals("FindText") && keyList.Contains(Keys.Back))
                 {
                     string searchText = m_project.getSelectedBufferView().getSearchText();
                     // Delete charcters from the file name if we have one
@@ -2790,21 +2571,21 @@ namespace Xyglo.Brazil.Xna
                         m_project.getSelectedBufferView().setSearchText(searchText.Substring(0, searchText.Length - 1));
                     }
                 }
-                else if (m_state == State.Test("GotoLine") && keyList.Contains(Keys.Back))
+                else if (m_state.equals("GotoLine") && keyList.Contains(Keys.Back))
                 {
                     if (m_gotoLine.Length > 0)
                     {
                         m_gotoLine = m_gotoLine.Substring(0, m_gotoLine.Length - 1);
                     }
                 }
-                else if (m_state == State.Test("Configuration") && m_editConfigurationItem && keyList.Contains(Keys.Back))
+                else if (m_state.equals("Configuration") && m_editConfigurationItem && keyList.Contains(Keys.Back))
                 {
                     if (m_editConfigurationItemValue.Length > 0)
                     {
                         m_editConfigurationItemValue = m_editConfigurationItemValue.Substring(0, m_editConfigurationItemValue.Length - 1);
                     }
                 }
-                else if (m_state == State.Test("ManageProject"))
+                else if (m_state.equals("ManageProject"))
                 {
                     if (m_configPosition >= 0 && m_configPosition < m_modelBuilder.getLeafNodesPlaces())
                     {
@@ -2882,7 +2663,7 @@ namespace Xyglo.Brazil.Xna
             {
                 //ScreenPosition fp = m_project.getSelectedBufferView().getCursorPosition();
 
-                if (m_state == State.Test("FileSaveAs"))
+                if (m_state.equals("FileSaveAs"))
                 {
                     // Check that the filename is valid
                     //
@@ -2930,11 +2711,11 @@ namespace Xyglo.Brazil.Xna
                         }
                     }
                 }
-                else if (m_state == State.Test("FileOpen"))
+                else if (m_state.equals("FileOpen"))
                 {
                     traverseDirectory(gameTime);
                 }
-                else if (m_state == State.Test("Configuration"))
+                else if (m_state.equals("Configuration"))
                 {
                     // Set this status so that we edit the item
                     //
@@ -2952,11 +2733,11 @@ namespace Xyglo.Brazil.Xna
                         m_project.updateConfigurationItem(m_project.getConfigurationItem(m_configPosition).Name, m_editConfigurationItemValue);
                     }
                 }
-                else if (m_state == State.Test("FindText"))
+                else if (m_state.equals("FindText"))
                 {
                     doSearch(gameTime);
                 }
-                else if (m_state == State.Test("GotoLine"))
+                else if (m_state.equals("GotoLine"))
                 {
                     try
                     {
@@ -3031,14 +2812,14 @@ namespace Xyglo.Brazil.Xna
 
             // Check confirm state
             //
-            if (m_confirmState != ConfirmState.Test("None"))
+            if (m_confirmState.equals("None"))
             {
                 if (keyList.Contains(Keys.Y))
                 {
                     Logger.logMsg("XygloXNA::processCombinationsCommands() - confirm y/n");
                     try
                     {
-                        if (m_confirmState == ConfirmState.Test("FileSave"))
+                        if (m_confirmState.equals("FileSave"))
                         {
                             // Select a file path if we need one
                             //
@@ -3061,7 +2842,7 @@ namespace Xyglo.Brazil.Xna
                                 rC = true;
                             }
                         }
-                        else if (m_confirmState == ConfirmState.Test("FileSaveCancel"))
+                        else if (m_confirmState.equals("FileSaveCancel"))
                         {
                             // First of all save all open buffers we can write and save
                             // a list of all those we can't
@@ -3105,13 +2886,13 @@ namespace Xyglo.Brazil.Xna
                                 checkExit(gameTime);
                             }
                         }
-                        else if (m_confirmState == ConfirmState.Test("CancelBuild"))
+                        else if (m_confirmState.equals("CancelBuild"))
                         {
                             Logger.logMsg("XygloXNA::processCombinationsCommands() - cancel build");
                             m_buildProcess.Close();
                             m_buildProcess = null;
                         }
-                        else if (m_confirmState == ConfirmState.Test("ConfirmQuit"))
+                        else if (m_confirmState.equals("ConfirmQuit"))
                         {
                             m_confirmQuit = true;
                             checkExit(gameTime, true);
@@ -3123,39 +2904,39 @@ namespace Xyglo.Brazil.Xna
                         setTemporaryMessage("Save failed with \"" + e.Message + "\".", 5, gameTime);
                     }
 
-                    m_confirmState = ConfirmState.Test("None");
+                    m_confirmState.set("None");
                 }
                 else if (keyList.Contains(Keys.N))
                 {
                     // If no for single file save then continue - if no for FileSaveCancel then quit
                     //
-                    if (m_confirmState == ConfirmState.Test("FileSave"))
+                    if (m_confirmState.equals("FileSave"))
                     {
                         m_temporaryMessage = "";
-                        m_confirmState = ConfirmState.Test("None");
+                        m_confirmState.set("None");
                     }
-                    else if (m_confirmState == ConfirmState.Test("FileSaveCancel"))
+                    else if (m_confirmState.equals("FileSaveCancel"))
                     {
                         // Exit nicely
                         //
                         checkExit(gameTime, true);
                     }
-                    else if (m_confirmState == ConfirmState.Test("CancelBuild"))
+                    else if (m_confirmState.equals("CancelBuild"))
                     {
                         setTemporaryMessage("Continuing build..", 2, gameTime);
-                        m_confirmState = ConfirmState.Test("None");
+                        m_confirmState.set("None");
                     }
-                    else if (m_confirmState == ConfirmState.Test("ConfirmQuit"))
+                    else if (m_confirmState.equals("ConfirmQuit"))
                     {
                         setTemporaryMessage("Cancelled quit", 2, gameTime);
-                        m_confirmState = ConfirmState.Test("None");
+                        m_confirmState.set("None");
                     }
                     rC = true; // consume this letter
                 }
-                else if (keyList.Contains(Keys.C) && m_confirmState == ConfirmState.Test("FileSaveCancel"))
+                else if (keyList.Contains(Keys.C) && m_confirmState.equals("FileSaveCancel"))
                 {
                     setTemporaryMessage("Cancelled Quit.", 0.5, gameTime);
-                    m_confirmState = ConfirmState.Test("None");
+                    m_confirmState.set("None");
                     rC = true;
                 }
             }
@@ -3163,7 +2944,7 @@ namespace Xyglo.Brazil.Xna
             {
                 if (keyList.Contains(Keys.C)) // Copy
                 {
-                    if (m_state == State.Test("Configuration") && m_editConfigurationItem)
+                    if (m_state.equals("Configuration") && m_editConfigurationItem)
                     {
                         Logger.logMsg("XygloXNA::processCombinationsCommands() - copying from configuration");
                         System.Windows.Forms.Clipboard.SetText(m_editConfigurationItemValue);
@@ -3183,7 +2964,7 @@ namespace Xyglo.Brazil.Xna
                 }
                 else if (keyList.Contains(Keys.X)) // Cut
                 {
-                    if (m_state == State.Test("Configuration") && m_editConfigurationItem)
+                    if (m_state.equals("Configuration") && m_editConfigurationItem)
                     {
                         Logger.logMsg("XygloXNA::processCombinationsCommands() - cutting from configuration");
                         System.Windows.Forms.Clipboard.SetText(m_editConfigurationItemValue);
@@ -3202,7 +2983,7 @@ namespace Xyglo.Brazil.Xna
                 {
                     if (System.Windows.Forms.Clipboard.ContainsText())
                     {
-                        if (m_state == State.Test("Configuration") && m_editConfigurationItem)
+                        if (m_state.equals("Configuration") && m_editConfigurationItem)
                         {
                             Logger.logMsg("XygloXNA::processCombinationsCommands() - pasting into configuration");
 
@@ -3354,7 +3135,7 @@ namespace Xyglo.Brazil.Xna
                     if (m_confirmFileSave)
                     {
                         setTemporaryMessage("Confirm Save? Y/N", 0, gameTime);
-                        m_confirmState = ConfirmState.Test("FileSave");
+                        m_confirmState.set("FileSave");
                     }
                     else  // just save
                     {
@@ -3518,161 +3299,6 @@ namespace Xyglo.Brazil.Xna
             return rC;
         }
 
-        /// <summary>
-        /// Convert the mouse mappings from XNA to framework - it appears that buttons show as released
-        /// continuously so we want to use this process to change these mappings to events.  The return
-        /// list here will give information on whether the button has been held, pressed or released 
-        /// since last Update().
-        /// </summary>
-        /// <returns></returns>
-        protected List<Mouse> convertMouseMappings(Microsoft.Xna.Framework.Input.MouseState state, Microsoft.Xna.Framework.Input.MouseState lastState)
-        {
-            List<Mouse> rL = new List<Mouse>();
-
-            // Check the left button
-            //
-            if (state.LeftButton != lastState.LeftButton)
-            {
-                if (state.LeftButton == ButtonState.Pressed)
-                {
-                    rL.Add(Mouse.LeftButtonPress);
-                }
-                else if (state.LeftButton == ButtonState.Released)
-                {
-                    rL.Add(Mouse.LeftButtonRelease);
-                }                
-            }
-            else  // possibly it's being held
-            {
-                if (state.LeftButton == ButtonState.Pressed)
-                {
-                    rL.Add(Mouse.LeftButtonHeld);
-                }
-            }
-
-
-            if (state.MiddleButton != lastState.MiddleButton)
-            {
-                if (state.MiddleButton == ButtonState.Pressed)
-                {
-                    rL.Add(Mouse.MiddleButtonPress);
-                }
-                else if (state.MiddleButton == ButtonState.Released)
-                {
-                    rL.Add(Mouse.MiddleButtonRelease);
-                }
-            }
-            else
-            {
-                if (state.MiddleButton == ButtonState.Pressed)
-                {
-                    rL.Add(Mouse.MiddleButtonHeld);
-                }
-            }
-
-            if (state.RightButton != lastState.RightButton)
-            {
-                if (state.RightButton == ButtonState.Pressed)
-                {
-                    rL.Add(Mouse.RightButtonPress);
-                }
-                else if (state.RightButton == ButtonState.Released)
-                {
-                    rL.Add(Mouse.RightButtonRelease);
-                }
-            }
-            else
-            {
-                if (state.RightButton == ButtonState.Pressed)
-                {
-                    rL.Add(Mouse.RightButtonHeld);
-                }
-            }
-
-            return rL;
-        }
-
-
-
-        /*
-        /// <summary>
-        /// Return a list of stable state keys from last time
-        /// </summary>
-        /// <returns></returns>
-        protected List<KeyAction> getLastKeys(bool ignoreModifiers = false)
-        {
-            List<KeyAction> lKA = new List<KeyAction>();
-
-            foreach(Keys key in convertKeyMappings(m_lastKeyboardState.GetPressedKeys(), ignoreModifiers))
-            {
-                lKA.Add(new KeyAction(key, true));
-            }
-
-            return lKA;
-        }
-
-        /// <summary>
-        /// Return a list of keys that have changed since last update - note that we have a local type Keys which 
-        /// is the same as the XNA name but requires mapping (as we don't know the XNA enum).
-        /// 
-        /// We have to ignore modifier keys when creating this list otherwise our StateActions get confused.
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        protected List<KeyAction> getKeysChanged(bool ignoreModifiers = false)
-        {
-            List<KeyAction> lKA = new List<KeyAction>();
-
-            // First off build up a map of what keys have been pressed since last state
-            //
-            if (m_lastKeyboardState != Keyboard.GetState())
-            {
-                // Some keys have been pressed
-                //
-                foreach (Keys key in convertKeyMappings(Keyboard.GetState().GetPressedKeys(), ignoreModifiers))
-                {
-                    bool found = false;
-                    foreach (Keys lastKey in convertKeyMappings(m_lastKeyboardState.GetPressedKeys(), ignoreModifiers))
-                    {
-                        if (lastKey == key) // still down
-                        {
-                            found = true;
-                            break;
-                        }
-                    }
-
-                    if (!found)
-                    {
-                        // Ensure that we add any modifiers here
-                        //
-                        lKA.Add(new KeyAction(key, true));
-                    }
-                }
-
-                // Which keys have gone up since last press
-                //
-                foreach (Keys lastKey in convertKeyMappings(m_lastKeyboardState.GetPressedKeys(), ignoreModifiers))
-                {
-                    bool found = false;
-                    foreach (Keys key in convertKeyMappings(Keyboard.GetState().GetPressedKeys(), ignoreModifiers))
-                    {
-                        if (lastKey == key) // still down
-                        {
-                            found = true;
-                            break;
-                        }
-                    }
-
-                    if (!found)
-                    {
-                        lKA.Add(new KeyAction(lastKey, false));
-                    }
-                }
-            }
-
-            return lKA;
-        }
-        */
 
         /// <summary>
         /// Get a list of mouse actions since the last time we had a mouse action - create an
@@ -3683,7 +3309,7 @@ namespace Xyglo.Brazil.Xna
         {
             List<MouseAction> lMA = new List<MouseAction>();
             MouseState mouseState = Microsoft.Xna.Framework.Input.Mouse.GetState();
-            List<Mouse> currentMouseList = convertMouseMappings(mouseState, m_lastMouseState);
+            List<Mouse> currentMouseList = XygloConvert.convertMouseMappings(mouseState, m_lastMouseState);
 //            List<Mouse> lastMouseList = convertMouseMappings(m_lastMouseState);
             
             // All differences between current mouse list and last one
@@ -3945,14 +3571,14 @@ namespace Xyglo.Brazil.Xna
                         }
                         break;
 
-                    //case Target.CursorDown:
-                        //break;
+                    case "CursorDown":
+                        break;
 
-                    //case Target.CursorLeft:
-                        //break;
+                    case "CursorLeft":
+                        break;
 
-                    //case Target.CursorRight:
-                        //break;
+                    case "CursorRight":
+                        break;
 
 
                         // --- PAULO cases ---
@@ -4872,7 +4498,7 @@ namespace Xyglo.Brazil.Xna
                     break;
 
                 case Keys.T:
-                    if (m_state == State.Test("FileOpen"))
+                    if (m_state.equals("FileOpen"))
                     {
                         // Open a file as read only and tail it
                         //
@@ -4905,24 +4531,24 @@ namespace Xyglo.Brazil.Xna
             {
                 //Logger.logMsg("XygloXNA::processKeys() - processing key " + key);
 
-                if (m_state == State.Test("FileSaveAs")) // File name
+                if (m_state.equals("FileSaveAs")) // File name
                 {
                     //Logger.logMsg("Writing letter " + key);
                     m_saveFileName += key;
                 }
-                else if (m_state == State.Test("Configuration") && m_editConfigurationItem) // Configuration item
+                else if (m_state.equals("Configuration") && m_editConfigurationItem) // Configuration item
                 {
                     m_editConfigurationItemValue += key;
                 }
-                else if (m_state == State.Test("FindText"))
+                else if (m_state.equals("FindText"))
                 {
                     m_project.getSelectedBufferView().appendToSearchText(key);
                 }
-                else if (m_state == State.Test("GotoLine"))
+                else if (m_state.equals("GotoLine"))
                 {
                     m_gotoLine += key;
                 }
-                else if (m_state == State.Test("TextEditing"))
+                else if (m_state.equals("TextEditing"))
                 {
                     // Do we need to do some deletion or replacing?
                     //
@@ -5653,7 +5279,7 @@ namespace Xyglo.Brazil.Xna
                 BufferView bv = (BufferView)testFind.First;
                 ScreenPosition fp = (ScreenPosition)testFind.Second.First;
 
-                if (m_state == State.Test("DiffPicker"))
+                if (m_state.equals("DiffPicker"))
                 {
                     ScreenPosition newSP = bv.testCursorPosition(new FilePosition(fp));
 
@@ -6016,7 +5642,7 @@ namespace Xyglo.Brazil.Xna
                     if ((gameTime.TotalGameTime - m_lastClickTime).TotalSeconds < 0.15f)
                     {
 
-                        if (m_state == State.Test("DiffPicker"))
+                        if (m_state.equals("DiffPicker"))
                         {
                             if (m_differ != null && m_differ.hasDiffs())
                             {
@@ -6392,7 +6018,7 @@ namespace Xyglo.Brazil.Xna
 
             // In the manage project mode we zoom off into the distance
             //
-            if (m_state == State.Test("ManageProject"))
+            if (m_state.equals("ManageProject"))
             {
                 m_drawingHelper.drawManageProject(m_overlaySpriteBatch, gameTime, m_modelBuilder, m_graphics, m_configPosition, out m_textScreenLength);
                 base.Draw(gameTime);
@@ -6445,14 +6071,14 @@ namespace Xyglo.Brazil.Xna
 
             // We only draw the scrollbar on the active view in the right mode
             //
-            if (m_state == State.Test("TextEditing"))
+            if (m_state.equals("TextEditing"))
             {
                 drawScrollbar(m_project.getSelectedBufferView());
             }
 
             // Cursor and cursor highlight
             //
-            if (m_state == State.Test("TextEditing"))
+            if (m_state.equals("TextEditing"))
             {
                 // Stop and use a different spritebatch for the highlighting and cursor
                 //
@@ -6474,22 +6100,22 @@ namespace Xyglo.Brazil.Xna
 
             // If we're choosing a file then
             //
-            if (m_state == State.Test("FileSaveAs") || m_state == State.Test("FileOpen") || m_state == State.Test("PositionScreenOpen") || m_state == State.Test("PositionScreenNew") || m_state == State.Test("PositionScreenCopy"))
+            if (m_state.equals("FileSaveAs") || m_state.equals("FileOpen") || m_state.equals("PositionScreenOpen") || m_state.equals("PositionScreenNew") || m_state.equals("PositionScreenCopy"))
             {
                 drawDirectoryChooser(gameTime);
 
             }
-            else if (m_state == State.Test("Help"))
+            else if (m_state.equals("Help"))
             {
                 // Get the text screen length back from the drawing method
                 //
                 m_textScreenLength = m_drawingHelper.drawHelpScreen(m_overlaySpriteBatch, gameTime, m_graphics, m_textScreenPositionY);
             }
-            else if (m_state == State.Test("Information"))
+            else if (m_state.equals("Information"))
             {
                 m_drawingHelper.drawInformationScreen(m_overlaySpriteBatch, gameTime, m_graphics, out m_textScreenLength);
             }
-            else if (m_state == State.Test("Configuration"))
+            else if (m_state.equals("Configuration"))
             {
                 drawConfigurationScreen(gameTime);
             }
@@ -6672,7 +6298,7 @@ namespace Xyglo.Brazil.Xna
             // Don't draw the cursor if we're not the active window or if we're confirming 
             // something on the screen.
             //
-            if (m_differ == null || m_state != State.Test("DiffPicker") || m_differ.hasDiffs() == false)
+            if (m_differ == null || m_state .notEquals("DiffPicker") || m_differ.hasDiffs() == false)
             {
                 return;
             }
@@ -6745,7 +6371,7 @@ namespace Xyglo.Brazil.Xna
             // Don't draw the cursor if we're not the active window or if we're confirming 
             // something on the screen.
             //
-            if (!this.IsActive || m_confirmState != ConfirmState.Test("None") || m_state == State.Test("FindText") || m_state == State.Test("GotoLine"))
+            if (!this.IsActive || m_confirmState.notEquals("None") || m_state.equals("FindText") || m_state.equals("GotoLine"))
             {
                 return;
             }
@@ -6815,15 +6441,15 @@ namespace Xyglo.Brazil.Xna
                                                 0.0f);
 
 
-            if (m_state == State.Test("FileOpen"))
+            if (m_state.equals("FileOpen"))
             {
                 line = "Open file...";
             }
-            else if (m_state == State.Test("FileSaveAs"))
+            else if (m_state.equals("FileSaveAs"))
             {
                 line = "Save as...";
             }
-            else if (m_state == State.Test("PositionScreenNew") || m_state == State.Test("PositionScreenOpen") || m_state == State.Test("PositionScreenCopy"))
+            else if (m_state.equals("PositionScreenNew") || m_state.equals("PositionScreenOpen") || m_state.equals("PositionScreenCopy"))
             {
                 line = "Choose a position...";
             }
@@ -6842,7 +6468,7 @@ namespace Xyglo.Brazil.Xna
 
             // If we're using this method to position a new window only then don't show the directory chooser part..
             //
-            if (m_state == State.Test("PositionScreenNew") || m_state == State.Test("PositionScreenCopy"))
+            if (m_state.equals("PositionScreenNew") || m_state.equals("PositionScreenCopy"))
             {
                 m_overlaySpriteBatch.End();
                 return;
@@ -7151,7 +6777,7 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         protected void renderTextScroller()
         {
-            if (m_state != State.Test("TextEditing"))
+            if (m_state .notEquals("TextEditing"))
             {
                 return;
             }
@@ -7227,7 +6853,7 @@ namespace Xyglo.Brazil.Xna
 
             // Override this for the diff view
             //
-            if (m_differ != null && m_state == State.Test("DiffPicker"))
+            if (m_differ != null && m_state.equals("DiffPicker"))
             {
                 start = m_diffPosition;
             }
@@ -7240,7 +6866,7 @@ namespace Xyglo.Brazil.Xna
             {
                 // Make this work for diff view as well as normal view
                 //
-                if (m_differ != null && m_state == State.Test("DiffPicker"))
+                if (m_differ != null && m_state.equals("DiffPicker"))
                 {
                     length = m_differ.getMaxDiffLength();
                 }
