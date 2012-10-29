@@ -77,43 +77,12 @@ namespace Xyglo.Brazil
         /// Default initialise with just an ActionMap
         /// </summary>
         /// <param name="actionMap"></param>
-        public void initialise(ActionMap actionMap, List<Component> componentList, BrazilWorld world)
+        public void initialise(ActionMap actionMap, List<Component> componentList, BrazilWorld world, List<State> states, List<Target> targets)
         {
-            m_xna = new XygloXNA(actionMap, componentList, world);
-
-            /*
-            // Get the features of the input
-            //
-            if (m_xna.getInputFeatures().Contains("Keyboard"))
-            {
-                m_inputFeatures |= InputFeatures.Keyboard;
-            }
-
-            if (m_xna.getInputFeatures().Contains("Mouse"))
-            {
-                m_inputFeatures |= InputFeatures.Mouse;
-            }
-
-            if (m_xna.getInputFeatures().Contains("Gesture"))
-            {
-                m_inputFeatures |= InputFeatures.Gesture;
-            }
-
-            Logger.logMsg("Input features = " + m_inputFeatures);
-             * */
+            m_xna = new XygloXNA(actionMap, componentList, world, states, targets);
         }
 
-        /*
-        /// <summary>
-        /// Return the input features
-        /// </summary>
-        /// <returns></returns>
-        public List<string> getInputFeatures()
-        {
-            return m_xna.getInputFeatures();
-        }*/
-
-        // Run the main loop
+       // Run the main loop
         //
         public void run()
         {

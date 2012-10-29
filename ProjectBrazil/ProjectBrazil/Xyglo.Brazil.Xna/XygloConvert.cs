@@ -149,6 +149,10 @@ namespace Xyglo.Brazil.Xna
                         break;
 
                     case Microsoft.Xna.Framework.Input.Keys.M:
+                        newKey = Keys.M;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.N:
                         newKey = Keys.N;
                         break;
 

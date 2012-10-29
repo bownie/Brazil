@@ -543,7 +543,7 @@ namespace Xyglo.Brazil.Xna
             }
             else
             {
-                throw new Exception("FileBuffer::getLine() - cannot fetch line " + line);
+                throw new XygloException("FileBuffer::getLine()", "Cannot fetch line " + line);
             }
         }
 

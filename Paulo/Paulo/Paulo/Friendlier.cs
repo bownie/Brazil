@@ -54,20 +54,40 @@ namespace Paulo
             // Connect ALT+O to the open file mode
             //
             connect("TextEditing", new KeyAction(Keys.O, KeyboardModifier.Alt), "OpenFile");
+            connect("PositionScreenOpen", new KeyAction(Keys.Left), "Default");
+            connect("PositionScreenOpen", new KeyAction(Keys.Right), "Default");
+            connect("PositionScreenOpen", new KeyAction(Keys.Up), "Default");
+            connect("PositionScreenOpen", new KeyAction(Keys.Down), "Default");
+
+            // File save connection
+            //
             connect("TextEditing", new KeyAction(Keys.S, KeyboardModifier.Alt), "SaveFile");
+
+            // New BufferView with state keys for selecting direction
+            //
+            connect("TextEditing", new KeyAction(Keys.N, KeyboardModifier.Alt), "NewBufferView");
+            connect("PositionScreenNew", new KeyAction(Keys.Left), "Default");
+            connect("PositionScreenNew", new KeyAction(Keys.Right), "Default");
+            connect("PositionScreenNew", new KeyAction(Keys.Up), "Default");
+            connect("PositionScreenNew", new KeyAction(Keys.Down), "Default");
+
+            // Connect up the information screen and escape to get out of it
+            //
+            connect("TextEditing", new KeyAction(Keys.I, KeyboardModifier.Alt), "ShowInformation");
+            connect("Information", Keys.Escape, "Default");
+
+            // Connect up manage project
+            //
+            connect("TextEditing", new KeyAction(Keys.M, KeyboardModifier.Alt), "ManageProject");
+            connect("ManageProject", Keys.Escape, "Default");
 
             // Connect some standard editor keys to states
             //
             connectEditorKeys("TextEditing");
-            connectEditorKeys("FileSaveAs");
-            connectEditorKeys("FileOpen");
-            connectEditorKeys("PositionScreenOpen");
-            connectEditorKeys("PositionScreenNew");
-
-            // Move the selects bufferview
-            //
-            //viewSpace.connect(State.TextEditing, new KeyAction(Keys.Left, KeyboardModifier.Alt), Target.
-            //viewSpace.connectArrowKeys(State.
+            //connectEditorKeys("FileSaveAs");
+            //connectEditorKeys("FileOpen");
+            //connectEditorKeys("PositionScreenOpen");
+            //connectEditorKeys("PositionScreenNew");
         }
 
         /// <summary>
@@ -87,7 +107,7 @@ namespace Paulo
             // Targets are actions we can perform in the application - a default target will usually mean the object
             // in focus within the current State.  This should be defined by the component.
             //
-            string[] targets = { "None", "Default", "CurrentBufferView", "OpenFile", "SaveFile", "CursorUp", "CursorDown", "CursorRight", "CursorLeft" };
+            string[] targets = { "None", "Default", "CurrentBufferView", "OpenFile", "SaveFile", "NewBufferView", "CursorUp", "CursorDown", "CursorRight", "CursorLeft", "ShowInformation" , "ManageProject"};
             foreach (string target in targets)
             {
                 addTarget(target);

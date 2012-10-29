@@ -21,7 +21,7 @@ namespace Xyglo.Brazil
         /// </summary>
         public BrazilApp()
         {
-            m_viewSpace.initialise(m_actionMap, m_componentList, m_world);
+            m_viewSpace.initialise(m_actionMap, m_componentList, m_world, m_states, m_targets);
         }
 
         /// <summary>
@@ -128,7 +128,18 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
-        /// Connect up by 
+        /// Connect up by strings - for convenience
+        /// </summary>
+        /// <param name="stateName"></param>
+        /// <param name="action"></param>
+        /// <param name="targetName"></param>
+        public void connect(string stateName, Keys key, string targetName = "")
+        {
+            connect(stateName, new KeyAction(key), targetName);
+        }
+
+        /// <summary>
+        /// Connect up by strings and Actions
         /// </summary>
         /// <param name="stateName"></param>
         /// <param name="action"></param>

@@ -70,7 +70,7 @@ namespace Paulo
             // States of the application - where are we in the navigation around the app.  States will affect what 
             // components are showing and how we interact with them.
             //
-            string[] states = { "Menu", "PlayingGame" };
+            string[] states = { "Menu", "PlayingGame", "LevelComplete" };
             foreach (string state in states)
             {
                 addState(state);
@@ -161,6 +161,11 @@ namespace Paulo
             //
             BrazilHud hud = new BrazilHud(BrazilColour.White, BrazilVector3.Zero, 1.0, "HUD");
             addComponent("PlayingGame", hud);
+
+            // Add the finishing block
+            //
+            BrazilFinishBlock finishBlock = new BrazilFinishBlock(BrazilColour.Pink, new BrazilVector3(0, -500, 0), new BrazilVector3(200, 10, 10), getState("LevelComplete"));
+            addComponent("PlayingGame", finishBlock);
         }
     }
 }

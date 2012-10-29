@@ -33,6 +33,16 @@ namespace Xyglo.Brazil.Xna
         List<Component> m_componentList = null;
 
         /// <summary>
+        /// Get the list of States from the BrazilApp
+        /// </summary>
+        List<State> m_states = null;
+
+        /// <summary>
+        /// Get the list of Targets from the BrazilApp
+        /// </summary>
+        List<Target> m_targets = null;
+
+        /// <summary>
         /// BrazilWorld holds some Worldly information for us
         /// </summary>
         BrazilWorld m_world = null;
@@ -628,11 +638,14 @@ namespace Xyglo.Brazil.Xna
         /// <summary>
         /// Default constructor
         /// </summary>
-        public XygloXNA(ActionMap actionMap, List<Component> componentList, BrazilWorld world)
+        public XygloXNA(ActionMap actionMap, List<Component> componentList, BrazilWorld world, List<State> states, List<Target> targets)
         {
             m_actionMap = actionMap;
             m_componentList = componentList;
             m_world = world;
+            m_states = states;
+            m_targets = targets;
+
             initialise();
         }
 
@@ -641,7 +654,7 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="project"></param>
         /// <param name="actionMap"></param>
-        public XygloXNA(ActionMap actionMap, Project project, List<Component> componentList, BrazilWorld world)
+        public XygloXNA(ActionMap actionMap, Project project, List<Component> componentList, BrazilWorld world, List<State> states, List<Target> targets)
         {
             // Store project and actionmap
             //
@@ -649,6 +662,8 @@ namespace Xyglo.Brazil.Xna
             m_actionMap = actionMap;
             m_componentList = componentList;
             m_world = world;
+            m_states = states;
+            m_targets = targets;
 
             // init
             initialise();
@@ -671,6 +686,38 @@ namespace Xyglo.Brazil.Xna
         public Project getProject()
         {
             return m_project;
+        }
+
+        /// <summary>
+        /// Check a State exists and throw up if not
+        /// </summary>
+        /// <param name="state"></param>
+        protected State confirmState(string stateName)
+        {
+            foreach (State state in m_states)
+            {
+                if (state.m_name == stateName)
+                {
+                    return state;
+                }
+            }
+            throw new Exception("Unrecognized state " + stateName);
+        }
+
+        /// <summary>
+        /// Check a Target exists
+        /// </summary>
+        /// <param name="target"></param>
+        protected string confirmTarget(string targetName)
+        {
+            foreach (Target target in m_targets)
+            {
+                if (target.m_name == targetName)
+                {
+                    return targetName;
+                }
+            }
+            throw new Exception("Unrecognised target " + targetName);
         }
 
         /// <summary>
@@ -1963,6 +2010,7 @@ namespace Xyglo.Brazil.Xna
                     case "PositionScreenNew":
                     case "PositionScreenCopy":
                     case "SplashScreen":
+                    case "Help":
                         m_state = State.Test("TextEditing");
                         m_editConfigurationItem = false;
                         break;
@@ -2029,7 +2077,7 @@ namespace Xyglo.Brazil.Xna
 
                 if (keyList.Contains(Keys.Left))
                 {
-                    Logger.logMsg("Friendler::Update() - position screen left");
+                    Logger.logMsg("XygloXNA::processMetaCommands() - position screen left");
                     m_newPosition = BufferView.ViewPosition.Left;
                     gotSelection = true;
                 }
@@ -2037,19 +2085,19 @@ namespace Xyglo.Brazil.Xna
                 {
                     m_newPosition = BufferView.ViewPosition.Right;
                     gotSelection = true;
-                    Logger.logMsg("Friendler::Update() - position screen right");
+                    Logger.logMsg("XygloXNA::processMetaCommands() - position screen right");
                 }
                 else if (keyList.Contains(Keys.Up))
                 {
                     m_newPosition = BufferView.ViewPosition.Above;
                     gotSelection = true;
-                    Logger.logMsg("Friendler::Update() - position screen up");
+                    Logger.logMsg("XygloXNA::processMetaCommands() - position screen up");
                 }
                 else if (keyList.Contains(Keys.Down))
                 {
                     m_newPosition = BufferView.ViewPosition.Below;
                     gotSelection = true;
-                    Logger.logMsg("Friendler::Update() - position screen down");
+                    Logger.logMsg("XygloXNA::processMetaCommands() - position screen down");
                 }
 
                 // If we have discovered a position for our pending new window
@@ -2091,7 +2139,7 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
-        /// Process action keys in the Update() statement
+        /// Process action keys for commands
         /// </summary>
         /// <param name="gameTime"></param>
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
@@ -2592,7 +2640,7 @@ namespace Xyglo.Brazil.Xna
                         string fileToRemove = m_modelBuilder.getSelectedModelString(m_configPosition);
                         if (m_project.removeFileBuffer(fileToRemove))
                         {
-                            Logger.logMsg("XygloXNA::Update() - removed FileBuffer for " + fileToRemove);
+                            Logger.logMsg("XygloXNA::processActionKeys() - removed FileBuffer for " + fileToRemove);
 
                             // Update Active Buffer as necessary
                             //
@@ -2606,7 +2654,7 @@ namespace Xyglo.Brazil.Xna
                         }
                         else
                         {
-                            Logger.logMsg("XygloXNA::Update() - failed to remove FileBuffer for " + fileToRemove);
+                            Logger.logMsg("XygloXNA::processActionKeys() - failed to remove FileBuffer for " + fileToRemove);
                         }
                     }
                 }
@@ -2671,7 +2719,7 @@ namespace Xyglo.Brazil.Xna
                     {
                         m_project.getSelectedBufferView().getFileBuffer().setFilepath(m_fileSystemView.getPath() + m_saveFileName);
 
-                        Logger.logMsg("XygloXNA::Update() - file name = " + m_project.getSelectedBufferView().getFileBuffer().getFilepath());
+                        Logger.logMsg("XygloXNA::processActionKeys() - file name = " + m_project.getSelectedBufferView().getFileBuffer().getFilepath());
 
                         completeSaveFile(gameTime);
 
@@ -2693,7 +2741,7 @@ namespace Xyglo.Brazil.Xna
                             else // We're done 
                             {
                                 m_filesToWrite = null;
-                                Logger.logMsg("XygloXNA::Update() - saved some files.  Quitting.");
+                                Logger.logMsg("XygloXNA::processActionKeys() - saved some files.  Quitting.");
 
                                 // Exit nicely and ensure we serialise
                                 //
@@ -2777,7 +2825,7 @@ namespace Xyglo.Brazil.Xna
                     }
                     catch (Exception e)
                     {
-                        Logger.logMsg("XygloXNA::Update() - couldn't get AUTOINDENT from config - " + e.Message);
+                        Logger.logMsg("XygloXNA::processActionKeys) - couldn't get AUTOINDENT from config - " + e.Message);
                     }
 
                     if (m_project.getSelectedBufferView().gotHighlight())
@@ -2810,7 +2858,14 @@ namespace Xyglo.Brazil.Xna
                 keyList.Add(keyAction.m_key);
             }
 
-            // Check confirm state
+            if (m_confirmState.equals("ConfirmQuit") && keyList.Contains(Keys.Y))
+            {
+                m_confirmQuit = true;
+                checkExit(gameTime, true);
+                return true;
+            }
+
+            // Check confirm state - this works out the complicated statuses of open file buffers
             //
             if (m_confirmState.equals("None"))
             {
@@ -3016,7 +3071,6 @@ namespace Xyglo.Brazil.Xna
                             }
                             updateSmartHelp();
                             rC = true;
-
                         }
                     }
                 }
@@ -3309,10 +3363,14 @@ namespace Xyglo.Brazil.Xna
         {
             List<MouseAction> lMA = new List<MouseAction>();
             MouseState mouseState = Microsoft.Xna.Framework.Input.Mouse.GetState();
+
+            // This conversion process diffs the states and returns the results
+            //
             List<Mouse> currentMouseList = XygloConvert.convertMouseMappings(mouseState, m_lastMouseState);
-//            List<Mouse> lastMouseList = convertMouseMappings(m_lastMouseState);
             
-            // All differences between current mouse list and last one
+            // So now we have all the differences between current mouse list and last one.
+            // Generate some MouseActions for these.
+            //
             foreach (Mouse mouse in currentMouseList)
             {
                 MouseAction mouseAction = new MouseAction(mouse);
@@ -3324,6 +3382,7 @@ namespace Xyglo.Brazil.Xna
 
             // If nothing has changed then at least update the positional information
             //
+            /*
             if (lMA.Count == 0)
             {
                 // No mouse action but we might have movement
@@ -3345,6 +3404,7 @@ namespace Xyglo.Brazil.Xna
                 }
                 lMA.Add(mouseAction);
             }
+            */
 
             /*
             // Now get the inverse state
@@ -3366,7 +3426,8 @@ namespace Xyglo.Brazil.Xna
 
         /// <summary>
         /// Get all the KeyActions that are currently in progress - whether keys be newly down 
-        /// or held down or released.
+        /// or held down or released.  We can use this method to define repeat timings for individual
+        /// keys as well.
         /// </summary>
         /// <returns></returns>
         protected List<KeyAction> getAllKeyActions()
@@ -3476,8 +3537,8 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
-        /// Allows the game to run logic such as updating the world,
-        /// checking for collisions, gathering input, and playing audio.
+        /// Allows the game to run logic such as updating the world, checking for collisions, gathering input, and playing audio.
+        /// Also handles all the keypresses and other movemements.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
@@ -3505,10 +3566,6 @@ namespace Xyglo.Brazil.Xna
             //
             List<KeyAction> keyActionList = getAllKeyActions();
 
-            // Fetch all the mouse actions too
-            //
-            List<MouseAction> mouseActionList = getAllMouseActions();
-
             if (keyActionList.Count > 0)
             {
                 if (keyActionList.Count > 1)
@@ -3530,10 +3587,8 @@ namespace Xyglo.Brazil.Xna
                 // Now fire off the keys according to the Target
                 switch (target.m_name)
                 {
-                        // --- FRIENDLIER cases ---
-                        //
-
-                    //case Target.None:
+                    // --- FRIENDLIER cases ---
+                    //
                     case "None":
                         // do nothing;
                         break;
@@ -3555,8 +3610,17 @@ namespace Xyglo.Brazil.Xna
                         m_state = State.Test("FileOpen");
                         break;
 
+                    case "NewBufferView":
+                        m_state = State.Test("PositionScreenNew");
+                        break;
+
                     //case Target.SaveFile:
                     case "SaveFile":
+                        selectSaveFile();
+                        break;
+
+                    case "ShowInformation":
+                        m_state = State.Test("Information");
                         break;
 
                     //case Target.CursorUp:
@@ -3608,8 +3672,6 @@ namespace Xyglo.Brazil.Xna
                     case "MoveLeft":
                         Vector3 leftVector = new Vector3(-1, 0, 0);
                         // accelerate will accelerate in mid air or move
-
-
                         Pair<XygloXnaDrawable, Vector3> coll = checkCollisions(m_interloper);
 
                         // If there is an X component to the checkCollisions call then we're on an object
@@ -3653,7 +3715,12 @@ namespace Xyglo.Brazil.Xna
                         break;
 
                     default:
-                        // do nothing
+                        // In the default state just try to change state to the passed target
+                        // i.e. Target = New State
+                        //
+                        // This will throw an exception if the target state isn't found
+                        m_state = confirmState(target.m_name);
+                        //throw new XygloException("Update", "Unhandled Target encountered");
                         break;
                 }
 
@@ -3698,6 +3765,10 @@ namespace Xyglo.Brazil.Xna
             // Store gameTime for use in helper functions
             //
             m_gameTime = gameTime;
+
+            // Fetch all the mouse actions too
+            //
+            List<MouseAction> mouseActionList = getAllMouseActions();
 
             // Check for any mouse actions here
             //
@@ -4522,7 +4593,6 @@ namespace Xyglo.Brazil.Xna
                 //
                 default:
                     key = "";
-                    //Logger.logMsg("XygloXNA::update() - got key = " + keyDown.ToString());
                     break;
             }
 
@@ -5007,58 +5077,6 @@ namespace Xyglo.Brazil.Xna
                 }
             }
         }
-
-        /// <summary>
-        /// Gets a single key click - but also repeats if it's still held down after a while
-        /// </summary>
-        /// <param name="check"></param>
-        /// <param name="gameTime"></param>
-        /// <returns></returns>
-        /// 
-/*
-        bool checkKeyState(Keys check, GameTime gameTime)
-        {
-            // Do we have any keys pressed down?  If not return
-            //
-            Keys[] keys = Keyboard.GetState(PlayerIndex.One).GetPressedKeys();
-            if (keys.Length == 0 || check == Keys.LeftControl || check == Keys.RightControl ||
-                check == Keys.LeftAlt || check == Keys.RightAlt)
-                return false;
-
-            // Is the checked key down?
-            //
-            if (Keyboard.GetState(PlayerIndex.One).IsKeyDown(check))
-            {
-                if (m_lastKeyboardState.IsKeyUp(check))
-                {
-                    m_heldKey = check;
-                    m_heldDownStartTime = gameTime.TotalGameTime.TotalSeconds;
-                    return true;
-                }
-
-                // Check to see if the key has been held down for a while - for file selection menus
-                // (see the m_state clause) we make the repeat interval smaller.
-                //
-                if (gameTime.TotalGameTime.TotalSeconds - m_heldDownStartTime > m_repeatHoldTime ||
-                    (m_state != State.TextEditing &&
-                    (gameTime.TotalGameTime.TotalSeconds - m_heldDownStartTime > m_repeatHoldTime / 2)))
-                {
-                    return true;
-                }
-
-                // It hasn't
-                //
-                return false;
-            }
-
-            if (m_heldKey == check)
-            {
-                m_heldDownStartTime = gameTime.TotalGameTime.TotalSeconds;
-            }
-
-            return false;
-        }
-        */
 
         /// <summary>
         /// Get some rays to help us work out where the user is clicking
@@ -5883,7 +5901,8 @@ namespace Xyglo.Brazil.Xna
                 if (!component.getStates().Contains(m_state))
                     continue;
 
-                // Has this component already been added to the drawableComponent dictionary?
+                // Has this component already been added to the drawableComponent dictionary?  If it hasn't then
+                // we haven't drawn it yet.
                 //
                 if (!m_drawableComponent.ContainsKey(component))
                 {
@@ -5958,6 +5977,15 @@ namespace Xyglo.Brazil.Xna
                             XygloBannerText ipBanner = new XygloBannerText(m_overlaySpriteBatch, m_fontManager.getOverlayFont(), XygloConvert.getColour(BrazilColour.Blue), new Vector3(0, m_fontManager.getOverlayFont().LineSpacing, 0), 1.0f, ipText);
                             ipBanner.draw(m_graphics.GraphicsDevice);
                         }
+                    } else if (component.GetType() == typeof(Xyglo.Brazil.BrazilGoody))
+                    {
+                        Logger.logMsg("Draw Goody for the first time");
+                    } else if (component.GetType() == typeof(Xyglo.Brazil.BrazilBaddy))
+                    {
+                        Logger.logMsg("Draw Baddy for the first time");
+                    } else if (component.GetType() == typeof(Xyglo.Brazil.BrazilFinishBlock))
+                    {
+                        Logger.logMsg("Draw Finish Block for the first time");
                     }
                 }
                 else
