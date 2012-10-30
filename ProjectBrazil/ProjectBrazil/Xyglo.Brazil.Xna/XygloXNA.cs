@@ -3826,7 +3826,7 @@ namespace Xyglo.Brazil.Xna
             //
             //BrazilVector3 acceleration = BrazilVector3.Zero;
 
-            // Now we can update any components that need moving
+            // Process components for MOVEMENT
             //
             foreach (Component component in m_componentList)
             {
@@ -3834,7 +3834,7 @@ namespace Xyglo.Brazil.Xna
                 //
                 if (m_drawableComponent.ContainsKey(component)) // && m_drawableComponent[component].getVelocity() != Vector3.Zero)
                 {
-                    // If not then is it a drawable type? 
+                    // If so then process it for any movement
                     //
                     if (component.GetType() == typeof(Xyglo.Brazil.BrazilFlyingBlock))
                     {
@@ -3898,6 +3898,28 @@ namespace Xyglo.Brazil.Xna
                             m_interloper = il;
                         }
                     }
+                    else if (component.GetType() == typeof(Xyglo.Brazil.BrazilGoody))
+                    {
+                        //Logger.logMsg("Draw Goody for the first time");
+                        BrazilGoody bg = (BrazilGoody)component;
+
+                        if (bg.m_type == BrazilGoodyType.Coin)
+                        {
+                            // For the moment the only movement is a rotation
+                            //
+                            if (bg.getRotation() != 0)
+                            {
+                                m_drawableComponent[component].incrementRotation(bg.getRotation());
+                                m_drawableComponent[component].buildBuffers(m_graphics.GraphicsDevice);
+                            }
+                        }
+                        else
+                        {
+                            throw new XygloException("Update", "Unsupported Goody Type");
+                        }
+
+                        m_drawableComponent[component].draw(m_graphics.GraphicsDevice);
+                    }
                 }
             }
 
@@ -3940,7 +3962,7 @@ namespace Xyglo.Brazil.Xna
 
             if (planeIntersection != null)
             {
-                Logger.logMsg("Got PLANE intersect");
+                //Logger.logMsg("Got PLANE intersect");
                 return ray.Position + ray.Direction * planeIntersection.Value;
             }
 
@@ -4099,7 +4121,7 @@ namespace Xyglo.Brazil.Xna
                         {
                             // Elastic collision undefined
                             //
-                            Logger.logMsg("computeCollisions- Elastic collision");
+                            //Logger.logMsg("computeCollisions- Elastic collision");
                         }
                         else
                         {
@@ -5942,6 +5964,10 @@ namespace Xyglo.Brazil.Xna
                         XygloFlyingBlock drawBlock = new XygloFlyingBlock(XygloConvert.getColour(il.getColour()), m_lineEffect, il.getPosition(), il.getSize());
                         group.addComponent(drawBlock);
 
+                        // Set the name of the component group from the interloper
+                        //
+                        group.setName(il.getName());
+
                         XygloSphere drawSphere = new XygloSphere(XygloConvert.getColour(il.getColour()), m_lineEffect, il.getPosition(), il.getSize().X);
                         drawSphere.setRotation(il.getRotation());
                         group.addComponentRelative(drawSphere, new Vector3(0, - (float)il.getSize().X, 0));
@@ -5979,13 +6005,34 @@ namespace Xyglo.Brazil.Xna
                         }
                     } else if (component.GetType() == typeof(Xyglo.Brazil.BrazilGoody))
                     {
-                        Logger.logMsg("Draw Goody for the first time");
+                        //Logger.logMsg("Draw Goody for the first time");
+                        BrazilGoody bg = (BrazilGoody)component;
+
+                        if (bg.m_type == BrazilGoodyType.Coin)
+                        {
+                            // Build a coin
+                            //
+                            XygloCoin coin = new XygloCoin(Color.Yellow, m_basicEffect, XygloConvert.getVector3(bg.getPosition()), bg.getSize().X);
+                            coin.setRotation(bg.getRotation());
+                            coin.buildBuffers(m_graphics.GraphicsDevice);
+                            coin.draw(m_graphics.GraphicsDevice);
+
+                            // And store in drawable component array
+                            //
+                            m_drawableComponent[component] = coin;
+                        }
+                        else
+                        {
+                            throw new XygloException("Update", "Unsupported Goody Type");
+                        }
+
+
                     } else if (component.GetType() == typeof(Xyglo.Brazil.BrazilBaddy))
                     {
                         Logger.logMsg("Draw Baddy for the first time");
                     } else if (component.GetType() == typeof(Xyglo.Brazil.BrazilFinishBlock))
                     {
-                        Logger.logMsg("Draw Finish Block for the first time");
+                        //Logger.logMsg("Draw Finish Block for the first time");
                     }
                 }
                 else

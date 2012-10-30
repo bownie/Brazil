@@ -6,18 +6,29 @@ using System.Text;
 namespace Xyglo.Brazil
 {
     /// <summary>
+    /// The type of our Goody
+    /// </summary>
+    public enum BrazilGoodyType
+    {
+        Coin,
+        Egg,
+        Box
+    }
+
+    /// <summary>
     /// A prize that can be consumed by our Interloper.  A goody has position, a birth time, a worth and 
     /// can potentially automatically reset after being eaten.
     /// </summary>
     public class BrazilGoody : Component3D
     {
-        public BrazilGoody(BrazilColour colour, int worth, BrazilVector3 position, BrazilVector3 size, DateTime birthTime)
+        public BrazilGoody(BrazilGoodyType type, int worth, BrazilVector3 position, BrazilVector3 size, DateTime birthTime)
         {
-            m_colour = colour;
+            m_colour = BrazilColour.White; // probably not used so we default it
             m_position = position;
             m_dimensions = size;
             m_birthTime = birthTime;
             m_worth = worth;
+            m_type = type; // default type
 
             // Is affected by gravity - set mass and hardness
             //
@@ -54,5 +65,10 @@ namespace Xyglo.Brazil
         /// How many points is this Goody worth?
         /// </summary>
         public int m_worth { get; set; }
+
+        /// <summary>
+        /// Type of our Goody determines shape and colouration
+        /// </summary>
+        public BrazilGoodyType m_type { get; set; }
     }
 }

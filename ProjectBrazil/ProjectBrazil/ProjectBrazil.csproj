@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -35,12 +36,7 @@
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
     <Reference Include="Microsoft.Xna.Framework.Game, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
-    <Reference Include="Microsoft.Xna.Framework.GamerServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Xna.Framework.Graphics, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
-    <Reference Include="Microsoft.Xna.Framework.Net, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL" />
-    <Reference Include="Microsoft.Xna.Framework.Storage, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL" />
-    <Reference Include="Microsoft.Xna.Framework.Video, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL" />
-    <Reference Include="Microsoft.Xna.Framework.Xact, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
     <Reference Include="PresentationFramework.Aero" />
     <Reference Include="QuickGraph, Version=3.3.51106.0, Culture=neutral, PublicKeyToken=f3fb40175eec2af3, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -53,7 +49,11 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net" />
+    <Reference Include="System.Runtime.Caching" />
+    <Reference Include="System.Runtime.DurableInstancing" />
+    <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Runtime.Serialization.Formatters.Soap" />
     <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms">
       <EmbedInteropTypes>False</EmbedInteropTypes>
@@ -67,7 +67,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BrazilColour.cs" />
-    <Compile Include="BrazilFinishBlock.cs" />
     <Compile Include="BrazilFlyingBlock.cs" />
     <Compile Include="BrazilPosition.cs" />
     <Compile Include="BrazilState.cs" />
@@ -87,6 +86,7 @@
     <Compile Include="BrazilRay.cs" />
     <Compile Include="BrazilBaddy.cs" />
     <Compile Include="BrazilGoody.cs" />
+    <Compile Include="BrazilFinishBlock.cs" />
     <Compile Include="Target.cs" />
     <Compile Include="Core.cs" />
     <Compile Include="DrawableComponent.cs" />
@@ -97,10 +97,11 @@
     <Compile Include="Xyglo.Brazil.Xna\BraceDepth.cs" />
     <Compile Include="BrazilWorld.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BufferView.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\XygloCoin.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\XygloException.cs" />
     <Compile Include="Xyglo.Brazil.Xna\Command.cs" />
     <Compile Include="Component.cs" />
     <Compile Include="Xyglo.Brazil.Xna\Component.cs" />
-    <Compile Include="Xyglo.Brazil.Xna\XygloException.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloXnaDrawableShape.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloBannerText.cs" />
     <Compile Include="Xyglo.Brazil.Xna\CppSyntaxManager.cs" />

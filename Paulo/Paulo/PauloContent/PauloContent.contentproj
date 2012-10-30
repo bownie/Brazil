@@ -68,6 +68,7 @@
       <Name>Bitstream Vera Sans Mono_fullScreen</Name>
       <Importer>FontDescriptionImporter</Importer>
       <Processor>FontDescriptionProcessor</Processor>
+      <SubType>Designer</SubType>
     </Compile>
     <Compile Include="Bitstream Vera Sans Mono_overlayBigScreen.spritefont">
       <Name>Bitstream Vera Sans Mono_overlayBigScreen</Name>

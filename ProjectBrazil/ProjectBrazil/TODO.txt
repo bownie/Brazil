@@ -1,0 +1,20 @@
+﻿Brazil Framework and Paulo
+--------------------------
+
+- Add Baddies
+- Add Prizes
+- Scoring Mechanism
+- Level Completion
+
+XNA/Store
+---------
+
+- XNA Developers Account
+- XBox?
+- Registration?
+
+
+Android Store
+-------------
+
+- Registration?

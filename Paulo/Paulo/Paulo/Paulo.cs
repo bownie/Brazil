@@ -40,10 +40,10 @@ namespace Paulo
             //
             generateComponents();
 
-            // Set up an interloper
+            // Set up an interloper - we give it a name to aid debugging
             //
             BrazilInterloper paulo = new BrazilInterloper(BrazilColour.White, new BrazilVector3(0, 0, 0), new BrazilVector3(10, 10, 10));
-            //paulo.setVelocity(new BrazilVector3(0.1f, 0, 0));
+            paulo.setName("Interloper");
             addComponent("PlayingGame", paulo);
 
             // Banner screen
@@ -144,7 +144,6 @@ namespace Paulo
             BrazilFlyingBlock block3 = new BrazilFlyingBlock(BrazilColour.Orange, new BrazilVector3(0, 150, 0), new BrazilVector3(200, 50, 0));
             //block3.setRotation(0.01);
             block3.setHardness(10);
-            //m_componentList.Add(block3);
             block3.setName("LandingBlock1");
             addComponent("PlayingGame", block3);
 
@@ -166,6 +165,11 @@ namespace Paulo
             //
             BrazilFinishBlock finishBlock = new BrazilFinishBlock(BrazilColour.Pink, new BrazilVector3(0, -500, 0), new BrazilVector3(200, 10, 10), getState("LevelComplete"));
             addComponent("PlayingGame", finishBlock);
+
+            // Add some prizes
+            //
+            BrazilGoody goody1 = new BrazilGoody(BrazilGoodyType.Coin, 50, new BrazilVector3(0, 100, 0), new BrazilVector3(100, 10, 10), DateTime.Now);
+            addComponent("PlayingGame", goody1);
         }
     }
 }

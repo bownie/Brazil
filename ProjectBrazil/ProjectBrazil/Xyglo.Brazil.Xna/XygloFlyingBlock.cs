@@ -237,7 +237,13 @@ namespace Xyglo.Brazil.Xna
         public override BoundingBox getBoundingBox()
         {
             Vector3 [] vertices = new Vector3[m_vertexBuffer.VertexCount];
-            m_vertexBuffer.GetData<Vector3>(vertices);
+            for(int i = 0; i < m_vertices.Length; i++)
+            {
+                vertices[i] = m_vertices[i].Position;
+            }
+            
+            // This doesn't appear to work - hence the above
+            //m_vertexBuffer.GetData<Vector3>(vertices);
 
             // Assuming that m_position is within our shape we always find min and max
             // based from this point.
