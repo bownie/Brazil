@@ -108,7 +108,13 @@ namespace Xyglo.Brazil.Xna
         {
             Vector3 rad = new Vector3((float)Math.Abs(m_radius), 0, 0);
             int maxVertex = 0;
+            float coinWidth = m_radius / 2;
             Vector3 point;
+
+            // Rotate about the Y axis
+            //
+            Matrix worldMatrix = Matrix.CreateRotationY((float)m_rotation);
+
             // Do this twice for the two coins
             //
             for (int x = 0; x < m_circlesInCoin; x++)
@@ -123,18 +129,23 @@ namespace Xyglo.Brazil.Xna
 
                     Matrix zrot = Matrix.CreateRotationZ(MathHelper.ToRadians(y * dify)); // rotate vertex around z
                     Matrix yrot = Matrix.CreateRotationY(MathHelper.ToRadians(x * difx)); // rotate circle around y
-                    point = m_position + Vector3.Transform(Vector3.Transform(rad, zrot), yrot);// transformation
+
+                    // transformation including rotation with world matrix
+                    //
+                    point = Vector3.Transform(Vector3.Transform(rad, zrot), yrot);
 
                     // Adjust the translation by a factor of the radius for the two coins
                     //
                     if (x == 0)
                     {
-                        point.Z += m_radius / 2.0f;
+                        point.Z += coinWidth;
                     }
                     else // x == 1
                     {
-                        point.Z -= m_radius / 2.0f;
+                        point.Z -= coinWidth;
                     }
+
+                    point = m_position + Vector3.Transform(point, worldMatrix);
 
                     //m_vertices[x + y * m_vertsInCircle] = new VertexPositionColorTexture(point, m_colour, new Vector2(0, 0));
                     m_vertices[y + x * m_vertsInCircle].Position = point;
@@ -150,13 +161,13 @@ namespace Xyglo.Brazil.Xna
 
             // Define the centre points
             point = m_position;
-            point.X += m_radius / 2.0f;
+            point.Z += coinWidth;
             m_vertices[maxVertex + 1].Position = point;
             m_vertices[maxVertex + 1].Color = m_colour;
             m_vertices[maxVertex + 1].TextureCoordinate = Vector2.Zero;
 
             point = m_position;
-            point.X -= m_radius / 2.0f;
+            point.Z -= coinWidth;
             m_vertices[maxVertex + 2].Position = point;
             m_vertices[maxVertex + 2].Color = m_colour;
             m_vertices[maxVertex + 2].TextureCoordinate = Vector2.Zero;

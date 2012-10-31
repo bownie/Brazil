@@ -33,8 +33,8 @@ namespace Paulo
 
                 // Initialise with default state
                 //
-                app.initialise(State.Test("Menu"));
-                //app.initialise(State.Test("ComponentTest"));
+                //app.initialise(State.Test("Menu"));
+                app.initialise(State.Test("ComponentTest"));
             }
 
             // If we have something then run it

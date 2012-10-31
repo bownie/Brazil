@@ -120,6 +120,10 @@ namespace Paulo
             connectKey("PlayingGame", Keys.Right, KeyButtonState.Held, "MoveRight");
 
             connectKey("PlayingGame", Keys.Space, "Jump");
+
+            // Connect up our test state
+            //
+            connectKey("ComponentTest", Keys.Escape, "QuitToMenu");
         }
 
 
@@ -168,13 +172,14 @@ namespace Paulo
 
             // Add some prizes
             //
-            BrazilGoody goody1 = new BrazilGoody(BrazilGoodyType.Coin, 50, new BrazilVector3(0, 100, 0), new BrazilVector3(10, 10, 10), DateTime.Now);
+            BrazilGoody goody1 = new BrazilGoody(BrazilGoodyType.Coin, 50, new BrazilVector3(0, 100, 0), new BrazilVector3(5, 10, 10), DateTime.Now);
+            goody1.setRotation(0.2);
             addComponent("PlayingGame", goody1);
 
             // Test state for new components
             //
-            BrazilGoody goody2 = new BrazilGoody(BrazilGoodyType.Coin, 50, new BrazilVector3(0, 100, 0), new BrazilVector3(10, 10, 10), DateTime.Now);
-            goody2.setRotation(0.2);
+            BrazilGoody goody2 = new BrazilGoody(BrazilGoodyType.Coin, 50, new BrazilVector3(0, 100, 0), new BrazilVector3(50, 50, 50), DateTime.Now);
+            goody2.setRotation(0.01);
             addComponent("ComponentTest", goody2);
         }
     }
