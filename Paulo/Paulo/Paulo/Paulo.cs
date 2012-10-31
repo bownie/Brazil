@@ -48,17 +48,17 @@ namespace Paulo
 
             // Banner screen
             //
-            BannerText menuScreen = new BannerText(BrazilColour.Blue, new BrazilVector3(360.0f, 240.0f, 0), 4.0, "Paulo");
+            //BrazilBannerText menuScreen = new BrazilBannerText(BrazilColour.Blue, new BrazilVector3(360.0f, 240.0f, 0), 4.0, "Paulo");
+            BrazilBannerText menuScreen = new BrazilBannerText(BrazilColour.Blue, BrazilPosition.Middle, 4.0, "Paulo");
             addComponent("Menu", menuScreen);
 
-            BannerText byLine = new BannerText(BrazilColour.Yellow, new BrazilVector3(430.0f, 345.0f, 0), 1.0, "@xyglo");
+            //BrazilBannerText byLine = new BrazilBannerText(BrazilColour.Yellow, new BrazilVector3(430.0f, 345.0f, 0), 1.0, "@xyglo");
+            BrazilBannerText byLine = new BrazilBannerText(BrazilColour.Yellow, BrazilRelativePosition.BeneathCentred, menuScreen, 0, 1.0f, "@xyglo");
             addComponent("Menu", byLine);
 
-            BannerText toPlay = new BannerText(BrazilColour.White, new BrazilVector3(380.0f, 500.0f, 0), 1.0, "Hit '1' to Play");
+            //BrazilBannerText toPlay = new BrazilBannerText(BrazilColour.White, new BrazilVector3(380.0f, 500.0f, 0), 1.0, "Hit '1' to Play");
+            BrazilBannerText toPlay = new BrazilBannerText(BrazilColour.White, BrazilPosition.BottomMiddle, 1.0f, "Hit '1' to Play");
             addComponent("Menu", toPlay);
-
-            //BannerText toPlay = new BannerText(BrazilColour.White, new BrazilVector3(350.0f, 500.0f, 0), 1.0, "1 - Play the Game");
-            //addComponent(State.Test("Menu"), toPlay);
         }
 
 
@@ -70,7 +70,7 @@ namespace Paulo
             // States of the application - where are we in the navigation around the app.  States will affect what 
             // components are showing and how we interact with them.
             //
-            string[] states = { "Menu", "PlayingGame", "LevelComplete" };
+            string[] states = { "Menu", "PlayingGame", "LevelComplete", "ComponentTest" };
             foreach (string state in states)
             {
                 addState(state);
@@ -168,8 +168,14 @@ namespace Paulo
 
             // Add some prizes
             //
-            BrazilGoody goody1 = new BrazilGoody(BrazilGoodyType.Coin, 50, new BrazilVector3(0, 100, 0), new BrazilVector3(100, 10, 10), DateTime.Now);
+            BrazilGoody goody1 = new BrazilGoody(BrazilGoodyType.Coin, 50, new BrazilVector3(0, 100, 0), new BrazilVector3(10, 10, 10), DateTime.Now);
             addComponent("PlayingGame", goody1);
+
+            // Test state for new components
+            //
+            BrazilGoody goody2 = new BrazilGoody(BrazilGoodyType.Coin, 50, new BrazilVector3(0, 100, 0), new BrazilVector3(10, 10, 10), DateTime.Now);
+            goody2.setRotation(0.2);
+            addComponent("ComponentTest", goody2);
         }
     }
 }

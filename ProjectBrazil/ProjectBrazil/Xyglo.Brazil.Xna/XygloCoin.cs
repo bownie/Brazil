@@ -129,11 +129,11 @@ namespace Xyglo.Brazil.Xna
                     //
                     if (x == 0)
                     {
-                        point.X += m_radius / 2.0f;
+                        point.Z += m_radius / 2.0f;
                     }
                     else // x == 1
                     {
-                        point.X -= m_radius / 2.0f;
+                        point.Z -= m_radius / 2.0f;
                     }
 
                     //m_vertices[x + y * m_vertsInCircle] = new VertexPositionColorTexture(point, m_colour, new Vector2(0, 0));
@@ -143,6 +143,9 @@ namespace Xyglo.Brazil.Xna
                     maxVertex = y + x * m_vertsInCircle;
                 }
             }
+
+            // DO THIS:
+            // http://www.riemers.net/eng/Tutorials/XNA/Csharp/Series2/Textures.php
 
 
             // Define the centre points
@@ -176,16 +179,27 @@ namespace Xyglo.Brazil.Xna
                 //{
                     for (int y = 0; y < m_vertsInCircle; y++)
                     {
-                        m_indices[i] = (short)centreFront;
-                        //m_indices[m_vertsInCircle + i++] = (short)centreBack;
-                        i++;
-                        m_indices[i] = (short)((y + 1) % m_vertsInCircle);
-                        //m_indices[m_vertsInCircle + i++] = (short)(2 * m_vertsInCircle - y);
-                        i++;
-                        
-                        m_indices[i] = (short)(y);
-                        //m_indices[m_vertsInCircle + i++] = (short)((2 * m_vertsInCircle - y - 1));
-                        i++;
+                        // Front triangle
+                        //
+                        m_indices[i++] = (short)centreFront;
+                        m_indices[i++] = (short)(y);
+                        m_indices[i++] = (short)((y + 1) % m_vertsInCircle);
+
+                        // Back triangle
+                        //
+                        m_indices[i++] = (short)centreBack;
+                        m_indices[i++] = (short)(2 * m_vertsInCircle - y);
+                        m_indices[i++] = (short)((2 * m_vertsInCircle - y - 1));
+
+                        // Connect edges with two triangles
+                        //
+                        m_indices[i++] = (short)(y);
+                        m_indices[i++] = (short)(2 * m_vertsInCircle - y);
+                        m_indices[i++] = (short)((2 * m_vertsInCircle - y - 1));
+
+                        m_indices[i++] = (short)((2 * m_vertsInCircle - y - 1));
+                        m_indices[i++] = (short)((y + 1) % m_vertsInCircle);
+                        m_indices[i++] = (short)(y);
                     }
 
                 //}
@@ -219,7 +233,7 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
-        /// Draw this FlyingBlock by setting and swriting the 
+        /// Draw this XygloCoin
         /// </summary>
         /// <param name="device"></param>
         public override void draw(GraphicsDevice device)
@@ -241,9 +255,11 @@ namespace Xyglo.Brazil.Xna
                 //
                 //device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, m_vertices.Length, 0, m_indices.Length / 3);
                 device.DrawUserIndexedPrimitives<VertexPositionColorTexture>(PrimitiveType.TriangleList, m_vertices, 0, m_vertices.Length, m_indices, 0, m_indices.Length / 3);
+
+                // Attempt
+                //device.DrawUserPrimitives<VertexPositionColorTexture>(PrimitiveType.TriangleList, m_vertices, 0, m_vertices.Length);
             }
         }
-
 
         /// <summary>
         /// Return the VertexBuffer

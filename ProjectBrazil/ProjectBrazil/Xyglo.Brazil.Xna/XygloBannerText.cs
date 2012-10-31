@@ -32,29 +32,6 @@ namespace Xyglo.Brazil.Xna
 
             if (m_alphaBlendingTest) m_colour.A = 10;
         }
-
-        public XygloBannerText(SpriteBatch spriteBatch, SpriteFont spriteFont, Color colour, BrazilVector3 position, double size, string text)
-        {
-            // Store the effect
-            //m_effect = effect;
-            m_colour = colour;
-
-            m_size = size;
-            m_text = text;
-
-            m_spriteBatch = spriteBatch;
-            m_spriteFont = spriteFont;
-
-            m_position.X = position.X;
-            m_position.Y = position.Y;
-            m_position.Z = position.Z;
-
-            if (m_alphaBlendingTest) m_colour.A = 10;
-        }
-
-        //public XygloBannerText(SpriteBatch spriteBatch, SpriteFont spriteFont, Color colour, BrazilAlignment vertAlign, BrazilAlignment horzAlign, double size, string text)
-        //{
-        //}
         
         /// <summary>
         /// We need to implement this override

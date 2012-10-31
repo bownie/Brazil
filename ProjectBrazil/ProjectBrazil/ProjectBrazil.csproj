@@ -81,7 +81,7 @@
     <Compile Include="BrazilMatrix3.cs" />
     <Compile Include="BrazilBoundingBox.cs" />
     <Compile Include="ConfirmState.cs" />
-    <Compile Include="BannerText.cs" />
+    <Compile Include="BrazilBannerText.cs" />
     <Compile Include="BrazilHud.cs" />
     <Compile Include="BrazilRay.cs" />
     <Compile Include="BrazilBaddy.cs" />

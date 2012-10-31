@@ -5981,19 +5981,23 @@ namespace Xyglo.Brazil.Xna
                         m_drawableComponent[component] = group;
 #endif
                     }
-                    else if (component.GetType() == typeof(Xyglo.Brazil.BannerText))
+                    else if (component.GetType() == typeof(Xyglo.Brazil.BrazilBannerText))
                     {
-                        BannerText bt = (Xyglo.Brazil.BannerText)component;
+                        BrazilBannerText bt = (Xyglo.Brazil.BrazilBannerText)component;
 
-                        XygloBannerText bannerText = new XygloBannerText(m_overlaySpriteBatch, m_fontManager.getOverlayFont(), XygloConvert.getColour(bt.getColour()), bt.getPosition(), bt.getSize(), bt.getText());
+                        // The helper method does all the hard work in getting this position
+                        //
+                        Vector3 position = XygloConvert.getTextPosition(bt, m_fontManager, m_graphics.GraphicsDevice.Viewport.Width, m_graphics.GraphicsDevice.Viewport.Height);
+                        XygloBannerText bannerText = new XygloBannerText(m_overlaySpriteBatch, m_fontManager.getOverlayFont(), XygloConvert.getColour(bt.getColour()), position, bt.getSize(), bt.getText());
                         bannerText.draw(m_graphics.GraphicsDevice);
                     }
                     else if (component.GetType() == typeof(Xyglo.Brazil.BrazilHud))
                     {
                         BrazilHud bh = (Xyglo.Brazil.BrazilHud)component;
+                        Vector3 position = XygloConvert.getVector3(bh.getPosition());
 
                         string fpsText = "FPS = " + m_frameRate;
-                        XygloBannerText bannerText = new XygloBannerText(m_overlaySpriteBatch, m_fontManager.getOverlayFont(), XygloConvert.getColour(bh.getColour()), bh.getPosition(), bh.getSize(), fpsText);
+                        XygloBannerText bannerText = new XygloBannerText(m_overlaySpriteBatch, m_fontManager.getOverlayFont(), XygloConvert.getColour(bh.getColour()), position, bh.getSize(), fpsText);
                         bannerText.draw(m_graphics.GraphicsDevice);
 
                         if (m_interloper != null)
@@ -6003,6 +6007,7 @@ namespace Xyglo.Brazil.Xna
                             XygloBannerText ipBanner = new XygloBannerText(m_overlaySpriteBatch, m_fontManager.getOverlayFont(), XygloConvert.getColour(BrazilColour.Blue), new Vector3(0, m_fontManager.getOverlayFont().LineSpacing, 0), 1.0f, ipText);
                             ipBanner.draw(m_graphics.GraphicsDevice);
                         }
+
                     } else if (component.GetType() == typeof(Xyglo.Brazil.BrazilGoody))
                     {
                         //Logger.logMsg("Draw Goody for the first time");
@@ -6012,7 +6017,7 @@ namespace Xyglo.Brazil.Xna
                         {
                             // Build a coin
                             //
-                            XygloCoin coin = new XygloCoin(Color.Yellow, m_basicEffect, XygloConvert.getVector3(bg.getPosition()), bg.getSize().X);
+                            XygloCoin coin = new XygloCoin(Color.Yellow, m_lineEffect, XygloConvert.getVector3(bg.getPosition()), bg.getSize().X);
                             coin.setRotation(bg.getRotation());
                             coin.buildBuffers(m_graphics.GraphicsDevice);
                             coin.draw(m_graphics.GraphicsDevice);
