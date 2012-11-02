@@ -3537,6 +3537,20 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Ensure that all components are reactivated before changing to that state
+        /// </summary>
+        /// <param name="newState"></param>
+        protected void setState(string newState)
+        {
+            foreach (Component component in m_componentList)
+            {
+                component.setDestroyed(false);
+            }
+
+            m_state = State.Test(newState);
+        }
+
+        /// <summary>
         /// Allows the game to run logic such as updating the world, checking for collisions, gathering input, and playing audio.
         /// Also handles all the keypresses and other movemements.
         /// </summary>
@@ -3656,7 +3670,9 @@ namespace Xyglo.Brazil.Xna
 
                         // If we hit this target then transition to PlayingGame
                     case "StartPlaying":
-                        m_state = State.Test("PlayingGame");
+                        // Before we start the state ensure that all components are reset to being active
+                        //
+                        setState("PlayingGame");
                         break;
 
                     case "QuitToMenu":
@@ -3918,9 +3934,27 @@ namespace Xyglo.Brazil.Xna
                             throw new XygloException("Update", "Unsupported Goody Type");
                         }
 
-                        m_drawableComponent[component].draw(m_graphics.GraphicsDevice);
+
+                        if (!m_drawableComponent[component].shouldBeDestroyed())
+                        {
+                            m_drawableComponent[component].draw(m_graphics.GraphicsDevice);
+                        }
                     }
                 }
+            }
+
+            // Check for any drawables which need removing and get rid of them
+            //
+            Dictionary<Component, XygloXnaDrawable> destroyDict = m_drawableComponent.Where(item => item.Value.shouldBeDestroyed() == true).ToDictionary(p => p.Key, p => p.Value);
+            foreach (Component destroyKey in destroyDict.Keys)
+            {
+                XygloXnaDrawable drawable = m_drawableComponent[destroyKey];
+                m_drawableComponent.Remove(destroyKey);
+                drawable = null;
+                
+                // Now set the Component to be destroyed so it's not recreated by the next event loop
+                //
+                destroyKey.setDestroyed(true);
             }
 
             base.Update(gameTime);
@@ -4079,114 +4113,154 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         protected bool computeCollisions()
         {
-            // We'll have to iterate the realDict twice
+            // We'll have to iterate the realDict twice but here we filter in any goodies or baddies
+            // and also anything that has a hardness (isCorporeal).
             //
-            Dictionary<Component, XygloXnaDrawable> realDict = m_drawableComponent.Where(item => item.Key.isCorporeal()).ToDictionary(p => p.Key, p => p.Value);
+            Dictionary<Component, XygloXnaDrawable> realDict = m_drawableComponent.Where(item => item.Key.isCorporeal() || item.Key.getBehaviour() != Behaviour.Goody).ToDictionary(p => p.Key, p => p.Value);
 
             // Keep a list of all elements we've applied collisions to
             //
             List<XygloXnaDrawable> collisionList = new List<XygloXnaDrawable>();
 
-            // Everything we're interating over has hardness - so they could potentially interact 
+            // Everything we're interating over has hardness or is a prize/baddy - so they could potentially interact 
             //
             foreach (Component realKey in realDict.Keys)
             {
+                // Skip all but Interloper for the moment
+                //
+                if (realKey.GetType() != typeof(Xyglo.Brazil.BrazilInterloper))
+                    continue;
+
+                BrazilInterloper il = (Xyglo.Brazil.BrazilInterloper)realKey;
+                
+                // For the moment we only 
                 foreach (Component testKey in realDict.Keys)
                 {
-                    // Ignore self
+                    // Ignore ourself
                     if (testKey == realKey)
                         continue;
 
                     XygloXnaDrawable realComp = realDict[realKey];
                     XygloXnaDrawable testComp = realDict[testKey];
 
-                    //realComp.
-                    BoundingBox bb1 = realComp.getBoundingBox();
-                    BoundingBox bb2 = testComp.getBoundingBox();
+                    // If we've already processed this element
+                    //
+                    if (collisionList.Contains(testComp))
+                        continue;
 
-                    if (realComp.getBoundingBox().Intersects(testComp.getBoundingBox()))
+                    // Deal with Goodies
+                    //
+                    if (testKey.GetType() == typeof(Xyglo.Brazil.BrazilGoody))
                     {
-                        // Work out the vectors and the rebound angle
-                        //
-                        //Logger.logMsg("computeCollisions - Got a collision");
+                        BoundingBox bb1 = realComp.getBoundingBox();
+                        BoundingSphere bs1 = ((XygloCoin)testComp).getBoundingSphere();
 
-                        // Then testKey has mass and realKey doesn't - give testKey a bounce
+                        // Check for a collision
                         //
-                        Vector3 testVely = testComp.getVelocity();
-                        Vector3 realVely = realComp.getVelocity();
-
-                        // If they both have mass then do an elastic collision.
-                        //
-                        if (testKey.getMass() > 0 && realKey.getMass() > 0)
+                        if (bb1.Intersects(bs1))
                         {
-                            // Elastic collision undefined
+                            BrazilGoody goody = (BrazilGoody)testKey;
+                            il.incrementScore(goody.m_worth);
+
+                            // Set this item for destruction
                             //
-                            //Logger.logMsg("computeCollisions- Elastic collision");
+                            testComp.setDestroy(true);
+
+                            // Add collision item
+                            //
+                            collisionList.Add(testComp);
                         }
-                        else
+                    }
+                    else
+                    {
+                        // Now we have all the non ourself, non Interloper components
+                        //
+                        BoundingBox bb1 = realComp.getBoundingBox();
+                        BoundingBox bb2 = testComp.getBoundingBox();
+
+                        if (realComp.getBoundingBox().Intersects(testComp.getBoundingBox()))
                         {
-                            if (testKey.getMass() > 0)
+                            // Work out the vectors and the rebound angle
+                            //
+                            //Logger.logMsg("computeCollisions - Got a collision");
+
+                            // Then testKey has mass and realKey doesn't - give testKey a bounce
+                            //
+                            Vector3 testVely = testComp.getVelocity();
+                            Vector3 realVely = realComp.getVelocity();
+
+                            // If they both have mass then do an elastic collision.
+                            //
+                            if (testKey.getMass() > 0 && realKey.getMass() > 0)
                             {
-                                if (!collisionList.Contains(testComp))
-                                {
-                                    // Get the point at which they collided
-                                    //
-                                    Vector3 collisionPoint = getCollisionPoint(testComp, realComp);
-
-                                    // Get the gravity vector, normalize and use to invert
-                                    //
-                                    Vector3 unitGravity = XygloConvert.getVector3(m_world.getGravity());
-                                    unitGravity.Normalize();
-
-                                    // Invert our velocity by multiplying each element by gravity
-                                    if (unitGravity.X > 0) testVely.X *= - unitGravity.X;
-                                    if (unitGravity.Y > 0) testVely.Y *= - unitGravity.Y;
-                                    if (unitGravity.Z > 0) testVely.Z *= - unitGravity.Z;
-
-                                    // Invert the velocity and modify by a factor
-                                    //
-                                    testComp.setVelocity(testVely * (float) testKey.getHardness() );
-
-                                    //testComp.se
-
-                                    // Move the testComp by the difference from the surface to the new position below the 
-                                    // surface.
-                                    //
-                                    /*
-                                    Vector3 depthDiff = realComp.getBoundingBox().Max;// - testComp.getPosition().Y;
-                                    depthDiff.X = 0;
-                                    depthDiff.Z = 0;
-                                    depthDiff.Y += testComp.getPosition().Y;
-                                    testComp.move(depthDiff);
-                                    */
-
-                                    /*
-                                    try
-                                    {
-                                        BrazilFlyingBlock xfb = (BrazilFlyingBlock)testKey;
-
-                                        if (testKey != null) //.GetType() == typeof(XygloFlyingBlock))
-                                        {
-                                            Logger.logMsg("Trying to do somethign weird");
-                                        }
-                                    }
-                                    catch (Exception)
-                                    {
-                                    }*/
-
-                                    // Only reset the position if the X axis is unmoved
-                                    // otherwise we've arrived.
-                                    //
-                                    if (collisionPoint.X == testComp.getPosition().X)
-                                    {
-                                        Logger.logMsg("computeCollisions - moving position of interloper");
-
-                                        testComp.setPosition(collisionPoint);
-                                    }
-
-                                    collisionList.Add(testComp);
-                                }
+                                // Elastic collision undefined
+                                //
+                                //Logger.logMsg("computeCollisions- Elastic collision");
                             }
+                            else
+                            {
+                                if (testKey.getMass() > 0)
+                                {
+                                    if (!collisionList.Contains(testComp))
+                                    {
+                                        // Get the point at which they collided
+                                        //
+                                        Vector3 collisionPoint = getCollisionPoint(testComp, realComp);
+
+                                        // Get the gravity vector, normalize and use to invert
+                                        //
+                                        Vector3 unitGravity = XygloConvert.getVector3(m_world.getGravity());
+                                        unitGravity.Normalize();
+
+                                        // Invert our velocity by multiplying each element by gravity
+                                        if (unitGravity.X > 0) testVely.X *= -unitGravity.X;
+                                        if (unitGravity.Y > 0) testVely.Y *= -unitGravity.Y;
+                                        if (unitGravity.Z > 0) testVely.Z *= -unitGravity.Z;
+
+                                        // Invert the velocity and modify by a factor
+                                        //
+                                        testComp.setVelocity(testVely * (float)testKey.getHardness());
+
+                                        //testComp.se
+
+                                        // Move the testComp by the difference from the surface to the new position below the 
+                                        // surface.
+                                        //
+                                        /*
+                                        Vector3 depthDiff = realComp.getBoundingBox().Max;// - testComp.getPosition().Y;
+                                        depthDiff.X = 0;
+                                        depthDiff.Z = 0;
+                                        depthDiff.Y += testComp.getPosition().Y;
+                                        testComp.move(depthDiff);
+                                        */
+
+                                        /*
+                                        try
+                                        {
+                                            BrazilFlyingBlock xfb = (BrazilFlyingBlock)testKey;
+
+                                            if (testKey != null) //.GetType() == typeof(XygloFlyingBlock))
+                                            {
+                                                Logger.logMsg("Trying to do somethign weird");
+                                            }
+                                        }
+                                        catch (Exception)
+                                        {
+                                        }*/
+
+                                        // Only reset the position if the X axis is unmoved
+                                        // otherwise we've arrived.
+                                        //
+                                        if (collisionPoint.X == testComp.getPosition().X)
+                                        {
+                                            Logger.logMsg("computeCollisions - moving position of interloper");
+
+                                            testComp.setPosition(collisionPoint);
+                                        }
+
+                                        collisionList.Add(testComp);
+                                    }
+                                }
                                 /*
                             else // realKey.getMass() > 0
                             {
@@ -4196,6 +4270,7 @@ namespace Xyglo.Brazil.Xna
                                     collisionList.Add(realComp);
                                 }
                             }*/
+                            }
                         }
                     }
                 }
@@ -5918,9 +5993,9 @@ namespace Xyglo.Brazil.Xna
             //
             foreach (Component component in m_componentList)
             {
-                // Check that this component should be showing for this State
+                // Check that this component should be showing for this State and that's it's not been destroyed
                 //
-                if (!component.getStates().Contains(m_state))
+                if (!component.getStates().Contains(m_state) || component.isDestroyed())
                     continue;
 
                 // Has this component already been added to the drawableComponent dictionary?  If it hasn't then
@@ -6002,10 +6077,18 @@ namespace Xyglo.Brazil.Xna
 
                         if (m_interloper != null)
                         {
+                            // Interloper position
+                            //
                             Vector3 ipPos = m_drawableComponent[m_interloper].getPosition();
                             string ipText = "Interloper Position X = " + ipPos.X + ", Y = " + ipPos.Y + ", Z = " + ipPos.Z;
                             XygloBannerText ipBanner = new XygloBannerText(m_overlaySpriteBatch, m_fontManager.getOverlayFont(), XygloConvert.getColour(BrazilColour.Blue), new Vector3(0, m_fontManager.getOverlayFont().LineSpacing, 0), 1.0f, ipText);
                             ipBanner.draw(m_graphics.GraphicsDevice);
+
+                            // Interloper score
+                            //
+                            string ipScore = "Score = " + m_interloper.getScore();
+                            XygloBannerText ipScoreText = new XygloBannerText(m_overlaySpriteBatch, m_fontManager.getOverlayFont(), XygloConvert.getColour(BrazilColour.Green), new Vector3(0, m_fontManager.getOverlayFont().LineSpacing * 2, 0), 1.0f, ipScore);
+                            ipScoreText.draw(m_graphics.GraphicsDevice);
                         }
 
                     } else if (component.GetType() == typeof(Xyglo.Brazil.BrazilGoody))

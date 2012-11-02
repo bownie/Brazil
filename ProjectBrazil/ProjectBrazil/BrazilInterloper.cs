@@ -33,9 +33,32 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
+        /// Get the score
+        /// </summary>
+        /// <returns></returns>
+        public int getScore()
+        {
+            return m_score;
+        }
+
+        /// <summary>
+        /// Add to score
+        /// </summary>
+        /// <param name="score"></param>
+        public void incrementScore(int score)
+        {
+            m_score += score;
+        }
+
+        /// <summary>
         /// Dimensions of this Interloper
         /// </summary>
         protected BrazilVector3 m_dimensions;
+
+        /// <summary>
+        /// Interloper score
+        /// </summary>
+        protected int m_score;
 
     }
 }

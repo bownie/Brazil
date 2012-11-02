@@ -108,7 +108,7 @@ namespace Xyglo.Brazil.Xna
         {
             Vector3 rad = new Vector3((float)Math.Abs(m_radius), 0, 0);
             int maxVertex = 0;
-            float coinWidth = m_radius / 2;
+            float coinWidth = m_radius / 8;
             Vector3 point;
 
             // Rotate about the Y axis
@@ -160,14 +160,18 @@ namespace Xyglo.Brazil.Xna
 
 
             // Define the centre points
-            point = m_position;
-            point.Z += coinWidth;
+            point.X = 0;
+            point.Y = 0;
+            point.Z = coinWidth;
+            point = m_position + Vector3.Transform(point, worldMatrix);
             m_vertices[maxVertex + 1].Position = point;
             m_vertices[maxVertex + 1].Color = m_colour;
             m_vertices[maxVertex + 1].TextureCoordinate = Vector2.Zero;
 
-            point = m_position;
-            point.Z -= coinWidth;
+            point.X = 0;
+            point.Y = 0;
+            point.Z = -coinWidth;
+            point = m_position + Vector3.Transform(point, worldMatrix); 
             m_vertices[maxVertex + 2].Position = point;
             m_vertices[maxVertex + 2].Color = m_colour;
             m_vertices[maxVertex + 2].TextureCoordinate = Vector2.Zero;
@@ -178,69 +182,45 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         void createIndices(GraphicsDevice device)
         {
+            // Generate indices if not already
+            //
+            if (m_indices != null) return;
+            
             int centreFront = m_circlesInCoin * m_vertsInCircle;
             int centreBack = centreFront + 1;
+            m_indices = new short[m_numIndices];
 
-            if (m_indices == null)
+            // Index counter
+            int i = 0;
+
+            for (int y = 0; y < m_vertsInCircle; y++)
             {
-                m_indices = new short[m_numIndices];
-                
-                int i = 0;
-                //for (int x = 0; x < m_circlesInCoin; x++)
-                //{
-                    for (int y = 0; y < m_vertsInCircle; y++)
-                    {
-                        // Front triangle
-                        //
-                        m_indices[i++] = (short)centreFront;
-                        m_indices[i++] = (short)(y);
-                        m_indices[i++] = (short)((y + 1) % m_vertsInCircle);
+                // Front circle
+                //
+                m_indices[i++] = (short)centreFront;
+                m_indices[i++] = (short)(y);
+                m_indices[i++] = (short)((y + 1) % m_vertsInCircle);
 
-                        // Back triangle
-                        //
-                        m_indices[i++] = (short)centreBack;
-                        m_indices[i++] = (short)(2 * m_vertsInCircle - y);
-                        m_indices[i++] = (short)((2 * m_vertsInCircle - y - 1));
+                // Back circle
+                //
+                m_indices[i++] = (short)centreBack;
+                m_indices[i++] = (short)(2 * m_vertsInCircle - y - 1);
+                m_indices[i++] = (short)((2 * m_vertsInCircle - y - 2 < m_vertsInCircle) ? 3 * m_vertsInCircle - y - 2 : 2 * m_vertsInCircle - y - 2);
 
-                        // Connect edges with two triangles
-                        //
-                        m_indices[i++] = (short)(y);
-                        m_indices[i++] = (short)(2 * m_vertsInCircle - y);
-                        m_indices[i++] = (short)((2 * m_vertsInCircle - y - 1));
+                // Connect edges with two triangles
+                //
+                m_indices[i++] = (short)(y);
+                m_indices[i++] = (short)(m_vertsInCircle + y);
+                m_indices[i++] = (short)(m_vertsInCircle + (m_vertsInCircle + y + 1) % (m_vertsInCircle));
 
-                        m_indices[i++] = (short)((2 * m_vertsInCircle - y - 1));
-                        m_indices[i++] = (short)((y + 1) % m_vertsInCircle);
-                        m_indices[i++] = (short)(y);
-                    }
-
-                //}
-                /*
-                for (int x = 0; x < m_circlesInCoin; x++)
-                {
-                    for (int y = 0; y < m_vertsInCircle; y++)
-                    {
-                        int s1 = x == (m_circlesInCoin - 1) ? 0 : x + 1;
-                        int s2 = y == (m_vertsInCircle - 1) ? 0 : y + 1;
-                        short upperLeft = (short)(x * m_circlesInCoin + y);
-                        short upperRight = (short)(s1 * m_circlesInCoin + y);
-                        short lowerLeft = (short)(x * m_circlesInCoin + s2);
-                        short lowerRight = (short)(s1 * m_circlesInCoin + s2);
-                        m_indices[i++] = upperLeft;
-                        m_indices[i++] = upperRight;
-                        m_indices[i++] = lowerLeft;
-                        m_indices[i++] = lowerLeft;
-                        m_indices[i++] = upperRight;
-                        m_indices[i++] = lowerRight;
-
-                        /////////
-                        // Note - we also need to connect up the edges of the coin
-                        /////////
-                    }
-                }*/
-
-                m_indexBuffer = new IndexBuffer(device, typeof(short), m_numIndices, BufferUsage.WriteOnly);
-                m_indexBuffer.SetData(m_indices);
+                m_indices[i++] = (short)(y);
+                m_indices[i++] = (short)(short)(m_vertsInCircle + (m_vertsInCircle + y + 1) % (m_vertsInCircle));
+                m_indices[i++] = (short)((y + 1) % m_vertsInCircle);
             }
+
+            m_indexBuffer = new IndexBuffer(device, typeof(short), m_numIndices, BufferUsage.WriteOnly);
+            m_indexBuffer.SetData(m_indices);
+
         }
 
         /// <summary>
@@ -302,5 +282,15 @@ namespace Xyglo.Brazil.Xna
             //
             return BoundingBox.CreateFromPoints(vertices); //(m_position - m_blockSize / 2, m_position + m_blockSize / 2);
         }
+        
+        /// <summary>
+        /// The BoundingSphere for this coin
+        /// </summary>
+        /// <returns></returns>
+        public BoundingSphere getBoundingSphere()
+        {
+            return new BoundingSphere(m_position, m_radius);
+        }
+
     }
 }

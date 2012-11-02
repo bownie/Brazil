@@ -7,6 +7,9 @@ namespace Xyglo.Brazil
 {
     public enum Behaviour
     {
+        None,
+        Goody, // a prize, not a person
+        Baddy  // a person, not a price
     }
 
     /// <summary>
@@ -95,6 +98,15 @@ namespace Xyglo.Brazil
             return (m_hardness > 0);
         }
 
+        /// <summary>
+        /// Get the Component behaviour
+        /// </summary>
+        /// <returns></returns>
+        public Behaviour getBehaviour()
+        {
+            return m_behaviour;
+        }
+
         /// Get the name
         /// </summary>
         /// <returns></returns>
@@ -113,6 +125,24 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
+        /// Has this Component been destroyed on the drawing side?  If so don't recreate it.
+        /// </summary>
+        /// <returns></returns>
+        public bool isDestroyed()
+        {
+            return m_isDestroyed;
+        }
+
+        /// <summary>
+        /// Set this Component to destroyed so it's not recreated drawing side
+        /// </summary>
+        /// <param name="isDestroyed"></param>
+        public void setDestroyed(bool isDestroyed)
+        {
+            m_isDestroyed = isDestroyed;
+        }
+
+        /// <summary>
         /// Affected by gravity?
         /// </summary>
         protected bool m_gravityAffected = false;
@@ -126,6 +156,11 @@ namespace Xyglo.Brazil
         /// Hardness of this object
         /// </summary>
         protected double m_hardness = 0;
+        
+        /// <summary>
+        /// Default behaviour is none - but could be a goody or a baddy
+        /// </summary>
+        protected Behaviour m_behaviour = Behaviour.None;
 
         /// <summary>
         /// List of sub-components
@@ -142,5 +177,10 @@ namespace Xyglo.Brazil
         /// Name for this component just in case we want to track it easily for some insane reason
         /// </summary>
         protected string m_name;
+
+        /// <summary>
+        /// Is this Component destroyed in GameLand?  If so don't regenerate it
+        /// </summary>
+        protected bool m_isDestroyed = false;
     }
 }

@@ -219,6 +219,24 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Should we be destroyed?
+        /// </summary>
+        /// <returns></returns>
+        public bool shouldBeDestroyed()
+        {
+            return m_pleaseDestroy;
+        }
+
+        /// <summary>
+        /// Do we want to destroy this drawable?
+        /// </summary>
+        /// <param name="pleaseDestroy"></param>
+        public void setDestroy(bool pleaseDestroy)
+        {
+            m_pleaseDestroy = pleaseDestroy;
+        }
+
+        /// <summary>
         /// Position of this block
         /// </summary>
         public Vector3 m_position;
@@ -247,5 +265,10 @@ namespace Xyglo.Brazil.Xna
         /// Name for this component just in case we want to track it easily for some insane reason
         /// </summary>
         protected string m_name;
+
+        /// <summary>
+        /// Set this from collision code if we want to remove this item at a safe point in time
+        /// </summary>
+        protected bool m_pleaseDestroy = false;
     }
 }

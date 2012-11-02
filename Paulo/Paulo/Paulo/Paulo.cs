@@ -178,7 +178,7 @@ namespace Paulo
 
             // Test state for new components
             //
-            BrazilGoody goody2 = new BrazilGoody(BrazilGoodyType.Coin, 50, new BrazilVector3(0, 100, 0), new BrazilVector3(50, 50, 50), DateTime.Now);
+            BrazilGoody goody2 = new BrazilGoody(BrazilGoodyType.Coin, 50, new BrazilVector3(0, 100, 0), new BrazilVector3(100, 50, 50), DateTime.Now);
             goody2.setRotation(0.01);
             addComponent("ComponentTest", goody2);
         }
