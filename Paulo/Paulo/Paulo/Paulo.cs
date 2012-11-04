@@ -181,6 +181,14 @@ namespace Paulo
             BrazilGoody goody2 = new BrazilGoody(BrazilGoodyType.Coin, 50, new BrazilVector3(0, 100, 0), new BrazilVector3(100, 50, 50), DateTime.Now);
             goody2.setRotation(0.01);
             addComponent("ComponentTest", goody2);
+
+            for (int i = 0; i < 100; i++)
+            {
+                BrazilVector3 position = new BrazilVector3(-350.0f + (i * 12.0f), 120, 0); 
+                BrazilGoody newGoody = new BrazilGoody(BrazilGoodyType.Coin, 50, position, new BrazilVector3(5, 10, 10), DateTime.Now);
+                newGoody.setRotation(0.01);
+                addComponent("PlayingGame", newGoody);
+            }
         }
     }
 }

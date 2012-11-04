@@ -3891,13 +3891,13 @@ namespace Xyglo.Brazil.Xna
 
                         // Check for collisions and adjust the position and velocity accordingly before drawing this
                         //
-                        if (!computeCollisions())
-                        {
+                        computeCollisions();
+                        //{
                             // Move any update any buffers
                             //
                             //m_drawableComponent[component].move(XygloConvert.getVector3(il.getVelocity()));
                             m_drawableComponent[component].moveDefault();
-                        }
+                        //}
 
                         // Apply any rotation if we have one
                         if (il.getRotation() != 0)
@@ -4199,10 +4199,17 @@ namespace Xyglo.Brazil.Xna
                             }
                             else
                             {
-                                if (testKey.getMass() > 0)
+                                if (testKey.getHardness() > 0)
                                 {
-                                    if (!collisionList.Contains(testComp))
-                                    {
+                                    Vector3 newVely = Vector3.Zero;
+                                    newVely.Y = -realVely.Y * 0.6f;
+                                    realComp.setVelocity(newVely);
+                                    //realComp.accelerate(
+                                    collisionList.Add(realComp);
+
+                                    /*
+                                    //if (collisionList.Contains(testComp))
+                                    //{
                                         // Get the point at which they collided
                                         //
                                         Vector3 collisionPoint = getCollisionPoint(testComp, realComp);
@@ -4219,34 +4226,33 @@ namespace Xyglo.Brazil.Xna
 
                                         // Invert the velocity and modify by a factor
                                         //
-                                        testComp.setVelocity(testVely * (float)testKey.getHardness());
+                                        //testComp.setVelocity(testVely * (float)testKey.getHardness());
 
                                         //testComp.se
 
                                         // Move the testComp by the difference from the surface to the new position below the 
                                         // surface.
                                         //
-                                        /*
+                                        
                                         Vector3 depthDiff = realComp.getBoundingBox().Max;// - testComp.getPosition().Y;
                                         depthDiff.X = 0;
                                         depthDiff.Z = 0;
                                         depthDiff.Y += testComp.getPosition().Y;
                                         testComp.move(depthDiff);
-                                        */
+                                        
 
-                                        /*
-                                        try
-                                        {
-                                            BrazilFlyingBlock xfb = (BrazilFlyingBlock)testKey;
+                                        //try
+                                        //{
+                                            //BrazilFlyingBlock xfb = (BrazilFlyingBlock)testKey;
 
-                                            if (testKey != null) //.GetType() == typeof(XygloFlyingBlock))
-                                            {
-                                                Logger.logMsg("Trying to do somethign weird");
-                                            }
-                                        }
-                                        catch (Exception)
-                                        {
-                                        }*/
+                                            //if (testKey != null) //.GetType() == typeof(XygloFlyingBlock))
+                                            //{
+                                                //Logger.logMsg("Trying to do somethign weird");
+                                            //}
+                                        //}
+                                        //catch (Exception)
+                                        //{
+                                        //}
 
                                         // Only reset the position if the X axis is unmoved
                                         // otherwise we've arrived.
@@ -4259,7 +4265,7 @@ namespace Xyglo.Brazil.Xna
                                         }
 
                                         collisionList.Add(testComp);
-                                    }
+                                    //}*/
                                 }
                                 /*
                             else // realKey.getMass() > 0
