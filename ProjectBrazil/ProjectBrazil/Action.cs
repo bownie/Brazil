@@ -117,6 +117,20 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
+        /// KeyAction constructor with state and modifier
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="modifier"></param>
+        /// <param name="down"></param>
+        public KeyAction(Keys key, KeyButtonState state, KeyboardModifier modifier)
+        {
+            m_name = "Key Action";
+            m_key = key;
+            m_modifier = modifier;
+            m_state = state;
+        }
+
+        /// <summary>
         /// Operator equals
         /// </summary>
         /// <param name="a"></param>

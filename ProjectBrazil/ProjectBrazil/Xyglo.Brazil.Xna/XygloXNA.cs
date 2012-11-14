@@ -918,6 +918,10 @@ namespace Xyglo.Brazil.Xna
             //
             m_project.buildInitialConfiguration();
 
+            // Setup the sprite font
+            //
+            setSpriteFont();
+
             // Load all the files - if we have nothing in this project then create a BufferView
             // and a FileBuffer.
             //
@@ -1022,7 +1026,6 @@ namespace Xyglo.Brazil.Xna
                 }
             }
         }
-
 
         /// <summary>
         /// Attempt to set the display mode to the desired resolution.  Itterates through the display
@@ -1299,10 +1302,6 @@ namespace Xyglo.Brazil.Xna
             {
                 initialiseProject();
             }
-
-            // Set up the SpriteFont for the chosen resolution
-            //
-            setSpriteFont();
 
             // Make mouse invisible
             //
@@ -2867,7 +2866,7 @@ namespace Xyglo.Brazil.Xna
 
             // Check confirm state - this works out the complicated statuses of open file buffers
             //
-            if (m_confirmState.equals("None"))
+            if (!m_confirmState.equals("None"))
             {
                 if (keyList.Contains(Keys.Y))
                 {
@@ -3425,6 +3424,35 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Remove keyboard modifiers from a list of XNA Keys
+        /// </summary>
+        /// <param name="inList"></param>
+        /// <returns></returns>
+        protected List<Keys> removeModifiers(List<Keys> inList)
+        {
+            List<Keys> outList = new List<Keys>();
+            List<Keys> modifierList = new List<Keys>();
+            modifierList.Add(Keys.LeftShift);
+            modifierList.Add(Keys.RightShift);
+            modifierList.Add(Keys.LeftControl);
+            modifierList.Add(Keys.RightControl);
+            modifierList.Add(Keys.LeftAlt);
+            modifierList.Add(Keys.RightAlt);
+            modifierList.Add(Keys.LeftWindows);
+            modifierList.Add(Keys.RightWindows);
+
+            foreach (Keys key in inList)
+            {
+                if (!modifierList.Contains(key))
+                {
+                    outList.Add(key);
+                }
+            }
+
+            return outList;
+        }
+
+        /// <summary>
         /// Get all the KeyActions that are currently in progress - whether keys be newly down 
         /// or held down or released.  We can use this method to define repeat timings for individual
         /// keys as well.
@@ -3434,7 +3462,7 @@ namespace Xyglo.Brazil.Xna
         {
             List<KeyAction> lKA = new List<KeyAction>();
             List<Keys> newKeys = XygloConvert.keyMappings(Keyboard.GetState().GetPressedKeys());
-            List<Keys> lastKeys =XygloConvert.keyMappings(m_lastKeyboardState.GetPressedKeys());
+            List<Keys> lastKeys = XygloConvert.keyMappings(m_lastKeyboardState.GetPressedKeys());
             KeyboardModifier modifier = KeyboardModifier.None;
 
             // Check for modifiers - flag and remove
@@ -3442,25 +3470,25 @@ namespace Xyglo.Brazil.Xna
             if (newKeys.Contains(Keys.LeftShift))
             {
                 modifier |= KeyboardModifier.Shift;
-                newKeys.Remove(Keys.LeftShift);
+                //newKeys.Remove(Keys.LeftShift);
             }
 
             if (newKeys.Contains(Keys.RightShift))
             {
                 modifier |= KeyboardModifier.Shift;
-                newKeys.Remove(Keys.RightShift);
+                //newKeys.Remove(Keys.RightShift);
             }
 
             if (newKeys.Contains(Keys.LeftControl))
             {
                 modifier |= KeyboardModifier.Control;
-                newKeys.Remove(Keys.LeftControl);
+                //newKeys.Remove(Keys.LeftControl);
             }
 
             if (newKeys.Contains(Keys.RightControl))
             {
                 modifier |= KeyboardModifier.Control;
-                newKeys.Remove(Keys.RightControl);
+                //newKeys.Remove(Keys.RightControl);
             }
 
             if (newKeys.Contains(Keys.LeftAlt))
@@ -3472,24 +3500,24 @@ namespace Xyglo.Brazil.Xna
             if (newKeys.Contains(Keys.RightAlt))
             {
                 modifier |= KeyboardModifier.Alt;
-                newKeys.Remove(Keys.RightAlt);
+                //newKeys.Remove(Keys.RightAlt);
             }
 
             if (newKeys.Contains(Keys.LeftWindows))
             {
                 modifier |= KeyboardModifier.Windows;
-                newKeys.Remove(Keys.LeftWindows);
+                //newKeys.Remove(Keys.LeftWindows);
             }
 
             if (newKeys.Contains(Keys.RightWindows))
             {
                 modifier |= KeyboardModifier.Windows;
-                newKeys.Remove(Keys.RightWindows);
+                //newKeys.Remove(Keys.RightWindows);
             }
 
             // At this point we can work out if we have any new keys pressed or any held
             // 
-            foreach (Keys key in newKeys)
+            foreach (Keys key in removeModifiers(newKeys))
             {
                 bool pressed = true;
 
@@ -3519,7 +3547,7 @@ namespace Xyglo.Brazil.Xna
 
             // Now any keys that are were and have been released.
             //
-            foreach(Keys key in lastKeys)
+            foreach (Keys key in removeModifiers(lastKeys))
             {
                 KeyAction keyAction = new KeyAction(key, modifier);
                 keyAction.m_state = KeyButtonState.Released;
@@ -3572,6 +3600,19 @@ namespace Xyglo.Brazil.Xna
             if (m_frustrum != null)
             {
                 m_frustrum.Matrix = m_viewMatrix * m_projection;
+            }
+
+            // Check for end states that require no further processing
+            //
+            if (m_state.equals("RestartLevel"))
+            {                        
+                m_drawableComponent.Clear();
+                setState("PlayingGame");
+            }
+
+            if (m_state.equals("GameOver"))
+            {
+                m_drawableComponent.Clear();
             }
 
             // getAllKeyActions also works out the modifiers and applies them
@@ -3957,6 +3998,25 @@ namespace Xyglo.Brazil.Xna
                 destroyKey.setDestroyed(true);
             }
 
+            // Check for world boundary escape
+            //
+            if (m_interloper != null && !XygloConvert.getBoundingBox(m_world.getBounds()).Intersects(m_drawableComponent[m_interloper].getBoundingBox()))
+            {
+                Logger.logMsg("Interloper has left the world");
+                m_world.setLives(m_world.getLives() - 1);
+
+                if (m_world.getLives() < 0)
+                {
+                    setState("GameOver");
+                }
+                else
+                {
+                    // We've got one less life - this effectively restarts the level from scratch
+                    m_interloper = null;
+                    m_drawableComponent.Clear();
+                }
+            }
+
             base.Update(gameTime);
         }
 
@@ -4296,14 +4356,14 @@ namespace Xyglo.Brazil.Xna
             // We have to adjust for any held down modifier keys here and also clear the variable as 
             // necessary.
             //
-            if (keyActionList.Count == 0 ||
-                (keyActionList.Count == 1 && (m_altDown || m_shiftDown || m_ctrlDown)))
-            {
+            //if (keyActionList.Count == 0 ||
+                //(keyActionList.Count == 1 && (m_altDown || m_shiftDown || m_ctrlDown)))
+            //{
                 //m_heldDownStartTime = gameTime.TotalGameTime.TotalSeconds;
                 //m_heldDownLastRepeatTime = gameTime.TotalGameTime.TotalSeconds;
-                m_heldDownKeyValid = false;
-                return;
-            }
+                //m_heldDownKeyValid = false;
+                //return;
+            //}
 
             // We need to do a variety of tests here - test to see if a new key has been
             // pressed but also check to see if a held key is still being pressed.  If the
@@ -5949,46 +6009,7 @@ namespace Xyglo.Brazil.Xna
             m_bloom.BeginDraw();
 
             setupDrawWorld(gameTime);
-
-#if NEW_ATTEMPT
-            foreach (Component component in m_componentList)
-            {
-                if (component.GetType() == typeof(Xyglo.Brazil.FlyingBlock))
-                {
-
-                    FlyingBlock block = getDrawableFlyingBlock((Xyglo.Brazil.FlyingBlock)component);
-                    m_graphics.GraphicsDevice.SetVertexBuffer(block.getVertexBuffer());
-
-                    foreach (EffectPass pass in m_basicEffect.CurrentTechnique.Passes)
-                    {
-
-                        int _iVertexOffset = -4; // we default to array index 0 within the following loop as 0 += 4 ... 
-
-                        //for (int i = 0; i < textureList.Count; ++i)
-                        //{
-
-                            //m_lineEffect.Texture = textureList[i];
-
-                            //pass.Apply();
-                            //GraphicsDevice.DrawUserIndexedPrimitives<VertexPositionNormalTexture>(PrimitiveType.TriangleList, block.getVertices(), _iVertexOffset += 4, 4, Indices, 0, 2);
-
-                        //}
-
-
-
-                        
-                        //m_basicEffect.Texture = cube.shapeTexture;
-                        //cube.RenderShape(GraphicsDevice);
-                        //pass.End();
-                    }
-                }
-                //cubeEffect.End();
-            }
-
-#else
-            //m_spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.DepthRead, RasterizerState.CullNone, m_lineEffect);
-
-            
+          
             // Create/draw the components - note that we have two components called the same in different
             // areas of the framework - we should disambiguate to make sure this distinction between
             // API levels is clear.
@@ -6095,6 +6116,11 @@ namespace Xyglo.Brazil.Xna
                             string ipScore = "Score = " + m_interloper.getScore();
                             XygloBannerText ipScoreText = new XygloBannerText(m_overlaySpriteBatch, m_fontManager.getOverlayFont(), XygloConvert.getColour(BrazilColour.Green), new Vector3(0, m_fontManager.getOverlayFont().LineSpacing * 2, 0), 1.0f, ipScore);
                             ipScoreText.draw(m_graphics.GraphicsDevice);
+
+                            string ipLives = "Lives = " + m_world.getLives();
+                            XygloBannerText ipLivesText = new XygloBannerText(m_overlaySpriteBatch, m_fontManager.getOverlayFont(), XygloConvert.getColour(BrazilColour.Green), new Vector3(0, m_fontManager.getOverlayFont().LineSpacing * 3, 0), 1.0f, ipLives);
+                            ipLivesText.draw(m_graphics.GraphicsDevice);
+
                         }
 
                     } else if (component.GetType() == typeof(Xyglo.Brazil.BrazilGoody))
@@ -6135,9 +6161,6 @@ namespace Xyglo.Brazil.Xna
                 }
 
             }
-
-            //m_spriteBatch.End();
-#endif
         }
 
         /// <summary>

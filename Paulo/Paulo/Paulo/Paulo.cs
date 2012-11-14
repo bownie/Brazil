@@ -17,6 +17,7 @@ namespace Paulo
         public Paulo(BrazilVector3 gravity):base()
         {
             m_world.setGravity(gravity);
+            m_world.setBounds(new BrazilBoundingBox(new BrazilVector3(-400, -400, -300), new BrazilVector3(400, 400, 300)));
 
             // Initialise the states
             //
@@ -45,6 +46,15 @@ namespace Paulo
             BrazilInterloper paulo = new BrazilInterloper(BrazilColour.White, new BrazilVector3(0, 0, 0), new BrazilVector3(10, 10, 10));
             paulo.setName("Interloper");
             addComponent("PlayingGame", paulo);
+
+
+            // Big dummy interloper
+            //
+            // Set up an interloper - we give it a name to aid debugging
+            //
+            BrazilInterloper paulo2 = new BrazilInterloper(BrazilColour.Yellow, new BrazilVector3(0, 0, 0), new BrazilVector3(100, 100, 100));
+            paulo.setName("Interloper2");
+            addComponent("ComponentTest", paulo2);
 
             // Banner screen
             //
@@ -185,8 +195,8 @@ namespace Paulo
             for (int i = 0; i < 100; i++)
             {
                 BrazilVector3 position = new BrazilVector3(-350.0f + (i * 12.0f), 120, 0); 
-                BrazilGoody newGoody = new BrazilGoody(BrazilGoodyType.Coin, 50, position, new BrazilVector3(5, 10, 10), DateTime.Now);
-                newGoody.setRotation(0.01);
+                BrazilGoody newGoody = new BrazilGoody(BrazilGoodyType.Coin, 50, position, new BrazilVector3(4, 10, 10), DateTime.Now);
+                newGoody.setRotation(0.2);
                 addComponent("PlayingGame", newGoody);
             }
         }

@@ -63,9 +63,11 @@ namespace Paulo
             //
             connect("TextEditing", new KeyAction(Keys.S, KeyboardModifier.Alt), "SaveFile");
 
-            // New BufferView with state keys for selecting direction
+            // New BufferView with state keys for selecting direction - we don't need a lot of states
+            // defining as our XygloXNA for Friendlier cheats a bit as it predates these methods.
             //
-            connect("TextEditing", new KeyAction(Keys.N, KeyboardModifier.Alt), "NewBufferView");
+            //connect("TextEditing", new KeyAction(Keys.N, KeyboardModifier.Alt), "NewBufferView");
+            //connect("TextEditing", new KeyAction(Keys.C, KeyboardModifier.Alt), "CloseBufferView");
             connect("PositionScreenNew", new KeyAction(Keys.Left), "Default");
             connect("PositionScreenNew", new KeyAction(Keys.Right), "Default");
             connect("PositionScreenNew", new KeyAction(Keys.Up), "Default");
@@ -81,13 +83,47 @@ namespace Paulo
             connect("TextEditing", new KeyAction(Keys.M, KeyboardModifier.Alt), "ManageProject");
             connect("ManageProject", Keys.Escape, "Default");
 
+            connect("Configuration", Keys.Escape, "Default");
+            connect("Help", Keys.Escape, "Default");
+            connect("FileOpen", Keys.Escape, "Default");
+
             // Connect some standard editor keys to states
             //
             connectEditorKeys("TextEditing");
+
+            // Undo/redo
+            //
+            connect("TextEditing", new KeyAction(Keys.Z, KeyboardModifier.Control), "Default");
+            connect("TextEditing", new KeyAction(Keys.Y, KeyboardModifier.Control), "Default");
+
+            // CTRL + A
+            //
+            connect("TextEditing", new KeyAction(Keys.A, KeyboardModifier.Control), "Default");
+
+            // Help screen
+            //
+            connect("TextEditing", new KeyAction(Keys.H, KeyboardModifier.Alt), "Help");
+
+            // Information
+            //
+            connect("TextEditing", new KeyAction(Keys.I, KeyboardModifier.Alt), "Information");
+
             //connectEditorKeys("FileSaveAs");
             //connectEditorKeys("FileOpen");
             //connectEditorKeys("PositionScreenOpen");
             //connectEditorKeys("PositionScreenNew");
+
+            // and the F keys
+            initialiseFKeys();
+        }
+
+        protected void initialiseFKeys()
+        {
+            Keys[] keys = { Keys.F1, Keys.F2, Keys.F3, Keys.F4, Keys.F5, Keys.F6, Keys.F7, Keys.F8, Keys.F9, Keys.F10 };
+            foreach (Keys key in keys)
+            {
+                connect("TextEditing", key);
+            }
         }
 
         /// <summary>
@@ -107,7 +143,7 @@ namespace Paulo
             // Targets are actions we can perform in the application - a default target will usually mean the object
             // in focus within the current State.  This should be defined by the component.
             //
-            string[] targets = { "None", "Default", "CurrentBufferView", "OpenFile", "SaveFile", "NewBufferView", "CursorUp", "CursorDown", "CursorRight", "CursorLeft", "ShowInformation" , "ManageProject"};
+            string[] targets = { "None", "Default", "CurrentBufferView", "OpenFile", "SaveFile", "NewBufferView", "CursorUp", "CursorDown", "CursorRight", "CursorLeft", "ShowInformation" , "ManageProject", "Help", "Information"};
             foreach (string target in targets)
             {
                 addTarget(target);

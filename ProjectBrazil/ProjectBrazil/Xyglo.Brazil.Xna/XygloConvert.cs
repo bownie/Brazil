@@ -308,6 +308,77 @@ namespace Xyglo.Brazil.Xna
                         if (!ignoreModifiers) newKey = Keys.Space;
                         break;
 
+                        // Do we need ignoreModifiers or not??
+                        //
+                    case Microsoft.Xna.Framework.Input.Keys.Delete:
+                        if (!ignoreModifiers) newKey = Keys.Delete;
+                        break;
+
+                        // Question and forward slash
+                    case Microsoft.Xna.Framework.Input.Keys.OemQuestion:
+                        newKey = Keys.OemQuestion;
+                        break;
+                        
+                    case Microsoft.Xna.Framework.Input.Keys.OemBackslash:
+                        newKey = Keys.OemBackslash;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.Back:
+                        newKey = Keys.Back;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.Enter:
+                        newKey = Keys.Enter;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.F1:
+                        newKey = Keys.F1;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.F2:
+                        newKey = Keys.F2;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.F3:
+                        newKey = Keys.F3;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.F4:
+                        newKey = Keys.F4;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.F5:
+                        newKey = Keys.F5;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.F6:
+                        newKey = Keys.F6;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.F7:
+                        newKey = Keys.F7;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.F8:
+                        newKey = Keys.F8;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.F9:
+                        newKey = Keys.F9;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.F10:
+                        newKey = Keys.F10;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.F11:
+                        newKey = Keys.F11;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.F12:
+                        newKey = Keys.F12;
+                        break;
+
                     default:
                         newKey = Keys.None;
                         break;
@@ -389,6 +460,19 @@ namespace Xyglo.Brazil.Xna
                 if (state.RightButton == ButtonState.Pressed)
                 {
                     rL.Add(Mouse.RightButtonHeld);
+                }
+            }
+
+            // Check for scrollwheel change
+            //
+            if (rL.Count == 0)
+            {
+                if (state.ScrollWheelValue > lastState.ScrollWheelValue)
+                {
+                    rL.Add(Mouse.ScrollUp);
+                } else if (state.ScrollWheelValue < lastState.ScrollWheelValue)
+                {
+                    rL.Add(Mouse.ScrollDown);
                 }
             }
 

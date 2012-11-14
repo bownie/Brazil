@@ -53,6 +53,27 @@ namespace Xyglo.Brazil
             m_gravity = gravity;
         }
 
+        /// <summary>
+        /// Set lives
+        /// </summary>
+        /// <param name="lives"></param>
+        public void setLives(int lives)
+        {
+            m_lives = lives;
+        }
+
+        /// <summary>
+        /// Get lives
+        /// </summary>
+        /// <returns></returns>
+        public int getLives()
+        {
+            return m_lives;
+        }
+
+        /// <summary>
+        /// Bounding area for our world
+        /// </summary>
         protected BrazilBoundingBox m_bounds;
 
         /// <summary>
@@ -60,5 +81,10 @@ namespace Xyglo.Brazil
         /// in directional units per time unit.
         /// </summary>
         protected BrazilVector3 m_gravity;
+
+        /// <summary>
+        /// How many lives do people have in this world?
+        /// </summary>
+        protected int m_lives = 3;
     }
 }

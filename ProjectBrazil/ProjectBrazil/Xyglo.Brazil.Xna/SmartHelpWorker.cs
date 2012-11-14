@@ -119,15 +119,15 @@ namespace Xyglo.Brazil.Xna
                                 m_requestQueue[0].m_fileBuffer.copyBackgroundHighlighting();
                                 Logger.logMsg("Updated all highlighting");
                             }
-
-                            // Remove this instance of something to process
-                            //
-                            m_requestQueue.RemoveAt(0);
                         }
                         catch (Exception e)
                         {
-                            Logger.logMsg("SmartHelpWorker::startWorking() - " + e.Message);
+                            Logger.logMsg("SmartHelpWorker::startWorking() - error removing request - " + e.Message);
                         }
+
+                        // Remove this instance of something to process
+                        //
+                        m_requestQueue.RemoveAt(0);
 
                         // And rest
                         //

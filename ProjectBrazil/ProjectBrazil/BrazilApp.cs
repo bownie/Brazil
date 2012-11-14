@@ -254,7 +254,18 @@ namespace Xyglo.Brazil
                             Keys.V, Keys.W, Keys.X, Keys.Y, Keys.Z };
             foreach (Keys key in alphaKeys)
             {
+                // Connect key
+                //
                 connectKey(state, key, target);
+
+                // Connect shifted key
+                //
+                connect(state, new KeyAction(key, KeyboardModifier.Shift), target);
+
+                // Held for upper and lower case
+                //
+                connect(state, new KeyAction(key, KeyButtonState.Held), target);
+                connect(state, new KeyAction(key, KeyButtonState.Held, KeyboardModifier.Shift), target);
             }
 
             // Numbers
@@ -263,6 +274,10 @@ namespace Xyglo.Brazil
             foreach (Keys key in numKeys)
             {
                 connectKey(state, key, target);
+
+                // Connect shifted key
+                //
+                connect(state, new KeyAction(key, KeyboardModifier.Shift), target);
             }
 
             // Power keys - like Escape
@@ -275,7 +290,7 @@ namespace Xyglo.Brazil
 
             // Other keys
             //
-            Keys[] otherKeys = { Keys.OemComma, Keys.OemPeriod, Keys.OemQuotes, Keys.OemCloseBrackets, Keys.OemOpenBrackets, Keys.OemPipe, Keys.OemMinus, Keys.OemPlus, Keys.OemQuestion, Keys.Back, Keys.Delete, Keys.Decimal, Keys.OemBackslash, Keys.LeftWindows, Keys.RightWindows, Keys.LeftControl, Keys.RightControl, Keys.RightShift, Keys.LeftShift, Keys.LeftShift, Keys.RightAlt, Keys.LeftAlt /*, Keys.Right, Keys.Left, Keys.Up, Keys.Down, Keys.PageUp, Keys.PageDown */ };
+            Keys[] otherKeys = { Keys.Space, Keys.OemComma, Keys.OemPeriod, Keys.OemQuotes, Keys.OemCloseBrackets, Keys.OemOpenBrackets, Keys.OemPipe, Keys.OemMinus, Keys.OemPlus, Keys.OemQuestion, Keys.Back, Keys.Delete, Keys.Decimal, Keys.OemBackslash, Keys.LeftWindows, Keys.RightWindows, Keys.LeftControl, Keys.RightControl, Keys.RightShift, Keys.LeftShift, Keys.LeftShift, Keys.RightAlt, Keys.LeftAlt /*, Keys.Right, Keys.Left, Keys.Up, Keys.Down, Keys.PageUp, Keys.PageDown */ };
             foreach (Keys key in otherKeys)
             {
                 connectKey(state, key, target);

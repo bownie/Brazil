@@ -2148,7 +2148,7 @@ namespace Xyglo.Brazil.Xna
 
             // Add numTabs to the line.Length for all calculations
             //
-            if (m_cursorPosition.X + steps < lineLength)
+            if (m_cursorPosition.X + steps <= lineLength)
             {
                 int numTabs = line.Substring(screenToFileX(project), steps).Where(item => item == '\t').Count();
 
