@@ -497,6 +497,14 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
+        /// Push any world changes through to XNA
+        /// </summary>
+        public void pushWorldChanges()
+        {
+            m_viewSpace.pushWorld();
+        }
+
+        /// <summary>
         /// ViewSpace object - created at construction.   The Viewspace will define what we can
         /// see for this moment in our space.   It will be rebuilt on each 'level' according to how
         /// the application/game is structued.

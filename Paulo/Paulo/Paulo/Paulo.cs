@@ -162,7 +162,7 @@ namespace Paulo
             addComponent("PlayingGame", block3);
 
             BrazilFlyingBlock block4 = new BrazilFlyingBlock(BrazilColour.Green, new BrazilVector3(-170, 170, 0), new BrazilVector3(70, 20, 10));
-            //block4.setRotation(0.03);
+            block4.setRotation(0.03);
             //block4.setVelocity(new BrazilVector3(-0.5f, -1f, -0.4f));
             //m_componentList.Add(block4);
             block4.setHardness(10);
@@ -194,7 +194,7 @@ namespace Paulo
 
             for (int i = 0; i < 10; i++)
             {
-                BrazilVector3 position = new BrazilVector3(-350.0f + (i * 12.0f), 120, 0); 
+                BrazilVector3 position = new BrazilVector3(-100.0f + (i * 12.0f), 120, 0); 
                 BrazilGoody newGoody = new BrazilGoody(BrazilGoodyType.Coin, 50, position, new BrazilVector3(4, 10, 10), DateTime.Now);
                 newGoody.setRotation(0.2);
                 addComponent("PlayingGame", newGoody);

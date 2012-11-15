@@ -107,6 +107,7 @@ namespace Xyglo.Brazil.Xna
             // And set the velocity of this group
             //
             m_velocity = velocity;
+            m_velocity = XygloConvert.roundVector(m_velocity);
         }
 
         /// <summary>
@@ -123,6 +124,9 @@ namespace Xyglo.Brazil.Xna
             // And move ourself
             m_position += movement;
             m_groupCentrePosition += movement;
+
+            // Round
+            m_position = XygloConvert.roundVector(m_position);
         }
 
         /// <summary>
@@ -166,6 +170,8 @@ namespace Xyglo.Brazil.Xna
 
             m_position += m_velocity;
             m_groupCentrePosition += m_velocity;
+
+            m_position = XygloConvert.roundVector(m_position);
         }
 
         /// <summary>
@@ -209,6 +215,10 @@ namespace Xyglo.Brazil.Xna
 
             m_velocity.Y += accelerationVector.Y;
             m_velocity.Z += accelerationVector.Z;
+
+            // Round our interlopers velocity
+            //
+            m_velocity = XygloConvert.roundVector(m_velocity);
         }
 
         /// <summary>
@@ -224,6 +234,8 @@ namespace Xyglo.Brazil.Xna
 
             m_position.X -= x;
             m_groupCentrePosition.X -= x;
+
+            m_position = XygloConvert.roundVector(m_position);
         }
 
         /// <summary>
@@ -239,6 +251,8 @@ namespace Xyglo.Brazil.Xna
 
             m_position.X += x;
             m_groupCentrePosition.X += x;
+
+            m_position = XygloConvert.roundVector(m_position);
         }
 
         /// <summary>

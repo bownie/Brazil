@@ -72,6 +72,42 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
+        /// Get repeat interval (seconds)
+        /// </summary>
+        /// <returns></returns>
+        public double getKeyAutoRepeatInterval()
+        {
+            return m_repeatInterval;
+        }
+
+        /// <summary>
+        /// Time before auto repeating of keys happens (seconds)
+        /// </summary>
+        /// <returns></returns>
+        public double getKeyAutoRepeatHoldTime()
+        {
+            return m_repeatHoldTime;
+        }
+
+        /// <summary>
+        /// Set autorepeat interval
+        /// </summary>
+        /// <param name="time"></param>
+        public void setKeyAutoRepeatInterval(double time)
+        {
+            m_repeatInterval = time;
+        }
+
+        /// <summary>
+        /// Set AutoRepeat key hold time
+        /// </summary>
+        /// <param name="time"></param>
+        public void setKeyAutoRepeatHoldTime(double time)
+        {
+            m_repeatHoldTime = time;
+        }
+
+        /// <summary>
         /// Bounding area for our world
         /// </summary>
         protected BrazilBoundingBox m_bounds;
@@ -86,5 +122,15 @@ namespace Xyglo.Brazil
         /// How many lives do people have in this world?
         /// </summary>
         protected int m_lives = 3;
+
+        /// <summary>
+        /// Key repeat start time in seconds (defaults to zero for games)
+        /// </summary>
+        protected double m_repeatHoldTime = 0.0f;
+
+        /// <summary>
+        /// Time between auto-key repeats
+        /// </summary>
+        protected double m_repeatInterval = 0.05f;
     }
 }

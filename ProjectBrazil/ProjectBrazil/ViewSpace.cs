@@ -105,6 +105,14 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
+        /// Tell the XNA layer to re-read world data
+        /// </summary>
+        public void pushWorld()
+        {
+            m_xna.pushWorld();
+        }
+
+        /// <summary>
         /// Implement the Dispose method
         /// </summary>
         public void Dispose()

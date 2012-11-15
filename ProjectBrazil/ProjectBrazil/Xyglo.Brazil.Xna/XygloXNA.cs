@@ -152,26 +152,6 @@ namespace Xyglo.Brazil.Xna
         protected KeyboardState m_lastKeyboardState;
 
         /// <summary>
-        /// Which key has been held down most recently?
-        /// </summary>
-        protected Keys m_heldKey;
-
-        /// <summary>
-        /// When did we start holding down a key?
-        /// </summary>
-        protected double m_heldDownStartTime = 0;
-
-        /// <summary>
-        /// Last time the thing repeated
-        /// </summary>
-        protected double m_heldDownLastRepeatTime = 0;
-
-        /// <summary>
-        /// Is the held key actually held or just last state?   This is an awkward way of doing this.
-        /// </summary>
-        protected bool m_heldDownKeyValid = false;
-
-        /// <summary>
         /// Is either Shift key being held?
         /// </summary>
         protected bool m_shiftDown = false;
@@ -557,9 +537,9 @@ namespace Xyglo.Brazil.Xna
         protected Pair<BufferView, Highlight> m_clickHighlight = new Pair<BufferView, Highlight>();
 
         /// <summary>
-        /// Time for key auto-repeat to start
+        /// Time for key auto-repeat to start - defaults to zero
         /// </summary>
-        double m_repeatHoldTime = 0.6; // seconds
+        double m_repeatHoldTime = 0; // seconds
 
         // Time between autorepeats
         //
@@ -652,6 +632,11 @@ namespace Xyglo.Brazil.Xna
             m_states = states;
             m_targets = targets;
 
+            // Get these values from the World
+            //
+            m_repeatHoldTime = world.getKeyAutoRepeatHoldTime();
+            m_repeatInterval = world.getKeyAutoRepeatInterval();
+
             initialise();
         }
 
@@ -670,6 +655,11 @@ namespace Xyglo.Brazil.Xna
             m_world = world;
             m_states = states;
             m_targets = targets;
+
+            // Get these values from the World
+            //
+            m_repeatHoldTime = world.getKeyAutoRepeatHoldTime();
+            m_repeatInterval = world.getKeyAutoRepeatInterval();
 
             // init
             initialise();
@@ -692,6 +682,19 @@ namespace Xyglo.Brazil.Xna
         public Project getProject()
         {
             return m_project;
+        }
+
+        /// <summary>
+        /// Allow some world parameters to be re-read
+        /// </summary>
+        /// <param name="keyHold"></param>
+        /// <param name="keyRepeatInterval"></param>
+        public void pushWorld()
+        {
+            // Get these values from the World
+            //
+            m_repeatHoldTime = m_world.getKeyAutoRepeatHoldTime();
+            m_repeatInterval = m_world.getKeyAutoRepeatInterval();
         }
 
         /// <summary>
@@ -3767,8 +3770,10 @@ namespace Xyglo.Brazil.Xna
                         }
                         break;
 
+                        // Jump the interloper
+                        //
                     case "Jump":
-                        m_drawableComponent[m_interloper].jump(new Vector3(0, -10, 0));
+                        m_drawableComponent[m_interloper].jump(new Vector3(0, -4, 0));
                         break;
 
                     case "MoveForward":
@@ -4265,9 +4270,22 @@ namespace Xyglo.Brazil.Xna
                             {
                                 if (testKey.getHardness() > 0)
                                 {
+
+
                                     Vector3 newVely = Vector3.Zero;
-                                    newVely.Y = -realVely.Y * 0.6f;
+                                    //newVely.Y = -realVely.Y * 0.6f;
+                                    newVely.Y = -realVely.Y * (float)(realKey.getHardness() / testKey.getHardness());
+                                    newVely.X = realVely.X * (float)(realKey.getHardness() / testKey.getHardness());
+
+                                    newVely = XygloConvert.roundVector(newVely, 1);
+
+                                    if (newVely.Length() < 0.5f)
+                                    {
+                                        newVely = Vector3.Zero;
+                                    }
                                     realComp.setVelocity(newVely);
+
+
                                     //realComp.accelerate(
                                     collisionList.Add(realComp);
 
@@ -4391,7 +4409,7 @@ namespace Xyglo.Brazil.Xna
                 {
                     if ((gameTime.TotalGameTime.TotalSeconds - m_keyMap[keyAction.m_key].Second) < m_repeatInterval)
                     {
-                        Logger.logMsg("LS = " + gameTime.TotalGameTime.TotalSeconds + ", MS = " + m_keyMap[keyAction.m_key].Second);
+                        //Logger.logMsg("LS = " + gameTime.TotalGameTime.TotalSeconds + ", MS = " + m_keyMap[keyAction.m_key].Second);
                         return false;
                     }
                 }

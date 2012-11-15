@@ -16,6 +16,16 @@ namespace Paulo
         public Friendlier() 
         {
             initialiseStates();
+
+            // Set up the keyboard behaviour
+            //
+            m_world.setKeyAutoRepeatHoldTime(0.6); // seconds
+            m_world.setKeyAutoRepeatInterval(0.05); // seconds
+
+            // Have to re-push these changes as they key repeats have already
+            // been loaded into the XNA world.
+            //
+            pushWorldChanges();
         }
 
         /// <summary>

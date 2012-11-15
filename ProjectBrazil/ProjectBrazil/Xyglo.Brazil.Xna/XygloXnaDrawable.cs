@@ -198,6 +198,9 @@ namespace Xyglo.Brazil.Xna
 
             m_velocity.Y += accelerationVector.Y;
             m_velocity.Z += accelerationVector.Z;
+
+            // Round
+            m_velocity = XygloConvert.roundVector(m_velocity);
         }
 
         /// <summary>

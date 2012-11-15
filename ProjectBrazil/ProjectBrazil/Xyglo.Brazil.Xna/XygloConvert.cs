@@ -15,6 +15,17 @@ namespace Xyglo.Brazil.Xna
     static public class XygloConvert
     {
         /// <summary>
+        /// Round a Vector3 to a given precision
+        /// </summary>
+        /// <param name="vector"></param>
+        /// <param name="precision"></param>
+        /// <returns></returns>
+        static public Vector3 roundVector(Vector3 vector, int precision = 2)
+        {
+            return new Vector3((float)Math.Round(vector.X, precision), (float)Math.Round(vector.Y, precision), (float)Math.Round(vector.Z, precision));
+        }
+
+        /// <summary>
         /// Get an XNA Vector2 for a BrazilVector2
         /// </summary>
         /// <param name="bV"></param>

@@ -12,7 +12,7 @@ namespace Paulo
         [STAThread]// Setting this as single threaded for cut and paste of all things to work
         static void Main(string[] args)
         {
-            bool friendlier = true;
+            bool friendlier = false;
             BrazilApp app = null;
 
             if (friendlier)
