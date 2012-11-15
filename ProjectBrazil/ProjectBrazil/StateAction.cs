@@ -117,6 +117,31 @@ namespace Xyglo.Brazil
             return false;
         }
 
+        /// <summary>
+        /// Match all the actions of a single keyAction
+        /// </summary>
+        /// <param name="keyAction"></param>
+        /// <returns></returns>
+        public bool matchKeyAction(KeyAction keyAction)
+        {
+            bool match = true;
+            foreach (Action action in m_actionList)
+            {
+                if (action.GetType() == typeof(KeyAction))
+                {
+                    KeyAction testKeyAction = (KeyAction)action;
+
+                    if (testKeyAction != keyAction)
+                    {
+                        match = false;
+                        break;
+                    }
+                }
+            }
+
+            return match;
+        }
+
         /*
         public int CompareTo(Object obj)
         {

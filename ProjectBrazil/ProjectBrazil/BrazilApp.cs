@@ -278,6 +278,11 @@ namespace Xyglo.Brazil
                 // Connect shifted key
                 //
                 connect(state, new KeyAction(key, KeyboardModifier.Shift), target);
+
+                // Held for upper and lower case
+                //
+                connect(state, new KeyAction(key, KeyButtonState.Held), target);
+                connect(state, new KeyAction(key, KeyButtonState.Held, KeyboardModifier.Shift), target);
             }
 
             // Power keys - like Escape
@@ -294,6 +299,15 @@ namespace Xyglo.Brazil
             foreach (Keys key in otherKeys)
             {
                 connectKey(state, key, target);
+
+                // Connect shifted key
+                //
+                connect(state, new KeyAction(key, KeyboardModifier.Shift), target);
+
+                // Held for upper and lower case
+                //
+                connect(state, new KeyAction(key, KeyButtonState.Held), target);
+                connect(state, new KeyAction(key, KeyButtonState.Held, KeyboardModifier.Shift), target);
             }
 
             // Connect the arrow and movement keys

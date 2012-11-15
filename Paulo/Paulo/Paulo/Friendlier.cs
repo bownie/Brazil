@@ -86,6 +86,7 @@ namespace Paulo
             connect("Configuration", Keys.Escape, "Default");
             connect("Help", Keys.Escape, "Default");
             connect("FileOpen", Keys.Escape, "Default");
+            connect("DiffPicker", Keys.Escape, "Default");
 
             // Connect some standard editor keys to states
             //

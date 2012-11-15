@@ -379,6 +379,14 @@ namespace Xyglo.Brazil.Xna
                         newKey = Keys.F12;
                         break;
 
+                    case Microsoft.Xna.Framework.Input.Keys.OemPeriod:
+                        newKey = Keys.OemPeriod;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.OemPipe:
+                        newKey = Keys.OemPipe;
+                        break;
+
                     default:
                         newKey = Keys.None;
                         break;

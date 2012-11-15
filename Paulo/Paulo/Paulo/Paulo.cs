@@ -192,7 +192,7 @@ namespace Paulo
             goody2.setRotation(0.01);
             addComponent("ComponentTest", goody2);
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 10; i++)
             {
                 BrazilVector3 position = new BrazilVector3(-350.0f + (i * 12.0f), 120, 0); 
                 BrazilGoody newGoody = new BrazilGoody(BrazilGoodyType.Coin, 50, position, new BrazilVector3(4, 10, 10), DateTime.Now);

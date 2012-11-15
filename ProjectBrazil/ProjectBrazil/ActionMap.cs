@@ -129,6 +129,36 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
+        /// Get a Target for a Key combination - only one Target is allowed for a combination.
+        /// Note that this method ignores modifier keys as they should already be set in the 
+        /// KeyAction itself.
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="keys"></param>
+        /// <returns></returns>
+        public Target getTargetForKey(State state, KeyAction key)
+        {
+            // Filter the StateActions by state
+            //
+            Dictionary<StateAction, Target> dict = getActionsForState(state);
+
+            //  Check for key actions and return list
+            //
+            foreach (StateAction sA in dict.Keys)
+            {
+                // We only need to match keys once as we're looking up in a Dictionary that ensures
+                // there's only one result.
+                //
+                if (sA.matchKeyAction(key))
+                {
+                    return dict[sA];
+                }
+            }
+
+            return Target.None;
+        }
+
+        /// <summary>
         /// The ActionMap is basically a Dictionary for each State and Action which
         /// points to a Target - or not.
         /// </summary>

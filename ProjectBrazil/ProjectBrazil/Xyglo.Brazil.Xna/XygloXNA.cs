@@ -28,6 +28,12 @@ namespace Xyglo.Brazil.Xna
         ///////////////// MEMBER VARIABLES //////////////////
 
         /// <summary>
+        /// Store a map of all keys that are being pressed or held - bool is true for the first
+        /// pass through for the 'initial' hold.  Double is for the GameTime in TotalSeconds.
+        /// </summary>
+        protected Dictionary<Keys, Pair<bool, double>> m_keyMap = new Dictionary<Keys, Pair<bool, double>>();
+
+        /// <summary>
         /// Component list is passed in from the BrazilApp
         /// </summary>
         List<Component> m_componentList = null;
@@ -617,7 +623,7 @@ namespace Xyglo.Brazil.Xna
         /// <summary>
         /// Part of our botched keyboard managament routines
         /// </summary>
-        protected Keys m_currentKeyDown;
+        //protected Keys m_currentKeyDown;
 
         /// <summary>
         /// Frame rate
@@ -1883,13 +1889,13 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="gameTime"></param>
         /// <returns></returns>
-        protected bool processMetaCommands(GameTime gameTime, List<KeyAction> keyActionList)
+        protected bool processMetaCommand(GameTime gameTime, KeyAction keyAction)
         {
             List<Keys> keyList = new List<Keys>();
-            foreach(KeyAction keyAction in keyActionList)
-            {
+            //foreach(KeyAction keyAction in keyActionList)
+            //{
                 keyList.Add(keyAction.m_key);
-            }
+            //}
 
             // Allow the game to exit
             //
@@ -2142,13 +2148,10 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="gameTime"></param>
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
-        protected void processActionKeys(GameTime gameTime, List<KeyAction> keyActionList)
+        protected void processActionKey(GameTime gameTime, KeyAction keyAction)
         {
             List<Keys> keyList = new List<Keys>();
-            foreach (KeyAction keyAction in keyActionList)
-            {
-                keyList.Add(keyAction.m_key);
-            }
+            keyList.Add(keyAction.m_key);
 
             // Main key handling statement
             //
@@ -3621,23 +3624,24 @@ namespace Xyglo.Brazil.Xna
             //
             List<KeyAction> keyActionList = getAllKeyActions();
 
-            if (keyActionList.Count > 0)
+            foreach(KeyAction keyAction in keyActionList)
             {
-                if (keyActionList.Count > 1)
-                {
-                    Logger.logMsg("Got two");
-                }
+                // We check and discard key events that aren't within the repeat or press
+                // window at this point.  So we apply the same delays for all keys currently.
+                //
+                if (!checkKeyRepeat(gameTime, keyAction))
+                    continue;
 
                 // Process action keys
                 //
                 if (m_project != null)
                 {
-                    processActionKeys(gameTime, keyActionList);
+                    processActionKey(gameTime, keyAction);
                 }
 
                 // Get a target for this (potential) combination of keys
                 //
-                Target target = m_actionMap.getTargetForKeys(m_state, keyActionList);
+                Target target = m_actionMap.getTargetForKey(m_state, keyAction);
 
                 // Now fire off the keys according to the Target
                 switch (target.m_name)
@@ -3654,8 +3658,8 @@ namespace Xyglo.Brazil.Xna
                     case "CurrentBufferView":
                         // The default target will process meta key commands
                         //
-                        processKeys(gameTime, keyActionList);
-                        processMetaCommands(gameTime, keyActionList);
+                        processKey(gameTime, keyAction);
+                        processMetaCommand(gameTime, keyAction);
                         break;
                     
                         // For OpenFile all we need to do is change state (for the moment)
@@ -3705,8 +3709,8 @@ namespace Xyglo.Brazil.Xna
                     case "Exit":
                         // The default target will process meta key commands
                         //
-                        processKeys(gameTime, keyActionList);
-                        processMetaCommands(gameTime, keyActionList);
+                        processKey(gameTime, keyAction);
+                        processMetaCommand(gameTime, keyAction);
                         break;
 
                         // If we hit this target then transition to PlayingGame
@@ -4345,419 +4349,394 @@ namespace Xyglo.Brazil.Xna
             return (collisionList.Count > 0);
         }
 
+        /// <summary>
+        /// Check to see whether a key is available for repeat yet and ensure that the m_keyMap is
+        /// updated with the latest status.  Returns true if we can do something with this key.
+        /// </summary>
+        /// <param name="gameTime"></param>
+        /// <param name="keyAction"></param>
+        /// <returns></returns>
+        protected bool checkKeyRepeat(GameTime gameTime, KeyAction keyAction)
+        {
+            // Skip all repeats except the ones we want
+            //
+            if (keyAction.m_state == KeyButtonState.Released)
+            {
+                // Release the value of the key pressed
+                m_keyMap[keyAction.m_key] = null;
+                m_keyMap.Remove(keyAction.m_key);
+                return false;
+            }
+
+            // Create new key storage if it's not available yet - might want to
+            // optimise this later.
+            //
+            if (!m_keyMap.ContainsKey(keyAction.m_key))
+            {
+                m_keyMap[keyAction.m_key] = new Pair<bool, double>();
+            }
+
+            // For the held state we have to check to see if it's ready to repeat this key yet
+            //
+            if (keyAction.m_state == KeyButtonState.Held)
+            {
+                if (m_keyMap[keyAction.m_key].First) // Within the first hold interval
+                {
+                    if ((gameTime.TotalGameTime.TotalSeconds - m_keyMap[keyAction.m_key].Second) < m_repeatHoldTime)
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    if ((gameTime.TotalGameTime.TotalSeconds - m_keyMap[keyAction.m_key].Second) < m_repeatInterval)
+                    {
+                        Logger.logMsg("LS = " + gameTime.TotalGameTime.TotalSeconds + ", MS = " + m_keyMap[keyAction.m_key].Second);
+                        return false;
+                    }
+                }
+            }
+
+            // For pressed and held store the last time this event was issued
+            //
+            m_keyMap[keyAction.m_key].First = (keyAction.m_state == KeyButtonState.Pressed);
+            m_keyMap[keyAction.m_key].Second = gameTime.TotalGameTime.TotalSeconds;
+
+            return true;
+        }
 
         /// <summary>
         /// Process any keys that need to be printed
         /// </summary>
         /// <param name="gameTime"></param>
-        protected void processKeys(GameTime gameTime, List<KeyAction> keyActionList)
+        protected void processKey(GameTime gameTime, KeyAction keyAction)
         {
             // Do nothing if no keys are pressed except check for auto repeat and clear if necessary.
             // We have to adjust for any held down modifier keys here and also clear the variable as 
             // necessary.
-            //
-            //if (keyActionList.Count == 0 ||
-                //(keyActionList.Count == 1 && (m_altDown || m_shiftDown || m_ctrlDown)))
-            //{
-                //m_heldDownStartTime = gameTime.TotalGameTime.TotalSeconds;
-                //m_heldDownLastRepeatTime = gameTime.TotalGameTime.TotalSeconds;
-                //m_heldDownKeyValid = false;
-                //return;
-            //}
-
-            // We need to do a variety of tests here - test to see if a new key has been
-            // pressed but also check to see if a held key is still being pressed.  If the
-            // former is true then we set 'foundKey' and in the latter is true we have 
-            // 'foundLastKey'.  Both have implications in terms of timing of key repeats.
-            //
-            //Keys keyDown = new Keys();
-            bool foundKey = false;
-
-            // Turn KeyAction list to key list
-            //
-            List<Keys> keyList = new List<Keys>();
-            foreach (KeyAction keyAction in keyActionList)
-            {
-                keyList.Add(keyAction.m_key);
-            }
-
-            // Detect a key being hit that isn't one of the meta keys
-            //
-            foreach (Keys testKey in keyList)
-            {
-                // Discard any processing if a meta key is involved
-                //
-                if (testKey == Keys.RightControl || testKey == Keys.LeftControl ||
-                    testKey == Keys.LeftAlt || testKey == Keys.RightAlt)
-                {
-                    return;
-                }
-                else
-                {
-                    // Ignore shifts at this time
-                    //
-                    if (testKey != Keys.LeftShift && testKey != Keys.RightShift)
-                    {
-                        m_currentKeyDown = testKey;
-                        foundKey = true;
-                    }
-                }
-            }
-
-            // Just return if we've not got anything
-            //
-            if (!foundKey)
-            {
-                return;
-            }
-
-            // Test for auto-repeating
-            //
-            if (m_heldKey != m_currentKeyDown || !m_heldDownKeyValid)
-            {
-                Logger.logMsg("SETTING HELD DOWN START TIME");
-                m_heldDownStartTime = gameTime.TotalGameTime.TotalSeconds;
-                m_heldDownLastRepeatTime = gameTime.TotalGameTime.TotalSeconds;
-                m_heldKey = m_currentKeyDown;
-            }
-            else
-            {
-                // We have a held down key - only repeat after the m_repeatHoldTime interval
-                //
-                if (gameTime.TotalGameTime.TotalSeconds - m_heldDownStartTime < m_repeatHoldTime)
-                {
-                    return;
-                }
-
-                if (gameTime.TotalGameTime.TotalSeconds - m_heldDownLastRepeatTime < m_repeatInterval)
-                {
-                    return;
-                }
-
-                // Set last repeat time
-                //
-                m_heldDownLastRepeatTime = gameTime.TotalGameTime.TotalSeconds;
-                // If we're repeating then don't repeat too fast
-                //
-                Logger.logMsg("XygloXNA::processKeys() - got key repeat");
-            }
-
-            // At this point any held down key is valid for the next iteration
-            //
-            m_heldDownKeyValid = true;
 
             // Ok, let's see if we can translate a key
             //
             string key = "";
 
-            switch (m_currentKeyDown)
-            {
-                case Keys.LeftShift:
-                case Keys.RightShift:
-                case Keys.LeftControl:
-                case Keys.RightControl:
-                case Keys.LeftAlt:
-                case Keys.RightAlt:
-                    break;
+            // Iterate the list and provide some output according to timing conditions on keys and repeats
+            //
+            //foreach (KeyAction keyAction in keyActionList)
+            //{
+                // Check for key repeats and handle as necessary
+                //
+                //if (!checkKeyRepeat(gameTime, keyAction))
+                    //continue;
 
-                case Keys.OemPipe:
-                    if (m_shiftDown)
-                    {
-                        key = "|";
-                    }
-                    else
-                    {
-                        key = "\\";
-                    }
-                    break;
+                switch (keyAction.m_key)
+                {
+                    case Keys.LeftShift:
+                    case Keys.RightShift:
+                    case Keys.LeftControl:
+                    case Keys.RightControl:
+                    case Keys.LeftAlt:
+                    case Keys.RightAlt:
+                        break;
 
-                case Keys.OemQuestion:
-                    if (m_shiftDown)
-                    {
-                        key = "?";
-                    }
-                    else
-                    {
-                        key = "/";
-                    }
-                    break;
-
-                case Keys.OemSemicolon:
-                    if (m_shiftDown)
-                    {
-                        key = ":";
-                    }
-                    else
-                    {
-                        key = ";";
-                    }
-                    break;
-
-                case Keys.OemQuotes:
-                    if (m_shiftDown)
-                    {
-                        key = "\"";
-                    }
-                    else
-                    {
-                        key = "'";
-                    }
-                    break;
-
-                case Keys.OemTilde:
-                    if (m_shiftDown)
-                    {
-                        key = "@";
-                    }
-                    else
-                    {
-                        key = "'";
-                    }
-                    break;
-
-                case Keys.OemOpenBrackets:
-                    if (m_shiftDown)
-                    {
-                        key = "{";
-                    }
-                    else
-                    {
-                        key = "[";
-                    }
-                    break;
-
-                case Keys.OemCloseBrackets:
-                    if (m_shiftDown)
-                    {
-                        key = "}";
-                    }
-                    else
-                    {
-                        key = "]";
-                    }
-                    break;
-
-                case Keys.D0:
-                    if (m_shiftDown)
-                    {
-                        key = ")";
-                    }
-                    else
-                    {
-                        key = "0";
-                    }
-                    break;
-
-                case Keys.D1:
-                    if (m_shiftDown)
-                    {
-                        key = "!";
-                    }
-                    else
-                    {
-                        key = "1";
-                    }
-                    break;
-
-                case Keys.D2:
-                    if (m_shiftDown)
-                    {
-                        key = "@";
-                    }
-                    else
-                    {
-                        key = "2";
-                    }
-                    break;
-
-                case Keys.D3:
-                    if (m_shiftDown)
-                    {
-                        key = "#";
-                    }
-                    else
-                    {
-                        key = "3";
-                    }
-                    break;
-
-                case Keys.D4:
-                    if (m_shiftDown)
-                    {
-                        key = "$";
-                    }
-                    else
-                    {
-                        key = "4";
-                    }
-                    break;
-
-                case Keys.D5:
-                    if (m_shiftDown)
-                    {
-                        key = "%";
-                    }
-                    else
-                    {
-                        key = "5";
-                    }
-                    break;
-
-                case Keys.D6:
-                    if (m_shiftDown)
-                    {
-                        key = "^";
-                    }
-                    else
-                    {
-                        key = "6";
-                    }
-                    break;
-
-                case Keys.D7:
-                    if (m_shiftDown)
-                    {
-                        key = "&";
-                    }
-                    else
-                    {
-                        key = "7";
-                    }
-                    break;
-
-                case Keys.D8:
-                    if (m_shiftDown)
-                    {
-                        key = "*";
-                    }
-                    else
-                    {
-                        key = "8";
-                    }
-                    break;
-
-                case Keys.D9:
-                    if (m_shiftDown)
-                    {
-                        key = "(";
-                    }
-                    else
-                    {
-                        key = "9";
-                    }
-                    break;
-
-
-                case Keys.Space:
-                    key = " ";
-                    break;
-
-                case Keys.OemPlus:
-                    if (m_shiftDown)
-                    {
-                        key = "+";
-                    }
-                    else
-                    {
-                        key = "=";
-                    }
-                    break;
-
-                case Keys.OemMinus:
-                    if (m_shiftDown)
-                    {
-                        key = "_";
-                    }
-                    else
-                    {
-                        key = "-";
-                    }
-                    break;
-
-                case Keys.OemPeriod:
-                    if (m_shiftDown)
-                    {
-                        key = ">";
-                    }
-                    else
-                    {
-                        key = ".";
-                    }
-                    break;
-
-                case Keys.OemComma:
-                    if (m_shiftDown)
-                    {
-                        key = "<";
-                    }
-                    else
-                    {
-                        key = ",";
-                    }
-                    break;
-
-                case Keys.A:
-                case Keys.B:
-                case Keys.C:
-                case Keys.D:
-                case Keys.E:
-                case Keys.F:
-                case Keys.G:
-                case Keys.H:
-                case Keys.I:
-                case Keys.J:
-                case Keys.K:
-                case Keys.L:
-                case Keys.M:
-                case Keys.N:
-                case Keys.O:
-                case Keys.P:
-                case Keys.Q:
-                case Keys.R:
-                case Keys.S:
-                case Keys.U:
-                case Keys.V:
-                case Keys.W:
-                case Keys.X:
-                case Keys.Y:
-                case Keys.Z:
-                    if (m_shiftDown)
-                    {
-                        key = m_currentKeyDown.ToString().ToUpper();
-                    }
-                    else
-                    {
-                        key = m_currentKeyDown.ToString().ToLower();
-                    }
-                    break;
-
-                case Keys.T:
-                    if (m_state.equals("FileOpen"))
-                    {
-                        // Open a file as read only and tail it
-                        //
-                        traverseDirectory(gameTime, true, true);
-                    }
-                    else
-                    {
+                    case Keys.OemPipe:
                         if (m_shiftDown)
                         {
-                            key = m_currentKeyDown.ToString().ToUpper();
+                            key += "|";
                         }
                         else
                         {
-                            key = m_currentKeyDown.ToString().ToLower();
+                            key += "\\";
                         }
-                    }
-                    break;
+                        break;
+
+                    case Keys.OemQuestion:
+                        if (m_shiftDown)
+                        {
+                            key += "?";
+                        }
+                        else
+                        {
+                            key += "/";
+                        }
+                        break;
+
+                    case Keys.OemSemicolon:
+                        if (m_shiftDown)
+                        {
+                            key += ":";
+                        }
+                        else
+                        {
+                            key += ";";
+                        }
+                        break;
+
+                    case Keys.OemQuotes:
+                        if (m_shiftDown)
+                        {
+                            key += "\"";
+                        }
+                        else
+                        {
+                            key += "'";
+                        }
+                        break;
+
+                    case Keys.OemTilde:
+                        if (m_shiftDown)
+                        {
+                            key += "@";
+                        }
+                        else
+                        {
+                            key += "'";
+                        }
+                        break;
+
+                    case Keys.OemOpenBrackets:
+                        if (m_shiftDown)
+                        {
+                            key += "{";
+                        }
+                        else
+                        {
+                            key += "[";
+                        }
+                        break;
+
+                    case Keys.OemCloseBrackets:
+                        if (m_shiftDown)
+                        {
+                            key += "}";
+                        }
+                        else
+                        {
+                            key += "]";
+                        }
+                        break;
+
+                    case Keys.D0:
+                        if (m_shiftDown)
+                        {
+                            key += ")";
+                        }
+                        else
+                        {
+                            key += "0";
+                        }
+                        break;
+
+                    case Keys.D1:
+                        if (m_shiftDown)
+                        {
+                            key += "!";
+                        }
+                        else
+                        {
+                            key += "1";
+                        }
+                        break;
+
+                    case Keys.D2:
+                        if (m_shiftDown)
+                        {
+                            key += "@";
+                        }
+                        else
+                        {
+                            key += "2";
+                        }
+                        break;
+
+                    case Keys.D3:
+                        if (m_shiftDown)
+                        {
+                            key += "#";
+                        }
+                        else
+                        {
+                            key += "3";
+                        }
+                        break;
+
+                    case Keys.D4:
+                        if (m_shiftDown)
+                        {
+                            key += "$";
+                        }
+                        else
+                        {
+                            key += "4";
+                        }
+                        break;
+
+                    case Keys.D5:
+                        if (m_shiftDown)
+                        {
+                            key += "%";
+                        }
+                        else
+                        {
+                            key += "5";
+                        }
+                        break;
+
+                    case Keys.D6:
+                        if (m_shiftDown)
+                        {
+                            key += "^";
+                        }
+                        else
+                        {
+                            key += "6";
+                        }
+                        break;
+
+                    case Keys.D7:
+                        if (m_shiftDown)
+                        {
+                            key += "&";
+                        }
+                        else
+                        {
+                            key += "7";
+                        }
+                        break;
+
+                    case Keys.D8:
+                        if (m_shiftDown)
+                        {
+                            key += "*";
+                        }
+                        else
+                        {
+                            key += "8";
+                        }
+                        break;
+
+                    case Keys.D9:
+                        if (m_shiftDown)
+                        {
+                            key += "(";
+                        }
+                        else
+                        {
+                            key += "9";
+                        }
+                        break;
 
 
-                // Do nothing as default
-                //
-                default:
-                    key = "";
-                    break;
-            }
+                    case Keys.Space:
+                        key += " ";
+                        break;
+
+                    case Keys.OemPlus:
+                        if (m_shiftDown)
+                        {
+                            key += "+";
+                        }
+                        else
+                        {
+                            key += "=";
+                        }
+                        break;
+
+                    case Keys.OemMinus:
+                        if (m_shiftDown)
+                        {
+                            key += "_";
+                        }
+                        else
+                        {
+                            key += "-";
+                        }
+                        break;
+
+                    case Keys.OemPeriod:
+                        if (m_shiftDown)
+                        {
+                            key += ">";
+                        }
+                        else
+                        {
+                            key += ".";
+                        }
+                        break;
+
+                    case Keys.OemComma:
+                        if (m_shiftDown)
+                        {
+                            key += "<";
+                        }
+                        else
+                        {
+                            key += ",";
+                        }
+                        break;
+
+                    case Keys.A:
+                    case Keys.B:
+                    case Keys.C:
+                    case Keys.D:
+                    case Keys.E:
+                    case Keys.F:
+                    case Keys.G:
+                    case Keys.H:
+                    case Keys.I:
+                    case Keys.J:
+                    case Keys.K:
+                    case Keys.L:
+                    case Keys.M:
+                    case Keys.N:
+                    case Keys.O:
+                    case Keys.P:
+                    case Keys.Q:
+                    case Keys.R:
+                    case Keys.S:
+                    case Keys.U:
+                    case Keys.V:
+                    case Keys.W:
+                    case Keys.X:
+                    case Keys.Y:
+                    case Keys.Z:
+                        if (m_shiftDown)
+                        {
+                            key += keyAction.m_key.ToString().ToUpper();
+                        }
+                        else
+                        {
+                            key += keyAction.m_key.ToString().ToLower();
+                        }
+                        break;
+
+                    case Keys.T:
+                        if (m_state.equals("FileOpen"))
+                        {
+                            // Open a file as read only and tail it
+                            //
+                            traverseDirectory(gameTime, true, true);
+                        }
+                        else
+                        {
+                            if (m_shiftDown)
+                            {
+                                key += keyAction.m_key.ToString().ToUpper();
+                            }
+                            else
+                            {
+                                key += keyAction.m_key.ToString().ToLower();
+                            }
+                        }
+                        break;
+
+
+                    // Do nothing as default
+                    //
+                    default:
+                        key += "";
+                        break;
+                }
+            //}
 
 
             if (key != "")
