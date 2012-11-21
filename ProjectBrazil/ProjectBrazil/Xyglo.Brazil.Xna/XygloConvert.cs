@@ -398,6 +398,18 @@ namespace Xyglo.Brazil.Xna
                         newKey = Keys.OemPipe;
                         break;
 
+                    case Microsoft.Xna.Framework.Input.Keys.PageUp:
+                        newKey = Keys.PageUp;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.PageDown:
+                        newKey = Keys.PageDown;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.Tab:
+                        newKey = Keys.Tab;
+                        break;
+
                     default:
                         newKey = Keys.None;
                         break;

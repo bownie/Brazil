@@ -58,7 +58,12 @@ namespace Xyglo.Brazil.Xna
 
             // Generate an initial ScreenPosition from the FilePosition - we use this for undo
             //
-            m_screenPosition.X = m_fileBuffer.getLine(m_startPos.Y).Substring(0, m_startPos.X).Replace("\t", project.getTab()).Length;
+            m_screenPosition.X = 0;
+            if (m_fileBuffer.getLineCount() > 0)
+            {
+                m_screenPosition.X = m_fileBuffer.getLine(m_startPos.Y).Substring(0, m_startPos.X).Replace("\t", project.getTab()).Length;
+            }
+
             m_screenPosition.Y = m_startPos.Y;
         }
 
@@ -77,7 +82,11 @@ namespace Xyglo.Brazil.Xna
             //
             if (m_startPos.Y == m_endPos.Y)
             {
-                string line = m_fileBuffer.getLine(m_startPos.Y);
+                string line = "";
+                if (m_fileBuffer.getLineCount() > 0)
+                {
+                    line = m_fileBuffer.getLine(m_startPos.Y);
+                }
 
                 // Add this line to snippet as we're only editing a single line
                 //
@@ -108,8 +117,12 @@ namespace Xyglo.Brazil.Xna
                 }
                 else
                 {
-                    bufLine = line.Substring(0, m_startPos.X) +
-                              line.Substring(m_endPos.X, line.Length - m_endPos.X);
+                    bufLine = "";
+                    if (line.Length >= m_endPos.X)
+                    {
+                        bufLine = line.Substring(0, m_startPos.X) +
+                                  line.Substring(m_endPos.X, line.Length - m_endPos.X);
+                    }
 
                     if (bufLine == "")
                     {

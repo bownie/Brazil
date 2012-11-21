@@ -2029,7 +2029,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="steps"></param>
         public void redo(Project project, int steps = 1)
         {
-            Pair<ScreenPosition, Pair<ScreenPosition, ScreenPosition>> rP = m_fileBuffer.redo(1);
+            Pair<ScreenPosition, Pair<ScreenPosition, ScreenPosition>> rP = m_fileBuffer.redo(1, m_cursorPosition);
 
             m_cursorPosition = rP.First;
 
@@ -2113,7 +2113,11 @@ namespace Xyglo.Brazil.Xna
 
             // Fetch the line and expand tabs for screenLine using project helper
             //
-            string getLine = m_fileBuffer.getLine(sP.Y);
+            string getLine = "";
+            if (m_fileBuffer.getLineCount() > 0)
+            {
+                getLine = m_fileBuffer.getLine(sP.Y);
+            } 
 
             // Create return type and populate
             //

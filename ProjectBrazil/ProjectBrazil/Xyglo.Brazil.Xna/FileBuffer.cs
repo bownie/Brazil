@@ -1142,7 +1142,7 @@ namespace Xyglo.Brazil.Xna
         /// Redo a certain number of commands already on the commands list
         /// </summary>
         /// <param name="steps"></param>
-        public Pair<ScreenPosition, Pair<ScreenPosition, ScreenPosition>> redo(int steps)
+        public Pair<ScreenPosition, Pair<ScreenPosition, ScreenPosition>> redo(int steps, ScreenPosition cursorPosition)
         {
             Pair<ScreenPosition, Pair<ScreenPosition, ScreenPosition>> rP = new Pair<ScreenPosition, Pair<ScreenPosition, ScreenPosition>>();
             ScreenPosition fp = new ScreenPosition();
@@ -1170,15 +1170,28 @@ namespace Xyglo.Brazil.Xna
                 m_undoPosition += steps;
             }
 
-            // Set return value of the cursor position and highlight information
+            // For a redo command we have to use the highlight positions from the next one up in the stack
+            // if it exists.
             //
-            rP.First = fp;
 
             // Assign the sub-pair
             //
             rP.Second = new Pair<ScreenPosition, ScreenPosition>();
-            rP.Second.First = startHighlight;
-            rP.Second.Second = endHighlight;
+
+            if (m_undoPosition <= 1)
+            {
+                rP.First = cursorPosition;
+                rP.Second.First = cursorPosition;
+                rP.Second.Second = cursorPosition;
+            }
+            else
+            {
+                // Set return value of the cursor position and highlight information
+                //
+                rP.First = fp;
+                rP.Second.First = startHighlight;
+                rP.Second.Second = endHighlight;
+            }
 
             // Last command wasn't an undo
             //

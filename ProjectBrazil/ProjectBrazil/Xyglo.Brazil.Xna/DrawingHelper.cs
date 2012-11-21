@@ -300,7 +300,6 @@ namespace Xyglo.Brazil.Xna
         /// <param name="text"></param>
         public int drawTextScreen(SpriteBatch spriteBatch, GameTime gameTime, GraphicsDeviceManager graphics, string text, int textScreenPositionY, int fixedWidth = 0, int highlight = -1)
         {
-            /*
             Vector3 fp = m_project.getSelectedBufferView().getPosition();
 
             // Always start from 0 for offsets
@@ -383,10 +382,6 @@ namespace Xyglo.Brazil.Xna
                 spriteBatch.DrawString(m_project.getFontManager().getOverlayFont(), pageString, new Vector2((int)xPos, (int)yPos), Color.LightSeaGreen);
             }
             return textScreenLength;
-             *
-             */
-
-            return 0;
         }
 
         /// <summary>
@@ -829,7 +824,7 @@ namespace Xyglo.Brazil.Xna
             // Set our colour according to the state of Friendlier
             //
             Color overlayColour = Color.White;
-            if (state != State.Test("TextEditing") && state != State.Test("GotoLine") && state != State.Test("FindText") && state != State.Test("DiffPicker"))
+            if (!state.equals("TextEditing") && !state.equals("GotoLine") && !state.equals("FindText") && !state.equals("DiffPicker"))
             {
                 overlayColour = m_greyedColour;
             }
@@ -845,12 +840,12 @@ namespace Xyglo.Brazil.Xna
             //
             string fileName = "";
 
-            if (state == State.Test("FindText"))
+            if (state.equals("FindText"))
             {
                 // Draw the search string down there
                 fileName = "Search: " + m_project.getSelectedBufferView().getSearchText();
             }
-            else if (state == State.Test("GotoLine"))
+            else if (state.equals("GotoLine"))
             {
                 fileName = "Goto line: " + gotoLine;
             }

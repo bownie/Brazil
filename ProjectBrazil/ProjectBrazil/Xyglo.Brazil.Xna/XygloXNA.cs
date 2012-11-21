@@ -748,10 +748,6 @@ namespace Xyglo.Brazil.Xna
             //
             m_graphics.PreferMultiSampling = true;
 
-            // Set the editing state
-            //
-            //m_state = State.Test("TextEditing");
-
             // Set physical memory
             //
             Microsoft.VisualBasic.Devices.ComputerInfo ci = new Microsoft.VisualBasic.Devices.ComputerInfo();
@@ -2372,6 +2368,7 @@ namespace Xyglo.Brazil.Xna
             else if (keyList.Contains(Keys.End))
             {
                 ScreenPosition fp = m_project.getSelectedBufferView().getCursorPosition();
+                ScreenPosition originalFp = fp;
 
                 // Set X and allow for tabs
                 //
@@ -2669,6 +2666,7 @@ namespace Xyglo.Brazil.Xna
                     // calls the command in the FileBuffer.
                     //
                     m_project.getSelectedBufferView().deleteCurrentSelection(m_project);
+                    updateSmartHelp();
                 }
                 else // delete at cursor
                 {
@@ -3095,9 +3093,8 @@ namespace Xyglo.Brazil.Xna
                         }
                         else
                         {
-                            setTemporaryMessage("Nothing to undo.", 0.3, gameTime);
+                            setTemporaryMessage("Nothing to undo.", 1.0, gameTime);
                         }
-                        rC = true;
                     }
                     catch (Exception e)
                     {
@@ -3105,6 +3102,10 @@ namespace Xyglo.Brazil.Xna
                         Logger.logMsg("XygloXNA::processCombinationsCommands() - got exception " + e.Message);
                         setTemporaryMessage("Nothing to undo with exception.", 2, gameTime);
                     }
+
+                    // Always return true
+                    //
+                    rC = true;
                 }
                 else if (keyList.Contains(Keys.Y))  // Redo
                 {
@@ -3123,9 +3124,8 @@ namespace Xyglo.Brazil.Xna
                         }
                         else
                         {
-                            setTemporaryMessage("Nothing to redo.", 0.3, gameTime);
+                            setTemporaryMessage("Nothing to redo.", 1.0, gameTime);
                         }
-                        rC = true;
                     }
                     catch (Exception e)
                     {
@@ -3133,6 +3133,10 @@ namespace Xyglo.Brazil.Xna
                         Logger.logMsg("XygloXNA::processCombinationsCommands() - got exception " + e.Message);
                         setTemporaryMessage("Nothing to redo.", 2, gameTime);
                     }
+
+                    // Always return true as we've captured the event
+                    //
+                    rC = true;
                 }
                 else if (keyList.Contains(Keys.A))  // Select all
                 {
@@ -3327,6 +3331,11 @@ namespace Xyglo.Brazil.Xna
                     m_gotoBufferView += getNumberKey();
                     rC = true;
                 }
+
+
+                /*
+                // Don't do any state transitions in this class now
+                //  
                 else if (keyList.Contains(Keys.F)) // Find text
                 {
                     Logger.logMsg("XygloXNA::processCombinationsCommands() - find");
@@ -3336,7 +3345,9 @@ namespace Xyglo.Brazil.Xna
                 {
                     Logger.logMsg("XygloXNA::processCombinationsCommands() - goto line");
                     m_state = State.Test("GotoLine");
-                }
+                }*/ 
+
+
             }
             else if (m_windowsDown) // Windows keys
             {
@@ -3627,6 +3638,10 @@ namespace Xyglo.Brazil.Xna
             //
             List<KeyAction> keyActionList = getAllKeyActions();
 
+            // Do we consume a key?  Has it been used in a Metacommand?
+            //
+            //bool consume = false;
+
             foreach(KeyAction keyAction in keyActionList)
             {
                 // We check and discard key events that aren't within the repeat or press
@@ -3640,6 +3655,11 @@ namespace Xyglo.Brazil.Xna
                 if (m_project != null)
                 {
                     processActionKey(gameTime, keyAction);
+
+                    // do any key combinations
+                    //
+                    if (processCombinationsCommands(gameTime, keyActionList))
+                        continue;
                 }
 
                 // Get a target for this (potential) combination of keys
@@ -3662,7 +3682,7 @@ namespace Xyglo.Brazil.Xna
                         // The default target will process meta key commands
                         //
                         processKey(gameTime, keyAction);
-                        processMetaCommand(gameTime, keyAction);
+                        /* consume = */ processMetaCommand(gameTime, keyAction);
                         break;
                     
                         // For OpenFile all we need to do is change state (for the moment)
@@ -3713,7 +3733,7 @@ namespace Xyglo.Brazil.Xna
                         // The default target will process meta key commands
                         //
                         processKey(gameTime, keyAction);
-                        processMetaCommand(gameTime, keyAction);
+                        /* consume = */ processMetaCommand(gameTime, keyAction);
                         break;
 
                         // If we hit this target then transition to PlayingGame
@@ -3789,10 +3809,6 @@ namespace Xyglo.Brazil.Xna
                         //throw new XygloException("Update", "Unhandled Target encountered");
                         break;
                 }
-
-                // do any key combinations
-                //
-                processCombinationsCommands(gameTime, keyActionList);
             }
 
             // Turn KeyAction list to key list
@@ -3839,32 +3855,6 @@ namespace Xyglo.Brazil.Xna
             // Check for any mouse actions here
             //
             checkMouse(gameTime, mouseActionList);
-
-            // Don't process anything that's a runover character
-            //
-            //if (m_heldDownKeyValid == false && m_lastKeyboardState == Keyboard.GetState())
-            //{
-            //return;
-            //}
-
-            // Actions bound to key combinations - if we don't consume a key here then we print it
-            // inside the processKeys() method.
-            //
-            /*
-            if (!processCombinationsCommands(gameTime))
-            {
-                // Process keys that are left over if the above is false
-                //
-                processKeys(gameTime);
-            }
-            else
-            {
-                // If we've got a key here then spin without processing keyboard input
-                // for 50 milliseconds
-                //
-                m_processKeyboardAllowed = gameTime.TotalGameTime + new TimeSpan(0, 0, 0, 0, 100);
-            }
-            */
 
             // limit number of keys
             //
@@ -5244,8 +5234,9 @@ namespace Xyglo.Brazil.Xna
         /// <returns></returns>
         public Ray getPickRay()
         {
-            /*
-            MouseState mouseState = Mouse.GetState();
+            // Get the mouse state
+            //
+            MouseState mouseState = Microsoft.Xna.Framework.Input.Mouse.GetState();
 
             int mouseX = mouseState.X;
             int mouseY = mouseState.Y;
@@ -5267,9 +5258,6 @@ namespace Xyglo.Brazil.Xna
             direction.Normalize();
             Ray pickRay = new Ray(nearPoint, direction);
             return pickRay;
-             * */
-
-            return new Ray();
         }
 
         /// <summary>
@@ -5277,7 +5265,6 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         protected void handleDoubleClick()
         {
-            Logger.logMsg("XygloXNA::checkMouse() - got double click");
             Pair<BufferView, Pair<ScreenPosition, ScreenPosition>> testFind = m_project.testRayIntersection(getPickRay());
 
             BufferView bv = (BufferView)testFind.First;
@@ -7110,8 +7097,10 @@ namespace Xyglo.Brazil.Xna
 
             // Draw a highlight overview
             //
-            if (view.gotHighlight())
+            if (view.gotHighlight() && length > 0)
             {
+                //float hS = view.getHighlightStart().Y;
+
                 float highlightStart = ((float)view.getHighlightStart().Y) / length * height;
                 float highlightEnd = ((float)view.getHighlightEnd().Y) / length * height;
 

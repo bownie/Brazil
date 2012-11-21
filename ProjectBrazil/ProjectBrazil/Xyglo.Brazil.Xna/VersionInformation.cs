@@ -34,7 +34,7 @@ namespace Xyglo.Brazil.Xna
         /// <summary>
         /// Version of this software
         /// </summary>
-        static private string m_version = "1.0.1";
+        static private string m_version = "1.1";
 
         /// <summary>
         /// Email to report bugs at

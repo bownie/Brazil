@@ -19,7 +19,7 @@ namespace Paulo
 
             // Set up the keyboard behaviour
             //
-            m_world.setKeyAutoRepeatHoldTime(0.6); // seconds
+            m_world.setKeyAutoRepeatHoldTime(0.4); // seconds
             m_world.setKeyAutoRepeatInterval(0.05); // seconds
 
             // Have to re-push these changes as they key repeats have already
@@ -93,10 +93,18 @@ namespace Paulo
             connect("TextEditing", new KeyAction(Keys.M, KeyboardModifier.Alt), "ManageProject");
             connect("ManageProject", Keys.Escape, "Default");
 
+            // Ensure the escape key works in various modes
+            //
             connect("Configuration", Keys.Escape, "Default");
             connect("Help", Keys.Escape, "Default");
+            connect("Help", Keys.PageUp, "Default");
+            connect("Help", Keys.PageDown, "Default");
             connect("FileOpen", Keys.Escape, "Default");
             connect("DiffPicker", Keys.Escape, "Default");
+
+            // Save as
+            connectEditorKeys("FileSaveAs");
+            connect("FileSaveAs", Keys.Escape, "Default");
 
             // Connect some standard editor keys to states
             //
@@ -114,6 +122,18 @@ namespace Paulo
             // Help screen
             //
             connect("TextEditing", new KeyAction(Keys.H, KeyboardModifier.Alt), "Help");
+
+            // Find command
+            //
+            connect("TextEditing", new KeyAction(Keys.F, KeyboardModifier.Alt), "FindText");
+            connectEditorKeys("FindText");
+            connect("FindText", Keys.Escape, "Default");
+
+
+            // Goto line
+            connect("TextEditing", new KeyAction(Keys.L, KeyboardModifier.Alt), "GotoLine");
+            connectEditorKeys("GotoLine");
+            connect("GotoLine", Keys.Escape, "Default");
 
             // Information
             //
@@ -154,7 +174,7 @@ namespace Paulo
             // Targets are actions we can perform in the application - a default target will usually mean the object
             // in focus within the current State.  This should be defined by the component.
             //
-            string[] targets = { "None", "Default", "CurrentBufferView", "OpenFile", "SaveFile", "NewBufferView", "CursorUp", "CursorDown", "CursorRight", "CursorLeft", "ShowInformation" , "ManageProject", "Help", "Information"};
+            string[] targets = { "None", "Default", "CurrentBufferView", "OpenFile", "SaveFile", "NewBufferView", "CursorUp", "CursorDown", "CursorRight", "CursorLeft", "ShowInformation" , "ManageProject", "Help", "Information", "FindText", "GotoLine"};
             foreach (string target in targets)
             {
                 addTarget(target);

@@ -1,0 +1,312 @@
+﻿USE CASES
+---------
+- The developer - developing, debugging, coding
+
+  Scenario - building Rosegarden
+
+  - generated Makefile from QtCreator/QMake already
+  - Use Qt lrelease to generate QM files
+  - build and zap to error line
+  - diff file versions
+  - edit files successfully
+  - write code
+
+- The writer - writing a book, researching
+- The journalist - writing a story, researching
+
+
+BUGS
+----
+
+- tabs in the differ
+- control word jump is too aggressive - must take slashes etc into account [DONE?]
+- fix tabs and write tests for them
+- Do file buffering to improve performance 
+- complete tests for textcommands [INPROGRESS]
+- word jumping with long lines on editor
+- drag and drop file to exact position
+- paste doesn't do last line [FIXED?]
+- search in tailing views needs to match up
+- case on searches is annoying
+- copy search between bufferviews
+- quit is not showing the Y/N consistently
+- replacetextcommand not working - putting first char at end of line [DONE]
+
+- alternate build command doesn't produce stdout
+- project manage - file opening works but on exit/restart project is incorrect
+- log file contention still with long build/multiple build threads perhaps? [CHANGED THREADING]
+- mouse click to navigate in file browser
+- clear save as filename between save as's
+- highlight going beyond top of file
+- hash comment not at beginning of line doesn't highlight
+- want F1 to send me to the LAST Bufferview I used (i.e. after build)
+
+BUILD and USABILITY FEATURES TODO and BUGS
+----
+
+C:\Q\Desktop\Qt\4.7.4\mingw\bin\qmake.exe -makefile C:\dev-alpha2\win32-mingw-rtmidi\garderobe.pro
+
+
+- 30 day limited trial/registry keys
+- auto update check from web
+- syntax highlighting slow
+- icon/logo
+
+- Paging on File Management [NOT VITAL]
+- click on diff preview to position in file [NOT VITAL BUT NICE]
+- change bufferviews? [NOT VITAL]
+- Elegant long line Config [NOT VITAL]
+- slow when editing.. [SYNTAX HIGHLIGHTING]
+- Build in Progress - ensure confirmation of exit [PARTIALLY DONE]
+
+
+MORE FEATURES
+-------------
+- search preview
+- zap to definition of method/class/#define
+- resizing window [IN PROGRESS - DECIDED TO DISABLE]
+- cluster control/command (undoable)
+- difference between bufferview level and project level undo???  possible??  desirable?
+- Resize window and BufferViews
+- Reposition BufferViews
+- import makefile?
+- remove all non-showing FileBuffers?
+- get highlighting to show the tabs
+- project management (adding, changing projects)
+- brace matching
+- remember last directory indent
+- Depth buffer for kinect improved
+
+- Licence file [STARTED]
+
+  + Fonts licence
+  + append to licence terms
+
+- Registry key and licence key [Need to make sure that this is run at installation time as administrator - not through the program itself]
+
+- Icons [PROVED but need a good one]
+
+  + http://www.axialis.com/iconworkshop/
+
+- Splash screen [DONE!]
+
+  + would like a nice 3d model
+
+http://gamedev.stackexchange.com/questions/24697/how-to-clip-cut-off-text-in-a-textbox
+http://social.msdn.microsoft.com/forums/en-US/xnaframework/thread/71263016-b26a-44bd-80f3-8cd620b119ff
+
+
+Build version:
+
+http://autobuildversion.codeplex.com/
+
+
+
+July/August Release (ALPHA 3/BETA)
+---------------------------------
+- Frustrum culling to improve performance [DONE]
+- return does not use highlight [FIXED]
+- exit not working [FIXED - it was the temporary message]
+- maximise button [DONE]
+- clicking on top right cross doens't close down neatly [DONE]
+- GOTO line implementation [DONE]
+- Fix windows line endings?  Handle both? [DONEish]
+- error with collections during background build [CHANGED MUTEX TO FILE BUFFER LEVEL]
+- fix defaults in project file etc [DONE]
+- highlighting with long lines on editor [DONE]
+- Check out highlighting and other performance sinks [MOVED HIGHLIGHTING TO THREAD]
+
+
+
+ALPHA 2 DONE
+------------
+- Visual Diff mechanism [DONE]
+- Move the VU meters to the HUD [DONE]
+- Hud cursor position
+- Mouse click (think that will be 1.1) [DONE]
+- improve search - wrap [DONE]
+- indenting [DONE SOMEWHAT]
+- Moving between BufferViews with Alt Cursor keys [BETTER - using BoundingBox]
+- double click on normal canvas to highlight [DONE]
+- undo bug when repeating (Dummys appearing) [FIXED COMMANDS FOR DELETE AND REPLACE]
+- highlighting keywords [DONE]
+- Elegant long lines File Management [WORKED AROUND]
+- File backups for project file [DONE]
+- double click error line to file editor [DONE]
+- scrolling and cut and paste on parameter editing and information screen [DONEISH]
+- make clean [DONE]
+- make debug/release options [CAN WORKAROUND THIS]
+- Cancel build option [DONE]
+- browse up error messages in build log [DONE]
+- Bloom highlight? [DONE]
+- update help [PARTIALLY DONE]
+- performance meters on the overlay [THINK I WILL LEAVE IT]
+- scroller is jerky [NOT USING IT ANY MORE]
+- zooming is not very good at the moment [FIXED]
+- click on error lines to open files and zap to line [DONE]
+- commands remember highlights [DONE]
+- refactor the keyboard code as it's a mess [DONE]
+- autorepeat is broken [FIXED]
+- handle Tabs in files slightly more elegantly [DONE]
+- click and drag with mouse to change windows [DONE]
+- mouse highlight/identify bufferview and position from mouse [DONE]
+- tip/spin select target and animate nicely [DONE]
+- LineSpacing issue [KLUDGED IN FRIENDLIER - still outstanding in Nuclex]
+- Sortable collections - FileBuffers, BufferViews, Highlights [DONE]
+- Drag and Drop files - current directory files only [DONE]
+- Some basic text highlighting and indenting [DONE]
+- some way of seeing/modifying/deleting files in project / visualisation of project contents  [DONE]
+- f-keys for zooming etc is unnatural [CHANGED to CURSOR plus ALT SHIFT] 
+- highlight on scrollbar [DONE]
+- Added basic Kinect support [DONE]
+- Mouse Scroll wheel zoom [DONE]
+- Kinect in its own thread [DONE]
+- save as not working [DONE]
+
+FONTS
+-----
+- Fuzzy fonts - some tips:
+
+  + http://gamedev.stackexchange.com/questions/15469/how-do-i-get-beautiful-small-text-in-xna-without-using-external-libraries
+  + Need to overhaul the font rendering completely
+  + Tried nuclex - looks good but artifacts [FIXED - much better]
+  + Therefore add zoom level and full screenness to fontmanager and add extra font levels - match font level to zoom level [DOESN'T PLAY NICELY]
+  + The above won't work - we have to stick with same size but at least we can modify some processing directives [NO REAL ADVANTAGE]
+  + Ensured that all drawStrings are aligned on integers[DONE]
+  + The added Matrix 0.5 modifier for X and Y to spread integer evenly when projecting [DONE]
+
+BUGs and OTHER TODOS
+--------------------
+- search highlight all occurences on the scrollbar
+- compare directories - smart compare 
+- drag and drop directory insertion
+- file browser remembers last directory positions
+- coloured and textured backgrounds for editing windows
+- animations and intro
+- change buffer show length interactively
+- auto colouring build paths (executable paths, directories etc)
+- undo remembers last highlight [PENDING]
+- overlapping BufferViews
+- copy section into new BufferView [ALMOST DONE]
+- moving to bufferviews with the alt + direction buttons [DONE - but bug with positions when mode switches due to font sizing]
+- some way of seeing/modifying/deleting bufferviews (and their indexes) in project
+- Saving/opening/browsing - ensure status is correct
+- Logging (timestamps and makes sense) 
+
+NOTES
+------ Friendlier should encourage you to develop in it and reward you for doing so
+- badges and unlocks can occur
+
+
+
+TO TEST/BUGS
+------------
+- auto indent [DONE TO SOME EXTENT]
+- Undo/redo testing and fixing [DONE for INSERT]
+- Pasting multiple lines for Replace [HALF COMPLETE]
+
+DONE
+----
+- work update status (sessions - time developing etc) [DONE]
+- Packaging .NET and XNA integrate with NSIS [DONE]
+- Temporary file save messages to move somewhere [FIXED with SCROLLING MESSAGES]
+- fix error logs line wrapping [DONE]
+- seperate ERR and LOG file streams? [DONE]
+- scrolling temporary message [DONE]
+- build error handling [DONE]
+- project information screen (files, buffers, lines etc) [DONE first version]
+- cursor end of line X with highlight bug [DONE]
+- Long lines handling [DONE]
+- search [DONE]
+- select all [DONE]
+- file saving/saving all [DONE]
+- Rearrange windows manually - create manual direction [DONE]
+- repurpose the Function keys [DONE]
+- new thread for the system load [DONE]
+- Editing Build details/General editing parameters [DONE]
+- no cursor when no focus [DONE]
+- information screen (file information) [DONE]
+- Persistance file to correct app location [DONE]
+- fix flashing scrollbars bug [DONE]
+- Configuration - builder, logging window [DONE]
+- highlight not working on cursor up and down (Y) [DONE]
+- System load meter [DONE]
+- Close BufferViews [DONE]
+- bufferview colours for editing and non-editable windows [DONE]
+- extra slash on file save directories [DONE]
+- multiple file save on quit [DONE]
+- CTRL to jump words [DONE]
+- Read only files [DONE]
+- Log file view (attach and view) [DONE but file watchers not working]
+- Drift focus when adding a new BufferView drift to position [DONE]
+- Alpha blending fonts / darkening and name overlay when zoomed out [DONE]
+- keyboard support?  [DONE for the moment - hardcoded]
+- screen mode toggle (full screen/small) [DONE]
+- Saving [DONE]
+- New file [DONE]
+- Loading and File Selector/Directory traversal [DONE]
+- Completing editing and undo [PARTIAL]
+- Directory listings [DONE]
+- Pasting multiple lines for Insert [DONE]
+- Project file auto-persistence [DONE]
+
+Refactoring
+-----------
+- Moving the selection end points to the BufferView [DONE]
+- Get BufferView to handle drawing highlights [DONE]
+
+
+For Later
+---------
+- File browsing - new view
+- Hud panner overview?
+- Hud Unsaved status better?
+- Hud file system positions?
+- Command line interface
+- Basic interpreter
+
+
+- Integrate with Scintilla [NO]
+
+
+CODE METRICS
+------------
+
+As of 19/11/2012 as part of Brazil Framework:
+
+33334 (9320 exec)
+
+126 days since last at 49.5 lines per day
+385 days since start at 86 lines per day
+
+
+As of 16/07/2012:
+
+27097 ( 6688 exec)
+
+53 days since last at 97 lines per day
+259 days since start at 104 lines per day
+
+
+As of 24/05/2012:
+
+21929 Lines (5868 executable)
+
+
+As of 13/03/2012:
+
+10000 Lines approx (?? executable)
+
+----
+
+select sysdate - 72 from dual;  -- 10k
+
+-- last 72 days
+--
+select (21929 - 10000)/72 from dual;
+
+-- since start
+--
+select 21929/205 from dual;
+
+select sysdate - 205 from dual; -- 0k

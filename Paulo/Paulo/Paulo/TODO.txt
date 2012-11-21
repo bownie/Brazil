@@ -2,9 +2,22 @@
 --------------------------
 
 - Add Baddies
-- Add Prizes
-- Scoring Mechanism
+- Add Prizes [DONE]
+- Scoring Mechanism [DONE]
 - Level Completion
+- Zooming
+- Gravity and interactions
+
+
+Friendlier
+----------
+- Get back to fully working version
+- Add features:
+ 
+  - first letter file system navigation 
+  - proper logo/app icon
+  - cut and paste effect - grab highlight and lurch across between files
+
 
 XNA/Store
 ---------
@@ -18,3 +31,9 @@ Android Store
 -------------
 
 - Registration?
+
+Windows App Store
+-----------------
+
+- Registered but not betting on this for the moment
+
