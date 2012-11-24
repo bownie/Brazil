@@ -2191,7 +2191,7 @@ namespace Xyglo.Brazil.Xna
                     }
                     else
                     {
-                        m_project.getSelectedBufferView().moveCursorUp(m_project, false);
+                        m_project.getSelectedBufferView().moveCursorUp(m_project, false, m_shiftDown);
 
                         if (m_shiftDown)
                         {
@@ -2260,7 +2260,7 @@ namespace Xyglo.Brazil.Xna
                     }
                     else
                     {
-                        m_project.getSelectedBufferView().moveCursorDown(false);
+                        m_project.getSelectedBufferView().moveCursorDown(false, m_shiftDown);
 
                         if (m_shiftDown)
                         {
@@ -2319,7 +2319,7 @@ namespace Xyglo.Brazil.Xna
                     }
                     else
                     {
-                        m_project.getSelectedBufferView().moveCursorLeft(m_project);
+                        m_project.getSelectedBufferView().moveCursorLeft(m_project, m_shiftDown);
                     }
 
                     if (m_shiftDown)
@@ -2352,7 +2352,7 @@ namespace Xyglo.Brazil.Xna
                     }
                     else
                     {
-                        m_project.getSelectedBufferView().moveCursorRight(m_project);
+                        m_project.getSelectedBufferView().moveCursorRight(m_project, m_shiftDown);
                     }
 
                     if (m_shiftDown)
@@ -3882,7 +3882,7 @@ namespace Xyglo.Brazil.Xna
             //
             //BrazilVector3 acceleration = BrazilVector3.Zero;
 
-            // Process components for MOVEMENT
+            // Process components for MOVEMENT or creation depending on key context
             //
             foreach (Component component in m_componentList)
             {
@@ -5266,7 +5266,6 @@ namespace Xyglo.Brazil.Xna
         protected void handleDoubleClick()
         {
             Pair<BufferView, Pair<ScreenPosition, ScreenPosition>> testFind = m_project.testRayIntersection(getPickRay());
-
             BufferView bv = (BufferView)testFind.First;
             ScreenPosition fp = (ScreenPosition)testFind.Second.First;
             ScreenPosition screenRelativePosition = (ScreenPosition)testFind.Second.Second;
@@ -5284,6 +5283,27 @@ namespace Xyglo.Brazil.Xna
             {
                 handleStandardDoubleClick(bv, fp, screenRelativePosition);
             }
+        }
+
+        /// <summary>
+        /// Return a null BufferView if there is no intersection
+        /// </summary>
+        /// <returns></returns>
+        protected Pair<BufferView, ScreenPosition> getBufferViewIntersection()
+        {
+            Pair<BufferView, Pair<ScreenPosition, ScreenPosition>> testFind = m_project.testRayIntersection(getPickRay());
+            BufferView bv = (BufferView)testFind.First;
+            ScreenPosition fp = (ScreenPosition)testFind.Second.First;
+            ScreenPosition screenRelativePosition = (ScreenPosition)testFind.Second.Second;
+
+            // Check for validity of bv and position here
+            //
+            if (bv == null /* || fp.Y < 0 || fp.Y > bv.getFileBuffer().getLineCount() */ || fp.X < 0 || fp.X >= bv.getBufferShowWidth()) 
+            {
+                bv = null;
+            }
+
+            return new Pair<BufferView, ScreenPosition>(bv, fp);
         }
 
         /// <summary>
@@ -5474,8 +5494,6 @@ namespace Xyglo.Brazil.Xna
         /// <param name="screenRelativePosition"></param>
         protected void handleStandardDoubleClick(BufferView bv, ScreenPosition fp, ScreenPosition screenRelativePosition)
         {
-            Logger.logMsg("XygloXNA::handleStandardDoubleClick()");
-
             // We need to identify a valid line
             //
             if (fp.Y >= bv.getFileBuffer().getLineCount())
@@ -5486,27 +5504,50 @@ namespace Xyglo.Brazil.Xna
             //
             string line = bv.getFileBuffer().getLine(fp.Y);
 
-            // Are we on a space?  If not highlight the word
+            string splitChars = " \t:,(){}[]\"\'<>-";
+
+            // Are we on a space or tab?  If not highlight the word
             //
-            if (fp.X < line.Length && line[fp.X] != ' ')
+            if (fp.X < line.Length && line[fp.X] != ' ' && line[fp.X] != '\t')
             {
                 // Find first and last occurences of spaces after splitting the string effectively
-                int startWord = line.Substring(0, fp.X).LastIndexOf(' ') + 1;
-                int endWord = line.Substring(fp.X, line.Length - fp.X).IndexOf(' ');
+                //
+                int startWord = -1; // line.Substring(0, fp.X).LastIndexOf(' ') + 1;
+                int endWord = -1; //line.Substring(fp.X, line.Length - fp.X).IndexOf(' ');
+
+                // Find first occurence backwards
+                //
+                for (int i = fp.X; i > 0; i--)
+                {
+                    if (splitChars.Contains(line[i]))
+                    {
+                        // Step past this character as it's a delimiter
+                        //
+                        startWord = (i < line.Length - 1 ) ? i + 1 : line.Length - 1;
+                        break;
+                    }
+                }
+
+                // First first occurence forwards
+                //
+                for (int i = fp.X; i < line.Length; i++)
+                {
+                    if (splitChars.Contains(line[i]))
+                    {
+                        endWord = i;
+                        break;
+                    }
+                }
 
                 // Adjust for no space to end of line
                 //
-                if (endWord == -1)
-                {
-                    endWord = line.Length;
-                }
-                else
-                {
-                    endWord += fp.X;
-                }
+                if (endWord == -1) endWord = line.Length;
+                if (startWord == -1) startWord = 0;
 
-                ScreenPosition sp1 = new ScreenPosition(startWord, fp.Y);
-                ScreenPosition sp2 = new ScreenPosition(endWord, fp.Y);
+                // Convert file to screen positions allowing for tabs
+                //
+                ScreenPosition sp1 = new ScreenPosition(m_project.fileToScreen(line, startWord), fp.Y);
+                ScreenPosition sp2 = new ScreenPosition(m_project.fileToScreen(line, endWord), fp.Y);
                 bv.setHighlight(sp1, sp2);
             }
         }
@@ -5680,6 +5721,11 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Have we recently got a double click - next release clears it
+        /// </summary>
+        bool m_gotDoubleClick = false;
+
+        /// <summary>
         /// Handle mouse click and double clicks and farm out the responsibility to other
         /// helper methods.
         /// </summary>
@@ -5736,6 +5782,10 @@ namespace Xyglo.Brazil.Xna
                     {
                         handleDoubleClick();
 
+                        // set a double click
+                        //
+                        m_gotDoubleClick = true;
+
                         // If we return early then make sure we set m_lastMousState
                         //
                         m_lastMouseState = Microsoft.Xna.Framework.Input.Mouse.GetState();
@@ -5752,58 +5802,118 @@ namespace Xyglo.Brazil.Xna
                 }
                 else if (mouseAction.m_mouse == Mouse.LeftButtonHeld)
                 {
-                    // Get the pick ray
-                    //
-                    Ray pickRay = getPickRay();
-                    int mouseX = (int)mouseAction.m_position.X;
-                    int mouseY = (int)mouseAction.m_position.Y;
-
-                    // We are dragging - work out the rate
-                    //
-                    double deltaX = pickRay.Position.X - m_lastClickPosition.X;
-                    double deltaY = pickRay.Position.Y - m_lastClickPosition.Y;
-
-                    // Vector and angle
-                    //
-                    double dragVector = Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
-                    double dragAngle = Math.Atan2(deltaY, deltaX);
-
-                    Vector3 nowPosition = Vector3.Zero;
-
-                    nowPosition.X = mouseAction.m_position.X;
-                    nowPosition.Y = mouseAction.m_position.Y;
-                    //nowPosition.X = mouseState.X;
-                    //nowPosition.Y = mouseState.Y;
-                    nowPosition.Z = 0;
-
-                    Vector3 diffPosition = (nowPosition - m_lastClickPosition);
-                    diffPosition.Z = 0;
-
-                    // Only set the cursor if we've started to drag
-                    //
-                    if (diffPosition.X != 0.0f && diffPosition.Y != 0.0f)
+                    if (m_gotDoubleClick)
                     {
-                        // Do panning - first set cursor to a hand
+                        // Reset cursor to current position
                         //
-                        System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Hand;
+                        Pair <BufferView, ScreenPosition> bS = getBufferViewIntersection();
+
+                        if (bS.First == m_project.getSelectedBufferView() && (bS.Second.X != -1 || bS.Second.Y != -1))
+                        {
+                            ScreenPosition sP = bS.Second;
+                            string line = m_project.getSelectedBufferView().getFileBuffer().getLine(bS.Second.Y);
+                            int maxX = Math.Max(m_project.screenToFile(line, line.Length - 1), 0);
+                            if (sP.X > maxX)
+                            {
+                                sP.X = maxX;
+                            }
+                            else
+                            {
+                                sP.X = m_project.screenToFile(line, sP.X);
+                            }
+
+                            if (sP.X == -1)
+                            {
+                                Logger.logMsg("GOT -1");
+                            }
+
+
+                            // If we're outside of the current highlight then extend it - if we don't
+                            // do this check then the hold after the double click cuts the newly 
+                            // highlighted 'word' in half at this new point within it.
+                            //
+                            if (sP.Y != m_project.getSelectedBufferView().getHighlightStart().Y ||
+                                sP.Y != m_project.getSelectedBufferView().getHighlightEnd().Y ||
+                                sP.X < m_project.getSelectedBufferView().getHighlightStart().X ||
+                                sP.X > m_project.getSelectedBufferView().getHighlightEnd().X)
+                            {
+                                // Move cursor to the new position and ensure that line is tab safe with the conversion
+                                //
+                                //Logger.logMsg("SET CURSOR POSTITION X = " + sP.X + ",Y = " + sP.Y);
+                                m_project.getSelectedBufferView().setCursorPosition(sP);
+
+                                // Sweep out a selection to the cursor
+                                //
+                                m_project.getSelectedBufferView().extendHighlight();
+                            }
+                        }
+
+                        // If we're at the extremities of the buffer view then try scrolling it
+                        //
+                        // etc.
+                        //
+                        // Actually this does it already to a certain extent
+
                     }
-
-                    //Logger.logMsg("XygloXNA::checkMouse() - mouse dragged: X = " + diffPosition.X + ", Y = " + diffPosition.Y);
-
-                    float multiplier = m_zoomLevel / m_zoomLevel;
-                    m_eye.X = m_lastClickEyePosition.X - diffPosition.X * multiplier;
-                    m_eye.Y = m_lastClickEyePosition.Y + diffPosition.Y * multiplier;
-
-                    // If shift isn't down then we pan with the eye movement
-                    //
-                    if (!m_shiftDown)
+                    else
                     {
-                        m_target.X = m_eye.X;
-                        m_target.Y = m_eye.Y;
+                        // Get the pick ray
+                        //
+                        Ray pickRay = getPickRay();
+                        int mouseX = (int)mouseAction.m_position.X;
+                        int mouseY = (int)mouseAction.m_position.Y;
+
+                        // We are dragging - work out the rate
+                        //
+                        double deltaX = pickRay.Position.X - m_lastClickPosition.X;
+                        double deltaY = pickRay.Position.Y - m_lastClickPosition.Y;
+
+                        // Vector and angle
+                        //
+                        double dragVector = Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
+                        double dragAngle = Math.Atan2(deltaY, deltaX);
+
+                        Vector3 nowPosition = Vector3.Zero;
+
+                        nowPosition.X = mouseAction.m_position.X;
+                        nowPosition.Y = mouseAction.m_position.Y;
+                        //nowPosition.X = mouseState.X;
+                        //nowPosition.Y = mouseState.Y;
+                        nowPosition.Z = 0;
+
+                        Vector3 diffPosition = (nowPosition - m_lastClickPosition);
+                        diffPosition.Z = 0;
+
+                        // Only set the cursor if we've started to drag
+                        //
+                        if (diffPosition.X != 0.0f && diffPosition.Y != 0.0f)
+                        {
+                            // Do panning - first set cursor to a hand
+                            //
+                            System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Hand;
+                        }
+
+                        //Logger.logMsg("XygloXNA::checkMouse() - mouse dragged: X = " + diffPosition.X + ", Y = " + diffPosition.Y);
+
+                        float multiplier = m_zoomLevel / m_zoomLevel;
+                        m_eye.X = m_lastClickEyePosition.X - diffPosition.X * multiplier;
+                        m_eye.Y = m_lastClickEyePosition.Y + diffPosition.Y * multiplier;
+
+                        // If shift isn't down then we pan with the eye movement
+                        //
+                        if (!m_shiftDown)
+                        {
+                            m_target.X = m_eye.X;
+                            m_target.Y = m_eye.Y;
+                        }
                     }
                 }
                 else if (mouseAction.m_mouse == Mouse.LeftButtonRelease)
                 {
+                    // Clear any double click
+                    //
+                    m_gotDoubleClick = false;
+
                     if ((gameTime.TotalGameTime - m_lastClickTime).TotalSeconds < 0.15f)
                     {
 
@@ -5871,14 +5981,14 @@ namespace Xyglo.Brazil.Xna
                         {
                             for (int i = 0; i < -linesDown; i++)
                             {
-                                m_project.getSelectedBufferView().moveCursorDown(false);
+                                m_project.getSelectedBufferView().moveCursorDown(false, m_shiftDown);
                             }
                         }
                         else
                         {
                             for (int i = 0; i < linesDown; i++)
                             {
-                                m_project.getSelectedBufferView().moveCursorUp(m_project, false);
+                                m_project.getSelectedBufferView().moveCursorUp(m_project, false, m_shiftDown);
                             }
                         }
                     }
@@ -5899,6 +6009,33 @@ namespace Xyglo.Brazil.Xna
                     m_isResizing = false;
                 }
 
+                // Right mouse press
+                //
+                if (mouseAction.m_mouse == Mouse.RightButtonPress)
+                {
+                    StateAction sA = new StateAction(m_state, Mouse.RightButtonPress);
+                    // scan components that could match
+                    //
+                    foreach (Component component in m_componentList)
+                    {
+                        string name = component.getStateActions().First().getState().m_name;
+                        if (!m_state.equals(component.getStateActions().First().getState().m_name) || !component.isDestroyed())
+                            continue;
+
+                        //Mouse mouse = (MouseAction)(component.getStateActions().First().getActions().First());
+                        Logger.logMsg("Got a matching component " + component.getName());
+                        Mouse mouse = ((MouseAction)component.getStateActions().First().getActions().First()).m_mouse;
+
+                        if (mouse == Mouse.RightButtonPress)
+                        {
+                            // Make it appear
+                            //
+                            component.setDestroyed(false);
+                        }
+                    }
+                }
+
+
                 // Store the last mouse state
                 //
                 m_lastMouseState = Microsoft.Xna.Framework.Input.Mouse.GetState();
@@ -5915,14 +6052,19 @@ namespace Xyglo.Brazil.Xna
             //
             m_frameCounter++;
 
+            // Draw onto the Bloom component
+            //
+            m_bloom.BeginDraw();
+            setupDrawWorld(gameTime);
+
             if (m_project != null)
             {
                 drawFriendlier(gameTime);
             }
-            else
-            {
-                drawXyglo(gameTime);
-            }
+
+            // Now draw any Xyglo components
+            //
+            drawXyglo(gameTime);
 
             base.Draw(gameTime);
         }
@@ -5988,12 +6130,6 @@ namespace Xyglo.Brazil.Xna
         /// <param name="gameTime"></param>
         protected void drawXyglo(GameTime gameTime)
         {
-            // Draw onto the Bloom component - this is the only modification we need to make
-            //
-            m_bloom.BeginDraw();
-
-            setupDrawWorld(gameTime);
-          
             // Create/draw the components - note that we have two components called the same in different
             // areas of the framework - we should disambiguate to make sure this distinction between
             // API levels is clear.
@@ -6002,11 +6138,15 @@ namespace Xyglo.Brazil.Xna
             // only if it doesn't already exist in the m_drawableComponent dictionary. If it does already
             // exist it just calls redraw on it.
             //
+
+            //m_spriteBatch.Begin();
+
             foreach (Component component in m_componentList)
             {
+                string compState = component.getStateActions().First().getState().m_name;
                 // Check that this component should be showing for this State and that's it's not been destroyed
                 //
-                if (!component.getStates().Contains(m_state) || component.isDestroyed())
+                if ((!component.getStates().Contains(m_state) && !m_state.equals(compState)) || component.isDestroyed())
                     continue;
 
                 // Has this component already been added to the drawableComponent dictionary?  If it hasn't then
@@ -6138,13 +6278,28 @@ namespace Xyglo.Brazil.Xna
                     {
                         //Logger.logMsg("Draw Finish Block for the first time");
                     }
+                    else if (component.GetType() == typeof(Xyglo.Brazil.BrazilMenu))
+                    {
+                        BrazilMenu bMenu = (BrazilMenu)component;
+                        XygloMenu menu = new XygloMenu(m_fontManager, m_spriteBatch,  Color.White, m_lineEffect, m_lastClickPosition);
+
+                        foreach (BrazilMenuOption item in bMenu.getMenuOptions().Keys)
+                        {
+                            menu.addOption(item.m_optionName);
+                        }
+
+                        // Assign menu
+                        //
+                        m_drawableComponent[component] = menu;
+                    }
                 }
                 else
                 {
                     m_drawableComponent[component].draw(m_graphics.GraphicsDevice);
                 }
-
             }
+
+            //m_spriteBatch.End();
         }
 
         /// <summary>
@@ -6155,7 +6310,7 @@ namespace Xyglo.Brazil.Xna
         {
             // Draw onto the Bloom component - this is the only modification we need to make
             //
-            m_bloom.BeginDraw();
+            //m_bloom.BeginDraw();
 
             // If we're not licenced then render this
             //
@@ -6190,7 +6345,7 @@ namespace Xyglo.Brazil.Xna
 
             // Call setup for the projection matrix and frustrum etc.
             //
-            setupDrawWorld(gameTime);
+            //setupDrawWorld(gameTime);
 
             // In the manage project mode we zoom off into the distance
             //

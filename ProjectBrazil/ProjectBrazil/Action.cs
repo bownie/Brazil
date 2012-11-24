@@ -256,6 +256,7 @@ namespace Xyglo.Brazil
         public MouseAction()
         {
             m_mouse = Mouse.None;
+            m_name = "Mouse Action";
         }
 
         /// <summary>
@@ -265,12 +266,13 @@ namespace Xyglo.Brazil
         public MouseAction(Mouse mouse)
         {
             m_mouse = mouse;
+            m_name = "Mouse Action";
         }
 
         public MouseAction(MouseAction mA)
         {
             m_mouse = mA.m_mouse;
-            m_name = m_name;
+            m_name = "Mouse Action";
         }
 
         /// <summary>

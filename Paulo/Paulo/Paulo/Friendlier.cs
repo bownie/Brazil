@@ -22,7 +22,7 @@ namespace Paulo
             m_world.setKeyAutoRepeatHoldTime(0.4); // seconds
             m_world.setKeyAutoRepeatInterval(0.05); // seconds
 
-            // Have to re-push these changes as they key repeats have already
+            // Have to re-push these changes as the above key repeats have already
             // been loaded into the XNA world.
             //
             pushWorldChanges();
@@ -146,8 +146,15 @@ namespace Paulo
 
             // and the F keys
             initialiseFKeys();
+
+            // Setup context menus
+            //
+            contextMenus();
         }
 
+        /// <summary>
+        /// Initialise the Function Keys
+        /// </summary>
         protected void initialiseFKeys()
         {
             Keys[] keys = { Keys.F1, Keys.F2, Keys.F3, Keys.F4, Keys.F5, Keys.F6, Keys.F7, Keys.F8, Keys.F9, Keys.F10 };
@@ -189,5 +196,17 @@ namespace Paulo
                 addConfirmState(confirmState);
             }
         }
+
+        protected void contextMenus()
+        {
+            // Set a context menu on right button press in the TextEditing state
+            //
+            BrazilMenu rightClickEditMenu = new BrazilMenu(BrazilMenuType.ContextMenu, new MouseAction(Mouse.RightButtonPress), "Right Click Edit Menu");
+            rightClickEditMenu.addMenuOption("Copy", new KeyAction(Keys.C), "Copy");
+            rightClickEditMenu.addMenuOption("Paste", new KeyAction(Keys.C), "Paste");
+            StateAction sA = new StateAction(getState("TextEditing"), Mouse.RightButtonPress);
+            addComponent(sA, rightClickEditMenu);
+        }
+
     }
 }

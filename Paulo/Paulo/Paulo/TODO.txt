@@ -17,6 +17,7 @@ Friendlier
   - first letter file system navigation 
   - proper logo/app icon
   - cut and paste effect - grab highlight and lurch across between files
+  - buildable, configurable context menus
 
 
 XNA/Store

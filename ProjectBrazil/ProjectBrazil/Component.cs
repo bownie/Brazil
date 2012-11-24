@@ -45,12 +45,30 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
+        /// Add a StateAction combination that activates this Component
+        /// </summary>
+        /// <param name="stateAction"></param>
+        public void addStateAction(StateAction stateAction)
+        {
+            m_stateActionList.Add(stateAction);
+        }
+
+        /// <summary>
         /// Get the States this Component is active in
         /// </summary>
         /// <returns></returns>
         public HashSet<State> getStates()
         {
             return m_stateList;
+        }
+
+        /// <summary>
+        /// Get the StateAction list
+        /// </summary>
+        /// <returns></returns>
+        public HashSet<StateAction> getStateActions()
+        {
+            return m_stateActionList;
         }
 
         /// <summary>
@@ -172,6 +190,12 @@ namespace Xyglo.Brazil
         /// don't get duplicates in this list.
         /// </summary>
         HashSet<State> m_stateList = new HashSet<State>();
+
+        /// <summary>
+        /// A Component can also be made available in a combination of State and Action - this is
+        /// a finer grained context
+        /// </summary>
+        HashSet<StateAction> m_stateActionList = new HashSet<StateAction>();
 
         /// <summary>
         /// Name for this component just in case we want to track it easily for some insane reason

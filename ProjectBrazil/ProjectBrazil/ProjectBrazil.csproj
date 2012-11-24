@@ -68,6 +68,7 @@
   <ItemGroup>
     <Compile Include="BrazilColour.cs" />
     <Compile Include="BrazilFlyingBlock.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\BrazilMenu.cs" />
     <Compile Include="BrazilPosition.cs" />
     <Compile Include="BrazilState.cs" />
     <Compile Include="BrazilVector2.cs" />
@@ -98,6 +99,7 @@
     <Compile Include="BrazilWorld.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BufferView.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloCoin.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\XygloEgg.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloException.cs" />
     <Compile Include="Xyglo.Brazil.Xna\Command.cs" />
     <Compile Include="Component.cs" />

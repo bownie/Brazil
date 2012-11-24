@@ -24,6 +24,17 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
+        /// Construct by a mouse action
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="mouse"></param>
+        public StateAction(State state, Mouse mouse)
+        {
+            m_state = state;
+            addAction(new MouseAction(mouse));
+        }
+
+        /// <summary>
         /// Insert a list of actions to this StateAction
         /// </summary>
         /// <param name="state"></param>
@@ -140,6 +151,32 @@ namespace Xyglo.Brazil
             }
 
             return match;
+        }
+
+        /// <summary>
+        /// Match all the actions on a single mouseAction
+        /// </summary>
+        /// <param name="mouseAction"></param>
+        /// <returns></returns>
+        public bool matchMouseAction(MouseAction mouseAction)
+        {
+            bool match = true;
+            foreach (Action action in m_actionList)
+            {
+                if (action.GetType() == typeof(MouseAction))
+                {
+                    MouseAction testKeyAction = (MouseAction)action;
+
+                    if (testKeyAction != mouseAction)
+                    {
+                        match = false;
+                        break;
+                    }
+                }
+            }
+
+            return match;
+
         }
 
         /*

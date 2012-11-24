@@ -439,6 +439,18 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
+        /// Add a component to a StateAction combination
+        /// </summary>
+        /// <param name="stateAction"></param>
+        /// <param name="component"></param>
+        public void addComponent(StateAction stateAction, Component component)
+        {
+            checkState(stateAction.getState());
+            component.addStateAction(stateAction);
+            m_componentList.Add(component);
+        }
+
+        /// <summary>
         /// Get the list of States to satisfy our interface
         /// </summary>
         /// <returns></returns>

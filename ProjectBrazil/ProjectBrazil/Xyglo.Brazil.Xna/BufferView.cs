@@ -859,8 +859,6 @@ namespace Xyglo.Brazil.Xna
             {
                 m_cursorPosition = fp;
                 keepVisible();
-
-                Logger.logMsg("BufferView::setCursorPosition() - fp.X = " + fp.X + ", fp.Y = " + fp.Y);
             }
             else
             {
@@ -1277,7 +1275,7 @@ namespace Xyglo.Brazil.Xna
         /// When moving up the cursor on this BufferView  
         /// </summary>
         /// <param name="leftCursor"></param>
-        public void moveCursorUp(Project project, bool leftCursor)
+        public void moveCursorUp(Project project, bool leftCursor, bool extendHighlight)
         {
             // Move start position if tailing
             //
@@ -1319,6 +1317,11 @@ namespace Xyglo.Brazil.Xna
                 }
             }
             keepVisible();
+
+            // potentially clear any highlight
+            //
+            if (!extendHighlight)
+                noHighlight();
         }
 
         /// <summary>
@@ -1326,7 +1329,7 @@ namespace Xyglo.Brazil.Xna
         /// wants to go down or wants to go off the end of the line (right)
         /// </summary>
         /// <param name="rightCursor"></param>
-        public void moveCursorDown(bool rightCursor)
+        public void moveCursorDown(bool rightCursor, bool extendHighlight)
         {
             // Move the view position if tailing
             //
@@ -1373,6 +1376,11 @@ namespace Xyglo.Brazil.Xna
             }
             //Logger.logMsg("BufferView::moveCursorDown() - m_cursorPosition.Y = " + m_cursorPosition.Y);
             //Logger.logMsg("BufferView::moveCursorDown() - m_bufferShowStart.Y = " + m_bufferShowStartY);
+
+            // potentially clear any highlight
+            //
+            if (!extendHighlight)
+                noHighlight();
         }
 
         /// <summary>
@@ -2133,7 +2141,7 @@ namespace Xyglo.Brazil.Xna
         /// etc. etc.
         /// </summary>
         /// <param name="steps"></param>
-        public void moveCursorRight(Project project, int steps = 1)
+        public void moveCursorRight(Project project, bool extendHighlight, int steps = 1)
         {
             // Test for empty file firstly
             //
@@ -2170,17 +2178,22 @@ namespace Xyglo.Brazil.Xna
             }
             else
             {
-                moveCursorDown(true); // use the built-in method for this
+                moveCursorDown(true, extendHighlight); // use the built-in method for this
             }
 
             keepVisible();
+
+            // potentially clear any highlight
+            //
+            if (!extendHighlight)
+                noHighlight();
         }
 
         /// <summary>
         /// Move the cursor left a number of steps
         /// </summary>
         /// <param name="steps"></param>
-        public void moveCursorLeft(Project project, int steps = 1)
+        public void moveCursorLeft(Project project, bool extendHighlight, int steps = 1)
         {
             // Test for empty file firstly
             //
@@ -2220,7 +2233,7 @@ namespace Xyglo.Brazil.Xna
                 {
                     if (m_cursorPosition.Y > 0) // reduce the line we're on if we can
                     {
-                        moveCursorUp(project, true);
+                        moveCursorUp(project, true, extendHighlight);
                         //m_cursorPosition.Y--;
                         //m_cursorPosition.X = m_fileBuffer.getLine(m_cursorPosition.Y).Length;
                     }
@@ -2228,6 +2241,11 @@ namespace Xyglo.Brazil.Xna
             }
 
             keepVisible();
+
+            // potentially clear any highlight
+            //
+            if (!extendHighlight)
+                noHighlight();
         }
 
         /// <summary>

@@ -2158,7 +2158,7 @@ namespace Xyglo.Brazil.Xna
                 rSP.X = (int)(intersectPos.X / getFontManager().getCharWidth(rBV.getViewSize()));
                 rSP.Y = (int)(intersectPos.Y / getFontManager().getLineSpacing(rBV.getViewSize()));
 
-                Logger.logMsg("Project::testRayIntersection() - got FilePosition of X = " + rFP.X + ", Y = " + rFP.Y);
+                //Logger.logMsg("Project::testRayIntersection() - got FilePosition of X = " + rFP.X + ", Y = " + rFP.Y);
 
                 if (rBV.isTailing())
                 {
@@ -2321,8 +2321,6 @@ namespace Xyglo.Brazil.Xna
                 }
                 rP++;
             }
-
-            Logger.logMsg("Project::screenToFile() - rP " + rP);
             return rP;
         }
 
