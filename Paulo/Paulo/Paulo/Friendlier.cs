@@ -206,6 +206,8 @@ namespace Paulo
             rightClickEditMenu.addMenuOption("Paste", new KeyAction(Keys.C), "Paste");
             StateAction sA = new StateAction(getState("TextEditing"), Mouse.RightButtonPress);
             addComponent(sA, rightClickEditMenu);
+
+            //connect("TextEditing", new MouseAction(Mouse.RightButtonRelease), "Default");
         }
 
     }

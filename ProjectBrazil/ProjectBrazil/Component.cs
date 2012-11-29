@@ -161,6 +161,24 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
+        /// Is this component hiding?
+        /// </summary>
+        /// <returns></returns>
+        public bool isHiding()
+        {
+            return m_isHiding;
+        }
+
+        /// <summary>
+        /// Set this component to hiding/unhiding
+        /// </summary>
+        /// <param name="hiding"></param>
+        public void setHiding(bool hiding)
+        {
+            m_isHiding = hiding;
+        }
+
+        /// <summary>
         /// Affected by gravity?
         /// </summary>
         protected bool m_gravityAffected = false;
@@ -206,5 +224,10 @@ namespace Xyglo.Brazil
         /// Is this Component destroyed in GameLand?  If so don't regenerate it
         /// </summary>
         protected bool m_isDestroyed = false;
+
+        /// <summary>
+        /// Is this Compont hiding?
+        /// </summary>
+        protected bool m_isHiding = false;
     }
 }

@@ -68,7 +68,7 @@
   <ItemGroup>
     <Compile Include="BrazilColour.cs" />
     <Compile Include="BrazilFlyingBlock.cs" />
-    <Compile Include="Xyglo.Brazil.Xna\BrazilMenu.cs" />
+    <Compile Include="BrazilMenu.cs" />
     <Compile Include="BrazilPosition.cs" />
     <Compile Include="BrazilState.cs" />
     <Compile Include="BrazilVector2.cs" />
@@ -104,6 +104,7 @@
     <Compile Include="Xyglo.Brazil.Xna\Command.cs" />
     <Compile Include="Component.cs" />
     <Compile Include="Xyglo.Brazil.Xna\Component.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\XygloMenu.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloXnaDrawableShape.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloBannerText.cs" />
     <Compile Include="Xyglo.Brazil.Xna\CppSyntaxManager.cs" />

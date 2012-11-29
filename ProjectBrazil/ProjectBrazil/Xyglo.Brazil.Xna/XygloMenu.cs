@@ -88,14 +88,13 @@ namespace Xyglo.Brazil.Xna
         /// <param name="device"></param>
         public override void buildBuffers(GraphicsDevice device)
         {
- /*
-  * // Set total number of vertices - two circle circumferences plus 2 centre points
+            // Set total number of vertices - two circle circumferences plus 2 centre points
             //
-            m_numVertices = m_vertsInCircle * m_circlesInCoin + 2;
+            m_numVertices = 4;
 
             // Total number of indices - will require more
             //
-            m_numIndices = m_vertsInCircle * m_circlesInCoin * 6;
+            m_numIndices = 6;
 
             if (m_vertices == null)
             {
@@ -109,7 +108,6 @@ namespace Xyglo.Brazil.Xna
 
             createVertices();
             createIndices(device);
-  */
         }
 
         /// <summary>
@@ -117,77 +115,33 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         protected void createVertices()
         {
-            /*
-            Vector3 rad = new Vector3((float)Math.Abs(m_radius), 0, 0);
-            int maxVertex = 0;
-            float coinWidth = m_radius / 8;
-            Vector3 point;
+            int longest = 0;
+            foreach (string item in m_options)
+            {
+                if (item.Length > longest)
+                    longest = item.Length;
+            }
 
-            // Rotate about the Y axis
-            //
-            Matrix worldMatrix = Matrix.CreateRotationY((float)m_rotation);
+            float width = ( longest + 2 ) * m_fontManager.getViewFont(XygloView.ViewSize.Medium).MeasureString("X").X;
+            float height = ( m_options.Count + 1 ) * m_fontManager.getViewFont(XygloView.ViewSize.Medium).LineSpacing;
 
             // Do this twice for the two coins
             //
-            for (int x = 0; x < m_circlesInCoin; x++)
-            {
-                // There is no difx rotation for these
-                //
-                float difx = 0.0f;
+            m_vertices[0].Position = new Vector3(m_position.X, m_position.Y, 0);
+            m_vertices[0].Color = Color.Azure;
+            m_vertices[0].TextureCoordinate = Vector2.Zero;
 
-                for (int y = 0; y < m_vertsInCircle; y++)
-                {
-                    float dify = 360.0f / (float)m_vertsInCircle;
+            m_vertices[1].Position = new Vector3(m_position.X + width, m_position.Y, 0);
+            m_vertices[1].Color = Color.Azure;
+            m_vertices[1].TextureCoordinate = Vector2.Zero;
 
-                    Matrix zrot = Matrix.CreateRotationZ(MathHelper.ToRadians(y * dify)); // rotate vertex around z
-                    Matrix yrot = Matrix.CreateRotationY(MathHelper.ToRadians(x * difx)); // rotate circle around y
+            m_vertices[2].Position = new Vector3(m_position.X + width, m_position.Y + height, 0);
+            m_vertices[2].Color = Color.Azure;
+            m_vertices[2].TextureCoordinate = Vector2.Zero;
 
-                    // transformation including rotation with world matrix
-                    //
-                    point = Vector3.Transform(Vector3.Transform(rad, zrot), yrot);
-
-                    // Adjust the translation by a factor of the radius for the two coins
-                    //
-                    if (x == 0)
-                    {
-                        point.Z += coinWidth;
-                    }
-                    else // x == 1
-                    {
-                        point.Z -= coinWidth;
-                    }
-
-                    point = m_position + Vector3.Transform(point, worldMatrix);
-
-                    //m_vertices[x + y * m_vertsInCircle] = new VertexPositionColorTexture(point, m_colour, new Vector2(0, 0));
-                    m_vertices[y + x * m_vertsInCircle].Position = point;
-                    m_vertices[y + x * m_vertsInCircle].Color = m_colour;
-                    m_vertices[y + x * m_vertsInCircle].TextureCoordinate = Vector2.Zero;
-                    maxVertex = y + x * m_vertsInCircle;
-                }
-            }
-
-            // DO THIS:
-            // http://www.riemers.net/eng/Tutorials/XNA/Csharp/Series2/Textures.php
-
-
-            // Define the centre points
-            point.X = 0;
-            point.Y = 0;
-            point.Z = coinWidth;
-            point = m_position + Vector3.Transform(point, worldMatrix);
-            m_vertices[maxVertex + 1].Position = point;
-            m_vertices[maxVertex + 1].Color = m_colour;
-            m_vertices[maxVertex + 1].TextureCoordinate = Vector2.Zero;
-
-            point.X = 0;
-            point.Y = 0;
-            point.Z = -coinWidth;
-            point = m_position + Vector3.Transform(point, worldMatrix); 
-            m_vertices[maxVertex + 2].Position = point;
-            m_vertices[maxVertex + 2].Color = m_colour;
-            m_vertices[maxVertex + 2].TextureCoordinate = Vector2.Zero;
-             */
+            m_vertices[3].Position = new Vector3(m_position.X, m_position.Y, 0);
+            m_vertices[3].Color = Color.Azure;
+            m_vertices[3].TextureCoordinate = Vector2.Zero;
         }
 
         /// <summary>
@@ -195,46 +149,17 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         void createIndices(GraphicsDevice device)
         {
-            /*
             // Generate indices if not already
             //
             if (m_indices != null) return;
             
-            int centreFront = m_circlesInCoin * m_vertsInCircle;
-            int centreBack = centreFront + 1;
             m_indices = new short[m_numIndices];
-
-            // Index counter
-            int i = 0;
-
-            for (int y = 0; y < m_vertsInCircle; y++)
-            {
-                // Front circle
-                //
-                m_indices[i++] = (short)centreFront;
-                m_indices[i++] = (short)(y);
-                m_indices[i++] = (short)((y + 1) % m_vertsInCircle);
-
-                // Back circle
-                //
-                m_indices[i++] = (short)centreBack;
-                m_indices[i++] = (short)(2 * m_vertsInCircle - y - 1);
-                m_indices[i++] = (short)((2 * m_vertsInCircle - y - 2 < m_vertsInCircle) ? 3 * m_vertsInCircle - y - 2 : 2 * m_vertsInCircle - y - 2);
-
-                // Connect edges with two triangles
-                //
-                m_indices[i++] = (short)(y);
-                m_indices[i++] = (short)(m_vertsInCircle + y);
-                m_indices[i++] = (short)(m_vertsInCircle + (m_vertsInCircle + y + 1) % (m_vertsInCircle));
-
-                m_indices[i++] = (short)(y);
-                m_indices[i++] = (short)(short)(m_vertsInCircle + (m_vertsInCircle + y + 1) % (m_vertsInCircle));
-                m_indices[i++] = (short)((y + 1) % m_vertsInCircle);
-            }
-
-            m_indexBuffer = new IndexBuffer(device, typeof(short), m_numIndices, BufferUsage.WriteOnly);
-            m_indexBuffer.SetData(m_indices);
-            */
+            m_indices[0] = 0;
+            m_indices[1] = 1;
+            m_indices[2] = 2;
+            m_indices[3] = 0;
+            m_indices[4] = 2;
+            m_indices[5] = 3;
         }
 
         /// <summary>
@@ -243,7 +168,6 @@ namespace Xyglo.Brazil.Xna
         /// <param name="device"></param>
         public override void draw(GraphicsDevice device)
         {
-            /*
             device.Indices = m_indexBuffer;
             device.SetVertexBuffer(m_vertexBuffer);
 
@@ -265,12 +189,11 @@ namespace Xyglo.Brazil.Xna
                 // Attempt
                 //device.DrawUserPrimitives<VertexPositionColorTexture>(PrimitiveType.TriangleList, m_vertices, 0, m_vertices.Length);
             }
-            */
 
             float textScale = 1.0f;
 
             m_spriteBatch.Begin();
-
+            int i = 0;
             foreach(string item in m_options)
             {
                 //string remainder = line.Substring(xPos, line.Length - xPos);
@@ -278,7 +201,7 @@ namespace Xyglo.Brazil.Xna
                 m_spriteBatch.DrawString(
                     m_fontManager.getViewFont(XygloView.ViewSize.Medium),
                     item,
-                    new Vector2(0, 0),
+                    new Vector2(m_position.X, m_position.Y + m_fontManager.getViewFont(XygloView.ViewSize.Medium).LineSpacing * i++),
                     m_colour,
                     0,
                     Vector2.Zero,

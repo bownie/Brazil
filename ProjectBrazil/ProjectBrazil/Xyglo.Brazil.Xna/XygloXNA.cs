@@ -902,7 +902,7 @@ namespace Xyglo.Brazil.Xna
 
             // Initialise and load fonts into our Content context by family.
             //
-            m_project.initialiseFonts(Content, "Bitstream Vera Sans Mono", GraphicsDevice.Viewport.AspectRatio, "Nuclex");
+            //m_project.initialiseFonts(Content, "Bitstream Vera Sans Mono", GraphicsDevice.Viewport.AspectRatio, "Nuclex");
 
             // We need to do this to connect up all the BufferViews, FileBuffers and the other components
             // such as FontManager etc.
@@ -1201,16 +1201,13 @@ namespace Xyglo.Brazil.Xna
         {
             Logger.logMsg("XygloXNA::LoadContent() - loading resources");
 
+            // Initialise font Manager
+            //
+            m_fontManager.initialise(Content, "Bitstream Vera Sans Mono", GraphicsDevice.Viewport.AspectRatio, "Nuclex");
             if (m_project != null)
             {
+                m_project.setFontManager(m_fontManager);
                 loadFriendlierContent();
-            }
-            else
-            {
-                // For everything else we need to initialise the FontManager properly - so
-                // we borrow from initialiseProject
-                //
-                m_fontManager.initialise(Content, "Bitstream Vera Sans Mono", GraphicsDevice.Viewport.AspectRatio, "Nuclex");
             }
 
             // We have to initialise this as follows to work around CA2000 warning
@@ -6014,12 +6011,13 @@ namespace Xyglo.Brazil.Xna
                 if (mouseAction.m_mouse == Mouse.RightButtonPress)
                 {
                     StateAction sA = new StateAction(m_state, Mouse.RightButtonPress);
+
                     // scan components that could match
                     //
                     foreach (Component component in m_componentList)
                     {
                         string name = component.getStateActions().First().getState().m_name;
-                        if (!m_state.equals(component.getStateActions().First().getState().m_name) || !component.isDestroyed())
+                        if (!m_state.equals(component.getStateActions().First().getState().m_name) || (!component.isDestroyed() && !component.isHiding()))
                             continue;
 
                         //Mouse mouse = (MouseAction)(component.getStateActions().First().getActions().First());
@@ -6028,13 +6026,44 @@ namespace Xyglo.Brazil.Xna
 
                         if (mouse == Mouse.RightButtonPress)
                         {
+                            m_lastClickPosition.X = mouseAction.m_position.X;
+                            m_lastClickPosition.Y = mouseAction.m_position.Y;
+
                             // Make it appear
                             //
                             component.setDestroyed(false);
+                            component.setHiding(false);
+
+                            // Update the click position if this is already drawn but hiding
+                            //
+                            if (m_drawableComponent.ContainsKey(component))
+                            {
+                                m_drawableComponent[component].setPosition(m_lastClickPosition);
+                            }
                         }
                     }
                 }
+                else if (mouseAction.m_mouse == Mouse.RightButtonRelease)
+                {
+                    List<Component> destroyList = new List<Component>();
 
+                    // scan components that could match
+                    //
+                    foreach (Component component in m_componentList)
+                    {
+                        string name = component.getStateActions().First().getState().m_name;
+                        if (!m_state.equals(component.getStateActions().First().getState().m_name))
+                            continue;
+
+                        // Make it disappear
+                        //
+                        component.setHiding(true);
+                    }
+
+                    m_lastClickPosition.X = mouseAction.m_position.X;
+                    m_lastClickPosition.Y = mouseAction.m_position.Y;
+
+                }
 
                 // Store the last mouse state
                 //
@@ -6288,6 +6317,11 @@ namespace Xyglo.Brazil.Xna
                             menu.addOption(item.m_optionName);
                         }
 
+                        // Build the buffers and draw
+                        //
+                        menu.buildBuffers(m_graphics.GraphicsDevice);
+                        menu.draw(m_graphics.GraphicsDevice);
+
                         // Assign menu
                         //
                         m_drawableComponent[component] = menu;
@@ -6295,7 +6329,20 @@ namespace Xyglo.Brazil.Xna
                 }
                 else
                 {
-                    m_drawableComponent[component].draw(m_graphics.GraphicsDevice);
+                    // If a component is currently hiding then update its position accordingly
+                    //
+                    if (component.isHiding())
+                    {
+                        if (component.GetType() == typeof(Xyglo.Brazil.BrazilMenu))
+                        {
+                            XygloMenu menu = (XygloMenu)m_drawableComponent[component];
+                            menu.setPosition(m_lastClickPosition);
+                        }
+                    }
+                    else
+                    {
+                        m_drawableComponent[component].draw(m_graphics.GraphicsDevice);
+                    }
                 }
             }
 
