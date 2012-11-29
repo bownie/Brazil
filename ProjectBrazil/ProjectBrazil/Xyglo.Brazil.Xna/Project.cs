@@ -290,18 +290,6 @@ namespace Xyglo.Brazil.Xna
         ////////////// METHODS ////////////////
 
         /// <summary>
-        /// Interface for initialising the font manager via the Project
-        /// </summary>
-        /// <param name="contentManager"></param>
-        /// <param name="fontFamily"></param>
-        /// <param name="aspectRatio"></param>
-        /// <param name="processor"></param>
-        public void initialiseFonts(Microsoft.Xna.Framework.Content.ContentManager contentManager, string fontFamily, float aspectRatio, string processor = "")
-        {
-            m_fontManager.initialise(contentManager, fontFamily, aspectRatio, processor);
-        }
-
-        /// <summary>
         /// Initialise this project
         /// </summary>
         protected void initialise()
@@ -2066,6 +2054,31 @@ namespace Xyglo.Brazil.Xna
             }
 
             return rB;
+        }
+
+
+        /// <summary>
+        /// Generate a vector position from the testRayIntersection method
+        /// </summary>
+        /// <param name="ray"></param>
+        /// <returns></returns>
+        public Vector3 getActualTestRayIntersection(Ray ray)
+        {
+            Pair<BufferView, Pair<ScreenPosition, ScreenPosition>> bVP = testRayIntersection(ray);
+            Vector3 rP = Vector3.Zero;
+
+            if (bVP.First != null)
+            {
+                rP = bVP.First.getPosition();
+
+                float fontSizeX = m_fontManager.getViewFont(bVP.First.getViewSize()).MeasureString("X").X;
+                float fontSizeY = m_fontManager.getViewFont(bVP.First.getViewSize()).LineSpacing;
+
+                rP.X = bVP.Second.Second.X * fontSizeX;
+                rP.Y = bVP.Second.Second.Y * fontSizeY;
+            }
+
+            return rP;
         }
 
 

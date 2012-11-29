@@ -36,7 +36,7 @@ namespace Xyglo.Brazil.Xna
         /// <summary>
         /// Alpha Blend text
         /// </summary>
-        protected bool m_alphaBlendingTest = false;
+        protected bool m_alphaBlendingTest = true;
 
         /// <summary>
         /// Save our local SpriteBatch
@@ -54,15 +54,31 @@ namespace Xyglo.Brazil.Xna
         List<string> m_options = new List<string>();
 
         /// <summary>
+        /// Cursor offset from position - uses font size to position the menu
+        /// </summary>
+        protected Vector2 m_cursorOffset = Vector2.Zero;
+
+        /// <summary>
+        /// Size of the font we're using
+        /// </summary>
+        XygloView.ViewSize m_fontSize = XygloView.ViewSize.Medium;
+
+        /// <summary>
         /// Menu constructor
         /// </summary>
         /// <param name="colour"></param>
         /// <param name="effect"></param>
         /// <param name="position"></param>
-        public XygloMenu(FontManager fontManager, SpriteBatch spriteBatch, Color colour, BasicEffect effect, Vector3 position)
+        public XygloMenu(FontManager fontManager, SpriteBatch spriteBatch, Color colour, BasicEffect effect, Vector3 position, Vector2 cursorOffset, XygloView.ViewSize viewFontSize)
         {
+            m_fontSize = viewFontSize;
             m_fontManager = fontManager;
             m_spriteBatch = spriteBatch;
+
+            // Convert cursor offset to screen offset
+            //
+            m_cursorOffset.X = cursorOffset.X * m_fontManager.getViewFont(m_fontSize).MeasureString("X").X;
+            m_cursorOffset.Y = cursorOffset.Y * m_fontManager.getViewFont(m_fontSize).LineSpacing;
 
             // Store the effect
             //
@@ -71,6 +87,16 @@ namespace Xyglo.Brazil.Xna
             m_position = position;
 
             if (m_alphaBlendingTest) m_colour.A = 10;
+        }
+
+        /// <summary>
+        /// Set the cursor offset
+        /// </summary>
+        /// <param name="screenPosition"></param>
+        public void setOffset(ScreenPosition screenPosition)
+        {
+            m_cursorOffset.X = screenPosition.X * m_fontManager.getViewFont(m_fontSize).MeasureString("X").X;
+            m_cursorOffset.Y = screenPosition.Y * m_fontManager.getViewFont(m_fontSize).LineSpacing;
         }
 
         /// <summary>
@@ -83,7 +109,8 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
-        /// Build the shape and populate the Vertex and Index buffers
+        /// Build the shape and populate the Vertex and Index buffers.  Needs to be called after any change
+        /// to position.
         /// </summary>
         /// <param name="device"></param>
         public override void buildBuffers(GraphicsDevice device)
@@ -92,13 +119,17 @@ namespace Xyglo.Brazil.Xna
             //
             m_numVertices = 4;
 
-            // Total number of indices - will require more
+            // Total number of indices
             //
             m_numIndices = 6;
 
             if (m_vertices == null)
             {
                 m_vertices = new VertexPositionColorTexture[m_numVertices];
+                m_vertices[0].TextureCoordinate = new Vector2(0, 0);
+                m_vertices[1].TextureCoordinate = new Vector2(0, 1);
+                m_vertices[2].TextureCoordinate = new Vector2(1, 0);
+                m_vertices[3].TextureCoordinate = new Vector2(1, 1);
             }
 
             if (m_vertexBuffer == null)
@@ -106,14 +137,14 @@ namespace Xyglo.Brazil.Xna
                 m_vertexBuffer = new VertexBuffer(device, typeof(VertexPositionNormalTexture), m_vertices.Count(), BufferUsage.WriteOnly);
             }
 
-            createVertices();
+            createVertices(device);
             createIndices(device);
         }
 
         /// <summary>
         /// Create the vertices
         /// </summary>
-        protected void createVertices()
+        protected void createVertices(GraphicsDevice device)
         {
             int longest = 0;
             foreach (string item in m_options)
@@ -122,26 +153,31 @@ namespace Xyglo.Brazil.Xna
                     longest = item.Length;
             }
 
-            float width = ( longest + 2 ) * m_fontManager.getViewFont(XygloView.ViewSize.Medium).MeasureString("X").X;
-            float height = ( m_options.Count + 1 ) * m_fontManager.getViewFont(XygloView.ViewSize.Medium).LineSpacing;
+            float width = ( longest + 2 ) * m_fontManager.getViewFont(m_fontSize).MeasureString("X").X;
+            float height = ( m_options.Count + 1 ) * m_fontManager.getViewFont(m_fontSize).LineSpacing;
 
             // Do this twice for the two coins
             //
-            m_vertices[0].Position = new Vector3(m_position.X, m_position.Y, 0);
-            m_vertices[0].Color = Color.Azure;
-            m_vertices[0].TextureCoordinate = Vector2.Zero;
+            //m_vertices[0].Position = Vector3.Transform(new Vector3(m_position.X, m_position.Y, 0), Matrix.Invert(m_effect.World));
+            m_vertices[0].Position = new Vector3(m_position.X + m_cursorOffset.X, m_position.Y + m_cursorOffset.Y, 0);
+            m_vertices[0].Color = Color.DarkBlue;
 
-            m_vertices[1].Position = new Vector3(m_position.X + width, m_position.Y, 0);
-            m_vertices[1].Color = Color.Azure;
-            m_vertices[1].TextureCoordinate = Vector2.Zero;
+            //m_vertices[1].Position = Vector3.Transform(new Vector3(m_position.X + width, m_position.Y, 0), Matrix.Invert(m_effect.World));
+            m_vertices[1].Position = new Vector3(m_position.X + m_cursorOffset.X + width, m_position.Y + m_cursorOffset.Y, 0);
+            m_vertices[1].Color = Color.DarkBlue;
 
-            m_vertices[2].Position = new Vector3(m_position.X + width, m_position.Y + height, 0);
-            m_vertices[2].Color = Color.Azure;
-            m_vertices[2].TextureCoordinate = Vector2.Zero;
+            //m_vertices[2].Position = Vector3.Transform(new Vector3(m_position.X + width, m_position.Y + height, 0), Matrix.Invert(m_effect.World));
+            m_vertices[2].Position = new Vector3(m_position.X + m_cursorOffset.X + width, m_position.Y + m_cursorOffset.Y + height, 0);
+            m_vertices[2].Color = Color.DarkBlue;
 
-            m_vertices[3].Position = new Vector3(m_position.X, m_position.Y, 0);
-            m_vertices[3].Color = Color.Azure;
-            m_vertices[3].TextureCoordinate = Vector2.Zero;
+            //m_vertices[3].Position = Vector3.Transform(new Vector3(m_position.X, m_position.Y + height, 0), Matrix.Invert(m_effect.World));
+            m_vertices[3].Position = new Vector3(m_position.X + m_cursorOffset.X, m_position.Y + m_cursorOffset.Y + height, 0);
+            m_vertices[3].Color = Color.DarkBlue;
+
+            // Push the vertex buffer
+            //
+            m_vertexBuffer = new VertexBuffer(device, typeof(VertexPositionColorTexture), m_vertices.Count(), BufferUsage.None);
+            m_vertexBuffer.SetData(m_vertices);
         }
 
         /// <summary>
@@ -160,6 +196,11 @@ namespace Xyglo.Brazil.Xna
             m_indices[3] = 0;
             m_indices[4] = 2;
             m_indices[5] = 3;
+
+            // Set the index buffer
+            //
+            m_indexBuffer = new IndexBuffer(device, typeof(short), m_indices.Length, BufferUsage.WriteOnly);
+            m_indexBuffer.SetData(m_indices);
         }
 
         /// <summary>
@@ -168,6 +209,10 @@ namespace Xyglo.Brazil.Xna
         /// <param name="device"></param>
         public override void draw(GraphicsDevice device)
         {
+            // See here for information on restoring the renderstate:
+            //
+            // http://blogs.msdn.com/b/shawnhar/archive/2006/11/13/spritebatch-and-renderstates.aspx
+            //
             device.Indices = m_indexBuffer;
             device.SetVertexBuffer(m_vertexBuffer);
 
@@ -175,33 +220,42 @@ namespace Xyglo.Brazil.Xna
 
             RasterizerState rasterizerState = new RasterizerState();
             rasterizerState.CullMode = CullMode.None;
-
+            rasterizerState.FillMode = FillMode.Solid;
             device.RasterizerState = rasterizerState;
 
+            // Disable the texture
+            //
+            m_effect.TextureEnabled = false;
             foreach (EffectPass pass in m_effect.CurrentTechnique.Passes)
             {
                 pass.Apply();
-                // This is UserIndexedPrimitives - why?
+                // IndexedPrimitives
                 //
-                //device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, m_vertices.Length, 0, m_indices.Length / 3);
-                device.DrawUserIndexedPrimitives<VertexPositionColorTexture>(PrimitiveType.TriangleList, m_vertices, 0, m_vertices.Length, m_indices, 0, m_indices.Length / 3);
+                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, m_vertices.Length, 0, m_indices.Length / 3);
 
+                //device.DrawUserIndexedPrimitives<VertexPositionColorTexture>(PrimitiveType.TriangleList, m_vertices, 0, m_vertices.Length, m_indices, 0, m_indices.Length / 3);
                 // Attempt
                 //device.DrawUserPrimitives<VertexPositionColorTexture>(PrimitiveType.TriangleList, m_vertices, 0, m_vertices.Length);
             }
 
+
+            // Reenable the texture
+            //
+            m_effect.TextureEnabled = true;
+
             float textScale = 1.0f;
 
-            m_spriteBatch.Begin();
+            m_spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.DepthRead, RasterizerState.CullNone, m_effect);
+
             int i = 0;
             foreach(string item in m_options)
             {
                 //string remainder = line.Substring(xPos, line.Length - xPos);
 
                 m_spriteBatch.DrawString(
-                    m_fontManager.getViewFont(XygloView.ViewSize.Medium),
+                    m_fontManager.getViewFont(m_fontSize),
                     item,
-                    new Vector2(m_position.X, m_position.Y + m_fontManager.getViewFont(XygloView.ViewSize.Medium).LineSpacing * i++),
+                    new Vector2(m_position.X + m_cursorOffset.X, m_position.Y + m_cursorOffset.Y + m_fontManager.getViewFont(m_fontSize).LineSpacing * i++),
                     m_colour,
                     0,
                     Vector2.Zero,
@@ -213,6 +267,11 @@ namespace Xyglo.Brazil.Xna
             m_spriteBatch.End();
         }
 
+        public override void drawPreview(GraphicsDevice device, BoundingBox fullBoundingBox, BoundingBox previewBoundingBox)
+        {
+        }
+
+        /*
         /// <summary>
         /// Return the VertexBuffer
         /// </summary>
@@ -220,7 +279,7 @@ namespace Xyglo.Brazil.Xna
         public VertexBuffer getVertexBuffer()
         {
             return m_vertexBuffer;
-        }
+        }*/
 
         /// <summary>
         /// Override the getBoundingBox call - examine vertex data and return a bounding box

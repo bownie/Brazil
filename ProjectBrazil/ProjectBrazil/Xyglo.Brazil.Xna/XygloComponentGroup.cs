@@ -79,6 +79,19 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Draw preview
+        /// </summary>
+        /// <param name="device"></param>
+        /// <param name="boundingBox"></param>
+        public override void drawPreview(GraphicsDevice device, BoundingBox fullBoundingBox, BoundingBox previewBoundingBox)
+        {
+            foreach (XygloXnaDrawableShape component in m_componentList)
+            {
+                component.drawPreview(device, fullBoundingBox, previewBoundingBox);
+            }
+        }
+
+        /// <summary>
         /// Set the position of this group - keeping relative placements..
         /// </summary>
         /// <param name="position"></param>

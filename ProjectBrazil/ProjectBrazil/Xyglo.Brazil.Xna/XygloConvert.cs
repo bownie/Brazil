@@ -410,6 +410,22 @@ namespace Xyglo.Brazil.Xna
                         newKey = Keys.Tab;
                         break;
 
+                    case Microsoft.Xna.Framework.Input.Keys.OemMinus:
+                        newKey = Keys.OemMinus;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.OemPlus:
+                        newKey = Keys.OemPlus;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.OemOpenBrackets:
+                        newKey = Keys.OemOpenBrackets;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.OemCloseBrackets:
+                        newKey = Keys.OemCloseBrackets;
+                        break;
+
                     default:
                         newKey = Keys.None;
                         break;

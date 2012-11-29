@@ -192,6 +192,10 @@ namespace Xyglo.Brazil.Xna
             }
         }
 
+        public override void drawPreview(GraphicsDevice device, BoundingBox fullBoundingBox, BoundingBox previewBoundingBox)
+        {
+        }
+
         /*
         public void Draw(Camera cam) // the camera class contains the View and Projection Matrices
         {

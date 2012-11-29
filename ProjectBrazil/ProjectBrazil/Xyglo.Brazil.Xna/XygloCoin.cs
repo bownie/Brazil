@@ -245,11 +245,20 @@ namespace Xyglo.Brazil.Xna
                 // This is UserIndexedPrimitives - why?
                 //
                 //device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, m_vertices.Length, 0, m_indices.Length / 3);
+
+                // This is very wasteful - change to use the above:
+                //
+                // http://blog.neilreed.co.uk/2010/01/drawindexedprimitives-sample.html
+                //
                 device.DrawUserIndexedPrimitives<VertexPositionColorTexture>(PrimitiveType.TriangleList, m_vertices, 0, m_vertices.Length, m_indices, 0, m_indices.Length / 3);
 
                 // Attempt
                 //device.DrawUserPrimitives<VertexPositionColorTexture>(PrimitiveType.TriangleList, m_vertices, 0, m_vertices.Length);
             }
+        }
+
+        public override void drawPreview(GraphicsDevice device, BoundingBox fullBoundingBox, BoundingBox previewBoundingBox)
+        {
         }
 
         /// <summary>

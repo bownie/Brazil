@@ -123,6 +123,82 @@ namespace Xyglo.Brazil.Xna
         // ---------------------------------- METHODS -----------------------------------
         //
 
+        /// <summary>
+        /// Return a max bounding box for a list of drawables
+        /// </summary>
+        /// <param name="drawables"></param>
+        /// <returns></returns>
+        public BoundingBox getDrawablesBoundingBox(List<XygloXnaDrawable> drawables)
+        {
+            BoundingBox bb = new BoundingBox();
+            foreach(XygloXnaDrawable drawable in drawables)
+            {
+                if (drawable.getBoundingBox().Min.X < bb.Min.X)
+                    bb.Min.X = drawable.getBoundingBox().Min.X;
+
+                if (drawable.getBoundingBox().Max.X > bb.Max.X)
+                    bb.Max.X = drawable.getBoundingBox().Max.X;
+
+                if (drawable.getBoundingBox().Min.Y < bb.Min.Y)
+                    bb.Min.Y = drawable.getBoundingBox().Min.Y;
+
+                if (drawable.getBoundingBox().Max.Y > bb.Max.Y)
+                    bb.Max.Y = drawable.getBoundingBox().Max.Y;
+            }
+
+            return bb;
+        }
+
+        /// <summary>
+        /// Get a BoundingBox which encompasses both
+        /// </summary>
+        /// <param name="bb1"></param>
+        /// <param name="bb2"></param>
+        /// <returns></returns>
+        public BoundingBox getMetaBoundingBox(BoundingBox bb1, BoundingBox bb2)
+        {
+            BoundingBox rBB = bb1;
+
+            if (bb2.Min.X < rBB.Min.X)
+                rBB.Min.X = bb2.Min.X;
+
+            if (bb2.Max.X > rBB.Max.X)
+                rBB.Max.X = bb2.Min.X;
+
+            if (bb2.Min.Y < rBB.Min.Y)
+                rBB.Min.Y = bb2.Min.Y;
+
+            if (bb2.Max.Y > rBB.Max.Y)
+                rBB.Max.Y = bb2.Max.Y;
+
+            return rBB;
+        }
+
+        /// <summary>
+        /// Draw an overview of all currently live drawables
+        /// </summary>
+        /// <param name="gameTime"></param>
+        /// <param name="List"></param>
+        public void drawXnaDrawableOverview(GraphicsDevice device, GameTime gameTime, List<XygloXnaDrawable> drawables)
+        {
+            // Get the bounding box of bounding boxes defined by project and also any drawables
+            //
+            BoundingBox bb = getDrawablesBoundingBox(drawables);;
+
+            // If we have a project do this
+            if (m_project != null)
+            {
+                bb = getMetaBoundingBox(m_project.getBoundingBox(), getDrawablesBoundingBox(drawables));
+            }
+
+            // Now draw the previews - the drawable works out the scaling itself according to what
+            // the size and shapes of the bounding boxen are.
+            //
+            foreach (XygloXnaDrawable drawable in drawables)
+            {
+                drawable.drawPreview(device, bb, m_previewBoundingBox);
+            }
+        }
 
         /// <summary>
         /// Draws a little map of our BufferViews onto a panner/scanner area

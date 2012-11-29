@@ -30,6 +30,13 @@ namespace Xyglo.Brazil.Xna
         public abstract void draw(GraphicsDevice device);
 
         /// <summary>
+        /// Draw a preview of this component scaled into a BoundingBox
+        /// </summary>
+        /// <param name="device"></param>
+        /// <param name="scale"></param>
+        public abstract void drawPreview(GraphicsDevice device, BoundingBox fullBoundingBox, BoundingBox previewBoundingBox);
+
+        /// <summary>
         /// We need to define a bounding box for any component we're interested in
         /// </summary>
         /// <returns></returns>

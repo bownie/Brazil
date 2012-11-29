@@ -407,6 +407,51 @@ namespace Xyglo.Brazil.Xna
             return m_highlightEnd;
         }
 
+        /// <summary>
+        /// Get the highlighted text - if any
+        /// </summary>
+        /// <returns></returns>
+        public string getHighlightText()
+        {
+            string rS = "";
+
+            if (m_highlightStart == m_highlightEnd)
+                return rS;
+
+            if (m_highlightStart.Y == m_highlightEnd.Y)
+            {
+                rS = m_fileBuffer.getLine(m_highlightStart.Y).Substring(m_highlightStart.X, m_highlightEnd.X - m_highlightStart.X);
+            }
+            else
+            {
+                for (int i = m_highlightStart.Y; i < m_highlightEnd.Y; i++)
+                {
+                    string line = m_fileBuffer.getLine(i);
+                    if (i == m_highlightStart.Y)
+                    {
+                        rS += line.Substring(m_highlightStart.X, line.Length - m_highlightStart.X);
+                    }
+                    else if (i == m_highlightEnd.Y)
+                    {
+                        rS += line.Substring(0, m_highlightEnd.X);
+                    }
+                    else
+                    {
+                        rS += line;
+                    }
+
+                    // Add a line break on to all but the last line
+                    //
+                    if (i != m_highlightEnd.Y)
+                    {
+                        rS += "\n";
+                    }
+                }
+            }
+
+            return rS;
+        }
+
         public void mouseCursorTo(bool shiftDown, ScreenPosition endPosition)
         {
             if (shiftDown)

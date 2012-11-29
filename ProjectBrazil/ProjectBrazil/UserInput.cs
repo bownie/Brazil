@@ -182,8 +182,6 @@ namespace Xyglo.Brazil
         LaunchApplication2,
         OemSemicolon,
         Oem1,
-        Oemplus,
-        Oemcomma,
         OemMinus,
         OemPeriod,
         OemQuestion,

@@ -220,6 +220,11 @@ namespace Xyglo.Brazil.Xna
             }
         }
 
+        public override void drawPreview(GraphicsDevice device, BoundingBox fullBoundingBox, BoundingBox previewBoundingBox)
+        {
+        }
+
+        /*
         /// <summary>
         /// Return the VertexBuffer
         /// </summary>
@@ -227,7 +232,7 @@ namespace Xyglo.Brazil.Xna
         public VertexBuffer getVertexBuffer()
         {
             return m_vertexBuffer;
-        }
+        }*/
 
         /// <summary>
         /// Override the getBoundingBox call - examine vertex data and return a bounding box

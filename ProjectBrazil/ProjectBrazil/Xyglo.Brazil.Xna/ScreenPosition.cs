@@ -97,6 +97,28 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// More than operator
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public static bool operator >=(ScreenPosition a, ScreenPosition b)
+        {
+            return ((a.Y > b.Y) || (a.Y == b.Y && a.X >= b.X));
+        }
+
+        /// <summary>
+        /// Less then operator
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public static bool operator <=(ScreenPosition a, ScreenPosition b)
+        {
+            return ((a.Y < b.Y) || (a.Y == b.Y && a.X <= b.X));
+        }
+
+        /// <summary>
         /// Not equals
         /// </summary>
         /// <param name="a"></param>

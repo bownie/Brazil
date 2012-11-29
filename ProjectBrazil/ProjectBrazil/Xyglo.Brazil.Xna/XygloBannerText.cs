@@ -62,6 +62,15 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Draw a preview of this BannerText
+        /// </summary>
+        /// <param name="device"></param>
+        /// <param name="boundingBox"></param>
+        public override void drawPreview(GraphicsDevice device, BoundingBox fullBoundingBox, BoundingBox previewBoundingBox)
+        {
+        }
+
+        /// <summary>
         /// Size of this block
         /// </summary>
         public double m_size;
