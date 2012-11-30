@@ -3,20 +3,20 @@
     /// <summary>
     /// Enumeration of temporary types
     /// </summary>
-    public enum XygloTemporaryType
+    public enum BrazilTemporaryType
     {
         CopyText
     }
     /// <summary>
-    /// A XygloTemporary drawable type - we use this as a Key into a Dictionary that points to a
+    /// A BrazilTemporary drawable type - we use this as a Key into a Dictionary that points to a
     /// temporary XygloDrawableComponent object
     /// </summary>
-    public class XygloTemporary
+    public class BrazilTemporary
     {
         /// <summary>
         /// Constructor
         /// </summary>
-        public XygloTemporary(XygloTemporaryType type, int index = 0)
+        public BrazilTemporary(BrazilTemporaryType type, int index = 0)
         {
             m_type = type;
             m_index = index;
@@ -26,7 +26,7 @@
         /// Get the type
         /// </summary>
         /// <returns></returns>
-        public XygloTemporaryType getType()
+        public BrazilTemporaryType getType()
         {
             return m_type;
         }
@@ -74,7 +74,7 @@
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns></returns>
-        public static bool operator ==(XygloTemporary a, XygloTemporary b)
+        public static bool operator ==(BrazilTemporary a, BrazilTemporary b)
         {
             return (a.getType() == b.getType() && a.getIndex() == b.getIndex() && a.getDropDead() == b.getDropDead());
         }
@@ -85,24 +85,32 @@
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns></returns>
-        public static bool operator !=(XygloTemporary a, XygloTemporary b)
+        public static bool operator !=(BrazilTemporary a, BrazilTemporary b)
         {
             return (a.getType() != b.getType() || a.getIndex() != b.getIndex() || a.getDropDead() != b.getDropDead());
         }
 
+        /*
+        // Needed to avoid warning
+        //
+        public override int GetHashCode()
+        {
+            return m_index;
+        }*/
+
         /// <summary>
         /// Type that this temporary refers to
         /// </summary>
-        protected XygloTemporaryType m_type;
+        protected BrazilTemporaryType m_type;
 
         /// <summary>
         /// Index of this temporary - used as an identifier only in the case of ordering requirements
         /// </summary>
-        protected int m_index;
+        protected int m_index = 0;
 
         /// <summary>
         /// Dropdead time for this and associated object if there is no other scope limitation
         /// </summary>
-        double m_dropdead;
+        double m_dropdead = 0;
     }
 }

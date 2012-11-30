@@ -2058,7 +2058,8 @@ namespace Xyglo.Brazil.Xna
 
 
         /// <summary>
-        /// Generate a vector position from the testRayIntersection method
+        /// Generate a vector position from the testRayIntersection method - probably of no use
+        /// for the moment.
         /// </summary>
         /// <param name="ray"></param>
         /// <returns></returns>
@@ -2074,13 +2075,34 @@ namespace Xyglo.Brazil.Xna
                 float fontSizeX = m_fontManager.getViewFont(bVP.First.getViewSize()).MeasureString("X").X;
                 float fontSizeY = m_fontManager.getViewFont(bVP.First.getViewSize()).LineSpacing;
 
-                rP.X = bVP.Second.Second.X * fontSizeX;
-                rP.Y = bVP.Second.Second.Y * fontSizeY;
+                rP.X += bVP.Second.Second.X * fontSizeX;
+                rP.Y += bVP.Second.Second.Y * fontSizeY;
             }
 
             return rP;
         }
 
+        /// <summary>
+        /// Gets the viewers zero plane intersection - zero plane is where the documents all
+        /// currently reside.
+        /// </summary>
+        /// <returns></returns>
+        public Vector3? getZeroPlaneIntersection(Ray ray)
+        {
+            Plane zeroPlane = new Plane(0, 0, 1, 0);
+            Vector3 rP = Vector3.Zero;
+
+            float ?intersect = ray.Intersects(zeroPlane);
+
+            if (intersect != null)
+            {
+                float dHyp = (float)intersect;
+
+                return ray.Position + (Vector3.Multiply(ray.Direction, dHyp));
+            }
+
+            return null;
+        }
 
         /// <summary>
         /// Check to see if a Ray passes through one of our BufferViews.  If it does then we
@@ -2134,6 +2156,10 @@ namespace Xyglo.Brazil.Xna
                 }
                 hyp = ray.Intersects(bb);
 
+                // If this is non-null then we've found a BufferView that we've intersected
+                // the value of this float is the scalar value of the ray from the original
+                // position.
+                //
                 if (hyp != null)
                 {
                     rBV = bv;
@@ -2180,7 +2206,7 @@ namespace Xyglo.Brazil.Xna
 
                     if (fileLine != -1)
                     {
-                        Logger.logMsg("GET REAL LINE = " + rBV.getFileBuffer().getLine(fileLine));
+                        //Logger.logMsg("GET REAL LINE = " + rBV.getFileBuffer().getLine(fileLine));
 
                         // Set the return file position to the correct row - nice bug here, we were
                         // doing all the hard work and then forgetting to set the return value..

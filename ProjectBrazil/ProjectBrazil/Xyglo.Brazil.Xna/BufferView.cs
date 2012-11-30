@@ -411,7 +411,7 @@ namespace Xyglo.Brazil.Xna
         /// Get the highlighted text - if any
         /// </summary>
         /// <returns></returns>
-        public string getHighlightText()
+        public string getHighlightText(Project project)
         {
             string rS = "";
 
@@ -424,9 +424,9 @@ namespace Xyglo.Brazil.Xna
             }
             else
             {
-                for (int i = m_highlightStart.Y; i < m_highlightEnd.Y; i++)
+                for (int i = m_highlightStart.Y; i < m_highlightEnd.Y + 1; i++)
                 {
-                    string line = m_fileBuffer.getLine(i);
+                    string line = m_fileBuffer.getLine(i).Replace("\t", project.getTab());
                     if (i == m_highlightStart.Y)
                     {
                         rS += line.Substring(m_highlightStart.X, line.Length - m_highlightStart.X);
@@ -450,6 +450,20 @@ namespace Xyglo.Brazil.Xna
             }
 
             return rS;
+        }
+
+        /// <summary>
+        /// Get the free space position offset when the highlight starts - this is so we can adjust for this
+        /// when lifting text from a document and ensuring that the text is aligned.
+        /// </summary>
+        /// <returns></returns>
+        public Vector3 getHighlightOffset(Vector3 mousePosition)
+        {
+            Vector3 rP = m_position;
+            rP.X += m_highlightStart.X * m_fontManager.getViewFont(m_viewSize).MeasureString("X").X;
+            rP.Y += (m_highlightStart.Y - m_bufferShowStartY) * m_fontManager.getViewFont(m_viewSize).LineSpacing;
+
+            return (mousePosition - rP);
         }
 
         public void mouseCursorTo(bool shiftDown, ScreenPosition endPosition)

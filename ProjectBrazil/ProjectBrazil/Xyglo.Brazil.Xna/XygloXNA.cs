@@ -34,6 +34,11 @@ namespace Xyglo.Brazil.Xna
         protected Dictionary<Keys, Pair<bool, double>> m_keyMap = new Dictionary<Keys, Pair<bool, double>>();
 
         /// <summary>
+        /// Source BufferView when doing a drag of text etc
+        /// </summary>
+        protected BufferView m_sourceBufferView = null;
+
+        /// <summary>
         /// Component list is passed in from the BrazilApp
         /// </summary>
         List<Component> m_componentList = null;
@@ -62,7 +67,7 @@ namespace Xyglo.Brazil.Xna
         /// A list of temporary Drawables - everything on here must have a time to live set for them
         /// or a scope defined to get rid of them from this list.
         /// </summary>
-        Dictionary<XygloTemporary, XygloXnaDrawable> m_temporaryDrawables = new Dictionary<XygloTemporary, XygloXnaDrawable>();
+        Dictionary<BrazilTemporary, XygloXnaDrawable> m_temporaryDrawables = new Dictionary<BrazilTemporary, XygloXnaDrawable>();
 
         // XNA stuff
         //
@@ -5869,30 +5874,90 @@ namespace Xyglo.Brazil.Xna
                     {
                         Logger.logMsg("Dragging in a click highlight");
 
-                        // Define a XygloTemporary as a placeholder for this temporary piece of text
+                        // Define a BrazilTemporary as a placeholder for this temporary piece of text
                         //
-                        XygloTemporary temp = new XygloTemporary(XygloTemporaryType.CopyText);
+                        //
 
-                        if (!m_temporaryDrawables.ContainsKey(temp))
+                        // Fetch the temporary drawable by type and index
+                        //
+                        List<BrazilTemporary> tempList = m_temporaryDrawables.Keys.ToList().Where(item => item.getType() == BrazilTemporaryType.CopyText && item.getIndex() == 0).ToList();
+
+                        if (tempList.Count == 0)
                         {
                             // Generate a simulcrum of the highlighted text and make a moving ghost of it.
                             //
-                            Vector3 position = m_project.getActualTestRayIntersection(getPickRay());
-                            string text = m_project.getSelectedBufferView().getHighlightText();
-                            XygloText highlightText = new XygloText(m_fontManager, m_spriteBatch, m_project.getSelectedBufferView().getTextColour(), m_lineEffect, position, m_project.getSelectedBufferView().getViewSize(), text);
-                            highlightText.setVelocity(new Vector3(1, 0, 0));
+                            //Vector3 position = m_project.getActualTestRayIntersection(getPickRay());
+                            Vector3 ?position = m_project.getZeroPlaneIntersection(getPickRay());
 
-                            // Set drop dead as five seconds into the future
-                            temp.setDropDead(gameTime.TotalGameTime.TotalSeconds + 5);
-                            m_temporaryDrawables[temp] = highlightText;
+                            // There is some interesting stuff on setData here:
+                            //
+                            // http://blogs.msdn.com/b/shawnhar/archive/2008/04/15/stalls-part-two-beware-of-setdata.aspx
+                            //
+                            //
+
+                            if (position != null)
+                            {
+                                Vector3 foundPosition = (Vector3)position;
+
+                                string text = m_project.getSelectedBufferView().getHighlightText(m_project);
+                                XygloText highlightText = new XygloText(m_fontManager, m_spriteBatch, m_project.getSelectedBufferView().getTextColour(), m_lineEffect, foundPosition, m_project.getSelectedBufferView().getViewSize(), text);
+                                highlightText.setPickupOffset(m_project.getSelectedBufferView().getHighlightOffset(foundPosition));
+                                highlightText.setVelocity(new Vector3(1, 0, 0));
+
+                                BrazilTemporary temp = new BrazilTemporary(BrazilTemporaryType.CopyText);
+                                // Set drop dead as five seconds into the future
+                                temp.setDropDead(gameTime.TotalGameTime.TotalSeconds + 5);
+                                m_temporaryDrawables[temp] = highlightText;
+
+                                // Store the source bufferview
+                                //
+                                m_sourceBufferView = m_project.getSelectedBufferView();
+                            }
                         }
                         else
                         {
-                            Vector3 position = m_project.getActualTestRayIntersection(getPickRay());
-                            m_temporaryDrawables[temp].setPosition(position);
-                            temp.setDropDead(gameTime.TotalGameTime.TotalSeconds + 5);
-                        }
+                            // Move the ghost using this code
+                            //
 
+                            //Vector3 position = m_project.getActualTestRayIntersection(getPickRay());
+                            Vector3? position = m_project.getZeroPlaneIntersection(getPickRay());
+
+                            if (position != null)
+                            {
+                                Vector3 foundPosition = (Vector3)position;
+                                foreach (BrazilTemporary temp in m_temporaryDrawables.Keys)
+                                {
+                                    if (temp.getType() == BrazilTemporaryType.CopyText && temp.getIndex() == 0)
+                                    {
+                                        m_temporaryDrawables[temp].setPosition(foundPosition);
+                                        temp.setDropDead(gameTime.TotalGameTime.TotalSeconds + 5);
+                                    }
+                                }
+                            }
+
+                            // If we're over a buffer view then insert a cursor where we might like to drop the text
+                            //
+                            Pair<BufferView, Pair<ScreenPosition, ScreenPosition>> testFind = m_project.testRayIntersection(getPickRay());
+                            if (testFind.First != null && testFind.First != m_sourceBufferView)
+                            {
+                                // Firstly want to fit target on the screen
+                                //
+                                //testFind.First.isvi
+                                Logger.logMsg("WIBBLE");
+
+                                // Dete
+                                // http://stackoverflow.com/questions/10998288/xna-camera-scene-size
+                                //
+                                if (m_frustrum.Contains(testFind.First.getBoundingBox()) == ContainmentType.Disjoint)
+                                {
+                                    Logger.logMsg("Target BV outside view - accomodate it by moving the eye back and out and across");
+
+                                    m_project.setSelectedBufferView(testFind.First);
+                                    m_eye = m_project.getSelectedBufferView().getEyePosition();
+                                }
+
+                            }
+                        }
                     }
                     else
                     if (m_gotDoubleClick)
@@ -6003,6 +6068,23 @@ namespace Xyglo.Brazil.Xna
                 }
                 else if (mouseAction.m_mouse == Mouse.LeftButtonRelease)
                 {
+
+                    // Clear down any temporaries
+                    //
+                    if (m_clickInHighlight)
+                    {
+                        List<BrazilTemporary> tempList = m_temporaryDrawables.Keys.ToList().Where(item => item.getType() == BrazilTemporaryType.CopyText && item.getIndex() == 0).ToList();
+
+                        if (tempList.Count > 0)
+                        {
+                            foreach (BrazilTemporary temp in tempList)
+                            {
+                                m_temporaryDrawables[temp] = null;
+                                m_temporaryDrawables.Remove(temp);
+                            }
+                        }
+                    }
+
                     // Clear any double click or click in highlight flag
                     //
                     m_gotDoubleClick = false;
@@ -6488,9 +6570,9 @@ namespace Xyglo.Brazil.Xna
             // Now we can draw any temporary drawables:
             // List to remove
             //
-            List<XygloTemporary> deleteTemps = new List<XygloTemporary>();
+            List<BrazilTemporary> deleteTemps = new List<BrazilTemporary>();
 
-            foreach (XygloTemporary temporary in m_temporaryDrawables.Keys)
+            foreach (BrazilTemporary temporary in m_temporaryDrawables.Keys)
             {
                 // Rebuild any buffers and draw
                 //
@@ -6504,9 +6586,9 @@ namespace Xyglo.Brazil.Xna
 
             // Remove items marked for deletion
             //
-            foreach (XygloTemporary temporary in deleteTemps)
+            foreach (BrazilTemporary temporary in deleteTemps)
             {
-                foreach (XygloTemporary testTemp in m_temporaryDrawables.Keys)
+                foreach (BrazilTemporary testTemp in m_temporaryDrawables.Keys)
                 {
                     if (testTemp == temporary)
                     {

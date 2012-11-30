@@ -40,6 +40,11 @@ namespace Xyglo.Brazil.Xna
         XygloView.ViewSize m_fontSize = XygloView.ViewSize.Medium;
 
         /// <summary>
+        /// The offset at which we've grabbed this piece of text (for example)
+        /// </summary>
+        Vector3 m_pickupOffset = Vector3.Zero;
+
+        /// <summary>
         /// Define a XygloText drawable
         /// </summary>
         /// <param name="fontManager"></param>
@@ -75,6 +80,16 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Set the pickup offset to ensure alignment
+        /// </summary>
+        /// <param name="offset"></param>
+        public void setPickupOffset(Vector3 offset)
+        {
+            m_pickupOffset = offset;
+        }
+
+
+        /// <summary>
         /// Build the shape and populate the Vertex and Index buffers.  Needs to be called after any change
         /// to position.
         /// </summary>
@@ -82,7 +97,6 @@ namespace Xyglo.Brazil.Xna
         public override void buildBuffers(GraphicsDevice device)
         {
         }
-
 
         /// <summary>
         /// Draw this XygloText
@@ -101,7 +115,7 @@ namespace Xyglo.Brazil.Xna
             m_spriteBatch.DrawString(
                 m_fontManager.getViewFont(m_fontSize),
                 m_text,
-                new Vector2(m_position.X, m_position.Y),
+                new Vector2(m_position.X - m_pickupOffset.X, m_position.Y - m_pickupOffset.Y),
                 m_colour,
                 0,
                 Vector2.Zero,
@@ -126,18 +140,38 @@ namespace Xyglo.Brazil.Xna
             m_effect.TextureEnabled = true;
             m_spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.DepthRead, RasterizerState.CullNone, m_effect);
 
-            m_spriteBatch.DrawString(
-                m_fontManager.getViewFont(m_fontSize),
-                m_text,
-                new Vector2(previewBoundingBox.Min.X + (float)(m_position.X * factor),
-                            previewBoundingBox.Min.Y + (float)(m_position.Y * factor)),
-                m_colour,
-                0,
-                Vector2.Zero,
-                Math.Max(m_fontManager.getTextScale() * (float)factor, 0.2f),
-                0,
-                0);
-
+            if (m_text.Contains("\n"))
+            {
+                string[] splitText = m_text.Split('\n');
+                for (int i = 0; i < splitText.Count(); i++)
+                {
+                    m_spriteBatch.DrawString(
+                    m_fontManager.getViewFont(m_fontSize),
+                    splitText[i],
+                    new Vector2(previewBoundingBox.Min.X + (float)(m_position.X * factor) - m_pickupOffset.X,
+                                previewBoundingBox.Min.Y + (float)(m_position.Y * factor) + i * m_fontManager.getViewFont(m_fontSize).LineSpacing - m_pickupOffset.Y),
+                    m_colour,
+                    0,
+                    Vector2.Zero,
+                    Math.Max(m_fontManager.getTextScale() * (float)factor, 0.2f),
+                    0,
+                    0);
+                }
+            }
+            else
+            {
+                m_spriteBatch.DrawString(
+                    m_fontManager.getViewFont(m_fontSize),
+                    m_text,
+                    new Vector2(previewBoundingBox.Min.X + (float)(m_position.X * factor) - m_pickupOffset.X,
+                                previewBoundingBox.Min.Y + (float)(m_position.Y * factor) - m_pickupOffset.Y),
+                    m_colour,
+                    0,
+                    Vector2.Zero,
+                    Math.Max(m_fontManager.getTextScale() * (float)factor, 0.2f),
+                    0,
+                    0);
+            }
             m_spriteBatch.End();
                 
         }
