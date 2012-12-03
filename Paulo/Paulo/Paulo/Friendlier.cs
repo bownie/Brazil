@@ -61,6 +61,11 @@ namespace Paulo
             //
             m_viewSpace.setProject(project);
 
+            // Setup the HUD
+            //
+            BrazilHud hud = new BrazilHud(BrazilColour.White, BrazilVector3.Zero, 1.0, "HUD");
+            addComponent("TextEditing", hud);
+
             // Connect ALT+O to the open file mode
             //
             connect("TextEditing", new KeyAction(Keys.O, KeyboardModifier.Alt), "OpenFile");

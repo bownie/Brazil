@@ -128,9 +128,15 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="drawables"></param>
         /// <returns></returns>
-        public BoundingBox getDrawablesBoundingBox(List<XygloXnaDrawable> drawables)
+        public BoundingBox? getDrawablesBoundingBox(List<XygloXnaDrawable> drawables)
         {
-            BoundingBox bb = new BoundingBox();
+            if (drawables.Count == 0)
+                return null;
+
+            // Set it up
+            //
+            BoundingBox bb = drawables[0].getBoundingBox();
+
             foreach(XygloXnaDrawable drawable in drawables)
             {
                 if (drawable.getBoundingBox().Min.X < bb.Min.X)
@@ -183,12 +189,16 @@ namespace Xyglo.Brazil.Xna
         {
             // Get the bounding box of bounding boxes defined by project and also any drawables
             //
-            BoundingBox bb = getDrawablesBoundingBox(drawables);;
+            BoundingBox ?bb = getDrawablesBoundingBox(drawables);;
+
+            // Do nothing if there's nothing to draw
+            if (bb == null)
+                return;
 
             // If we have a project do this
             if (m_project != null)
             {
-                bb = getMetaBoundingBox(m_project.getBoundingBox(), getDrawablesBoundingBox(drawables));
+                bb = getMetaBoundingBox(m_project.getBoundingBox(), (BoundingBox)bb);
             }
 
             // Now draw the previews - the drawable works out the scaling itself according to what
@@ -196,7 +206,7 @@ namespace Xyglo.Brazil.Xna
             //
             foreach (XygloXnaDrawable drawable in drawables)
             {
-                drawable.drawPreview(device, bb, m_previewBoundingBox);
+                drawable.drawPreview(device, (BoundingBox)bb, m_previewBoundingBox);
             }
         }
 

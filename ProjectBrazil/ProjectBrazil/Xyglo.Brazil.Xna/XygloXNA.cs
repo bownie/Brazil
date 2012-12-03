@@ -567,6 +567,11 @@ namespace Xyglo.Brazil.Xna
         protected ContainmentType m_testResult;
 
         /// <summary>
+        /// Set field of view of the camera in radians
+        /// </summary>
+        protected float m_fov = MathHelper.PiOver4;
+
+        /// <summary>
         /// Is this Window resizable - for the moment it isn't
         /// </summary>
         protected bool m_isResizable = false;
@@ -1178,7 +1183,7 @@ namespace Xyglo.Brazil.Xna
             // http://www.toymaker.info/Games/XNA/html/xna_camera.html
             // 
             m_viewMatrix = Matrix.CreateLookAt(m_eye, m_target, Vector3.Up);
-            m_projection = Matrix.CreateTranslation(-0.5f, -0.5f, 0) * Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, GraphicsDevice.Viewport.AspectRatio, 0.1f, 10000f);
+            m_projection = Matrix.CreateTranslation(-0.5f, -0.5f, 0) * Matrix.CreatePerspectiveFieldOfView(m_fov, GraphicsDevice.Viewport.AspectRatio, 0.1f, 10000f);
 
             // Generate frustrum
             //
@@ -5789,6 +5794,41 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Zoom the view out to accomodate a given set of BufferViews
+        /// </summary>
+        /// <param name="accmodateThese"></param>
+        protected void zoomToAccomodate(BufferView accomodateThis)
+        {
+            // See:
+            //
+            // http://msdn.microsoft.com/en-us/library/bb197900(v=xnagamestudio.10).aspx
+            //
+            List<BufferView> accomodateThese = new List<BufferView>();
+            accomodateThese.Add(m_project.getSelectedBufferView());
+            accomodateThese.Add(accomodateThis);
+
+            // Get the overall bounding box
+            //
+            BoundingBox containingBB = m_project.getBoundingBox(accomodateThese);
+
+            Vector3 newEyePosition = Vector3.Zero;
+            
+            // Work out width and find out widest or highest part
+            //
+            float widthX = ( containingBB.Max.X + containingBB.Min.X ) / 2;
+            float widthY = ( containingBB.Max.Y + containingBB.Min.Y ) / 2;
+            float largest = Math.Max(widthX, widthY);
+
+            // Position eye containing both bufferviews
+            //
+            newEyePosition.X = containingBB.Min.X + widthX;
+            newEyePosition.Y = containingBB.Min.Y + widthY;
+            newEyePosition.Z = largest / (float) Math.Sin(m_fov / 2);
+
+            flyToPosition(newEyePosition);
+        }
+
+        /// <summary>
         /// Handle mouse click and double clicks and farm out the responsibility to other
         /// helper methods.
         /// </summary>
@@ -5900,7 +5940,7 @@ namespace Xyglo.Brazil.Xna
                                 Vector3 foundPosition = (Vector3)position;
 
                                 string text = m_project.getSelectedBufferView().getHighlightText(m_project);
-                                XygloText highlightText = new XygloText(m_fontManager, m_spriteBatch, m_project.getSelectedBufferView().getTextColour(), m_lineEffect, foundPosition, m_project.getSelectedBufferView().getViewSize(), text);
+                                XygloText highlightText = new XygloText(m_fontManager, m_spriteBatch, m_project.getSelectedBufferView().getTextColour(), m_lineEffect, foundPosition, m_project.getSelectedBufferView().getViewSize(), text, m_project.getSelectedBufferView().getHighlightStart().X);
                                 highlightText.setPickupOffset(m_project.getSelectedBufferView().getHighlightOffset(foundPosition));
                                 highlightText.setVelocity(new Vector3(1, 0, 0));
 
@@ -5943,7 +5983,7 @@ namespace Xyglo.Brazil.Xna
                                 // Firstly want to fit target on the screen
                                 //
                                 //testFind.First.isvi
-                                Logger.logMsg("WIBBLE");
+                                //Logger.logMsg("WIBBLE");
 
                                 // Dete
                                 // http://stackoverflow.com/questions/10998288/xna-camera-scene-size
@@ -5951,11 +5991,8 @@ namespace Xyglo.Brazil.Xna
                                 if (m_frustrum.Contains(testFind.First.getBoundingBox()) == ContainmentType.Disjoint)
                                 {
                                     Logger.logMsg("Target BV outside view - accomodate it by moving the eye back and out and across");
-
-                                    m_project.setSelectedBufferView(testFind.First);
-                                    m_eye = m_project.getSelectedBufferView().getEyePosition();
+                                    zoomToAccomodate(testFind.First);
                                 }
-
                             }
                         }
                     }
@@ -6337,7 +6374,7 @@ namespace Xyglo.Brazil.Xna
             // Duplicate of what we have in the Initialize()
             //
             m_viewMatrix = Matrix.CreateLookAt(m_eye, m_target, Vector3.Up);
-            m_projection = Matrix.CreateTranslation(-0.5f, -0.5f, 0) * Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, GraphicsDevice.Viewport.AspectRatio, 0.1f, 10000f);
+            m_projection = Matrix.CreateTranslation(-0.5f, -0.5f, 0) * Matrix.CreatePerspectiveFieldOfView(m_fov, GraphicsDevice.Viewport.AspectRatio, 0.1f, 10000f);
 
             // Generate frustrum
             //
@@ -8008,7 +8045,6 @@ namespace Xyglo.Brazil.Xna
         private void friendlierDragEnter(object sender, System.Windows.Forms.DragEventArgs e)
         {
             Logger.logMsg("XygloXNA::friendlierDragEnter() - dragging entered " + e.Data.GetType().ToString());
-
 
             //if (!e.Data.GetDataPresent(typeof(System.Windows.Forms.DataObject)))
             if (e.Data.GetType() != typeof(System.Windows.Forms.DataObject))

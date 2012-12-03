@@ -9,9 +9,9 @@ using Microsoft.Xna.Framework.Graphics;
 namespace Xyglo.Brazil.Xna
 {
     /// <summary>
-    /// A XygloText drawable component
+    /// A XygloFile preview when dragging a file around
     /// </summary>
-    public class XygloText : XygloXnaDrawableShape
+    public class XygloFile : XygloXnaDrawableShape
     {
 
         /// <summary>
@@ -50,7 +50,22 @@ namespace Xyglo.Brazil.Xna
         protected int m_firstRowIndent = 0;
 
         /// <summary>
-        /// Define a XygloText drawable
+        /// A XygloFile constructor
+        /// </summary>
+        /// <param name="colour"></param>
+        /// <param name="effect"></param>
+        /// <param name="position"></param>
+        public XygloFile(Color colour, BasicEffect effect, Vector3 position)
+        {
+            m_colour = colour;
+            m_effect = effect;
+            m_position = position;
+
+            if (m_alphaBlendingTest) m_colour.A = 10;
+        }
+
+        /// <summary>
+        /// Another XygloFile constructor
         /// </summary>
         /// <param name="fontManager"></param>
         /// <param name="spriteBatch"></param>
@@ -59,7 +74,8 @@ namespace Xyglo.Brazil.Xna
         /// <param name="position"></param>
         /// <param name="viewFontSize"></param>
         /// <param name="text"></param>
-        public XygloText(FontManager fontManager, SpriteBatch spriteBatch, Color colour, BasicEffect effect, Vector3 position, XygloView.ViewSize viewFontSize, string text, int firstRowIndent)
+        /// <param name="firstRowIndent"></param>
+        public XygloFile(FontManager fontManager, SpriteBatch spriteBatch, Color colour, BasicEffect effect, Vector3 position, XygloView.ViewSize viewFontSize, string text, int firstRowIndent)
         {
             m_fontSize = viewFontSize;
             m_fontManager = fontManager;
@@ -126,8 +142,8 @@ namespace Xyglo.Brazil.Xna
                     m_spriteBatch.DrawString(
                         m_fontManager.getViewFont(m_fontSize),
                         splitText[i],
-                        new Vector2(m_position.X - m_pickupOffset.X - (i == 0 ? 0 : m_fontManager.getCharWidth(m_fontSize) * m_firstRowIndent),
-                        m_position.Y + (i * m_fontManager.getLineSpacing(m_fontSize)) - m_pickupOffset.Y ),
+                        new Vector2(m_position.X - m_pickupOffset.X - (i == 0 ? 0 : m_fontManager.getViewFont(m_fontSize).MeasureString("X").X * m_firstRowIndent),
+                        m_position.Y + (i * m_fontManager.getViewFont(m_fontSize).LineSpacing) - m_pickupOffset.Y ),
                         m_colour,
                         0,
                         Vector2.Zero,
@@ -175,8 +191,8 @@ namespace Xyglo.Brazil.Xna
                     m_spriteBatch.DrawString(
                     m_fontManager.getViewFont(m_fontSize),
                     splitText[i],
-                    new Vector2(previewBoundingBox.Min.X + (m_position.X - m_pickupOffset.X) * (float)factor - (i == 0 ? 0 : m_fontManager.getCharWidth(m_fontSize) * m_firstRowIndent * (float)factor),
-                                previewBoundingBox.Min.Y + (float)(m_position.Y * factor) + i * (m_fontManager.getLineSpacing(m_fontSize) * (float)factor) - m_pickupOffset.Y),
+                    new Vector2(previewBoundingBox.Min.X + (m_position.X - m_pickupOffset.X ) * (float)factor,
+                                previewBoundingBox.Min.Y + (float)(m_position.Y * factor) + i * (m_fontManager.getViewFont(m_fontSize).LineSpacing - m_pickupOffset.Y) * (float)factor),
                     m_colour,
                     0,
                     Vector2.Zero,

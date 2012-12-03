@@ -850,12 +850,12 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
-        /// We have a highlight if the two endpoints are not equal
+        /// We have a highlight if the two endpoints are not equal and they're not illegal
         /// </summary>
         /// <returns></returns>
         public bool gotHighlight()
         {
-            return (m_highlightStart != m_highlightEnd);
+            return (m_highlightStart != m_highlightEnd && m_highlightStart.X != -1 && m_highlightStart.Y != -1 && m_highlightEnd.X != -1 && m_highlightEnd.Y != -1);
         }
 
         /// <summary>

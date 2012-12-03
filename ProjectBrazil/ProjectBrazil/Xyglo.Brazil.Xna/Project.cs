@@ -2056,6 +2056,38 @@ namespace Xyglo.Brazil.Xna
             return rB;
         }
 
+        /// <summary>
+        /// Get BoundingBox of BufferViews
+        /// </summary>
+        /// <param name="bufferViews"></param>
+        /// <returns></returns>
+        public BoundingBox getBoundingBox(List<BufferView> bufferViews)
+        {
+            BoundingBox rBB = new BoundingBox();
+
+            foreach (BufferView bb in bufferViews)
+            {
+                if (bb.getBoundingBox().Min.X < rBB.Min.X)
+                    rBB.Min.X = bb.getBoundingBox().Min.X;
+
+                if (bb.getBoundingBox().Max.X > rBB.Max.X)
+                    rBB.Max.X = bb.getBoundingBox().Max.X;
+
+                if (bb.getBoundingBox().Min.Y < rBB.Min.Y)
+                    rBB.Min.Y = bb.getBoundingBox().Min.Y;
+
+                if (bb.getBoundingBox().Max.Y > rBB.Max.Y)
+                    rBB.Max.Y = bb.getBoundingBox().Max.Y;
+
+                if (bb.getBoundingBox().Min.Z < rBB.Min.Z)
+                    rBB.Min.Z = bb.getBoundingBox().Min.Z;
+
+                if (bb.getBoundingBox().Max.Z < rBB.Max.Z)
+                    rBB.Max.Z = bb.getBoundingBox().Max.Z;
+            }
+
+            return rBB;
+        }
 
         /// <summary>
         /// Generate a vector position from the testRayIntersection method - probably of no use

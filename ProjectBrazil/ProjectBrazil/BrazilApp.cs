@@ -5,6 +5,13 @@ using System.Text;
 
 namespace Xyglo.Brazil
 {
+    public enum BrazilAppMode
+    {
+        App,     // normal windowed or app mode running standalone
+        Hosted,  // hosted within another app and showing interface to that app
+        Shared   // shared mode enabling multiple connections/server mode
+    };
+
     /// <summary>
     /// A BrazilApp has to inherit and implement this class.  This is the proper - outside world view
     /// of our application.  At this class we create and hold various other components which we
@@ -19,8 +26,9 @@ namespace Xyglo.Brazil
         /// <summary>
         /// Default constructor
         /// </summary>
-        public BrazilApp()
+        public BrazilApp(BrazilAppMode appMode = BrazilAppMode.App)
         {
+            m_mode = appMode;
             m_viewSpace.initialise(m_actionMap, m_componentList, m_world, m_states, m_targets);
         }
 
@@ -517,6 +525,16 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
+        /// Get the application mode
+        /// </summary>
+        /// <returns></returns>
+        public BrazilAppMode getMode()
+        {
+            return m_mode;
+        }
+
+
+        /// <summary>
         /// ViewSpace object - created at construction.   The Viewspace will define what we can
         /// see for this moment in our space.   It will be rebuilt on each 'level' according to how
         /// the application/game is structued.
@@ -554,5 +572,10 @@ namespace Xyglo.Brazil
         /// List private so we have to use accessors
         /// </summary>
         private List<Component> m_componentList = new List<Component>();
+
+        /// <summary>
+        /// What mode is this app running in?
+        /// </summary>
+        protected BrazilAppMode m_mode = BrazilAppMode.App;
     }
 }
