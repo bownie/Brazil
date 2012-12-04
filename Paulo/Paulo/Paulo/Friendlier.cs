@@ -6,7 +6,7 @@ using System.IO;
 using Xyglo.Brazil;
 using Xyglo.Brazil.Xna;
 
-namespace Paulo
+namespace Xyglo.Friendlier
 {
     /// <summary>
     /// Top level wrapper class for Friendlier functionality
@@ -202,6 +202,9 @@ namespace Paulo
             }
         }
 
+        /// <summary>
+        /// Setup the context menus
+        /// </summary>
         protected void contextMenus()
         {
             // Set a context menu on right button press in the TextEditing state

@@ -1823,7 +1823,7 @@ namespace Xyglo.Brazil.Xna
                     setTemporaryMessage("Unsaved Buffers.  Save?  Y/N/C", 0, gameTime);
                     m_confirmState.set("FileSaveCancel");
                     m_saveAsExit = true;
-                    //m_state = State.FileSaveAs;
+                    m_state = State.Test("FileSaveAs");
                 }
             }
             else
@@ -2463,6 +2463,10 @@ namespace Xyglo.Brazil.Xna
             {
                 string command = m_project.getConfigurationValue("ALTERNATEBUILDCOMMAND");
                 doBuildCommand(gameTime, command);
+            }
+            else if (keyList.Contains(Keys.F8))
+            {
+                startGame(gameTime);
             }
             else if (keyList.Contains(Keys.F11)) // Toggle full screen
             {
@@ -3999,6 +4003,7 @@ namespace Xyglo.Brazil.Xna
                             m_drawableComponents[component].draw(m_graphics.GraphicsDevice);
                         }
                     }
+
                     //else if (component.GetType() == typeof(Xyglo.Brazil.BrazilMenu))
                     //{
                         //BrazilMenu menu = (BrazilMenu)component;
@@ -5192,7 +5197,8 @@ namespace Xyglo.Brazil.Xna
                     //Logger.logMsg("ACC = " + acc);
                     acc = 1.0f;
 
-
+                    // Font scaling - should this be in here?
+                    //
                     if (m_currentFontScale == 0.0f)
                     {
                         m_currentFontScale = m_fontScaleOriginal;
@@ -5799,7 +5805,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="accmodateThese"></param>
         protected void zoomToAccomodate(BufferView accomodateThis)
         {
-            // See:
+            // See this to work out position of eye from object list:
             //
             // http://msdn.microsoft.com/en-us/library/bb197900(v=xnagamestudio.10).aspx
             //
@@ -5815,15 +5821,17 @@ namespace Xyglo.Brazil.Xna
             
             // Work out width and find out widest or highest part
             //
-            float widthX = ( containingBB.Max.X + containingBB.Min.X ) / 2;
-            float widthY = ( containingBB.Max.Y + containingBB.Min.Y ) / 2;
+            float widthX = containingBB.Max.X - containingBB.Min.X;
+            float widthY = containingBB.Max.Y - containingBB.Min.Y;
             float largest = Math.Max(widthX, widthY);
 
             // Position eye containing both bufferviews
             //
-            newEyePosition.X = containingBB.Min.X + widthX;
-            newEyePosition.Y = containingBB.Min.Y + widthY;
-            newEyePosition.Z = largest / (float) Math.Sin(m_fov / 2);
+            newEyePosition.X = containingBB.Min.X + widthX / 2;
+            newEyePosition.Y = - (containingBB.Min.Y + widthY / 2);
+            newEyePosition.Z = largest / (float)Math.Cos(m_fov / 2);
+            //newEyePosition.Z = largest / (float) Math.Sin(m_fov / 2);
+            //newEyePosition.Z = largest * (float)Math.Atan(m_fov / 2);
 
             flyToPosition(newEyePosition);
         }
@@ -5910,10 +5918,10 @@ namespace Xyglo.Brazil.Xna
                 }
                 else if (mouseAction.m_mouse == Mouse.LeftButtonHeld)
                 {
+                    // Have we clicked within a block of highlighted text?
+                    //
                     if (m_clickInHighlight)
                     {
-                        Logger.logMsg("Dragging in a click highlight");
-
                         // Define a BrazilTemporary as a placeholder for this temporary piece of text
                         //
                         //
@@ -5922,6 +5930,9 @@ namespace Xyglo.Brazil.Xna
                         //
                         List<BrazilTemporary> tempList = m_temporaryDrawables.Keys.ToList().Where(item => item.getType() == BrazilTemporaryType.CopyText && item.getIndex() == 0).ToList();
 
+                        // Do we have a temporary piece of text yet?  (Not a definitive way of check for this)  If not we
+                        // create one and put it on the m_temporaryDrawables list.
+                        //
                         if (tempList.Count == 0)
                         {
                             // Generate a simulcrum of the highlighted text and make a moving ghost of it.
@@ -5935,7 +5946,7 @@ namespace Xyglo.Brazil.Xna
                             //
                             //
 
-                            if (position != null)
+                            if (position != null && m_project.getSelectedBufferView().gotHighlight())
                             {
                                 Vector3 foundPosition = (Vector3)position;
 
@@ -5956,9 +5967,8 @@ namespace Xyglo.Brazil.Xna
                         }
                         else
                         {
-                            // Move the ghost using this code
+                            // We already have a ghost - move it
                             //
-
                             //Vector3 position = m_project.getActualTestRayIntersection(getPickRay());
                             Vector3? position = m_project.getZeroPlaneIntersection(getPickRay());
 
@@ -5971,6 +5981,13 @@ namespace Xyglo.Brazil.Xna
                                     {
                                         m_temporaryDrawables[temp].setPosition(foundPosition);
                                         temp.setDropDead(gameTime.TotalGameTime.TotalSeconds + 5);
+
+                                        // now test to see if the drawable is on the screen (or maybe near edge?)
+                                        //
+                                        if (m_frustrum.Contains(m_temporaryDrawables[temp].getBoundingBox()) != ContainmentType.Intersects)
+                                        {
+                                            Logger.logMsg("Moved ghost outside of screen position");
+                                        }
                                     }
                                 }
                             }
@@ -5980,12 +5997,9 @@ namespace Xyglo.Brazil.Xna
                             Pair<BufferView, Pair<ScreenPosition, ScreenPosition>> testFind = m_project.testRayIntersection(getPickRay());
                             if (testFind.First != null && testFind.First != m_sourceBufferView)
                             {
-                                // Firstly want to fit target on the screen
-                                //
-                                //testFind.First.isvi
-                                //Logger.logMsg("WIBBLE");
 
-                                // Dete
+                                // We want to fit target on the screen.  Use the following to determine the eye position:
+                                //
                                 // http://stackoverflow.com/questions/10998288/xna-camera-scene-size
                                 //
                                 if (m_frustrum.Contains(testFind.First.getBoundingBox()) == ContainmentType.Disjoint)
@@ -5996,14 +6010,13 @@ namespace Xyglo.Brazil.Xna
                             }
                         }
                     }
-                    else
-                    if (m_gotDoubleClick)
+                    else if (m_gotDoubleClick)
                     {
                         // Reset cursor to current position
                         //
                         Pair <BufferView, ScreenPosition> bS = getBufferViewIntersection();
 
-                        if (bS.First == m_project.getSelectedBufferView() && (bS.Second.X != -1 || bS.Second.Y != -1))
+                        if (bS.First == m_project.getSelectedBufferView() && bS.Second.X != -1 && bS.Second.Y != -1)
                         {
                             ScreenPosition sP = bS.Second;
                             string line = m_project.getSelectedBufferView().getFileBuffer().getLine(bS.Second.Y);
@@ -6021,7 +6034,6 @@ namespace Xyglo.Brazil.Xna
                             {
                                 Logger.logMsg("GOT -1");
                             }
-
 
                             // If we're outside of the current highlight then extend it - if we don't
                             // do this check then the hold after the double click cuts the newly 
@@ -6403,7 +6415,7 @@ namespace Xyglo.Brazil.Xna
         /// Draw the Xyglo Components
         /// </summary>
         /// <param name="gameTime"></param>
-        protected void drawXyglo(GameTime gameTime)
+        protected void drawXyglo(GameTime gameTime, List<Component> componentList = null)
         {
             // Create/draw the components - note that we have two components called the same in different
             // areas of the framework - we should disambiguate to make sure this distinction between
@@ -6414,10 +6426,15 @@ namespace Xyglo.Brazil.Xna
             // exist it just calls redraw on it.
             //
 
+            if (componentList == null)
+            {
+                componentList = m_componentList;
+            }
+
             //m_spriteBatch.Begin();
             //m_spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.DepthRead, RasterizerState.CullNone, m_basicEffect);
 
-            foreach (Component component in m_componentList)
+            foreach (Component component in componentList)
             {
                 string compState = "";
                 if (component.getStateActions().Count > 0)
@@ -6575,6 +6592,11 @@ namespace Xyglo.Brazil.Xna
                         menu.buildBuffers(m_graphics.GraphicsDevice);
                         menu.draw(m_graphics.GraphicsDevice);
                         m_drawableComponents[component] = menu;
+                    }
+                    else if (component.GetType() == typeof(Xyglo.Brazil.BrazilContainer))
+                    {
+                        BrazilContainer container = (BrazilContainer)component;
+                        drawXyglo(gameTime, container.getApp().getComponents());
                     }
                 }
                 else
@@ -8171,5 +8193,97 @@ namespace Xyglo.Brazil.Xna
         {
             Logger.logMsg("XygloXNA::addNewDirectory() - adding directory " + dirPath);
         }
+
+        /// <summary>
+        /// Start a Game within Friendlier
+        /// </summary>
+        /// <param name="gameTime"></param>
+        protected void startGame(GameTime gameTime)
+        {
+            Logger.logMsg("Start Game");
+
+            // Note that this uses the local BrazilPaulo which is a copy of the top-level Paulo
+            // as we must avoid circular dependencies.  BrazilPaulo is of app type 'Hosted' so it
+            // won't reinitialise XygloXna via the ViewSpace
+            //
+            BrazilApp app = new BrazilPaulo(new BrazilVector3(0, 0.1f, 0));
+
+            // Initialise with default state
+            //
+            app.initialise(State.Test("Menu"));
+
+            // Now initialise a container with the BrazilApp inside it
+            //
+            BrazilContainer container = new BrazilContainer(app, new BrazilBoundingBox(new BrazilVector3(0, 0, 0), new BrazilVector3(600, 400, 10)));
+
+            //container.addStateAction(new StateAction(
+
+            // Now attach the container to this application at the right state
+            //
+            addComponent("TextEditing", container);
+
+            //container(
+            // 
+            //
+            //m_componentList.Add(container);
+           
+        }
+
+        // DUPLICATE CODE BELOW WE NEED TO FARM OUT
+        //
+
+
+        /// <summary>
+        /// Get a state
+        /// </summary>
+        /// <param name="stateName"></param>
+        /// <returns></returns>
+        public State getState(string stateName)
+        {
+            foreach (State state in m_states)
+            {
+                if (state.m_name == stateName)
+                {
+                    return state;
+                }
+            }
+
+            throw new Exception("BrazilApp: state not defined " + stateName);
+        }
+
+
+        /// <summary>
+        /// Add a Component with a given State - by state name
+        /// </summary>
+        /// <param name="component"></param>
+        public void addComponent(string stateName, Component component)
+        {
+            State state = getState(stateName);
+            addComponent(state, component);
+        }
+
+        /// <summary>
+        /// Add a Component with a given State
+        /// </summary>
+        /// <param name="component"></param>
+        public void addComponent(State state, Component component)
+        {
+            checkState(state);
+            component.addState(state);
+            m_componentList.Add(component);
+        }
+
+        /// <summary>
+        /// Check a State exists
+        /// </summary>
+        /// <param name="state"></param>
+        protected void checkState(State state)
+        {
+            if (!m_states.Contains(state))
+            {
+                throw new Exception("Unrecognized state " + state.m_name);
+            }
+        }
+
     }
 }

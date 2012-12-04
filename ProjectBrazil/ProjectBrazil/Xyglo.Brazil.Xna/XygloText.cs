@@ -153,6 +153,69 @@ namespace Xyglo.Brazil.Xna
             m_spriteBatch.End();
         }
 
+
+        /// <summary>
+        /// Override the getBoundingBox call - examine string data and return a bounding box
+        /// based on that if there are any line breaks.
+        /// </summary>
+        /// <returns></returns>
+        public override BoundingBox getBoundingBox()
+        {
+            BoundingBox bb = new BoundingBox();
+
+            if (m_text.Contains("\n"))
+            {
+                string[] splitText = m_text.Split('\n');
+                bool first = true;
+                for (int i = 0; i < splitText.Count(); i++)
+                {
+                    // First time through set the min and max values to the first text string
+                    //
+                    if (first)
+                    {
+                        bb.Min.X = m_position.X - m_pickupOffset.X - (i == 0 ? 0 : m_fontManager.getCharWidth(m_fontSize) * m_firstRowIndent);
+                        bb.Min.Y = m_position.Y + (i * m_fontManager.getLineSpacing(m_fontSize)) - m_pickupOffset.Y;
+
+                        bb.Max.X = bb.Min.X + m_fontManager.getCharWidth(m_fontSize) * splitText[i].Length;
+                        bb.Max.Y = bb.Min.Y + m_fontManager.getLineSpacing(m_fontSize);
+
+                        first = false;
+                    }
+                    else
+                    {
+                        float newMinX = m_position.X - m_pickupOffset.X;
+                        float newMinY = m_position.Y + (i * m_fontManager.getLineSpacing(m_fontSize)) - m_pickupOffset.Y;
+                        float newMaxX = bb.Min.X + m_fontManager.getCharWidth(m_fontSize) * splitText[i].Length;
+                        float newMaxY = bb.Min.Y + m_fontManager.getLineSpacing(m_fontSize);
+
+                        if (newMinX < bb.Min.X)
+                            bb.Min.X = newMinX;
+
+                        if (newMinY < bb.Min.Y)
+                            bb.Min.Y = newMinY;
+
+                        if (newMaxX > bb.Max.X)
+                            bb.Max.X = newMaxX;
+
+                        if (newMaxY > bb.Max.Y)
+                            bb.Max.Y = newMaxY;
+                    }
+                }
+            }
+            else
+            {
+                bb.Min.X = m_position.X;
+                bb.Max.X = bb.Min.X + (m_text.Length * m_fontManager.getViewFont(m_fontSize).MeasureString("X").X);
+                bb.Min.Y = m_position.Y;
+                bb.Max.Y = bb.Min.Y + m_fontManager.getViewFont(m_fontSize).LineSpacing; // allow for line breaks !!!!!
+                bb.Min.Z = m_position.Z;
+                bb.Max.Z = bb.Min.Z;
+            }
+
+            return bb;
+        }
+
+
         /// <summary>
         /// Draw a preview of this text
         /// </summary>
@@ -160,7 +223,9 @@ namespace Xyglo.Brazil.Xna
         /// <param name="boundingBox"></param>
         public override void drawPreview(GraphicsDevice device, BoundingBox fullBoundingBox, BoundingBox previewBoundingBox)
         {
-            double factor = (double)((previewBoundingBox.Max - previewBoundingBox.Min).Length()) / (double)((fullBoundingBox.Max - fullBoundingBox.Min).Length());
+            //double factor = (double)((previewBoundingBox.Max - previewBoundingBox.Min).Length()) / (double)((fullBoundingBox.Max - fullBoundingBox.Min).Length());
+            float xFactor = (previewBoundingBox.Max.X - previewBoundingBox.Min.X) / (fullBoundingBox.Max.X - fullBoundingBox.Min.X);
+            float yFactor = (previewBoundingBox.Max.Y - previewBoundingBox.Min.Y) / (fullBoundingBox.Max.Y - fullBoundingBox.Min.Y);
 
             // Reenable the texture
             //
@@ -172,15 +237,18 @@ namespace Xyglo.Brazil.Xna
                 string[] splitText = m_text.Split('\n');
                 for (int i = 0; i < splitText.Count(); i++)
                 {
+                    float xPos = previewBoundingBox.Min.X + (m_position.X - m_pickupOffset.X) * xFactor - (i == 0 ? 0 : m_fontManager.getCharWidth(m_fontSize) * m_firstRowIndent * xFactor);
+                    float yPos = previewBoundingBox.Min.Y + (m_position.Y * yFactor) + i * (m_fontManager.getLineSpacing(m_fontSize) * yFactor) - m_pickupOffset.Y;
+
                     m_spriteBatch.DrawString(
                     m_fontManager.getViewFont(m_fontSize),
                     splitText[i],
-                    new Vector2(previewBoundingBox.Min.X + (m_position.X - m_pickupOffset.X) * (float)factor - (i == 0 ? 0 : m_fontManager.getCharWidth(m_fontSize) * m_firstRowIndent * (float)factor),
-                                previewBoundingBox.Min.Y + (float)(m_position.Y * factor) + i * (m_fontManager.getLineSpacing(m_fontSize) * (float)factor) - m_pickupOffset.Y),
+                    new Vector2(xPos,
+                                yPos),
                     m_colour,
                     0,
                     Vector2.Zero,
-                    Math.Max(m_fontManager.getTextScale() * (float)factor, 0.2f),
+                    Math.Max(m_fontManager.getTextScale() * xFactor, 0.2f),
                     0,
                     0);
                 }
@@ -190,36 +258,17 @@ namespace Xyglo.Brazil.Xna
                 m_spriteBatch.DrawString(
                     m_fontManager.getViewFont(m_fontSize),
                     m_text,
-                    new Vector2(previewBoundingBox.Min.X + (float)(m_position.X * factor) - m_pickupOffset.X,
-                                previewBoundingBox.Min.Y + (float)(m_position.Y * factor) - m_pickupOffset.Y),
+                    new Vector2(previewBoundingBox.Min.X + (float)(m_position.X * xFactor) - m_pickupOffset.X,
+                                previewBoundingBox.Min.Y + (float)(m_position.Y * yFactor) - m_pickupOffset.Y),
                     m_colour,
                     0,
                     Vector2.Zero,
-                    Math.Max(m_fontManager.getTextScale() * (float)factor, 0.2f),
+                    Math.Max(m_fontManager.getTextScale() * xFactor, 0.1f),
                     0,
                     0);
             }
             m_spriteBatch.End();
                 
-        }
-
-        /// <summary>
-        /// Override the getBoundingBox call - examine vertex data and return a bounding box
-        /// based on that.
-        /// </summary>
-        /// <returns></returns>
-        public override BoundingBox getBoundingBox()
-        {
-            BoundingBox bb = new BoundingBox();
-
-            bb.Min.X = m_position.X;
-            bb.Max.X = bb.Min.X + (m_text.Length * m_fontManager.getViewFont(m_fontSize).MeasureString("X").X);
-            bb.Min.Y = m_position.Y;
-            bb.Max.Y = bb.Min.Y + m_fontManager.getViewFont(m_fontSize).LineSpacing; // allow for line breaks !!!!!
-            bb.Min.Z = m_position.Z;
-            bb.Max.Z = bb.Min.Z;
-
-            return bb;
         }
     }
 }

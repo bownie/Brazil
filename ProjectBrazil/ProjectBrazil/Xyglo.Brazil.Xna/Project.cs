@@ -2064,9 +2064,17 @@ namespace Xyglo.Brazil.Xna
         public BoundingBox getBoundingBox(List<BufferView> bufferViews)
         {
             BoundingBox rBB = new BoundingBox();
+            bool first = true;
 
             foreach (BufferView bb in bufferViews)
             {
+                if (first)
+                {
+                    rBB = bb.getBoundingBox();
+                    first = false;
+                    continue;
+                }
+
                 if (bb.getBoundingBox().Min.X < rBB.Min.X)
                     rBB.Min.X = bb.getBoundingBox().Min.X;
 

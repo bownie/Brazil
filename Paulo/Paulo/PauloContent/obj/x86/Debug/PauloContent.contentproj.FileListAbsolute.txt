@@ -1,3 +1,3 @@
 C:\devel\Import\devel\Paulo\Paulo\PauloContent\obj\x86\Debug\ResolveAssemblyReference.cache
 C:\Users\bownie\Documents\brazil\Paulo\Paulo\PauloContent\obj\x86\Debug\PauloContent.contentprojResolveAssemblyReference.cache
-C:\devel\brazil\Paulo\Paulo\PauloContent\obj\x86\Debug\PauloContent.contentprojResolveAssemblyReference.cache
+C:\devel\brazil\Paulo\Paulo\PauloContent\obj\x86\Debug\ResolveAssemblyReference.cache

@@ -1,7 +1,7 @@
 using System;
 using Xyglo.Brazil;
 
-namespace Paulo
+namespace Xyglo.Friendlier
 {
 #if WINDOWS || XBOX
     static class Program

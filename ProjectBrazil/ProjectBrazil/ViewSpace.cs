@@ -95,13 +95,16 @@ namespace Xyglo.Brazil
         /// <param name="state"></param>
         public void setState(State state)
         {
-            
-            m_xna.setState(state);
+            if (m_xna != null)
+                m_xna.setState(state);
         }
 
         public State getState()
         {
-            return m_xna.getState();
+            if (m_xna != null)
+                return m_xna.getState();
+            else
+                return State.Test("None");
         }
 
         /// <summary>

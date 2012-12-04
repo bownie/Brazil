@@ -67,6 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BrazilColour.cs" />
+    <Compile Include="BrazilContainer.cs" />
     <Compile Include="BrazilFlyingBlock.cs" />
     <Compile Include="BrazilMenu.cs" />
     <Compile Include="BrazilPosition.cs" />
@@ -89,6 +90,7 @@
     <Compile Include="BrazilBaddy.cs" />
     <Compile Include="BrazilGoody.cs" />
     <Compile Include="BrazilFinishBlock.cs" />
+    <Compile Include="BrazilPaulo.cs" />
     <Compile Include="Target.cs" />
     <Compile Include="Core.cs" />
     <Compile Include="DrawableComponent.cs" />

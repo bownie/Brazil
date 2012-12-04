@@ -29,7 +29,12 @@ namespace Xyglo.Brazil
         public BrazilApp(BrazilAppMode appMode = BrazilAppMode.App)
         {
             m_mode = appMode;
-            m_viewSpace.initialise(m_actionMap, m_componentList, m_world, m_states, m_targets);
+
+            // Only initialise the viewspace if the 
+            if (m_mode == BrazilAppMode.App)
+            {
+                m_viewSpace.initialise(m_actionMap, m_componentList, m_world, m_states, m_targets);
+            }
         }
 
         /// <summary>
@@ -533,6 +538,14 @@ namespace Xyglo.Brazil
             return m_mode;
         }
 
+        /// <summary>
+        /// Get the list of Components
+        /// </summary>
+        /// <returns></returns>
+        public List<Component> getComponents()
+        {
+            return m_componentList;
+        }
 
         /// <summary>
         /// ViewSpace object - created at construction.   The Viewspace will define what we can

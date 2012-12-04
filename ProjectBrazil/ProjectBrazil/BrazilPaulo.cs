@@ -3,18 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using Xyglo.Brazil;
 
-namespace Xyglo.Friendlier
+namespace Xyglo.Brazil
 {
     /// <summary>
     /// This is the top level class for our Paulo game.  It inherits a BrazilApp object which
     /// inherits the XNA Game implementation.
     /// </summary>
-    public class Paulo : BrazilApp
+    public class BrazilPaulo : BrazilApp
     {
         /// <summary>
-        /// Default constructor
+        /// BrazilPaulo constructor - note we used the Hosted mode so we don't reinitialise
+        /// anything at the drawing level.
         /// </summary>
-        public Paulo(BrazilVector3 gravity):base()
+        public BrazilPaulo(BrazilVector3 gravity): base(BrazilAppMode.Hosted)
         {
             m_world.setGravity(gravity);
             m_world.setBounds(new BrazilBoundingBox(new BrazilVector3(-400, -400, -300), new BrazilVector3(400, 400, 300)));
@@ -46,7 +47,6 @@ namespace Xyglo.Friendlier
             BrazilInterloper paulo = new BrazilInterloper(BrazilColour.White, new BrazilVector3(0, 0, 0), new BrazilVector3(10, 10, 10));
             paulo.setName("Interloper");
             addComponent("PlayingGame", paulo);
-
 
             // Big dummy interloper
             //

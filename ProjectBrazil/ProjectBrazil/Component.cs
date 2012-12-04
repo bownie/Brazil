@@ -179,6 +179,23 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
+        /// Set the container for this Component
+        /// </summary>
+        /// <param name="container"></param>
+        public void setContainer(BrazilContainer container)
+        {
+            m_container = container;
+        }
+
+        /// <summary>
+        /// Get the container for this Component
+        /// </summary>
+        public BrazilContainer getContainer()
+        {
+            return m_container;
+        }
+
+        /// <summary>
         /// Affected by gravity?
         /// </summary>
         protected bool m_gravityAffected = false;
@@ -229,5 +246,10 @@ namespace Xyglo.Brazil
         /// Is this Compont hiding?
         /// </summary>
         protected bool m_isHiding = false;
+
+        /// <summary>
+        /// Any BrazilComponent can be in a Container
+        /// </summary>
+        protected BrazilContainer m_container = null;
     }
 }
