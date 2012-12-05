@@ -21,7 +21,7 @@ namespace Xyglo.Brazil
     /// Note that this namespace is uncontaminated by Xyglo.Brazil.Xna as it should stay that way.
     /// 
     /// </summary>
-    public abstract class BrazilApp : IWorld
+    public abstract class BrazilApp : IWorld, IBrazilApp
     {
         /// <summary>
         /// Default constructor
@@ -75,6 +75,14 @@ namespace Xyglo.Brazil
             connectKey(state, key, target);
         }
 
+        /// <summary>
+        /// Get teh state
+        /// </summary>
+        /// <returns></returns>
+        public State getState()
+        {
+            return m_viewSpace.getState();
+        }
 
         /// <summary>
         /// Connect a Key to a Target in a State
@@ -485,7 +493,7 @@ namespace Xyglo.Brazil
         /// Check a State exists
         /// </summary>
         /// <param name="state"></param>
-        protected void checkState(State state)
+        public void checkState(State state)
         {
             if (!m_states.Contains(state))
             {

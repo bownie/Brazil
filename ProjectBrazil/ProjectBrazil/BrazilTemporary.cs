@@ -90,13 +90,19 @@
             return (a.getType() != b.getType() || a.getIndex() != b.getIndex() || a.getDropDead() != b.getDropDead());
         }
 
-        /*
-        // Needed to avoid warning
+        // Needed to avoid warning with ==/!= operators - also watch this value
         //
         public override int GetHashCode()
         {
             return m_index;
-        }*/
+        }
+
+        // Needed to avoid warning with ==/!= operators
+        //
+        public override bool Equals(object obj)
+        {
+            return base.Equals(obj);
+        }
 
         /// <summary>
         /// Type that this temporary refers to

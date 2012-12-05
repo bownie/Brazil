@@ -23,7 +23,7 @@ namespace Xyglo.Brazil.Xna
     /// <summary>
     /// XygloXNA is defined by a XNA Game class - the core of the XNA world.
     /// </summary>
-    public class XygloXNA : Game
+    public class XygloXNA : Game, IBrazilApp
     {
         ///////////////// MEMBER VARIABLES //////////////////
 
@@ -69,8 +69,9 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         Dictionary<BrazilTemporary, XygloXnaDrawable> m_temporaryDrawables = new Dictionary<BrazilTemporary, XygloXnaDrawable>();
 
-        // XNA stuff
-        //
+        /// <summary>
+        /// XNA graphics device context
+        /// </summary>
         GraphicsDeviceManager m_graphics;
 
         /// <summary>
@@ -410,7 +411,7 @@ namespace Xyglo.Brazil.Xna
         /// <summary>
         /// How many steps between eye start and eye end fly position
         /// </summary>
-        protected int m_flySteps = 15;
+        protected int m_flySteps = 10;
 
         /// <summary>
         /// An object that wraps our view of the file system
@@ -495,7 +496,7 @@ namespace Xyglo.Brazil.Xna
         /// <summary>
         /// Process for running builds
         /// </summary>
-        Process m_buildProcess = null;
+        protected Process m_buildProcess = null;
 
         /// <summary>
         /// Exit after save as
@@ -821,18 +822,10 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
-        /// Enable windowed mode
+        /// Enable windowed mode for the application
         /// </summary>
         protected void windowedMode()
         {
-            // Some of the modes we've used
-            //
-            //InitGraphicsMode(640, 480, false);
-            //InitGraphicsMode(720, 576, false);
-            //InitGraphicsMode(800, 500, false);
-            //InitGraphicsMode(960, 768, false);
-            //InitGraphicsMode(1920, 1080, true);
-
             int maxWidth = 0;
             int maxHeight = 0;
 
@@ -884,6 +877,9 @@ namespace Xyglo.Brazil.Xna
             //
             if (m_drawingHelper != null)
             {
+                // Set the graphics modes
+                //
+                //m_drawingHelper.initGraphicsMode(m_graphics, GraphicsAdapter.DefaultAdapter.CurrentDisplayMode, m_bloom, Components, this, windowWidth, windowHeight, false);
                 m_drawingHelper.setPreviewBoundingBox(m_graphics.GraphicsDevice.Viewport.Width, m_graphics.GraphicsDevice.Viewport.Height);
             }
         }
@@ -915,6 +911,8 @@ namespace Xyglo.Brazil.Xna
             //
             if (m_drawingHelper != null)
             {
+                // Set the graphics modes
+                //m_drawingHelper.initGraphicsMode(m_graphics, GraphicsAdapter.DefaultAdapter.CurrentDisplayMode, m_bloom, Components, this, maxWidth, maxHeight, true);
                 m_drawingHelper.setPreviewBoundingBox(m_graphics.GraphicsDevice.Viewport.Width, m_graphics.GraphicsDevice.Viewport.Height);
             }
         }
@@ -1053,78 +1051,6 @@ namespace Xyglo.Brazil.Xna
                     fb.forceRefetchFile(m_project.getSyntaxManager());
                 }
             }
-        }
-
-        /// <summary>
-        /// Attempt to set the display mode to the desired resolution.  Itterates through the display
-        /// capabilities of the default graphics adapter to determine if the graphics adapter supports the
-        /// requested resolution.  If so, the resolution is set and the function returns true.  If not,
-        /// no change is made and the function returns false.
-        /// </summary>
-        /// <param name="iWidth">Desired screen width.</param>
-        /// <param name="iHeight">Desired screen height.</param>
-        /// <param name="bFullScreen">True if you wish to go to Full Screen, false for Windowed Mode.</param>
-        private bool initGraphicsMode(int iWidth, int iHeight, bool bFullScreen)
-        {
-            // If we aren't using a full screen mode, the height and width of the window can
-            // be set to anything equal to or smaller than the actual screen size.
-            if (bFullScreen == false)
-            {
-                if ((iWidth <= GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width)
-                    && (iHeight <= GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height))
-                {
-                    m_graphics.PreferredBackBufferWidth = iWidth;
-                    m_graphics.PreferredBackBufferHeight = iHeight;
-                    m_graphics.IsFullScreen = bFullScreen;
-                    m_graphics.ApplyChanges();
-
-                    // Reload the bloom component
-                    //
-                    if (m_bloom != null)
-                    {
-                        Components.Remove(m_bloom);
-                        //m_bloom.Dispose();
-                        m_bloom = new BloomComponent(this);
-                        Components.Add(m_bloom);
-                    }
-
-                    Logger.logMsg("XygloXNA::initGraphicsMode() - width = " + iWidth + ", height = " + iHeight + ", fullscreen = " + bFullScreen.ToString());
-                    return true;
-                }
-            }
-            else
-            {
-                // If we are using full screen mode, we should check to make sure that the display
-                // adapter can handle the video mode we are trying to set.  To do this, we will
-                // iterate thorugh the display modes supported by the adapter and check them against
-                // the mode we want to set.
-                foreach (DisplayMode dm in GraphicsAdapter.DefaultAdapter.SupportedDisplayModes)
-                {
-                    // Check the width and height of each mode against the passed values
-                    if ((dm.Width == iWidth) && (dm.Height == iHeight))
-                    {
-                        // The mode is supported, so set the buffer formats, apply changes and return
-                        m_graphics.PreferredBackBufferWidth = iWidth;
-                        m_graphics.PreferredBackBufferHeight = iHeight;
-                        m_graphics.IsFullScreen = bFullScreen;
-                        m_graphics.ApplyChanges();
-
-                        // Reload the bloom component
-                        //
-                        if (m_bloom != null)
-                        {
-                            Components.Remove(m_bloom);
-                            //m_bloom.Dispose();
-                            m_bloom = new BloomComponent(this);
-                            Components.Add(m_bloom);
-                        }
-
-                        Logger.logMsg("XygloXNA::initGraphicsMode() - width = " + iWidth + ", height = " + iHeight + ", fullscreen = " + bFullScreen.ToString());
-                        return true;
-                    }
-                }
-            }
-            return false;
         }
 
         /// <summary>
@@ -1776,10 +1702,6 @@ namespace Xyglo.Brazil.Xna
                 return;
             }
 
-            // Use this somewhere probably
-            //
-            // _project.getLicenced() 
-
             // Only check BufferViews status if we're not forcing an exit
             //
             if (!force && m_saveAsExit == false && m_project.getConfigurationValue("CONFIRMQUIT").ToUpper() == "TRUE")
@@ -1796,16 +1718,11 @@ namespace Xyglo.Brazil.Xna
                 }
             }
 
+            // Check for unsaved like this
+            //
             if (!force)
             {
-                foreach (FileBuffer fb in m_project.getFileBuffers())
-                {
-                    if (fb.isModified())
-                    {
-                        unsaved = true;
-                        break;
-                    }
-                }
+                unsaved = (m_project.getFileBuffers().Where(item => item.isModified() == true).Count() > 0);
             }
 
             // Likewise only save if we want to
@@ -5122,11 +5039,35 @@ namespace Xyglo.Brazil.Xna
         /// <param name="newPosition"></param>
         protected void flyToPosition(Vector3 newPosition)
         {
-            m_originalEyePosition = m_eye;
-            m_newEyePosition = newPosition;
-            m_changingPositionLastGameTime = TimeSpan.Zero;
-            m_changingEyePosition = true;
+            // If we're already changing eye position then change the new eye position only
+            //
+            if (m_changingEyePosition)
+            {
+                // Set new destination
+                //
+                m_newEyePosition = newPosition;
+
+                // Modify the vectors we need to aim to the new target
+                //
+                m_vFly = (m_newEyePosition - m_eye) / m_flySteps;
+
+                // Also set up the target modification vector (where the eye is looking)
+                //
+                Vector3 tempTarget = m_newEyePosition;
+                tempTarget.Z = 0.0f;
+                m_vFlyTarget = (tempTarget - m_target) / m_flySteps;
+            }
+            else
+            {
+                // If we're currently stationary then we start moving like this
+                //
+                m_originalEyePosition = m_eye;
+                m_newEyePosition = newPosition;
+                m_changingPositionLastGameTime = TimeSpan.Zero;
+                m_changingEyePosition = true;
+            }
         }
+
 
         /// <summary>
         /// Transform current eye position to an intended eye position over time.  We use the orignal eye position to enable us
@@ -5136,123 +5077,114 @@ namespace Xyglo.Brazil.Xna
         /// <param name="delta"></param>
         protected void changeEyePosition(GameTime gameTime)
         {
-            if (m_changingEyePosition)
+            if (!m_changingEyePosition) return;
+
+            // Start of 
+            if (m_changingPositionLastGameTime == TimeSpan.Zero)
             {
-                // If more than twenty ms has elapsed
+                m_vFly = (m_newEyePosition - m_eye) / m_flySteps;
+
+                // Also set up the target modification vector (where the eye is looking)
                 //
-                try
+                Vector3 tempTarget = m_newEyePosition;
+                tempTarget.Z = 0.0f;
+                m_vFlyTarget = (tempTarget - m_target) / m_flySteps;
+
+                // Want to enforce a minimum vector size here
+                //
+                while (m_vFlyTarget.Length() != 0 && m_vFlyTarget.Length() < 10.0f)
                 {
-                    // Result of any of our bounding checks
-                    //
-
-                    // Set up the flying vector for the first iteration
-                    //
-                    if (m_changingPositionLastGameTime == TimeSpan.Zero)
-                    {
-                        m_vFly = (m_newEyePosition - m_eye) / m_flySteps;
-
-                        // Also set up the target modification vector thus
-                        //
-                        Vector3 tempTarget = m_newEyePosition;
-                        tempTarget.Z = 0.0f;
-                        m_vFlyTarget = (tempTarget - m_target) / m_flySteps;
-
-                        //m_vFly.Normalize();
-                        m_changingPositionLastGameTime = gameTime.TotalGameTime;
-                    }
-
-                    // As we close in on target ensure that we smoothly stop
-                    //
-                    /*
-                    m_testArrived.Center = m_newEyePosition;
-                    m_testArrived.Radius = 80.0f;
-
-                    m_testArrived.Contains(ref m_eye, out m_testResult);
-                    if (m_testResult == ContainmentType.Contains)
-                    {
-                        m_vFly *= 0.9f;
-                    }
-                    */
-
-                    // Add an acceleration and decceleration component
-                    //
-                    float acc = 0.2f;
-
-                    // Percentage position along way of track
-                    //
-                    float percTrack = (m_eye - m_originalEyePosition).Length() - (m_newEyePosition - m_originalEyePosition).Length();
-                    //float deltaPos = 
-                    //Logger.logMsg("Position = " + percTrack);
-
-                    if (percTrack < 0.5f)
-                    {
-                        acc = percTrack; // *percTrack;
-                    }
-                    else
-                    {
-                        acc = 1.0f - (percTrack); // * percTrack);
-                    }
-
-                    acc = Math.Min(acc, 0.01f);
-                    //Logger.logMsg("ACC = " + acc);
-                    acc = 1.0f;
-
-                    // Font scaling - should this be in here?
-                    //
-                    if (m_currentFontScale == 0.0f)
-                    {
-                        m_currentFontScale = m_fontScaleOriginal;
-                    }
-                    else if (m_currentFontScale != 1.0f)
-                    {
-                        if (m_fontScaleOriginal < 1.0f)
-                        {
-                            m_currentFontScale = m_fontScaleOriginal + ((1.0f - m_fontScaleOriginal) * percTrack);
-                        }
-                        else
-                        {
-                            m_currentFontScale = m_fontScaleOriginal - ((m_fontScaleOriginal - 1.0f) * percTrack);
-                        }
-                    }
-
-
-                    // Perform movement of the eye by the movement vector
-                    //
-                    if (gameTime.TotalGameTime - m_changingPositionLastGameTime > m_movementPause)
-                    {
-                        m_eye += m_vFly * acc;
-
-                        // modify target by the other vector (this is to keep our eye level constan
-                        //
-                        m_target.X += m_vFlyTarget.X * acc;
-                        m_target.Y += m_vFlyTarget.Y * acc;
-                        m_changingPositionLastGameTime = gameTime.TotalGameTime;
-                        //m_view = Matrix.CreateLookAt(m_eye, Vector3.Zero, Vector3.Up);
-#if DEBUG_FLYING
-                        Logger.logMsg("XygloXNA::changeEyePosition() - eye is now at " + m_eye.ToString());
-                        Logger.logMsg("XygloXNA::changeEyePosition() - final position is " + m_newEyePosition.ToString());
-#endif
-                    }
-
-                    // Test arrival of the eye at destination position
-                    //
-                    m_testArrived.Center = m_newEyePosition;
-                    m_testArrived.Radius = 1.0f;
-                    m_testArrived.Contains(ref m_eye, out m_testResult);
-
-                    if (m_testResult == ContainmentType.Contains)
-                    {
-                        m_eye = m_newEyePosition;
-                        m_target.X = m_newEyePosition.X;
-                        m_target.Y = m_newEyePosition.Y;
-                        m_changingEyePosition = false;
-                        m_currentFontScale = 1.0f;
-                    }
-
+                    m_vFlyTarget *= 2;
                 }
-                catch (Exception e)
+
+                m_changingPositionLastGameTime = gameTime.TotalGameTime;
+            }
+
+            // At this point we have the m_vFly and m_vFlyTarget vectors loaded
+            // with a fraction of the distance from source to target.  To begin
+            // with we need to start slowly and accelerate smoothly.  We use an
+            // acceleration (acc) which is based on the distance from source to 
+            // target.  This is used as a multiplier on the movement vector to
+            // provide the acceleration within bounds set by Max and Min.
+            //
+            float acc = 1.0f;
+            float percTrack = (m_eye - m_originalEyePosition).Length() / (m_newEyePosition - m_originalEyePosition).Length();
+
+            // Need a notion of distance for the next movement
+            //
+            if (m_eye != m_originalEyePosition)
+            {
+                if (percTrack < 0.5)
                 {
-                    Console.Write("Got timing exception " + e.Message);
+                    acc = percTrack;
+                }
+                else
+                {
+                        acc = 1.0f - percTrack;
+                }
+
+                // Set absolute limits on acceleration
+                //
+                acc = Math.Max(acc, 0.12f);
+                acc = Math.Min(acc, 1.0f);
+            }
+
+            // Perform movement of the eye by the movement vector and acceleration
+            //
+            if (gameTime.TotalGameTime - m_changingPositionLastGameTime > m_movementPause)
+            {
+                m_eye += m_vFly * acc;
+
+                // modify target by the other vector (this is to keep our eye level constan
+                //
+                m_target.X += m_vFlyTarget.X * acc;
+                m_target.Y += m_vFlyTarget.Y * acc;
+
+                m_changingPositionLastGameTime = gameTime.TotalGameTime;
+            }
+
+            // Font scaling - should this be in here?
+            //
+            if (m_currentFontScale == 0.0f)
+            {
+                m_currentFontScale = m_fontScaleOriginal;
+            }
+            else if (m_currentFontScale != 1.0f)
+            {
+                if (m_fontScaleOriginal < 1.0f)
+                {
+                    m_currentFontScale = m_fontScaleOriginal + ((1.0f - m_fontScaleOriginal) * acc);
+                }
+                else
+                {
+                    m_currentFontScale = m_fontScaleOriginal - ((m_fontScaleOriginal - 1.0f) * acc);
+                }
+            }
+
+            // Test arrival of the eye at destination position
+            //
+            m_testArrived.Center = m_newEyePosition;
+            m_testArrived.Radius = 5.0f;
+            m_testArrived.Contains(ref m_eye, out m_testResult);
+
+            if (m_testResult == ContainmentType.Contains)
+            {
+                m_eye = m_newEyePosition;
+                m_target.X = m_newEyePosition.X;
+                m_target.Y = m_newEyePosition.Y;
+                m_changingEyePosition = false;
+                m_currentFontScale = 1.0f;
+            }
+            else
+            {
+                float distanceToTarget = (m_newEyePosition - m_eye).Length();
+                float distanceToTargetNext = (m_newEyePosition - m_eye + (m_vFly * acc)).Length();
+                // Check for overshoots
+                //
+                //if (((m_newEyePosition - m_eye + (m_vFly * acc)).Length() > (m_newEyePosition - m_eye).Length()))
+                if (distanceToTargetNext > distanceToTarget)
+                {
+                    Logger.logMsg("OVERSHOT");
                 }
             }
         }
@@ -6415,7 +6347,7 @@ namespace Xyglo.Brazil.Xna
         /// Draw the Xyglo Components
         /// </summary>
         /// <param name="gameTime"></param>
-        protected void drawXyglo(GameTime gameTime, List<Component> componentList = null)
+        protected void drawXyglo(GameTime gameTime, BrazilApp app = null)
         {
             // Create/draw the components - note that we have two components called the same in different
             // areas of the framework - we should disambiguate to make sure this distinction between
@@ -6425,10 +6357,17 @@ namespace Xyglo.Brazil.Xna
             // only if it doesn't already exist in the m_drawableComponents dictionary. If it does already
             // exist it just calls redraw on it.
             //
-
-            if (componentList == null)
+            List<Component> componentList = null;
+            State state = null;
+            if (app != null)
+            {
+                componentList = app.getComponents();
+                state = app.getState();
+            }
+            else
             {
                 componentList = m_componentList;
+                state = m_state;
             }
 
             //m_spriteBatch.Begin();
@@ -6442,7 +6381,7 @@ namespace Xyglo.Brazil.Xna
 
                 // Check that this component should be showing for this State and that's it's not been destroyed
                 //
-                if ((!component.getStates().Contains(m_state) && !m_state.equals(compState)) || component.isDestroyed())
+                if ((!component.getStates().Contains(state) && !m_state.equals(compState)) || component.isDestroyed())
                     continue;
 
                 // Has this component already been added to the drawableComponent dictionary?  If it hasn't then
@@ -6540,7 +6479,6 @@ namespace Xyglo.Brazil.Xna
                             string ipLives = "Lives = " + m_world.getLives();
                             XygloBannerText ipLivesText = new XygloBannerText(m_overlaySpriteBatch, m_fontManager.getOverlayFont(), XygloConvert.getColour(BrazilColour.Green), new Vector3(0, m_fontManager.getOverlayFont().LineSpacing * 3, 0), 1.0f, ipLives);
                             ipLivesText.draw(m_graphics.GraphicsDevice);
-
                         }
 
                     } else if (component.GetType() == typeof(Xyglo.Brazil.BrazilGoody))
@@ -6596,7 +6534,7 @@ namespace Xyglo.Brazil.Xna
                     else if (component.GetType() == typeof(Xyglo.Brazil.BrazilContainer))
                     {
                         BrazilContainer container = (BrazilContainer)component;
-                        drawXyglo(gameTime, container.getApp().getComponents());
+                        drawXyglo(gameTime, container.getApp());
                     }
                 }
                 else
@@ -6657,6 +6595,87 @@ namespace Xyglo.Brazil.Xna
                     }
                 }
             }
+
+            // Now draw any previews in the panner.
+            //
+            // Draw overview of the all the XnaDrawables - compress all into a list and bung
+            // over to work out the preview.
+            //
+            List<XygloXnaDrawable> overviewList = m_drawableComponents.Values.ToList();
+            overviewList.AddRange(m_temporaryDrawables.Values.ToList());
+            m_drawingHelper.drawXnaDrawableOverview(m_graphics.GraphicsDevice, gameTime, overviewList);
+        }
+
+        /// <summary>
+        /// Attempt to set the display mode to the desired resolution.  Itterates through the display
+        /// capabilities of the default graphics adapter to determine if the graphics adapter supports the
+        /// requested resolution.  If so, the resolution is set and the function returns true.  If not,
+        /// no change is made and the function returns false.
+        /// </summary>
+        /// <param name="iWidth">Desired screen width.</param>
+        /// <param name="iHeight">Desired screen height.</param>
+        /// <param name="bFullScreen">True if you wish to go to Full Screen, false for Windowed Mode.</param>
+        private bool initGraphicsMode(int iWidth, int iHeight, bool bFullScreen)
+        {
+            // If we aren't using a full screen mode, the height and width of the window can
+            // be set to anything equal to or smaller than the actual screen size.
+            if (bFullScreen == false)
+            {
+                if ((iWidth <= GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width)
+                    && (iHeight <= GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height))
+                {
+                    m_graphics.PreferredBackBufferWidth = iWidth;
+                    m_graphics.PreferredBackBufferHeight = iHeight;
+                    m_graphics.IsFullScreen = bFullScreen;
+                    m_graphics.ApplyChanges();
+
+                    // Reload the bloom component
+                    //
+                    if (m_bloom != null)
+                    {
+                        Components.Remove(m_bloom);
+                        //m_bloom.Dispose();
+                        m_bloom = new BloomComponent(this);
+                        Components.Add(m_bloom);
+                    }
+
+                    Logger.logMsg("XygloXNA::initGraphicsMode() - width = " + iWidth + ", height = " + iHeight + ", fullscreen = " + bFullScreen.ToString());
+                    return true;
+                }
+            }
+            else
+            {
+                // If we are using full screen mode, we should check to make sure that the display
+                // adapter can handle the video mode we are trying to set.  To do this, we will
+                // iterate thorugh the display modes supported by the adapter and check them against
+                // the mode we want to set.
+                foreach (DisplayMode dm in GraphicsAdapter.DefaultAdapter.SupportedDisplayModes)
+                {
+                    // Check the width and height of each mode against the passed values
+                    if ((dm.Width == iWidth) && (dm.Height == iHeight))
+                    {
+                        // The mode is supported, so set the buffer formats, apply changes and return
+                        m_graphics.PreferredBackBufferWidth = iWidth;
+                        m_graphics.PreferredBackBufferHeight = iHeight;
+                        m_graphics.IsFullScreen = bFullScreen;
+                        m_graphics.ApplyChanges();
+
+                        // Reload the bloom component
+                        //
+                        if (m_bloom != null)
+                        {
+                            Components.Remove(m_bloom);
+                            //m_bloom.Dispose();
+                            m_bloom = new BloomComponent(this);
+                            Components.Add(m_bloom);
+                        }
+
+                        Logger.logMsg("XygloXNA::initGraphicsMode() - width = " + iWidth + ", height = " + iHeight + ", fullscreen = " + bFullScreen.ToString());
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         /// <summary>
@@ -6815,14 +6834,6 @@ namespace Xyglo.Brazil.Xna
                 //
                 m_drawingHelper.drawBufferViewMap(gameTime, m_overlaySpriteBatch);
                 m_overlaySpriteBatch.End();
-
-                // Draw overview of the all the XnaDrawables - compress all into a list and bung
-                // over to work out the preview.
-                //
-                List<XygloXnaDrawable> overviewList = m_drawableComponents.Values.ToList();
-                overviewList.AddRange(m_temporaryDrawables.Values.ToList());
-                m_drawingHelper.drawXnaDrawableOverview(m_graphics.GraphicsDevice, gameTime, overviewList);
-
 
                 // Draw any differ overlay
                 //
@@ -8200,7 +8211,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="gameTime"></param>
         protected void startGame(GameTime gameTime)
         {
-            Logger.logMsg("Start Game");
+            Logger.logMsg("Starting a Game");
 
             // Note that this uses the local BrazilPaulo which is a copy of the top-level Paulo
             // as we must avoid circular dependencies.  BrazilPaulo is of app type 'Hosted' so it
@@ -8208,30 +8219,23 @@ namespace Xyglo.Brazil.Xna
             //
             BrazilApp app = new BrazilPaulo(new BrazilVector3(0, 0.1f, 0));
 
-            // Initialise with default state
-            //
-            app.initialise(State.Test("Menu"));
-
             // Now initialise a container with the BrazilApp inside it
             //
             BrazilContainer container = new BrazilContainer(app, new BrazilBoundingBox(new BrazilVector3(0, 0, 0), new BrazilVector3(600, 400, 10)));
 
-            //container.addStateAction(new StateAction(
-
-            // Now attach the container to this application at the right state
+            // Now attach the container to this application at the right state for Friendlier - this is
+            // the context in which the app itself will be shown and not the state context for the app to
+            // run in.  The app container has its own state held internally.
             //
             addComponent("TextEditing", container);
 
-            //container(
-            // 
+            // Initialise with default state
             //
-            //m_componentList.Add(container);
-           
+            app.initialise(State.Test("Menu"));
         }
 
-        // DUPLICATE CODE BELOW WE NEED TO FARM OUT
+        // The following methods are used to satisfy the IBrazilApp interface
         //
-
 
         /// <summary>
         /// Get a state
@@ -8277,13 +8281,12 @@ namespace Xyglo.Brazil.Xna
         /// Check a State exists
         /// </summary>
         /// <param name="state"></param>
-        protected void checkState(State state)
+        public void checkState(State state)
         {
             if (!m_states.Contains(state))
             {
                 throw new Exception("Unrecognized state " + state.m_name);
             }
         }
-
     }
 }

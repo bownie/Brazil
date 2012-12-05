@@ -91,6 +91,7 @@
     <Compile Include="BrazilGoody.cs" />
     <Compile Include="BrazilFinishBlock.cs" />
     <Compile Include="BrazilPaulo.cs" />
+    <Compile Include="IBrazilApp.cs" />
     <Compile Include="Target.cs" />
     <Compile Include="Core.cs" />
     <Compile Include="DrawableComponent.cs" />
@@ -156,6 +157,10 @@
     <Compile Include="Xyglo.Brazil.Xna\XygloObject.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloXNA.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloView.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram3.cd" />
+    <None Include="ClassDiagram4.cd" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

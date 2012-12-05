@@ -7,7 +7,10 @@ namespace Xyglo.Brazil
 {
     /// <summary>
     /// A Brazil Container accepts a BrazilApp and rescales it ready for drawing inside another
-    /// app.   So this class containerises a regular app for injection.
+    /// app.   So this class containerises a regular app for injection into Friendlier/Brazil
+    /// to run as a sub-app.  The app itself holds its own state model and transitions as well
+    /// as components - some components will need to be modified (full screen ones for example)
+    /// and everything needs to be scaled to fit into the provided BoundingBox.
     /// </summary>
     public class BrazilContainer : Component
     {
@@ -26,7 +29,9 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
-        /// Set a reference to this container 
+        /// Set a reference to this container so that they can be identified as belonging to it.
+        /// Additionally we need to scale components according to the BoundingBox and also potentially
+        /// convert some components into other types for use as a Container.
         /// </summary>
         public void applyContainerToContents()
         {

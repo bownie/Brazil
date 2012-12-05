@@ -1,0 +1,417 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Xyglo.Brazil.ViewSpace" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="27" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QQAAAkAAACAAAKAAAAEAAAAgAAAQAAAAAAAAAAAAAAQ=</HashCode>
+      <FileName>ViewSpace.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Xyglo.Brazil.Action">
+    <Position X="1.75" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Action.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.KeyAction">
+    <Position X="2.75" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACEAAAAQABAAAAgAAAAAAAAAQAAIAIAEAAAAAAAiA=</HashCode>
+      <FileName>Action.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.MouseAction">
+    <Position X="0.5" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAAAAAAAAAAAABAAAAAAAAAAAAAAAACAA=</HashCode>
+      <FileName>Action.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.ActionMap" Collapsed="true">
+    <Position X="21.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAIAACAAAAgABAAAAAAAAABAAAAAiAAAAAA=</HashCode>
+      <FileName>ActionMap.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.BrazilApp">
+    <Position X="4.5" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>wAAIIiAEABgCCCgAiAUABgAAABAAAwgoIAAhAAAAAAA=</HashCode>
+      <FileName>BrazilApp.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.1" />
+  </Class>
+  <Class Name="Xyglo.Brazil.BrazilBaddy" Collapsed="true">
+    <Position X="10.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAA=</HashCode>
+      <FileName>BrazilBaddy.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.BrazilBannerText" Collapsed="true">
+    <Position X="14.75" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAIMAAhgAAAIACAAABABAAAAAACAABAIAAAA=</HashCode>
+      <FileName>BrazilBannerText.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.BrazilBoundingBox" Collapsed="true">
+    <Position X="23.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAIAQAA=</HashCode>
+      <FileName>BrazilBoundingBox.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.BrazilContainer" Collapsed="true">
+    <Position X="16.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AABAAAAABAAAAAAAAiAAAAAAAAAAAAhAAAAAAAAAAAA=</HashCode>
+      <FileName>BrazilContainer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.BrazilFinishBlock" Collapsed="true">
+    <Position X="14.5" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAIAAAAAIAAAAgAAIAAAAAAAAAIAAAAAAAAAAAABAA=</HashCode>
+      <FileName>BrazilFinishBlock.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.BrazilFlyingBlock" Collapsed="true">
+    <Position X="8" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAIAAAAAIAAAAgAAIAAAAAAAAAAAAAAAAAAAAAABAA=</HashCode>
+      <FileName>BrazilFlyingBlock.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.BrazilGoody" Collapsed="true">
+    <Position X="12.5" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAoAAAAIAAAIAAAAAAAAAAAAAAAAAAAAAAAAAABAQ=</HashCode>
+      <FileName>BrazilGoody.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.BrazilHud" Collapsed="true">
+    <Position X="17" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAIAAAggAAAAACAAAAAAAAAAAAAAAAAIAAAA=</HashCode>
+      <FileName>BrazilHud.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.BrazilInterloper" Collapsed="true">
+    <Position X="19.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAAIEAAAAAAAAAAAAAAAAAAACAAAAAAAAABAA=</HashCode>
+      <FileName>BrazilInterloper.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.BrazilMatrix3" Collapsed="true">
+    <Position X="25.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAAAAAAAAAAAAAAAAQAgAAAAAEAQQAAAQAA=</HashCode>
+      <FileName>BrazilMatrix3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.BrazilMenuOption" Collapsed="true">
+    <Position X="27" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAgAA=</HashCode>
+      <FileName>BrazilMenu.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.BrazilMenu" Collapsed="true">
+    <Position X="14.75" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAIAAAAAAQAAEAAAQBAACAARAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>BrazilMenu.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.BrazilPaulo">
+    <Position X="1.75" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgAAAAAAAAAAAEAAAAACAACAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>BrazilPaulo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.BrazilRay" Collapsed="true">
+    <Position X="28.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA=</HashCode>
+      <FileName>BrazilRay.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.BrazilState" Collapsed="true">
+    <Position X="21.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>BrazilState.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.BrazilVector2" Collapsed="true">
+    <Position X="25.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAACAAAAYAA=</HashCode>
+      <FileName>BrazilVector2.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.BrazilVector3" Collapsed="true">
+    <Position X="27" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAQAAAAAYAE=</HashCode>
+      <FileName>BrazilVector3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.BrazilWorld" Collapsed="true">
+    <Position X="28.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EIAACAAAAACAgAQAAAAAAgAAAQAAAAAIBCACAAIACAE=</HashCode>
+      <FileName>BrazilWorld.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.Component" Collapsed="true">
+    <Position X="12.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>UQAYiEAAEBAACECARoAAAAAEAACAAIRBgAAEAAAABAA=</HashCode>
+      <FileName>Component.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.Component3D" Collapsed="true">
+    <Position X="12.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAIIAABCBABAAAAAAIAAACCAQCAAUQAABAAAEAAAA=</HashCode>
+      <FileName>Component3D.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.ComponentInstance" Collapsed="true">
+    <Position X="23.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ComponentInstance.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.ConfirmState" Collapsed="true">
+    <Position X="25.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAAAAACAAAAAAAQAAAQAAAAAAAAAAAAACAAAAAA=</HashCode>
+      <FileName>ConfirmState.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.Core" Collapsed="true">
+    <Position X="27" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAAAAAAAEBAgAAAAiAAABAAAAACAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>Core.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.DrawableComponent" Collapsed="true">
+    <Position X="12.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>DrawableComponent.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.Pair&lt;T, U&gt;" Collapsed="true">
+    <Position X="28.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAQAAAAAAAAIAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Pair.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.State" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="21.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAAAAACAAAAAgAAAAAQAAgAAAIAAAAAACAAAAAA=</HashCode>
+      <FileName>State.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Xyglo.Brazil.StateAction" Collapsed="true">
+    <Position X="23.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QDAgAAAAAAABAAgAAAABAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>StateAction.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.Target" Collapsed="true">
+    <Position X="25.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAACAAAAAAAAAAgAAAIAAAAAAAAIAAAAAAAAEAAAA=</HashCode>
+      <FileName>Target.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.Brazil.Xna.BrazilTemporary" Collapsed="true">
+    <Position X="23.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAIAAAEAAAAAAAgAACEAABAQAAAIAAAAAAIAAAAiA=</HashCode>
+      <FileName>BrazilTemporary.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Xyglo.CollectionComparer&lt;T&gt;" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="21.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAIAAAAAAAAgAAAAAAAAAAAAIAAAAAAAAAAEAA=</HashCode>
+      <FileName>CollectionComparer.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="System.Object" Collapsed="true">
+    <Position X="31" Y="2.25" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="Xyglo.Brazil.Xna.FileBuffer" Collapsed="true">
+    <Position X="10.75" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AFoHUDFMAWOAAJiAxQHFAQTEJgRAMAORADFQoQAjTAA=</HashCode>
+      <FileName>Xyglo.Brazil.Xna\FileBuffer.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="Xyglo.Brazil.IBrazilApp" Collapsed="true">
+    <Position X="21.75" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAAAAAAAAAACAAAAAAAAAAAAgAAAAAAAAAAAAA=</HashCode>
+      <FileName>IBrazilApp.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Xyglo.Brazil.IWorld" Collapsed="true">
+    <Position X="23.5" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAAAAAAAAAAAAQABAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>IWorld.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="System.IDisposable" Collapsed="true">
+    <Position X="2.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="System.IComparable" Collapsed="true">
+    <Position X="0.5" Y="1.25" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="System.Collections.Generic.IEqualityComparer&lt;T&gt;" Collapsed="true">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Enum Name="Xyglo.Brazil.InputFeatures" Collapsed="true">
+    <Position X="21.75" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAAAAAAAAAAAQAAAAAAgAAAAAAAAAAAAEAAAAAA=</HashCode>
+      <FileName>ViewSpace.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Xyglo.Brazil.DefaultStates" Collapsed="true">
+    <Position X="28.75" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>ViewSpace.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Xyglo.Brazil.ViewSpaceMode" Collapsed="true">
+    <Position X="23.5" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAACAAAAAA=</HashCode>
+      <FileName>ViewSpace.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Xyglo.Brazil.KeyboardModifier" Collapsed="true">
+    <Position X="23.5" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEAAAAAAgAAAAAAAAAAAAAAAAAAJAAAAEAAAA=</HashCode>
+      <FileName>Action.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Xyglo.Brazil.KeyButtonState" Collapsed="true">
+    <Position X="25.25" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAIAAAAAAAAAAAAAAAAEAAAAAAAAEAAA=</HashCode>
+      <FileName>Action.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Xyglo.Brazil.Mouse" Collapsed="true">
+    <Position X="28.75" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAAAAAAgAAAACAQAEQAMAAAAAACAQAEAAEAAAA=</HashCode>
+      <FileName>Action.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Xyglo.Brazil.BrazilAppMode" Collapsed="true">
+    <Position X="25.25" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAgAAA=</HashCode>
+      <FileName>BrazilApp.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Xyglo.Brazil.BrazilColour" Collapsed="true">
+    <Position X="27" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAGAAAAAAAAIhAAAAAABAAABAAAAAAAAAAAADAAAAA=</HashCode>
+      <FileName>BrazilColour.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Xyglo.Brazil.BrazilGoodyType" Collapsed="true">
+    <Position X="28.75" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAQABAAAAAIAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>BrazilGoody.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Xyglo.Brazil.BrazilMenuType" Collapsed="true">
+    <Position X="21.75" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAg=</HashCode>
+      <FileName>BrazilMenu.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Xyglo.Brazil.BrazilPosition" Collapsed="true">
+    <Position X="23.5" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QgAAAgAIAAAACBAAACAAAAAAAAAAAAAACAAQAAEAAEE=</HashCode>
+      <FileName>BrazilPosition.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Xyglo.Brazil.BrazilRelativePosition" Collapsed="true">
+    <Position X="25.25" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAQgAEAACAIAAAEAAAAAAAAAAAAAAAAAEEAAAA=</HashCode>
+      <FileName>BrazilPosition.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Xyglo.Brazil.BrazilAlignment" Collapsed="true">
+    <Position X="23.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAQAAAAAAAIAAAACACQAAAAAAA=</HashCode>
+      <FileName>BrazilPosition.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Xyglo.Brazil.Behaviour" Collapsed="true">
+    <Position X="21.75" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAEAAIAAAAAAAAAAAAAAAAAAAAAAEAAAA=</HashCode>
+      <FileName>Component.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Xyglo.Brazil.Keys" Collapsed="true">
+    <Position X="27" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>A5qu4//VY8IoSswJUzETACoVGm1c1BsayKGo////YWM=</HashCode>
+      <FileName>UserInput.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Xyglo.Brazil.Pointer" Collapsed="true">
+    <Position X="21.75" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA=</HashCode>
+      <FileName>UserInput.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Xyglo.Brazil.Xna.BrazilTemporaryType" Collapsed="true">
+    <Position X="27" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>BrazilTemporary.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

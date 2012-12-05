@@ -123,6 +123,80 @@ namespace Xyglo.Brazil.Xna
         // ---------------------------------- METHODS -----------------------------------
         //
 
+        // FOLLOWING DOESN'T WORK YET
+        //
+
+        /// <summary>
+        /// Attempt to set the display mode to the desired resolution.  Itterates through the display
+        /// capabilities of the default graphics adapter to determine if the graphics adapter supports the
+        /// requested resolution.  If so, the resolution is set and the function returns true.  If not,
+        /// no change is made and the function returns false.
+        /// </summary>
+        /// <param name="iWidth">Desired screen width.</param>
+        /// <param name="iHeight">Desired screen height.</param>
+        /// <param name="bFullScreen">True if you wish to go to Full Screen, false for Windowed Mode.</param>
+        public bool initGraphicsMode(GraphicsDeviceManager graphics, DisplayMode mode, BloomComponent bloom, GameComponentCollection Components, Game game, int iWidth, int iHeight, bool bFullScreen)
+        {
+            // If we aren't using a full screen mode, the height and width of the window can
+            // be set to anything equal to or smaller than the actual screen size.
+            if (bFullScreen == false)
+            {
+                if ((iWidth <= mode.Width) && (iHeight <= mode.Height))
+                {
+                    graphics.PreferredBackBufferWidth = iWidth;
+                    graphics.PreferredBackBufferHeight = iHeight;
+                    graphics.IsFullScreen = bFullScreen;
+                    graphics.ApplyChanges();
+
+                    // Reload the bloom component
+                    //
+                    if (bloom != null)
+                    {
+                        Components.Remove(bloom);
+                        //m_bloom.Dispose();
+                        bloom = new BloomComponent(game);
+                        Components.Add(bloom);
+                    }
+
+                    Logger.logMsg("DrawingHelper::initGraphicsMode() - width = " + iWidth + ", height = " + iHeight + ", fullscreen = " + bFullScreen.ToString());
+                    return true;
+                }
+            }
+            else
+            {
+                // If we are using full screen mode, we should check to make sure that the display
+                // adapter can handle the video mode we are trying to set.  To do this, we will
+                // iterate thorugh the display modes supported by the adapter and check them against
+                // the mode we want to set.
+                foreach (DisplayMode dm in GraphicsAdapter.DefaultAdapter.SupportedDisplayModes)
+                {
+                    // Check the width and height of each mode against the passed values
+                    if ((dm.Width == iWidth) && (dm.Height == iHeight))
+                    {
+                        // The mode is supported, so set the buffer formats, apply changes and return
+                        graphics.PreferredBackBufferWidth = iWidth;
+                        graphics.PreferredBackBufferHeight = iHeight;
+                        graphics.IsFullScreen = bFullScreen;
+                        graphics.ApplyChanges();
+
+                        // Reload the bloom component
+                        //
+                        if (bloom != null)
+                        {
+                            Components.Remove(bloom);
+                            //m_bloom.Dispose();
+                            bloom = new BloomComponent(game);
+                            Components.Add(bloom);
+                        }
+
+                        Logger.logMsg("DrawingHelper::initGraphicsMode() - width = " + iWidth + ", height = " + iHeight + ", fullscreen = " + bFullScreen.ToString());
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         /// <summary>
         /// Return a max bounding box for a list of drawables
         /// </summary>

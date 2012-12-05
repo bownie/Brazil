@@ -97,14 +97,20 @@ namespace Xyglo.Brazil
         {
             if (m_xna != null)
                 m_xna.setState(state);
+            else
+                m_localState = state;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public State getState()
         {
             if (m_xna != null)
                 return m_xna.getState();
             else
-                return State.Test("None");
+                return m_localState;
         }
 
         /// <summary>
@@ -138,5 +144,12 @@ namespace Xyglo.Brazil
         /// </summary>
         protected ViewSpaceMode m_windowMode = ViewSpaceMode.Window;
 
+        /// <summary>
+        /// We use a local state here at the ViewSpace level IFF there is no XNA to connect to -
+        /// this can occur when we're working in the Hosted App mode and we're already running 
+        /// within say an XNA instance.  Then we are running this ViewSpace and World within another
+        /// and want to store our own state locally here.
+        /// </summary>
+        protected State m_localState;
     }
 }
