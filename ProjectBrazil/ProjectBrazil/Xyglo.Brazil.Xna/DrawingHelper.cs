@@ -166,13 +166,13 @@ namespace Xyglo.Brazil.Xna
 
                     // Reload the bloom component
                     //
-                    if (bloom != null)
-                    {
-                        Components.Remove(bloom);
-                        //m_bloom.Dispose();
-                        bloom = new BloomComponent(game);
-                        Components.Add(bloom);
-                    }
+                    //if (bloom != null)
+                    //{
+                        //Components.Remove(bloom);
+                        ////m_bloom.Dispose();
+                        //bloom = new BloomComponent(game);
+                        //Components.Add(bloom);
+                    //}
 
                     Logger.logMsg("DrawingHelper::initGraphicsMode() - width = " + iWidth + ", height = " + iHeight + ", fullscreen = " + bFullScreen.ToString());
                     return true;
@@ -197,13 +197,13 @@ namespace Xyglo.Brazil.Xna
 
                         // Reload the bloom component
                         //
-                        if (bloom != null)
-                        {
-                            Components.Remove(bloom);
-                            //m_bloom.Dispose();
-                            bloom = new BloomComponent(game);
-                            Components.Add(bloom);
-                        }
+                        //if (bloom != null)
+                        //{
+                            //Components.Remove(bloom);
+                            ////m_bloom.Dispose();
+                            //bloom = new BloomComponent(game);
+                            //Components.Add(bloom);
+                        //}
 
                         Logger.logMsg("DrawingHelper::initGraphicsMode() - width = " + iWidth + ", height = " + iHeight + ", fullscreen = " + bFullScreen.ToString());
                         return true;

@@ -3669,14 +3669,15 @@ namespace Xyglo.Brazil.Xna
             {
                 // Restore the original eye position before moving anywhere
                 //
-                if (m_eyePerturber != null)
-                {
-                    m_eye = XygloConvert.getVector3(m_eyePerturber.getInitialPosition());
-                    m_eyePerturber = null;
-                }
+                //if (m_eyePerturber != null)
+                //{
+                    //m_eye = XygloConvert.getVector3(m_eyePerturber.getInitialPosition());
+                    //m_eyePerturber = null;
+                //}
 
                 changeEyePosition(gameTime);
             }
+                /*
             else
             {
                 // Perform some humanising/vomitising of the view depending on the effect..
@@ -3687,7 +3688,7 @@ namespace Xyglo.Brazil.Xna
                 }
 
                 m_eye = XygloConvert.getVector3(m_eyePerturber.getPerturbedPosition(gameTime.TotalGameTime.TotalSeconds));
-            }
+            }*/
 
             // Save the last state if it has changed and clear any temporary message
             //
@@ -5037,23 +5038,28 @@ namespace Xyglo.Brazil.Xna
             float acc = 1.0f;
             float percTrack = (m_eye - m_originalEyePosition).Length() / (m_newEyePosition - m_originalEyePosition).Length();
 
-            // Need a notion of distance for the next movement
-            //
-            if (m_eye != m_originalEyePosition)
-            {
-                if (percTrack < 0.5)
-                {
-                    acc = percTrack;
-                }
-                else
-                {
-                        acc = 1.0f - percTrack;
-                }
+            bool enableAcceleration = false;
 
-                // Set absolute limits on acceleration
+            if (enableAcceleration)
+            {
+                // Need a notion of distance for the next movement
                 //
-                acc = Math.Max(acc, 0.12f);
-                acc = Math.Min(acc, 1.0f);
+                if (m_eye != m_originalEyePosition)
+                {
+                    if (percTrack < 0.5)
+                    {
+                        acc = percTrack;
+                    }
+                    else
+                    {
+                        acc = 1.0f - percTrack;
+                    }
+
+                    // Set absolute limits on acceleration
+                    //
+                    acc = Math.Max(acc, 0.12f);
+                    acc = Math.Min(acc, 1.0f);
+                }
             }
 
             // Perform movement of the eye by the movement vector and acceleration
