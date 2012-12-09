@@ -62,10 +62,10 @@ namespace Xyglo.Brazil
             // Check for null velocity - a lot of objects won't need this at all so
             // a valid check.
             //
-            if (m_velocity == null)
-            {
+            //if (m_velocity == null)
+            //{
                 m_velocity = BrazilVector3.Zero;
-            }
+            //}
 
             m_velocity.X += acceleration.X;
             m_velocity.Y += acceleration.Y;

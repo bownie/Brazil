@@ -101,6 +101,11 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         protected string m_userHelp;
 
+        /// <summary>
+        /// Font manager
+        /// </summary>
+        protected FontManager m_fontManager;
+
         // ---------------------------------- CONSTRUCTORS -------------------------------
         //
 
@@ -112,6 +117,19 @@ namespace Xyglo.Brazil.Xna
         public DrawingHelper(Project project, Texture2D flatTexture, float windowWidth, float windowHeight)
         {
             m_project = project;
+            m_fontManager = m_project.getFontManager();
+            m_flatTexture = flatTexture;
+            setPreviewBoundingBox(windowWidth, windowHeight);
+
+            // Populate the user help
+            //
+            populateUserHelp();
+        }
+
+        public DrawingHelper(FontManager fontManager, Texture2D flatTexture, float windowWidth, float windowHeight)
+        {
+            //m_project = project;
+            m_fontManager = fontManager;
             m_flatTexture = flatTexture;
             setPreviewBoundingBox(windowWidth, windowHeight);
 
@@ -123,9 +141,6 @@ namespace Xyglo.Brazil.Xna
         // ---------------------------------- METHODS -----------------------------------
         //
 
-        // FOLLOWING DOESN'T WORK YET
-        //
-
         /// <summary>
         /// Attempt to set the display mode to the desired resolution.  Itterates through the display
         /// capabilities of the default graphics adapter to determine if the graphics adapter supports the
@@ -135,13 +150,14 @@ namespace Xyglo.Brazil.Xna
         /// <param name="iWidth">Desired screen width.</param>
         /// <param name="iHeight">Desired screen height.</param>
         /// <param name="bFullScreen">True if you wish to go to Full Screen, false for Windowed Mode.</param>
-        public bool initGraphicsMode(GraphicsDeviceManager graphics, DisplayMode mode, BloomComponent bloom, GameComponentCollection Components, Game game, int iWidth, int iHeight, bool bFullScreen)
+        public bool initGraphicsMode(GraphicsDeviceManager graphics, BloomComponent bloom, GameComponentCollection Components, Game game, int iWidth, int iHeight, bool bFullScreen)
         {
             // If we aren't using a full screen mode, the height and width of the window can
             // be set to anything equal to or smaller than the actual screen size.
             if (bFullScreen == false)
             {
-                if ((iWidth <= mode.Width) && (iHeight <= mode.Height))
+                if ((iWidth <= GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width)
+                    && (iHeight <= GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height))
                 {
                     graphics.PreferredBackBufferWidth = iWidth;
                     graphics.PreferredBackBufferHeight = iHeight;
@@ -356,12 +372,12 @@ namespace Xyglo.Brazil.Xna
         public void setPreviewBoundingBox(float windowWidth, float windowHeight)
         {
             Vector3 topLeft = Vector3.Zero;
-            topLeft.X = windowWidth - m_project.getFontManager().getOverlayFont().MeasureString("X").X * 10;
-            topLeft.Y = windowHeight - m_project.getFontManager().getOverlayFont().LineSpacing * 6;
+            topLeft.X = windowWidth - m_fontManager.getOverlayFont().MeasureString("X").X * 10;
+            topLeft.Y = windowHeight - m_fontManager.getOverlayFont().LineSpacing * 6;
 
             Vector3 bottomRight = Vector3.Zero;
-            bottomRight.X = windowWidth - m_project.getFontManager().getOverlayFont().MeasureString("X").X * 3;
-            bottomRight.Y = windowHeight - m_project.getFontManager().getOverlayFont().LineSpacing * 2;
+            bottomRight.X = windowWidth - m_fontManager.getOverlayFont().MeasureString("X").X * 3;
+            bottomRight.Y = windowHeight - m_fontManager.getOverlayFont().LineSpacing * 2;
 
             m_previewBoundingBox.Min = topLeft;
             m_previewBoundingBox.Max = bottomRight;

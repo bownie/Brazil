@@ -544,14 +544,32 @@ namespace Xyglo.Brazil.Xna
         /// <summary>
         /// Extend an existing highlight to this position
         /// </summary>
-        public void extendHighlight()
+        public void extendHighlight(ScreenPosition lastCursorPosition)
         {
-            // Ensure that we're keeping the highlight ends the right way around
+            // If no highlight set
             //
-            if (m_cursorPosition <= m_highlightStart)
-                m_highlightStart = m_cursorPosition;
+            if (m_highlightStart.X == -1 && m_highlightStart.Y == -1)
+            {
+                if (lastCursorPosition < m_cursorPosition)
+                {
+                    m_highlightStart = lastCursorPosition;
+                    m_highlightEnd = m_cursorPosition;
+                }
+                else
+                {
+                    m_highlightStart = m_cursorPosition;
+                    m_highlightEnd = lastCursorPosition;
+                }
+            }
             else
-                m_highlightEnd = m_cursorPosition;
+            {
+                // Ensure that we're keeping the highlight ends the right way around
+                //
+                if (m_cursorPosition <= m_highlightStart)
+                    m_highlightStart = m_cursorPosition;
+                else
+                    m_highlightEnd = m_cursorPosition;
+            }
 
 #if DEBUG_HIGHLIGHT
             Logger.logMsg("BufferView::extendHighlight() - extending at X = " + m_cursorPosition.X + ", Y = " + m_cursorPosition.Y);

@@ -31,11 +31,11 @@ namespace Xyglo.Brazil
         /// <summary>
         /// Start position
         /// </summary>
-        protected BrazilVector3 m_startPos = null;
+        protected BrazilVector3 m_startPos;
 
         /// <summary>
         /// End position
         /// </summary>
-        protected BrazilVector3 m_endPos = null;
+        protected BrazilVector3 m_endPos;
     }
 }

@@ -59,12 +59,9 @@ namespace Xyglo.Brazil
             m3 = v3;
         }
 
-        /// <summary>
-        /// Accessors
-        /// </summary>
-        public BrazilVector3 m1 { get; set; }
-        public BrazilVector3 m2 { get; set; }
-        public BrazilVector3 m3 { get; set; }
+        public BrazilVector3 m1;
+        public BrazilVector3 m2;
+        public BrazilVector3 m3;
 
         /// <summary>
         /// Zero Matrix3

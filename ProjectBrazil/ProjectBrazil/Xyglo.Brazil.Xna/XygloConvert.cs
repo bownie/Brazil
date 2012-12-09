@@ -42,7 +42,17 @@ namespace Xyglo.Brazil.Xna
         /// <returns></returns>
         static public Vector3 getVector3(BrazilVector3 bV)
         {
-            return (bV == null ? Vector3.Zero : new Vector3(bV.X, bV.Y, bV.Z));
+            return new Vector3(bV.X, bV.Y, bV.Z);
+        }
+
+        /// <summary>
+        /// Get a BrazilVector3 for an XNA Vector3
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
+        static public BrazilVector3 getBrazilVector3(Vector3 v)
+        {
+            return new BrazilVector3(v.X, v.Y, v.Z);
         }
 
         /// <summary>

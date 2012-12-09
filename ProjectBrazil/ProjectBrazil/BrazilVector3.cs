@@ -8,18 +8,8 @@ namespace Xyglo.Brazil
     /// <summary>
     /// Vector2 is based on XNA's Vector2
     /// </summary>
-    public class BrazilVector3
+    public struct BrazilVector3
     {
-        /// <summary>
-        /// Default constructor
-        /// </summary>
-        public BrazilVector3()
-        {
-            X = 0.0f;
-            Y = 0.0f;
-            Z = 0.0f;
-        }
-
         /// <summary>
         /// Single constructor
         /// </summary>
@@ -43,14 +33,9 @@ namespace Xyglo.Brazil
             Z = z1;
         }
 
-
-
-        /// <summary>
-        /// Accessors
-        /// </summary>
-        public float X { get; set; }
-        public float Y { get; set; }
-        public float Z { get; set; }
+        public float X;
+        public float Y;
+        public float Z;
 
         public static BrazilVector3 Zero { get { return ZeroVector3; } }
 
