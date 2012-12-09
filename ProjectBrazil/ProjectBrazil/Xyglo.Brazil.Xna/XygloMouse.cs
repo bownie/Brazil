@@ -162,16 +162,90 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Get a list of mouse actions since the last time we had a mouse action - create an
+        /// event based interface for the mouse.
+        /// </summary>
+        /// <returns></returns>
+        protected List<MouseAction> getAllMouseActions()
+        {
+            List<MouseAction> lMA = new List<MouseAction>();
+            MouseState mouseState = Microsoft.Xna.Framework.Input.Mouse.GetState();
+
+            // This conversion process diffs the states and returns the results
+            //
+            List<Mouse> currentMouseList = XygloConvert.convertMouseMappings(mouseState, m_lastMouseState);
+
+            // So now we have all the differences between current mouse list and last one.
+            // Generate some MouseActions for these.
+            //
+            foreach (Mouse mouse in currentMouseList)
+            {
+                MouseAction mouseAction = new MouseAction(mouse);
+                mouseAction.m_position.X = mouseState.X;
+                mouseAction.m_position.Y = mouseState.Y;
+                mouseAction.m_scrollWheel = mouseState.ScrollWheelValue;
+                lMA.Add(mouseAction);
+            }
+
+            // If nothing has changed then at least update the positional information
+            //
+            /*
+            if (lMA.Count == 0)
+            {
+                // No mouse action but we might have movement
+                //
+                MouseAction mouseAction = new MouseAction();
+                if (mouseState.X != m_lastMouseState.X)
+                {
+                    mouseAction.m_position.X = mouseState.X;
+                }
+
+                if (mouseState.Y != m_lastMouseState.Y)
+                {
+                    mouseAction.m_position.Y = mouseState.Y;
+                }
+
+                if (mouseState.ScrollWheelValue != m_lastMouseState.ScrollWheelValue)
+                {
+                    mouseAction.m_scrollWheel = mouseState.ScrollWheelValue;
+                }
+                lMA.Add(mouseAction);
+            }
+            */
+
+            /*
+            // Now get the inverse state
+            //
+            foreach (Mouse lastMouse in lastMouseList)
+            {
+                if (!currentMouseList.Contains(lastMouse))
+                {
+                    MouseAction mouseAction = new MouseAction(lastMouse);
+                    mouseAction.m_position.X = mouseState.X;
+                    mouseAction.m_position.Y = mouseState.Y;
+                    mouseAction.m_scrollWheel = mouseState.ScrollWheelValue;
+                    lMA.Add(mouseAction);
+                }
+            }*/
+
+            return lMA;
+        }
+
+        /// <summary>
         /// Handle mouse click and double clicks and farm out the responsibility to other
         /// helper methods.
         /// </summary>
         /// <param name="gameTime"></param>
-        public void checkMouse(GameTime gameTime, Vector3 eye, Vector3 target, List<MouseAction> mouseActionList)
+        public void checkMouse(GameTime gameTime, Vector3 eye, Vector3 target)
         {
+            // Fetch all the mouse actions too
+            //
+            List<MouseAction> mouseActionList = getAllMouseActions();
+
             // Ignore an empty project for the moment
             //
-            if (m_context.m_project == null)
-                return;
+            //if (m_context.m_project == null)
+                //return;
 
             // If our main XNA window is inactive then ignore mouse clicks
             //
