@@ -104,6 +104,7 @@
     <Compile Include="Xyglo.Brazil.Xna\BloomSettings.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BraceDepth.cs" />
     <Compile Include="BrazilWorld.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\BrazilContext.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BufferView.cs" />
     <Compile Include="Xyglo.Brazil.Xna\EyePerturber.cs" />
     <Compile Include="Xyglo.Brazil.Xna\Model.cs" />

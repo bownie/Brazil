@@ -9,14 +9,18 @@ namespace Xyglo.Brazil.Xna
 {
 
     /// <summary>
-    /// Xyglo graphics and input state context
+    /// Xyglo generic context
     /// </summary>
     public class XygloContext
     {
         /// <summary>
-        /// The state of our application - what we're doing at the moment
+        /// BloomComponent
         /// </summary>
-        public State m_state;
+        public BloomComponent m_bloom;
+
+        // Current bloom settings index
+        //
+        public int m_bloomSettingsIndex = 0;
 
         /// <summary>
         /// Basic effect has with textures for fonts
@@ -89,11 +93,6 @@ namespace Xyglo.Brazil.Xna
         public Project m_project;
 
         /// <summary>
-        /// BrazilWorld holds some Worldly information for us
-        /// </summary>
-        public BrazilWorld m_world = null;
-
-        /// <summary>
         /// A drawable, keyed component dictionary
         /// </summary>
         public Dictionary<Component, XygloXnaDrawable> m_drawableComponents = new Dictionary<Component, XygloXnaDrawable>();
@@ -128,16 +127,6 @@ namespace Xyglo.Brazil.Xna
         /// Set field of view of the camera in radians
         /// </summary>
         public float m_fov = MathHelper.PiOver4;
-
-        /// <summary>
-        /// Get the list of States from the BrazilApp
-        /// </summary>
-        public List<State> m_states = null;
-
-        /// <summary>
-        /// Get the list of Targets from the BrazilApp
-        /// </summary>
-        public List<Target> m_targets = null;
 
         /// <summary>
         /// A helper class for drawing things

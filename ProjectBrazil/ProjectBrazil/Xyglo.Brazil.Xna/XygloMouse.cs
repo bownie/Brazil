@@ -47,21 +47,39 @@ namespace Xyglo.Brazil.Xna
 
     }
 
+    /// <summary>
+    /// Returned from XygloMouse - you can set the BufferView and ScreenPosition on the BufferView
+    /// and also if the highlight is being extended or not.
+    /// </summary>
     public class BufferViewEventArgs : System.EventArgs
     {
-        public BufferViewEventArgs(BufferView bv, ScreenPosition sp)
+        public BufferViewEventArgs(BufferView bv)
+        {
+            m_bufferView = bv;
+            m_setActiveBufferOnly = true;
+        }
+
+        public BufferViewEventArgs(BufferView bv, ScreenPosition sp, bool extendHighlight = false)
         {
             m_bufferView = bv;
             m_screenPosition = sp;
+            m_extendHighlight = extendHighlight;
         }
 
         public BufferView getBufferView() { return m_bufferView; }
         public ScreenPosition getScreenPosition() { return m_screenPosition; }
+        public bool isExtendingHighlight() { return m_extendHighlight; }
+        public bool setActiveOnly() { return m_setActiveBufferOnly; }
 
         protected BufferView m_bufferView;
         protected ScreenPosition m_screenPosition;
+        protected bool m_extendHighlight = false;
+        protected bool m_setActiveBufferOnly = false;
     }
 
+    /// <summary>
+    /// Returned from XygloMouse
+    /// </summary>
     public class NewBufferViewEventArgs : System.EventArgs
     {
         public NewBufferViewEventArgs(string filename, ScreenPosition sp)
@@ -76,21 +94,32 @@ namespace Xyglo.Brazil.Xna
         protected string m_filename;
         protected ScreenPosition m_screenPosition;
     }
+
+
+    // Declare some delegates
+    //
     public delegate void PositionChangeEventHandler(object sender, PositionEventArgs e);
     public delegate void TemporaryMessageEventHandler(object sender, TextEventArgs e);
     public delegate void BufferViewChangeEventHandler(object sender, BufferViewEventArgs e);
     public delegate void EyeChangeEventHandler(object sender, PositionEventArgs eye, PositionEventArgs target);
     public delegate void NewBufferViewEventHandler(object sender, NewBufferViewEventArgs e);
 
+
+
+    /// <summary>
+    /// Collection of all the mouse methods we had hanging around in XygloXNA - probably need further
+    /// teasing apart at some point.
+    /// </summary>
     public class XygloMouse
     {
         /// <summary>
         /// Construct on a XygloContext
         /// </summary>
         /// <param name="context"></param>
-        public XygloMouse(XygloContext context)
+        public XygloMouse(XygloContext context, BrazilContext brazilContext)
         {
             m_context = context;
+            m_brazilContext = brazilContext;
         }
 
         /// <summary>
@@ -99,8 +128,8 @@ namespace Xyglo.Brazil.Xna
         /// <param name="project"></param>
         /// <param name="projectionMatrix"></param>
         /// <param name="viewMatrix"></param>
-        public XygloMouse(Project project, Matrix projectionMatrix, Matrix viewMatrix, BoundingFrustum frustrum, FileSystemView fileSystemView, FontManager fontManager, GraphicsDeviceManager graphics)
-        {
+        //public XygloMouse(Project project, Matrix projectionMatrix, Matrix viewMatrix, BoundingFrustum frustrum, FileSystemView fileSystemView, FontManager fontManager, GraphicsDeviceManager graphics)
+        //{
             //m_project = project;
             //m_projection = projectionMatrix;
             //m_viewMatrix = viewMatrix;
@@ -108,7 +137,7 @@ namespace Xyglo.Brazil.Xna
             //m_fileSystemView = fileSystemView;
             //m_fontManager = fontManager;
             //m_graphics = graphics;
-        }
+        //}
 
         public event PositionChangeEventHandler ChangePositionEvent;
         public event TemporaryMessageEventHandler TemporaryMessageEvent;
@@ -549,7 +578,7 @@ namespace Xyglo.Brazil.Xna
                     if ((gameTime.TotalGameTime - m_lastClickTime).TotalSeconds < 0.15f)
                     {
 
-                        if (m_context.m_state.equals("DiffPicker"))
+                        if (m_brazilContext.m_state.equals("DiffPicker"))
                         {
                             if (m_differ != null && m_differ.hasDiffs())
                             {
@@ -580,7 +609,10 @@ namespace Xyglo.Brazil.Xna
                         {
                             //Logger.logMsg("XygloXNA::checkMouse() - switching to new buffer view");
                             //setActiveBuffer(newView);
-                            OnBufferViewChange(new BufferViewEventArgs(newView, new ScreenPosition(0, 0)));
+
+                            // Calling this constructor sets active buffer only
+                            //
+                            OnBufferViewChange(new BufferViewEventArgs(newView));
                         }
                         else
                         {
@@ -647,14 +679,14 @@ namespace Xyglo.Brazil.Xna
                 //
                 if (mouseAction.m_mouse == Mouse.RightButtonPress)
                 {
-                    StateAction sA = new StateAction(m_context.m_state, Mouse.RightButtonPress);
+                    StateAction sA = new StateAction(m_brazilContext.m_state, Mouse.RightButtonPress);
 
                     // scan components that could match
                     //
                     foreach (Component component in m_context.m_componentList)
                     {
                         string name = component.getStateActions().First().getState().m_name;
-                        if (!m_context.m_state.equals(component.getStateActions().First().getState().m_name) || (!component.isDestroyed() && !component.isHiding()))
+                        if (!m_brazilContext.m_state.equals(component.getStateActions().First().getState().m_name) || (!component.isDestroyed() && !component.isHiding()))
                             continue;
 
                         //Mouse mouse = (MouseAction)(component.getStateActions().First().getActions().First());
@@ -715,7 +747,7 @@ namespace Xyglo.Brazil.Xna
                     foreach (Component component in m_context.m_componentList)
                     {
                         string name = component.getStateActions().First().getState().m_name;
-                        if (!m_context.m_state.equals(component.getStateActions().First().getState().m_name))
+                        if (!m_brazilContext.m_state.equals(component.getStateActions().First().getState().m_name))
                             continue;
 
                         // Make it disappear
@@ -942,7 +974,7 @@ namespace Xyglo.Brazil.Xna
                         // Create a new FileBuffer at calculated position and add it to the project
                         //
                         Vector3 newPos = m_context.m_project.getBestBufferViewPosition(m_context.m_project.getSelectedBufferView());
-                        BufferView newBV = new BufferView(m_context.m_project.getFontManager(), fb, newPos, 0, 20, m_context.m_project.getFileIndex(fb), false);
+                        BufferView newBV = new BufferView(m_context.m_fontManager, fb, newPos, 0, 20, m_context.m_project.getFileIndex(fb), false);
                         int index = m_context.m_project.addBufferView(newBV);
 
                         int fileIndex = m_context.m_project.getFileIndex(fb);
@@ -1115,7 +1147,7 @@ namespace Xyglo.Brazil.Xna
                 BufferView bv = (BufferView)testFind.First;
                 ScreenPosition fp = (ScreenPosition)testFind.Second.First;
 
-                if (m_context.m_state.equals("DiffPicker"))
+                if (m_brazilContext.m_state.equals("DiffPicker"))
                 {
                     ScreenPosition newSP = bv.testCursorPosition(new FilePosition(fp));
 
@@ -1130,7 +1162,7 @@ namespace Xyglo.Brazil.Xna
                     {
                         //setActiveBuffer(bv);
                         //bv.mouseCursorTo(m_shiftDown, sp);
-                        OnBufferViewChange(new BufferViewEventArgs(bv, sp));
+                        OnBufferViewChange(new BufferViewEventArgs(bv, sp, m_context.m_shiftDown));
                     }
                 }
             }
@@ -1230,7 +1262,7 @@ namespace Xyglo.Brazil.Xna
 
                         // Set state back to default
                         //
-                        m_context.m_state = State.Test("TextEditing");
+                        m_brazilContext.m_state = State.Test("TextEditing");
                     }
                     else
                     {
@@ -1241,20 +1273,20 @@ namespace Xyglo.Brazil.Xna
                         // pregenerated the lines
                         //
                         Vector2 leftBox = Vector2.Zero;
-                        leftBox.X = (int)((m_context.m_graphics.GraphicsDevice.Viewport.Width / 2) - m_context.m_project.getFontManager().getCharWidth(FontManager.FontType.Overlay) * 20);
-                        leftBox.Y = (int)(m_context.m_project.getFontManager().getLineSpacing(FontManager.FontType.Overlay) * 3);
+                        leftBox.X = (int)((m_context.m_graphics.GraphicsDevice.Viewport.Width / 2) - m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) * 20);
+                        leftBox.Y = (int)(m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay) * 3);
 
                         Vector2 leftBoxEnd = leftBox;
-                        leftBoxEnd.X += (int)(m_context.m_project.getFontManager().getCharWidth(bv1.getViewSize()) * 16);
-                        leftBoxEnd.Y += (int)(m_context.m_project.getFontManager().getLineSpacing(bv1.getViewSize()) * 10);
+                        leftBoxEnd.X += (int)(m_context.m_fontManager.getCharWidth(bv1.getViewSize()) * 16);
+                        leftBoxEnd.Y += (int)(m_context.m_fontManager.getLineSpacing(bv1.getViewSize()) * 10);
 
                         Vector2 rightBox = Vector2.Zero;
-                        rightBox.X = (int)((m_context.m_graphics.GraphicsDevice.Viewport.Width / 2) + m_context.m_project.getFontManager().getCharWidth(FontManager.FontType.Overlay) * 4);
+                        rightBox.X = (int)((m_context.m_graphics.GraphicsDevice.Viewport.Width / 2) + m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) * 4);
                         rightBox.Y = leftBox.Y;
 
                         Vector2 rightBoxEnd = rightBox;
-                        rightBoxEnd.X += (int)(m_context.m_project.getFontManager().getCharWidth(bv2.getViewSize()) * 16);
-                        rightBoxEnd.Y += (int)(m_context.m_project.getFontManager().getLineSpacing(bv2.getViewSize()) * 10);
+                        rightBoxEnd.X += (int)(m_context.m_fontManager.getCharWidth(bv2.getViewSize()) * 16);
+                        rightBoxEnd.Y += (int)(m_context.m_fontManager.getLineSpacing(bv2.getViewSize()) * 10);
 
                         // Now generate some previews and store these positions
                         //
@@ -1294,7 +1326,7 @@ namespace Xyglo.Brazil.Xna
 
                     // Set state back to default
                     //
-                    m_context.m_state = State.Test("TextEditing");
+                    m_brazilContext.m_state = State.Test("TextEditing");
                 }
             }
         }
@@ -1303,7 +1335,7 @@ namespace Xyglo.Brazil.Xna
         /// Set a current zoom level
         /// </summary>
         /// <param name="zoomLevel"></param>
-        protected void setZoomLevel(float zoomLevel, Vector3 eye)
+        public void setZoomLevel(float zoomLevel, Vector3 eye)
         {
             m_context.m_zoomLevel = zoomLevel;
 
@@ -1398,5 +1430,10 @@ namespace Xyglo.Brazil.Xna
         /// The Xyglo context
         /// </summary>
         protected XygloContext m_context;
+
+        /// <summary>
+        /// BrazilContext
+        /// </summary>
+        protected BrazilContext m_brazilContext;
     }
 }

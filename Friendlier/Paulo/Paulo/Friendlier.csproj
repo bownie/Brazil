@@ -17,8 +17,7 @@
     <XnaProfile>Reach</XnaProfile>
     <XnaCrossPlatformGroupID>b86ad6fb-1b3f-48ce-b430-3323aee4ac8d</XnaCrossPlatformGroupID>
     <XnaOutputType>Game</XnaOutputType>
-    <ApplicationIcon>
-    </ApplicationIcon>
+    <ApplicationIcon>Friendlier.ico</ApplicationIcon>
     <Thumbnail>GameThumbnail.png</Thumbnail>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
@@ -88,6 +87,7 @@
     <Compile Include="Paulo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Friendlier.ico" />
     <Content Include="GameThumbnail.png" />
     <Content Include="TODO.txt" />
   </ItemGroup>

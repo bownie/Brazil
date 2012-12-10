@@ -47,7 +47,12 @@ namespace Xyglo.Brazil.Xna
         /// <summary>
         /// Project associated with this FileSystemView
         /// </summary>
-        Project m_project;
+        protected Project m_project;
+
+        /// <summary>
+        /// Local ref to FontManager
+        /// </summary>
+        protected FontManager m_fontManager;
 
         /// <summary>
         /// Index of the currently highlighted directory in a directory picker
@@ -60,11 +65,12 @@ namespace Xyglo.Brazil.Xna
         Vector3 m_position;
 
         ///////////////////////// CONSTRUCTORS ////////////////////////
-        public FileSystemView(string path, Vector3 position, Project project)
+        public FileSystemView(string path, Vector3 position, Project project, FontManager fontManager)
         {
             m_path = fixPathEnding(path);
             m_position = position;
             m_project = project;
+            m_fontManager = fontManager;
             scanDirectory();
         }
 
@@ -235,8 +241,8 @@ namespace Xyglo.Brazil.Xna
         {
             Vector3 rV = m_position;
             rV.Y = -rV.Y; // invert Y
-            rV.X += m_project.getFontManager().getCharWidth(m_project.getSelectedBufferView().getViewSize()) * m_project.getSelectedBufferView().getBufferShowWidth() / 2;
-            rV.Y -= m_project.getFontManager().getLineSpacing(m_project.getSelectedBufferView().getViewSize()) * m_project.getSelectedBufferView().getBufferShowLength() / 2;
+            rV.X += m_fontManager.getCharWidth(m_project.getSelectedBufferView().getViewSize()) * m_project.getSelectedBufferView().getBufferShowWidth() / 2;
+            rV.Y -= m_fontManager.getLineSpacing(m_project.getSelectedBufferView().getViewSize()) * m_project.getSelectedBufferView().getBufferShowLength() / 2;
             rV.Z += 600.0f;
             return rV;
         }

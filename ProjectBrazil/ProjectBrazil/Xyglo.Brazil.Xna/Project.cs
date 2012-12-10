@@ -1276,7 +1276,7 @@ namespace Xyglo.Brazil.Xna
         /// Return our font manager instance
         /// </summary>
         /// <returns></returns>
-        public FontManager getFontManager()
+        protected FontManager getFontManager()
         {
             return m_fontManager;
         }
