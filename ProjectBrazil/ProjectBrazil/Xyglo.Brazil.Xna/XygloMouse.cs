@@ -4,113 +4,16 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Xyglo.Brazil.Xna
 {
 
     /// <summary>
-    /// Position Event arguments
-    /// </summary>
-    public class PositionEventArgs : System.EventArgs
-    {
-        public PositionEventArgs(Vector3 newPosition)
-        {
-            m_position = newPosition;
-        }
-
-        public Vector3 getPosition()
-        {
-            return m_position;
-        }
-
-        protected Vector3 m_position;
-    }
-
-    public class TextEventArgs : System.EventArgs
-    {
-        public TextEventArgs(string text, double duration, GameTime gameTime)
-        {
-            m_text = text;
-            m_duration = duration;
-            m_gameTime = gameTime;
-        }
-
-        public string getText() { return m_text; }
-        public double getDuration() { return m_duration; }
-        public GameTime getGameTime() { return m_gameTime; }
-
-        protected string m_text;
-
-        protected double m_duration;
-
-        protected GameTime m_gameTime;
-
-    }
-
-    /// <summary>
-    /// Returned from XygloMouse - you can set the BufferView and ScreenPosition on the BufferView
-    /// and also if the highlight is being extended or not.
-    /// </summary>
-    public class BufferViewEventArgs : System.EventArgs
-    {
-        public BufferViewEventArgs(BufferView bv)
-        {
-            m_bufferView = bv;
-            m_setActiveBufferOnly = true;
-        }
-
-        public BufferViewEventArgs(BufferView bv, ScreenPosition sp, bool extendHighlight = false)
-        {
-            m_bufferView = bv;
-            m_screenPosition = sp;
-            m_extendHighlight = extendHighlight;
-        }
-
-        public BufferView getBufferView() { return m_bufferView; }
-        public ScreenPosition getScreenPosition() { return m_screenPosition; }
-        public bool isExtendingHighlight() { return m_extendHighlight; }
-        public bool setActiveOnly() { return m_setActiveBufferOnly; }
-
-        protected BufferView m_bufferView;
-        protected ScreenPosition m_screenPosition;
-        protected bool m_extendHighlight = false;
-        protected bool m_setActiveBufferOnly = false;
-    }
-
-    /// <summary>
-    /// Returned from XygloMouse
-    /// </summary>
-    public class NewBufferViewEventArgs : System.EventArgs
-    {
-        public NewBufferViewEventArgs(string filename, ScreenPosition sp)
-        {
-            m_filename = filename;
-            m_screenPosition = sp;
-        }
-
-        public string getFileName() { return m_filename; }
-        public ScreenPosition getScreenPosition() { return m_screenPosition; }
-
-        protected string m_filename;
-        protected ScreenPosition m_screenPosition;
-    }
-
-
-    // Declare some delegates
-    //
-    public delegate void PositionChangeEventHandler(object sender, PositionEventArgs e);
-    public delegate void TemporaryMessageEventHandler(object sender, TextEventArgs e);
-    public delegate void BufferViewChangeEventHandler(object sender, BufferViewEventArgs e);
-    public delegate void EyeChangeEventHandler(object sender, PositionEventArgs eye, PositionEventArgs target);
-    public delegate void NewBufferViewEventHandler(object sender, NewBufferViewEventArgs e);
-
-
-
-    /// <summary>
     /// Collection of all the mouse methods we had hanging around in XygloXNA - probably need further
     /// teasing apart at some point.
     /// </summary>
-    public class XygloMouse
+    public class XygloMouse : XygloEventEmitter
     {
         /// <summary>
         /// Construct on a XygloContext
@@ -138,57 +41,6 @@ namespace Xyglo.Brazil.Xna
             //m_fontManager = fontManager;
             //m_graphics = graphics;
         //}
-
-        public event PositionChangeEventHandler ChangePositionEvent;
-        public event TemporaryMessageEventHandler TemporaryMessageEvent;
-        public event BufferViewChangeEventHandler BufferViewChangeEvent;
-        public event EyeChangeEventHandler EyeChangeEvent;
-        public event NewBufferViewEventHandler NewBufferViewEvent;
-        /// <summary>
-        /// Convenience method for using the event
-        /// </summary>
-        /// <param name="e"></param>
-        protected virtual void OnChangePosition(PositionEventArgs e)
-        {
-            if (ChangePositionEvent != null) ChangePositionEvent(this, e);
-        }
-
-        /// <summary>
-        /// Convenience method for emitting temporary message change
-        /// </summary>
-        /// <param name="e"></param>
-        protected virtual void OnTemporaryMessage(TextEventArgs e)
-        {
-            if (TemporaryMessageEvent != null) TemporaryMessageEvent(this, e);
-        }
-
-        /// <summary>
-        /// Convenience function for emitting BufferViewChange event
-        /// </summary>
-        /// <param name="e"></param>
-        protected virtual void OnBufferViewChange(BufferViewEventArgs e)
-        {
-            if (BufferViewChangeEvent != null) BufferViewChangeEvent(this, e);
-        }
-
-        /// <summary>
-        /// Eye change event
-        /// </summary>
-        /// <param name="eye"></param>
-        /// <param name="target"></param>
-        protected virtual void OnEyeChangeEvent(PositionEventArgs eye, PositionEventArgs target)
-        {
-            if (EyeChangeEvent != null) EyeChangeEvent(this, eye, target);
-        }
-
-        /// <summary>
-        /// New BufferView
-        /// </summary>
-        /// <param name="e"></param>
-        protected virtual void OnNewBufferViewEvent(NewBufferViewEventArgs e)
-        {
-            if (NewBufferViewEvent != null) NewBufferViewEvent(this, e);
-        }
 
         /// <summary>
         /// Get a list of mouse actions since the last time we had a mouse action - create an
@@ -265,7 +117,7 @@ namespace Xyglo.Brazil.Xna
         /// helper methods.
         /// </summary>
         /// <param name="gameTime"></param>
-        public void checkMouse(GameTime gameTime, Vector3 eye, Vector3 target)
+        public void checkMouse(GameTime gameTime, XygloKeyboard keyboard, Vector3 eye, Vector3 target)
         {
             // Fetch all the mouse actions too
             //
@@ -542,7 +394,7 @@ namespace Xyglo.Brazil.Xna
 
                         // If shift isn't down then we pan with the eye movement
                         //
-                        if (!m_context.m_shiftDown)
+                        if (!keyboard.isShiftDown())
                         {
                             newTarget.X = newEye.X;
                             newTarget.Y = newEye.Y;
@@ -584,7 +436,7 @@ namespace Xyglo.Brazil.Xna
                             {
                                 // We have a diff pick - let's do something to the view
                                 //
-                                handleSingleClick(gameTime);
+                                handleSingleClick(gameTime, keyboard.isShiftDown());
                             }
                             else
                             {
@@ -595,7 +447,7 @@ namespace Xyglo.Brazil.Xna
                         }
                         else
                         {
-                            handleSingleClick(gameTime);
+                            handleSingleClick(gameTime, keyboard.isShiftDown());
                         }
                     }
                     else // we've done a long click and release we're dragging - on the release handle the drag result
@@ -639,7 +491,7 @@ namespace Xyglo.Brazil.Xna
 
                     // If shift down then scroll current view - otherwise zoom in/out
                     //
-                    if (m_context.m_shiftDown)
+                    if (keyboard.isShiftDown())
                     {
                         int linesDown = -(int)((m_lastMouseWheelValue - mouseAction.m_scrollWheel) / 120.0f);
 
@@ -647,14 +499,14 @@ namespace Xyglo.Brazil.Xna
                         {
                             for (int i = 0; i < -linesDown; i++)
                             {
-                                m_context.m_project.getSelectedBufferView().moveCursorDown(false, m_context.m_shiftDown);
+                                m_context.m_project.getSelectedBufferView().moveCursorDown(false, keyboard.isShiftDown());
                             }
                         }
                         else
                         {
                             for (int i = 0; i < linesDown; i++)
                             {
-                                m_context.m_project.getSelectedBufferView().moveCursorUp(m_context.m_project, false, m_context.m_shiftDown);
+                                m_context.m_project.getSelectedBufferView().moveCursorUp(m_context.m_project, false, keyboard.isShiftDown());
                             }
                         }
                     }
@@ -1131,7 +983,7 @@ namespace Xyglo.Brazil.Xna
         /// Handle a single left button mouse click
         /// </summary>
         /// <param name="gameTime"></param>
-        protected void handleSingleClick(GameTime gameTime)
+        protected void handleSingleClick(GameTime gameTime, bool shiftDown)
         {
             if (m_context.m_project == null)
             {
@@ -1162,7 +1014,7 @@ namespace Xyglo.Brazil.Xna
                     {
                         //setActiveBuffer(bv);
                         //bv.mouseCursorTo(m_shiftDown, sp);
-                        OnBufferViewChange(new BufferViewEventArgs(bv, sp, m_context.m_shiftDown));
+                        OnBufferViewChange(new BufferViewEventArgs(bv, sp, shiftDown));
                     }
                 }
             }
@@ -1349,6 +1201,75 @@ namespace Xyglo.Brazil.Xna
 
             //flyToPosition(eyePos);
             OnChangePosition(new PositionEventArgs(eyePos));
+        }
+
+        /// <summary>
+        /// Draw a cursor and make it blink in position on a FileBuffer
+        /// </summary>
+        /// <param name="v"></param>
+        public void drawCursor(GameTime gameTime, SpriteBatch spriteBatch)
+        {
+            // Don't draw the cursor if we're not the active window or if we're confirming 
+            // something on the screen.
+            //
+            // No cursor for tailing BufferViews
+            //
+            if (!m_context.m_project.getSelectedBufferView().isTailing())
+            {
+                double dTS = gameTime.TotalGameTime.TotalSeconds;
+                int blinkRate = 4;
+
+                // Test for when we're showing this
+                //
+                if (Convert.ToInt32(dTS * blinkRate) % 2 != 0)
+                {
+                    return;
+                }
+
+                // Blinks rate
+                //
+                Vector3 v1 = m_context.m_project.getSelectedBufferView().getCursorCoordinates();
+                v1.Y += m_context.m_project.getSelectedBufferView().getLineSpacing();
+
+                Vector3 v2 = m_context.m_project.getSelectedBufferView().getCursorCoordinates();
+                v2.X += 1;
+
+                m_context.m_drawingHelper.renderQuad(v1, v2, m_context.m_project.getSelectedBufferView().getHighlightColor(), spriteBatch);
+            }
+            // Draw any temporary highlight
+            //
+            if (m_clickHighlight.First != null &&
+                ((BufferView)m_clickHighlight.First) == m_context.m_project.getSelectedBufferView())
+            {
+                Highlight h = (Highlight)m_clickHighlight.Second;
+                Vector3 h1 = m_context.m_project.getSelectedBufferView().getSpaceCoordinates(h.m_startHighlight.asScreenPosition());
+                Vector3 h2 = m_context.m_project.getSelectedBufferView().getSpaceCoordinates(h.m_endHighlight.asScreenPosition());
+
+                // Add some height here so we can see the highlight
+                //
+                h2.Y += m_context.m_fontManager.getLineSpacing(m_context.m_project.getSelectedBufferView().getViewSize());
+
+                m_context.m_drawingHelper.renderQuad(h1, h2, h.getColour(), spriteBatch);
+            }
+        }
+
+        /// <summary>
+        /// Return this value for use in drawables
+        /// </summary>
+        /// <returns></returns>
+        public Vector3 getLastClickWorldPosition()
+        {
+            return m_lastClickWorldPosition;
+        }
+
+        /// <summary>
+        /// Returns the offset from the last click position to the start of the string that
+        /// was clicked on.  Used in drawables.
+        /// </summary>
+        /// <returns></returns>
+        public Vector2 geLastClickCursorOffset()
+        {
+            return m_lastClickCursorOffsetPosition;
         }
 
         /// <summary>

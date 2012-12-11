@@ -48,26 +48,6 @@ namespace Xyglo.Brazil.Xna
         public FontManager m_fontManager;
 
         /// <summary>
-        /// Is shift down?
-        /// </summary>
-        public bool m_shiftDown;
-
-        /// <summary>
-        /// Is control down?
-        /// </summary>
-        public bool m_ctrlDown;
-
-        /// <summary>
-        /// Is alt down?
-        /// </summary>
-        public bool m_altDown;
-
-        /// <summary>
-        /// Is Windows key down?
-        /// </summary>
-        public bool m_windowsDown;
-
-        /// <summary>
         /// Component list from XygloXNA
         /// </summary>
         public List<Component> m_componentList;
@@ -132,5 +112,40 @@ namespace Xyglo.Brazil.Xna
         /// A helper class for drawing things
         /// </summary>
         public DrawingHelper m_drawingHelper;
+
+        /// <summary>
+        /// Keep a copy of GameTime somewhere central
+        /// </summary>
+        public GameTime m_gameTime;
+
+        /// <summary>
+        /// Another SpriteBatch for the overlay
+        /// </summary>
+        public SpriteBatch m_overlaySpriteBatch;
+
+        /// <summary>
+        /// A third SpriteBatch for panners/differs etc utilising alpha
+        /// </summary>
+        public SpriteBatch m_pannerSpriteBatch;
+
+        /// <summary>
+        /// A flat texture we use for drawing coloured blobs like highlighting and cursors
+        /// </summary>
+        public Texture2D m_flatTexture;
+
+        /// <summary>
+        /// A rendertarget for the text scroller
+        /// </summary>
+        public RenderTarget2D m_textScroller;
+
+        /// <summary>
+        /// A texture we can render a text string to and scroll
+        /// </summary>
+        public Texture2D m_textScrollTexture;
+
+        /// <summary>
+        /// Splash screen texture
+        /// </summary>
+        public Texture2D m_splashScreen;
     }
 }

@@ -22,16 +22,6 @@ namespace Xyglo.Brazil.Xna
     public class DrawingHelper
     {
         /// <summary>
-        /// A Friendlier Project
-        /// </summary>
-        protected Project m_project;
-
-        /// <summary>
-        /// Store a local texture
-        /// </summary>
-        protected Texture2D m_flatTexture;
-
-        /// <summary>
         /// BoundingBox for the BufferView preview
         /// </summary>
         protected BoundingBox m_previewBoundingBox;
@@ -102,36 +92,21 @@ namespace Xyglo.Brazil.Xna
         protected string m_userHelp;
 
         /// <summary>
-        /// Font manager
+        /// XygloContext passed from the main app
         /// </summary>
-        protected FontManager m_fontManager;
+        protected XygloContext m_context;
 
         // ---------------------------------- CONSTRUCTORS -------------------------------
         //
-
         /// <summary>
         /// Construct our helper
         /// </summary>
         /// <param name="project"></param>
         /// <param name="flatTexture"></param>
-        public DrawingHelper(Project project, FontManager fontManager, Texture2D flatTexture, float windowWidth, float windowHeight)
+        public DrawingHelper(XygloContext context)
         {
-            m_project = project;
-            m_fontManager = fontManager;
-            m_flatTexture = flatTexture;
-            setPreviewBoundingBox(windowWidth, windowHeight);
-
-            // Populate the user help
-            //
-            populateUserHelp();
-        }
-
-        public DrawingHelper(FontManager fontManager, Texture2D flatTexture, float windowWidth, float windowHeight)
-        {
-            //m_project = project;
-            m_fontManager = fontManager;
-            m_flatTexture = flatTexture;
-            setPreviewBoundingBox(windowWidth, windowHeight);
+            m_context = context;
+            setPreviewBoundingBox(m_context.m_graphics.GraphicsDevice.Viewport.Width, m_context.m_graphics.GraphicsDevice.Viewport.Height);
 
             // Populate the user help
             //
@@ -140,79 +115,6 @@ namespace Xyglo.Brazil.Xna
 
         // ---------------------------------- METHODS -----------------------------------
         //
-
-        /// <summary>
-        /// Attempt to set the display mode to the desired resolution.  Itterates through the display
-        /// capabilities of the default graphics adapter to determine if the graphics adapter supports the
-        /// requested resolution.  If so, the resolution is set and the function returns true.  If not,
-        /// no change is made and the function returns false.
-        /// </summary>
-        /// <param name="iWidth">Desired screen width.</param>
-        /// <param name="iHeight">Desired screen height.</param>
-        /// <param name="bFullScreen">True if you wish to go to Full Screen, false for Windowed Mode.</param>
-        public bool initGraphicsMode(XygloContext context, GameComponentCollection Components, Game game, int iWidth, int iHeight, bool bFullScreen)
-        {
-            // If we aren't using a full screen mode, the height and width of the window can
-            // be set to anything equal to or smaller than the actual screen size.
-            if (bFullScreen == false)
-            {
-                if ((iWidth <= GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width)
-                    && (iHeight <= GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height))
-                {
-                    context.m_graphics.PreferredBackBufferWidth = iWidth;
-                    context.m_graphics.PreferredBackBufferHeight = iHeight;
-                    context.m_graphics.IsFullScreen = bFullScreen;
-                    context.m_graphics.ApplyChanges();
-
-                    // Reload the bloom component
-                    //
-                    if (context.m_bloom != null)
-                    {
-                        Components.Remove(context.m_bloom);
-                        ////m_bloom.Dispose();
-                        context.m_bloom = new BloomComponent(game);
-                        Components.Add(context.m_bloom);
-                    }
-
-                    Logger.logMsg("DrawingHelper::initGraphicsMode() - width = " + iWidth + ", height = " + iHeight + ", fullscreen = " + bFullScreen.ToString());
-                    return true;
-                }
-            }
-            else
-            {
-                // If we are using full screen mode, we should check to make sure that the display
-                // adapter can handle the video mode we are trying to set.  To do this, we will
-                // iterate thorugh the display modes supported by the adapter and check them against
-                // the mode we want to set.
-                foreach (DisplayMode dm in GraphicsAdapter.DefaultAdapter.SupportedDisplayModes)
-                {
-                    // Check the width and height of each mode against the passed values
-                    if ((dm.Width == iWidth) && (dm.Height == iHeight))
-                    {
-                        // The mode is supported, so set the buffer formats, apply changes and return
-                        context.m_graphics.PreferredBackBufferWidth = iWidth;
-                        context.m_graphics.PreferredBackBufferHeight = iHeight;
-                        context.m_graphics.IsFullScreen = bFullScreen;
-                        context.m_graphics.ApplyChanges();
-
-                        // Reload the bloom component
-                        //
-                        if (context.m_bloom != null)
-                        {
-                            Components.Remove(context.m_bloom);
-                            ////m_bloom.Dispose();
-                            context.m_bloom = new BloomComponent(game);
-                            Components.Add(context.m_bloom);
-                        }
-
-                        Logger.logMsg("DrawingHelper::initGraphicsMode() - width = " + iWidth + ", height = " + iHeight + ", fullscreen = " + bFullScreen.ToString());
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
         /// <summary>
         /// Return a max bounding box for a list of drawables
         /// </summary>
@@ -286,9 +188,9 @@ namespace Xyglo.Brazil.Xna
                 return;
 
             // If we have a project do this
-            if (m_project != null)
+            if (m_context.m_project != null)
             {
-                bb = getMetaBoundingBox(m_project.getBoundingBox(), (BoundingBox)bb);
+                bb = getMetaBoundingBox(m_context.m_project.getBoundingBox(), (BoundingBox)bb);
             }
 
             // Now draw the previews - the drawable works out the scaling itself according to what
@@ -307,7 +209,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="spriteBatch"></param>
         public void drawBufferViewMap(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            BoundingBox bb = m_project.getBoundingBox();
+            BoundingBox bb = m_context.m_project.getBoundingBox();
 
             // Modify alpha according to the type of the line
             //
@@ -325,7 +227,7 @@ namespace Xyglo.Brazil.Xna
             float previewX = m_previewBoundingBox.Max.X - m_previewBoundingBox.Min.X;
             float previewY = m_previewBoundingBox.Max.Y - m_previewBoundingBox.Min.Y;
 
-            foreach (BufferView bv in m_project.getBufferViews())
+            foreach (BufferView bv in m_context.m_project.getBufferViews())
             {
                 topLeft.X = m_previewBoundingBox.Min.X;
                 topLeft.Y = m_previewBoundingBox.Min.Y;
@@ -338,7 +240,7 @@ namespace Xyglo.Brazil.Xna
                 bottomRight.X += ((bv.getBoundingBox().Max.X - minX) / diffX) * previewX;
                 bottomRight.Y += ((bv.getBoundingBox().Max.Y - minY) / diffY) * previewY;
 
-                drawQuad(spriteBatch, topLeft, bottomRight, Color.LightYellow, (bv == m_project.getSelectedBufferView()) ? 0.5f : 0.1f);
+                drawQuad(spriteBatch, topLeft, bottomRight, Color.LightYellow, (bv == m_context.m_project.getSelectedBufferView()) ? 0.5f : 0.1f);
             }
         }
 
@@ -372,12 +274,12 @@ namespace Xyglo.Brazil.Xna
         public void setPreviewBoundingBox(float windowWidth, float windowHeight)
         {
             Vector3 topLeft = Vector3.Zero;
-            topLeft.X = windowWidth - m_fontManager.getOverlayFont().MeasureString("X").X * 10;
-            topLeft.Y = windowHeight - m_fontManager.getOverlayFont().LineSpacing * 6;
+            topLeft.X = windowWidth - m_context.m_fontManager.getOverlayFont().MeasureString("X").X * 10;
+            topLeft.Y = windowHeight - m_context.m_fontManager.getOverlayFont().LineSpacing * 6;
 
             Vector3 bottomRight = Vector3.Zero;
-            bottomRight.X = windowWidth - m_fontManager.getOverlayFont().MeasureString("X").X * 3;
-            bottomRight.Y = windowHeight - m_fontManager.getOverlayFont().LineSpacing * 2;
+            bottomRight.X = windowWidth - m_context.m_fontManager.getOverlayFont().MeasureString("X").X * 3;
+            bottomRight.Y = windowHeight - m_context.m_fontManager.getOverlayFont().LineSpacing * 2;
 
             m_previewBoundingBox.Min = topLeft;
             m_previewBoundingBox.Max = bottomRight;
@@ -396,7 +298,7 @@ namespace Xyglo.Brazil.Xna
         {
             float angle = (float)Math.Atan2(bottomRight.Y - topLeft.Y, bottomRight.X - topLeft.X);
             float length = Vector2.Distance(topLeft, bottomRight);
-            spriteBatch.Draw(m_flatTexture, topLeft, null, colour * alpha,
+            spriteBatch.Draw(m_context.m_flatTexture, topLeft, null, colour * alpha,
                              angle, Vector2.Zero, new Vector2(length, width),
                              SpriteEffects.None, 0);
         }
@@ -411,7 +313,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="width"></param>
         public void drawQuad(SpriteBatch spriteBatch, Vector2 topLeft, Vector2 bottomRight, Color colour, float alpha = 1.0f)
         {
-            spriteBatch.Draw(m_flatTexture, new Rectangle((int)topLeft.X, (int)topLeft.Y, (int)(bottomRight.X - topLeft.X), (int)(bottomRight.Y - topLeft.Y)), colour * alpha);
+            spriteBatch.Draw(m_context.m_flatTexture, new Rectangle((int)topLeft.X, (int)topLeft.Y, (int)(bottomRight.X - topLeft.X), (int)(bottomRight.Y - topLeft.Y)), colour * alpha);
         }
 
         /// <summary>
@@ -431,7 +333,7 @@ namespace Xyglo.Brazil.Xna
             m_topRight.Y = topLeft.Y;
             m_topRight.Z = bottomRight.Z;
 
-            spriteBatch.Draw(m_flatTexture, new Rectangle(Convert.ToInt16(topLeft.X),
+            spriteBatch.Draw(m_context.m_flatTexture, new Rectangle(Convert.ToInt16(topLeft.X),
                                                  Convert.ToInt16(topLeft.Y),
                                                  Convert.ToInt16(bottomRight.X) - Convert.ToInt16(topLeft.X),
                                                  Convert.ToInt16(bottomRight.Y) - Convert.ToInt16(topLeft.Y)),
@@ -444,13 +346,13 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         public void drawHighlight(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            List<BoundingBox> bb = m_project.getSelectedBufferView().computeHighlight(m_project);
+            List<BoundingBox> bb = m_context.m_project.getSelectedBufferView().computeHighlight(m_context.m_project);
 
             // Draw the bounding boxes
             //
             foreach (BoundingBox highlight in bb)
             {
-                renderQuad(highlight.Min, highlight.Max, m_project.getSelectedBufferView().getHighlightColor(), spriteBatch);
+                renderQuad(highlight.Min, highlight.Max, m_context.m_project.getSelectedBufferView().getHighlightColor(), spriteBatch);
             }
         }
 
@@ -476,7 +378,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="text"></param>
         public int drawTextScreen(SpriteBatch spriteBatch, GameTime gameTime, GraphicsDeviceManager graphics, string text, int textScreenPositionY, int fixedWidth = 0, int highlight = -1)
         {
-            Vector3 fp = m_project.getSelectedBufferView().getPosition();
+            Vector3 fp = m_context.m_project.getSelectedBufferView().getPosition();
 
             // Always start from 0 for offsets
             //
@@ -506,9 +408,9 @@ namespace Xyglo.Brazil.Xna
             //
             if (fixedWidth == 0)
             {
-                if (longestRow > m_project.getSelectedBufferView().getBufferShowWidth())
+                if (longestRow > m_context.m_project.getSelectedBufferView().getBufferShowWidth())
                 {
-                    longestRow = m_project.getSelectedBufferView().getBufferShowWidth();
+                    longestRow = m_context.m_project.getSelectedBufferView().getBufferShowWidth();
                 }
             }
             else
@@ -518,15 +420,15 @@ namespace Xyglo.Brazil.Xna
 
             // Calculate endline
             //
-            int endLine = textScreenPositionY + Math.Min(infoRows.Length - textScreenPositionY, m_project.getSelectedBufferView().getBufferShowLength());
+            int endLine = textScreenPositionY + Math.Min(infoRows.Length - textScreenPositionY, m_context.m_project.getSelectedBufferView().getBufferShowLength());
 
             // Modify by height of the screen to centralise
             //
-            yPos += (graphics.GraphicsDevice.Viewport.Height / 2) - (m_fontManager.getLineSpacing(FontManager.FontType.Overlay) * (endLine - textScreenPositionY) / 2);
+            yPos += (graphics.GraphicsDevice.Viewport.Height / 2) - (m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay) * (endLine - textScreenPositionY) / 2);
 
             // Adjust xPos
             //
-            xPos = (graphics.GraphicsDevice.Viewport.Width / 2) - (longestRow * m_fontManager.getCharWidth(FontManager.FontType.Overlay) / 2);
+            xPos = (graphics.GraphicsDevice.Viewport.Width / 2) - (longestRow * m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) / 2);
 
             // hardcode the font size to 1.0f so it looks nice
             //
@@ -534,16 +436,16 @@ namespace Xyglo.Brazil.Xna
             {
                 // Always Always Always render a string on an integer - never on a float as it looks terrible
                 //
-                spriteBatch.DrawString(m_fontManager.getOverlayFont(), infoRows[i], new Vector2((int)xPos, (int)yPos), (highlight == i ? Color.LightBlue : Color.White), 0, Vector2.Zero, 1.0f, 0, 0);
-                yPos += m_fontManager.getLineSpacing(FontManager.FontType.Overlay);
+                spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), infoRows[i], new Vector2((int)xPos, (int)yPos), (highlight == i ? Color.LightBlue : Color.White), 0, Vector2.Zero, 1.0f, 0, 0);
+                yPos += m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay);
             }
 
             // Draw a page header if we need to
             //
-            yPos = m_fontManager.getLineSpacing(FontManager.FontType.Overlay) * 5;
+            yPos = m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay) * 5;
 
-            double dPages = Math.Ceiling((float)textScreenLength / (float)m_project.getSelectedBufferView().getBufferShowLength());
-            double cPage = Math.Ceiling((float)(textScreenPositionY + 1) / ((float)m_project.getSelectedBufferView().getBufferShowLength()));
+            double dPages = Math.Ceiling((float)textScreenLength / (float)m_context.m_project.getSelectedBufferView().getBufferShowLength());
+            double cPage = Math.Ceiling((float)(textScreenPositionY + 1) / ((float)m_context.m_project.getSelectedBufferView().getBufferShowLength()));
 
             if (dPages > 1)
             {
@@ -551,11 +453,11 @@ namespace Xyglo.Brazil.Xna
 
                 // 3 character adjustment below
                 //
-                xPos = (graphics.GraphicsDevice.Viewport.Width / 2) - ((pageString.Length + 3) * m_fontManager.getCharWidth(FontManager.FontType.Overlay) / 2);
+                xPos = (graphics.GraphicsDevice.Viewport.Width / 2) - ((pageString.Length + 3) * m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) / 2);
 
                 // Always Always Always render a string on an integer - never on a float as it looks terrible
                 //
-                spriteBatch.DrawString(m_fontManager.getOverlayFont(), pageString, new Vector2((int)xPos, (int)yPos), Color.LightSeaGreen);
+                spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), pageString, new Vector2((int)xPos, (int)yPos), Color.LightSeaGreen);
             }
             return textScreenLength;
         }
@@ -577,30 +479,30 @@ namespace Xyglo.Brazil.Xna
 
             drawCentredTextOverlay(spriteBatch, graphics, 3, "File Information", Color.AntiqueWhite);
 
-            string truncFileName = m_project.estimateFileStringTruncation("", m_project.getSelectedBufferView().getFileBuffer().getFilepath(), 75);
+            string truncFileName = m_context.m_project.estimateFileStringTruncation("", m_context.m_project.getSelectedBufferView().getFileBuffer().getFilepath(), 75);
 
             text += truncFileName + "\n\n";
-            text += "File status        : " + (m_project.getSelectedBufferView().getFileBuffer().isWriteable() ? "Writeable " : "Read Only") + "\n";
-            text += "File lines         : " + m_project.getSelectedBufferView().getFileBuffer().getLineCount() + "\n";
-            text += "File created       : " + m_project.getSelectedBufferView().getFileBuffer().getCreationSystemTime().ToString() + "\n";
-            text += "File last modified : " + m_project.getSelectedBufferView().getFileBuffer().getLastWriteSystemTime().ToString() + "\n";
-            text += "File last accessed : " + m_project.getSelectedBufferView().getFileBuffer().getLastFetchSystemTime().ToString() + "\n";
+            text += "File status        : " + (m_context.m_project.getSelectedBufferView().getFileBuffer().isWriteable() ? "Writeable " : "Read Only") + "\n";
+            text += "File lines         : " + m_context.m_project.getSelectedBufferView().getFileBuffer().getLineCount() + "\n";
+            text += "File created       : " + m_context.m_project.getSelectedBufferView().getFileBuffer().getCreationSystemTime().ToString() + "\n";
+            text += "File last modified : " + m_context.m_project.getSelectedBufferView().getFileBuffer().getLastWriteSystemTime().ToString() + "\n";
+            text += "File last accessed : " + m_context.m_project.getSelectedBufferView().getFileBuffer().getLastFetchSystemTime().ToString() + "\n";
 
             text += "\n"; // divider
-            text += "Project name:      : " + m_project.m_projectName + "\n";
-            text += "Project created    : " + m_project.getCreationTime().ToString() + "\n";
-            text += "Project file       : " + m_project.getExternalProjectDefinitionFile() + "\n";
-            text += "Profile base dir   : " + m_project.getExternalProjectBaseDirectory() + "\n";
-            text += "Number of files    : " + m_project.getFileBuffers().Count + "\n";
-            text += "File lines         : " + m_project.getFilesTotalLines() + "\n";
-            text += "FileBuffers        : " + m_project.getFileBuffers().Count + "\n";
-            text += "BufferViews        : " + m_project.getBufferViews().Count + "\n";
+            text += "Project name:      : " + m_context.m_project.m_projectName + "\n";
+            text += "Project created    : " + m_context.m_project.getCreationTime().ToString() + "\n";
+            text += "Project file       : " + m_context.m_project.getExternalProjectDefinitionFile() + "\n";
+            text += "Profile base dir   : " + m_context.m_project.getExternalProjectBaseDirectory() + "\n";
+            text += "Number of files    : " + m_context.m_project.getFileBuffers().Count + "\n";
+            text += "File lines         : " + m_context.m_project.getFilesTotalLines() + "\n";
+            text += "FileBuffers        : " + m_context.m_project.getFileBuffers().Count + "\n";
+            text += "BufferViews        : " + m_context.m_project.getBufferViews().Count + "\n";
             text += "\n"; // divider
 
             // Some timings
             //
-            TimeSpan nowDiff = (DateTime.Now - m_project.getCreationTime());
-            TimeSpan activeTime = m_project.m_activeTime + (DateTime.Now - m_project.m_lastAccessTime);
+            TimeSpan nowDiff = (DateTime.Now - m_context.m_project.getCreationTime());
+            TimeSpan activeTime = m_context.m_project.m_activeTime + (DateTime.Now - m_context.m_project.m_lastAccessTime);
             text += "Project age        : " + nowDiff.Days + " days, " + nowDiff.Hours + " hours, " + nowDiff.Minutes + " minutes\n"; //, " + nowDiff.Seconds + " seconds\n";
             text += "Total editing time : " + activeTime.Days + " days, " + activeTime.Hours + " hours, " + activeTime.Minutes + " minutes, " + activeTime.Seconds + " seconds\n";
 
@@ -619,10 +521,10 @@ namespace Xyglo.Brazil.Xna
         /// <param name="textColour"></param>
         protected void drawTextOverlay(SpriteBatch spriteBatch, FilePosition position, string text, Color textColour)
         {
-            //int xPos = (int)((float)position.X * m_fontManager.getCharWidth(FontManager.FontType.Overlay));
-            //int yPos = (int)((float)position.Y * m_fontManager.getLineSpacing(FontManager.FontType.Overlay));
+            //int xPos = (int)((float)position.X * m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay));
+            //int yPos = (int)((float)position.Y * m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay));
 
-            //spriteBatch.DrawString(m_fontManager.getOverlayFont(), text, new Vector2(xPos, yPos), textColour);
+            //spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), text, new Vector2(xPos, yPos), textColour);
         }
 
         /// <summary>
@@ -643,9 +545,9 @@ namespace Xyglo.Brazil.Xna
                     maxWidth = subString.Length;
                 }
             }
-            int xPos = (graphics.GraphicsDevice.Viewport.Width / 2) - (int)((float)maxWidth / 2 * m_fontManager.getCharWidth(FontManager.FontType.Overlay));
-            int yPos = (int)((float)lines * m_fontManager.getLineSpacing(FontManager.FontType.Overlay));
-            spriteBatch.DrawString(m_fontManager.getOverlayFont(), text, new Vector2(xPos, yPos), textColour);
+            int xPos = (graphics.GraphicsDevice.Viewport.Width / 2) - (int)((float)maxWidth / 2 * m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay));
+            int yPos = (int)((float)lines * m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay));
+            spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), text, new Vector2(xPos, yPos), textColour);
         }
 
 
@@ -710,7 +612,7 @@ namespace Xyglo.Brazil.Xna
 
             // Take down the colours and alpha of the non selected buffer views to draw a visual distinction
             //
-            if (view != m_project.getSelectedBufferView())
+            if (view != m_context.m_project.getSelectedBufferView())
             {
                 bufferColour.R = (byte)(bufferColour.R / m_greyDivisor);
                 bufferColour.G = (byte)(bufferColour.G / m_greyDivisor);
@@ -737,7 +639,7 @@ namespace Xyglo.Brazil.Xna
                 // We don't do this all the time so let the FileBuffer work out when we've updated
                 // the file and need to change the viewing position to tail it.
                 //
-                view.getFileBuffer().refetchFile(gameTime, m_project.getSyntaxManager());
+                view.getFileBuffer().refetchFile(gameTime, m_context.m_project.getSyntaxManager());
                 //bufPos = view.getFileBuffer().getLineCount() - view.getBufferShowLength();
 
 
@@ -763,11 +665,11 @@ namespace Xyglo.Brazil.Xna
 
                 if (view == buildStdOutView)
                 {
-                    lines = view.getWrappedEndofBuffer(m_project.getStdOutLastLine());
+                    lines = view.getWrappedEndofBuffer(m_context.m_project.getStdOutLastLine());
                 }
                 else if (view == buildStdErrView)
                 {
-                    lines = view.getWrappedEndofBuffer(m_project.getStdErrLastLine());
+                    lines = view.getWrappedEndofBuffer(m_context.m_project.getStdErrLastLine());
                 }
                 else
                 {
@@ -780,9 +682,9 @@ namespace Xyglo.Brazil.Xna
 
                 for (int i = 0; i < lines.Count; i++)
                 {
-                    spriteBatch.DrawString(m_fontManager.getViewFont(view.getViewSize()), lines[i], new Vector2((int)viewSpaceTextPosition.X, (int)viewSpaceTextPosition.Y + yPosition),
-                        (i < view.getLogRunTerminator() ? bufferColourLastRun : bufferColour), 0, Vector2.Zero, m_fontManager.getTextScale(), 0, 0);
-                    yPosition += m_fontManager.getLineSpacing(view.getViewSize());
+                    spriteBatch.DrawString(m_context.m_fontManager.getViewFont(view.getViewSize()), lines[i], new Vector2((int)viewSpaceTextPosition.X, (int)viewSpaceTextPosition.Y + yPosition),
+                        (i < view.getLogRunTerminator() ? bufferColourLastRun : bufferColour), 0, Vector2.Zero, m_context.m_fontManager.getTextScale(), 0, 0);
+                    yPosition += m_context.m_fontManager.getLineSpacing(view.getViewSize());
                 }
             }
             else
@@ -795,7 +697,7 @@ namespace Xyglo.Brazil.Xna
                     {
                         // Fetch the line and convert any tabs to relevant spaces
                         //
-                        fetchLine = view.getFileBuffer().getLine(i + bufPos).Replace("\t", m_project.getTab());
+                        fetchLine = view.getFileBuffer().getLine(i + bufPos).Replace("\t", m_context.m_project.getTab());
 
                         if (fetchLine.Length - view.getBufferShowStartX() > view.getBufferShowWidth())
                         {
@@ -850,7 +752,7 @@ namespace Xyglo.Brazil.Xna
 
                             // If not active view then temper colour
                             //
-                            if (view != m_project.getSelectedBufferView())
+                            if (view != m_context.m_project.getSelectedBufferView())
                             {
                                 highlightColour.R = (byte)(highlightColour.R / m_greyDivisor);
                                 highlightColour.G = (byte)(highlightColour.G / m_greyDivisor);
@@ -874,7 +776,7 @@ namespace Xyglo.Brazil.Xna
 
                                 // Not sure we need this for the moment
                                 //
-                                int screenXpos = m_project.fileToScreen(line.Substring(0, xPos)).Length;
+                                int screenXpos = m_context.m_project.fileToScreen(line.Substring(0, xPos)).Length;
 
                                 //if (screenXpos != xPos)
                                 //{
@@ -882,13 +784,13 @@ namespace Xyglo.Brazil.Xna
                                 //}
 
                                 spriteBatch.DrawString(
-                                    m_fontManager.getViewFont(view.getViewSize()),
+                                    m_context.m_fontManager.getViewFont(view.getViewSize()),
                                     subLineToHighlight,
-                                    new Vector2((int)viewSpaceTextPosition.X + m_fontManager.getCharWidth(view.getViewSize()) * xPos, (int)(viewSpaceTextPosition.Y + yPosition)),
+                                    new Vector2((int)viewSpaceTextPosition.X + m_context.m_fontManager.getCharWidth(view.getViewSize()) * xPos, (int)(viewSpaceTextPosition.Y + yPosition)),
                                     bufferColour,
                                     0,
                                     Vector2.Zero,
-                                    m_fontManager.getTextScale() * (float)textScale,
+                                    m_context.m_fontManager.getTextScale() * (float)textScale,
                                     0,
                                     0);
 
@@ -904,13 +806,13 @@ namespace Xyglo.Brazil.Xna
                                                                            Math.Min(m_highlights[nextHighlight].m_endHighlight.X - m_highlights[nextHighlight].m_startHighlight.X, line.Length - m_highlights[nextHighlight].m_startHighlight.X));
 
                                 spriteBatch.DrawString(
-                                    m_fontManager.getViewFont(view.getViewSize()),
+                                    m_context.m_fontManager.getViewFont(view.getViewSize()),
                                     subLineInHighlight,
-                                    new Vector2((int)viewSpaceTextPosition.X + m_fontManager.getCharWidth(view.getViewSize()) * xPos, (int)(viewSpaceTextPosition.Y + yPosition)),
+                                    new Vector2((int)viewSpaceTextPosition.X + m_context.m_fontManager.getCharWidth(view.getViewSize()) * xPos, (int)(viewSpaceTextPosition.Y + yPosition)),
                                     highlightColour,
                                     0,
                                     Vector2.Zero,
-                                    m_fontManager.getTextScale() * (float)textScale,
+                                    m_context.m_fontManager.getTextScale() * (float)textScale,
                                     0,
                                     0);
 
@@ -929,13 +831,13 @@ namespace Xyglo.Brazil.Xna
                             string remainder = line.Substring(xPos, line.Length - xPos);
 
                             spriteBatch.DrawString(
-                                m_fontManager.getViewFont(view.getViewSize()),
+                                m_context.m_fontManager.getViewFont(view.getViewSize()),
                                 remainder,
-                                new Vector2((int)viewSpaceTextPosition.X + m_fontManager.getCharWidth(view.getViewSize()) * xPos, (int)(viewSpaceTextPosition.Y + yPosition)),
+                                new Vector2((int)viewSpaceTextPosition.X + m_context.m_fontManager.getCharWidth(view.getViewSize()) * xPos, (int)(viewSpaceTextPosition.Y + yPosition)),
                                 bufferColour,
                                 0,
                                 Vector2.Zero,
-                                m_fontManager.getTextScale() * (float)textScale,
+                                m_context.m_fontManager.getTextScale() * (float)textScale,
                                 0,
                                 0);
                         }
@@ -943,18 +845,18 @@ namespace Xyglo.Brazil.Xna
                     else  // draw the line without highlighting
                     {
                         spriteBatch.DrawString(
-                            m_fontManager.getViewFont(view.getViewSize()),
+                            m_context.m_fontManager.getViewFont(view.getViewSize()),
                             line,
                             new Vector2((int)viewSpaceTextPosition.X, (int)(viewSpaceTextPosition.Y + yPosition)),
                             bufferColour,
                             0,
                             Vector2.Zero,
-                            m_fontManager.getTextScale() * (float)textScale,
+                            m_context.m_fontManager.getTextScale() * (float)textScale,
                             0,
                             0);
                     }
                     
-                    yPosition += m_fontManager.getLineSpacing(view.getViewSize());
+                    yPosition += m_context.m_fontManager.getLineSpacing(view.getViewSize());
                 }
             }
 
@@ -962,7 +864,7 @@ namespace Xyglo.Brazil.Xna
             //
             if (zoomLevel > 950.0f)
             {
-                int viewId = m_project.getBufferViews().IndexOf(view);
+                int viewId = m_context.m_project.getBufferViews().IndexOf(view);
                 string bufferId = viewId.ToString();
 
                 if (view.isTailing())
@@ -976,12 +878,12 @@ namespace Xyglo.Brazil.Xna
 
                 Color seeThroughColour = bufferColour * 0.4f;
                 //seeThroughColour.A = 30;
-                //spriteBatch.DrawString(m_fontManager.getViewFont(BufferView.ViewSize.Medium), bufferId, new Vector2((int)viewSpaceTextPosition.X, (int)viewSpaceTextPosition.Y), seeThroughColour, 0, Vector2.Zero, m_fontManager.getTextScale() * 16.0f, 0, 0);
+                //spriteBatch.DrawString(m_context.m_fontManager.getViewFont(BufferView.ViewSize.Medium), bufferId, new Vector2((int)viewSpaceTextPosition.X, (int)viewSpaceTextPosition.Y), seeThroughColour, 0, Vector2.Zero, m_context.m_fontManager.getTextScale() * 16.0f, 0, 0);
 
                 // Show a filename
                 //
                 string fileName = view.getFileBuffer().getShortFileName();
-                spriteBatch.DrawString(m_fontManager.getViewFont(BufferView.ViewSize.Medium), fileName, new Vector2((int)viewSpaceTextPosition.X, (int)viewSpaceTextPosition.Y), seeThroughColour, 0, Vector2.Zero, m_fontManager.getTextScale() * 4.0f, 0, 0);
+                spriteBatch.DrawString(m_context.m_fontManager.getViewFont(BufferView.ViewSize.Medium), fileName, new Vector2((int)viewSpaceTextPosition.X, (int)viewSpaceTextPosition.Y), seeThroughColour, 0, Vector2.Zero, m_context.m_fontManager.getTextScale() * 4.0f, 0, 0);
            }
         }
 
@@ -1007,8 +909,8 @@ namespace Xyglo.Brazil.Xna
 
             // Set up some of these variables here
             //
-            string positionString = m_project.getSelectedBufferView().getCursorPosition().Y + "," + m_project.getSelectedBufferView().getCursorPosition().X;
-            float positionStringXPos = graphics.GraphicsDevice.Viewport.Width - positionString.Length * m_fontManager.getCharWidth(FontManager.FontType.Overlay) - (m_fontManager.getCharWidth(FontManager.FontType.Overlay) * 14);
+            string positionString = m_context.m_project.getSelectedBufferView().getCursorPosition().Y + "," + m_context.m_project.getSelectedBufferView().getCursorPosition().X;
+            float positionStringXPos = graphics.GraphicsDevice.Viewport.Width - positionString.Length * m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) - (m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) * 14);
             float filePercent = 0.0f;
 
             // Filename is where we put the filename plus other assorted gubbins or we put a
@@ -1019,7 +921,7 @@ namespace Xyglo.Brazil.Xna
             if (state.equals("FindText"))
             {
                 // Draw the search string down there
-                fileName = "Search: " + m_project.getSelectedBufferView().getSearchText();
+                fileName = "Search: " + m_context.m_project.getSelectedBufferView().getSearchText();
             }
             else if (state.equals("GotoLine"))
             {
@@ -1027,24 +929,24 @@ namespace Xyglo.Brazil.Xna
             }
             else
             {
-                if (m_project.getSelectedBufferView() != null && m_project.getSelectedBufferView().getFileBuffer() != null)
+                if (m_context.m_project.getSelectedBufferView() != null && m_context.m_project.getSelectedBufferView().getFileBuffer() != null)
                 {
                     // Set the filename
-                    if (m_project.getSelectedBufferView().getFileBuffer().getShortFileName() != "")
+                    if (m_context.m_project.getSelectedBufferView().getFileBuffer().getShortFileName() != "")
                     {
-                        fileName = "\"" + m_project.getSelectedBufferView().getFileBuffer().getShortFileName() + "\"";
+                        fileName = "\"" + m_context.m_project.getSelectedBufferView().getFileBuffer().getShortFileName() + "\"";
                     }
                     else
                     {
                         fileName = "<New Buffer>";
                     }
 
-                    if (m_project.getSelectedBufferView().getFileBuffer().isModified())
+                    if (m_context.m_project.getSelectedBufferView().getFileBuffer().isModified())
                     {
                         fileName += " [Modified]";
                     }
 
-                    fileName += " " + m_project.getSelectedBufferView().getFileBuffer().getLineCount() + " lines";
+                    fileName += " " + m_context.m_project.getSelectedBufferView().getFileBuffer().getLineCount() + " lines";
                 }
                 else
                 {
@@ -1053,12 +955,12 @@ namespace Xyglo.Brazil.Xna
 
                 // Add some other useful states to our status line
                 //
-                if (m_project.getSelectedBufferView().isReadOnly())
+                if (m_context.m_project.getSelectedBufferView().isReadOnly())
                 {
                     fileName += " [RDONLY]";
                 }
 
-                if (m_project.getSelectedBufferView().isTailing())
+                if (m_context.m_project.getSelectedBufferView().isTailing())
                 {
                     fileName += " [TAIL]";
                 }
@@ -1080,11 +982,11 @@ namespace Xyglo.Brazil.Xna
 
             }
 
-            BufferView bv = m_project.getSelectedBufferView();
+            BufferView bv = m_context.m_project.getSelectedBufferView();
 
             // Convert lineHeight back to normal size by dividing by m_textSize modifier
             //
-            float yPos = graphics.GraphicsDevice.Viewport.Height - m_fontManager.getLineSpacing(FontManager.FontType.Overlay);
+            float yPos = graphics.GraphicsDevice.Viewport.Height - m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay);
 
             string modeString = "none";
 
@@ -1111,32 +1013,32 @@ namespace Xyglo.Brazil.Xna
                     break;
             }
 
-            float modeStringXPos = graphics.GraphicsDevice.Viewport.Width - modeString.Length * m_fontManager.getCharWidth(FontManager.FontType.Overlay) - (m_fontManager.getCharWidth(FontManager.FontType.Overlay) * 8);
+            float modeStringXPos = graphics.GraphicsDevice.Viewport.Width - modeString.Length * m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) - (m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) * 8);
 
-            if (m_project.getSelectedBufferView().getFileBuffer() != null && m_project.getSelectedBufferView().getFileBuffer().getLineCount() > 0)
+            if (m_context.m_project.getSelectedBufferView().getFileBuffer() != null && m_context.m_project.getSelectedBufferView().getFileBuffer().getLineCount() > 0)
             {
-                filePercent = (float)(m_project.getSelectedBufferView().getCursorPosition().Y) /
-                              (float)(Math.Max(1, m_project.getSelectedBufferView().getFileBuffer().getLineCount() - 1));
+                filePercent = (float)(m_context.m_project.getSelectedBufferView().getCursorPosition().Y) /
+                              (float)(Math.Max(1, m_context.m_project.getSelectedBufferView().getFileBuffer().getLineCount() - 1));
             }
 
             string filePercentString = ((int)(filePercent * 100.0f)) + "%";
-            float filePercentStringXPos = graphics.GraphicsDevice.Viewport.Width - filePercentString.Length * m_fontManager.getCharWidth(FontManager.FontType.Overlay) - (m_fontManager.getCharWidth(FontManager.FontType.Overlay) * 3);
+            float filePercentStringXPos = graphics.GraphicsDevice.Viewport.Width - filePercentString.Length * m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) - (m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) * 3);
 
             // Debug eye position
             //
-            if (m_project.getViewMode() != Project.ViewMode.Formal)
+            if (m_context.m_project.getViewMode() != Project.ViewMode.Formal)
             {
                 string eyePosition = "[EyePosition] X " + eye.X + ",Y " + eye.Y + ",Z " + eye.Z;
-                float xPos = graphics.GraphicsDevice.Viewport.Width - eyePosition.Length * m_fontManager.getCharWidth(FontManager.FontType.Overlay);
-                spriteBatch.DrawString(m_fontManager.getOverlayFont(), eyePosition, new Vector2(0.0f, 0.0f), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
+                float xPos = graphics.GraphicsDevice.Viewport.Width - eyePosition.Length * m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay);
+                spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), eyePosition, new Vector2(0.0f, 0.0f), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
             }
 
             // hardcode the font size to 1.0f so that it looks nice
             //
-            spriteBatch.DrawString(m_fontManager.getOverlayFont(), fileName, new Vector2(0.0f, (int)yPos), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
-            spriteBatch.DrawString(m_fontManager.getOverlayFont(), modeString, new Vector2((int)modeStringXPos, 0.0f), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
-            spriteBatch.DrawString(m_fontManager.getOverlayFont(), positionString, new Vector2((int)positionStringXPos, (int)yPos), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
-            spriteBatch.DrawString(m_fontManager.getOverlayFont(), filePercentString, new Vector2((int)filePercentStringXPos, (int)yPos), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
+            spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), fileName, new Vector2(0.0f, (int)yPos), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
+            spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), modeString, new Vector2((int)modeStringXPos, 0.0f), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
+            spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), positionString, new Vector2((int)positionStringXPos, (int)yPos), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
+            spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), filePercentString, new Vector2((int)filePercentStringXPos, (int)yPos), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
 
             // Draw any temporary message
             //
@@ -1148,7 +1050,7 @@ namespace Xyglo.Brazil.Xna
             if (m_textScrollTexture != null && drawScrollingText)
             {
                 m_spriteBatch.Begin();
-                m_spriteBatch.Draw(m_textScrollTexture, new Rectangle((int)((fileName.Length + 1) * m_fontManager.getCharWidth(FontManager.FontType.Overlay)), (int)yPos, m_textScrollTexture.Width, m_textScrollTexture.Height), Color.White);
+                m_spriteBatch.Draw(m_textScrollTexture, new Rectangle((int)((fileName.Length + 1) * m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay)), (int)yPos, m_textScrollTexture.Width, m_textScrollTexture.Height), Color.White);
                 m_spriteBatch.End();
             }
 #endif
@@ -1197,18 +1099,18 @@ namespace Xyglo.Brazil.Xna
 
             // How many lines are we going to show for this temporary message?
             //
-            List<string> splitString = splitStringNicely(temporaryMessage, m_project.getSelectedBufferView().getBufferShowWidth());
+            List<string> splitString = splitStringNicely(temporaryMessage, m_context.m_project.getSelectedBufferView().getBufferShowWidth());
 
             // Set x and Y accordingly
             //
-            float yPos = graphics.GraphicsDevice.Viewport.Height - ((splitString.Count + 3) * m_fontManager.getOverlayFont().LineSpacing);
+            float yPos = graphics.GraphicsDevice.Viewport.Height - ((splitString.Count + 3) * m_context.m_fontManager.getOverlayFont().LineSpacing);
 
             //m_overlaySpriteBatch.Begin();
             for (int i = 0; i < splitString.Count; i++)
             {
-                float xPos = graphics.GraphicsDevice.Viewport.Width / 2 - m_fontManager.getOverlayFont().MeasureString("X").X * splitString[i].Length / 2;
-                spriteBatch.DrawString(m_fontManager.getOverlayFont(), splitString[i], new Vector2(xPos, yPos), fadeColour, 0, Vector2.Zero, 1.0f, 0, 0);
-                yPos += m_fontManager.getOverlayFont().LineSpacing;
+                float xPos = graphics.GraphicsDevice.Viewport.Width / 2 - m_context.m_fontManager.getOverlayFont().MeasureString("X").X * splitString[i].Length / 2;
+                spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), splitString[i], new Vector2(xPos, yPos), fadeColour, 0, Vector2.Zero, 1.0f, 0, 0);
+                yPos += m_context.m_fontManager.getOverlayFont().LineSpacing;
             }
             //m_overlaySpriteBatch.End();
         }
@@ -1369,7 +1271,7 @@ namespace Xyglo.Brazil.Xna
             //return;
             //}
 
-            Vector3 position = m_project.getSelectedBufferView().getPosition();
+            Vector3 position = m_context.m_project.getSelectedBufferView().getPosition();
 
             // Start with centering adjustments
             //
@@ -1390,13 +1292,13 @@ namespace Xyglo.Brazil.Xna
 
             if (isText)
             {
-                xPosition = -(int)((scale * maxLength * m_fontManager.getCharWidth(FontManager.FontType.Overlay) / 2));
-                yPosition = -(int)((m_bannerStringList.Count * scale * m_fontManager.getLineSpacing(FontManager.FontType.Overlay) / 2));
+                xPosition = -(int)((scale * maxLength * m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) / 2));
+                yPosition = -(int)((m_bannerStringList.Count * scale * m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay) / 2));
 
                 // Add half the editing window width and height
                 //
-                xPosition += (int)(m_project.getSelectedBufferView().getVisibleWidth() / 2);
-                yPosition += (int)(m_project.getSelectedBufferView().getVisibleHeight() / 2);
+                xPosition += (int)(m_context.m_project.getSelectedBufferView().getVisibleWidth() / 2);
+                yPosition += (int)(m_context.m_project.getSelectedBufferView().getVisibleHeight() / 2);
 
                 // Add window position - so we're doing this a bit backwards but you get the idea
                 //
@@ -1413,14 +1315,14 @@ namespace Xyglo.Brazil.Xna
                 //float scale = diff.Ticks;
                 // Draw to the render target
                 //
-                Vector3 curPos = m_project.getSelectedBufferView().getPosition();
+                Vector3 curPos = m_context.m_project.getSelectedBufferView().getPosition();
 
-                spriteBatch.DrawString(m_fontManager.getOverlayFont(), m_bannerString, new Vector2((int)xPosition, (int)yPosition), m_bannerColour, 0, new Vector2(0, 0), scale, 0, 0);
+                spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), m_bannerString, new Vector2((int)xPosition, (int)yPosition), m_bannerColour, 0, new Vector2(0, 0), scale, 0, 0);
             }
             else
             {
-                xPosition = (int)m_project.getEyePosition().X;
-                yPosition = (int)m_project.getEyePosition().Y;
+                xPosition = (int)m_context.m_project.getEyePosition().X;
+                yPosition = (int)m_context.m_project.getEyePosition().Y;
 
                 xPosition += (int)(scale * (float)splashScreen.Width / 2.0f);
                 yPosition += (int)(scale * (float)splashScreen.Height / 2.0f);
@@ -1444,7 +1346,7 @@ namespace Xyglo.Brazil.Xna
 
             // The maximum width of an entry in the file list
             //
-            int maxWidth = ((int)((float)m_project.getSelectedBufferView().getBufferShowWidth() * 0.9f));
+            int maxWidth = ((int)((float)m_context.m_project.getSelectedBufferView().getBufferShowWidth() * 0.9f));
 
             // This is very simply modelled at the moment
             //
@@ -1460,8 +1362,8 @@ namespace Xyglo.Brazil.Xna
                     }
                     else
                     {
-                        //text += m_project.buildFileString(m_modelBuilder.getRootString(), fileName, maxWidth) + "\n";
-                        text += m_project.estimateFileStringTruncation(modelBuilder.getRootString(), fileName, maxWidth) + "\n";
+                        //text += m_context.m_project.buildFileString(m_modelBuilder.getRootString(), fileName, maxWidth) + "\n";
+                        text += m_context.m_project.estimateFileStringTruncation(modelBuilder.getRootString(), fileName, maxWidth) + "\n";
                     }
 
                 }
@@ -1479,7 +1381,7 @@ namespace Xyglo.Brazil.Xna
             // Draw the project file name
             //
             drawCentredTextOverlay(spriteBatch, graphics, 3, "Project Overview", Color.AntiqueWhite);
-            drawCentredTextOverlay(spriteBatch, graphics, 5, "Project file : " + m_project.getProjectFile(), Color.LightSeaGreen);
+            drawCentredTextOverlay(spriteBatch, graphics, 5, "Project file : " + m_context.m_project.getProjectFile(), Color.LightSeaGreen);
 
             // Help text
             //

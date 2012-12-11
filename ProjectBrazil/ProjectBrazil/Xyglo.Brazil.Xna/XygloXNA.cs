@@ -26,23 +26,6 @@ namespace Xyglo.Brazil.Xna
     public class XygloXNA : Game, IBrazilApp
     {
         ///////////////// MEMBER VARIABLES //////////////////
-
-        /// <summary>
-        /// Store a map of all keys that are being pressed or held - bool is true for the first
-        /// pass through for the 'initial' hold.  Double is for the GameTime in TotalSeconds.
-        /// </summary>
-        protected Dictionary<Keys, Pair<bool, double>> m_keyMap = new Dictionary<Keys, Pair<bool, double>>();
-
-        /// <summary>
-        /// Another SpriteBatch for the overlay
-        /// </summary>
-        protected SpriteBatch m_overlaySpriteBatch;
-
-        /// <summary>
-        /// A third SpriteBatch for panners/differs etc utilising alpha
-        /// </summary>
-        protected SpriteBatch m_pannerSpriteBatch;
-
         /// <summary>
         /// Eye/Camera location
         /// </summary>
@@ -52,11 +35,6 @@ namespace Xyglo.Brazil.Xna
         /// Camera target
         /// </summary>
         protected Vector3 m_target;
-
-        /// <summary>
-        /// Are we spinning?
-        /// </summary>
-        protected bool m_spinning = false;
 
         /// <summary>
         /// A local Differ object
@@ -72,16 +50,6 @@ namespace Xyglo.Brazil.Xna
         /// Position we are in the diff
         /// </summary>
         protected int m_diffPosition = 0;
-
-        /// <summary>
-        /// Current project
-        /// </summary>
-        static protected Project m_project;
-
-        /// <summary>
-        /// Last keyboard state so that we can compare with current
-        /// </summary>
-        protected KeyboardState m_lastKeyboardState;
 
         /// <summary>
         /// Use this to store number when we've got ALT down - to select a new BufferView
@@ -116,22 +84,7 @@ namespace Xyglo.Brazil.Xna
         /// <summary>
         /// Confirmation state - expecting Y/N
         /// </summary>
-        public ConfirmState m_confirmState = ConfirmState.Test("None");
-
-        /// <summary>
-        /// A flat texture we use for drawing coloured blobs like highlighting and cursors
-        /// </summary>
-        protected Texture2D m_flatTexture;
-
-        /// <summary>
-        /// A rendertarget for the text scroller
-        /// </summary>
-        protected RenderTarget2D m_textScroller;
-
-        /// <summary>
-        /// A texture we can render a text string to and scroll
-        /// </summary>
-        protected Texture2D m_textScrollTexture;
+        //public ConfirmState m_brazilContext.m_confirmState = ConfirmState.Test("None");
 
         /// <summary>
         /// We can use this to communicate something to the user about the last command
@@ -187,11 +140,6 @@ namespace Xyglo.Brazil.Xna
         /// When we last fetched the system status
         /// </summary>
         protected TimeSpan m_lastSystemFetch = new TimeSpan(0, 0, 0, 0, 0);
-
-        /// <summary>
-        /// Are we allowed to process keyboard events?
-        /// </summary>
-        protected TimeSpan m_processKeyboardAllowed = TimeSpan.Zero;
 
         /// <summary>
         /// Percentage of system load
@@ -351,11 +299,6 @@ namespace Xyglo.Brazil.Xna
         protected Thread m_kinectWorkerThread;
 
         /// <summary>
-        /// Store GameTime somewhere central
-        /// </summary>
-        protected GameTime m_gameTime;
-
-        /// <summary>
         /// View for the Standard Output of a build command
         /// </summary>
         protected BufferView m_buildStdOutView;
@@ -396,41 +339,6 @@ namespace Xyglo.Brazil.Xna
         protected int m_textScreenLength = 0;
 
         /// <summary>
-        /// Config screen x direction
-        /// </summary>
-        protected int m_configXOffset = 0;
-
-        /// <summary>
-        /// Last mouse state
-        /// </summary>
-        protected MouseState m_lastMouseState;
-
-        /// <summary>
-        /// Time of last click
-        /// </summary>
-        protected TimeSpan m_lastClickTime = TimeSpan.Zero;
-
-        /// <summary>
-        /// Last position of the click
-        /// </summary>
-        protected Vector3 m_lastClickEyePosition = Vector3.Zero;
-
-        /// <summary>
-        /// Use this for highlighting a selected BufferView temporarily
-        /// </summary>
-        protected Pair<BufferView, Highlight> m_clickHighlight = new Pair<BufferView, Highlight>();
-
-        /// <summary>
-        /// Time for key auto-repeat to start - defaults to zero
-        /// </summary>
-        protected double m_repeatHoldTime = 0; // seconds
-
-        /// <summary>
-        /// Time between autorepeats
-        /// </summary>
-        protected double m_repeatInterval = 0.05; // seconds
-
-        /// <summary>
         /// Testing whether arrived in bounding sphere
         /// </summary>
         protected BoundingSphere m_testArrived = new BoundingSphere();
@@ -441,74 +349,14 @@ namespace Xyglo.Brazil.Xna
         protected ContainmentType m_testResult;
 
         /// <summary>
-        /// Is this Window resizable - for the moment it isn't
-        /// </summary>
-        protected bool m_isResizable = false;
-
-        /// <summary>
-        /// Are we resizing the main window?
-        /// </summary>
-        protected bool m_isResizing = false;
-
-        /// <summary>
         /// Store the last window size in case we're resizing
         /// </summary>
         protected Vector2 m_lastWindowSize = Vector2.Zero;
 
         /// <summary>
-        /// Spalsh screen texture
+        /// FrameCounter for counting frames
         /// </summary>
-        protected Texture2D m_splashScreen;
-
-        /// <summary>
-        /// Mouse wheel value
-        /// </summary>
-        protected int m_lastMouseWheelValue = 0;
-
-        /// <summary>
-        /// Position of last mouse click in screen coordinations
-        /// </summary>
-        protected Vector3 m_lastClickPosition = Vector3.Zero;
-
-        /// <summary>
-        /// Position in the World of the last click
-        /// </summary>
-        protected Vector3 m_lastClickWorldPosition = Vector3.Zero;
-
-        /// <summary>
-        /// Where the cursor was clicked within a BufferView
-        /// </summary>
-        protected Vector2 m_lastClickCursorOffsetPosition = Vector2.Zero;
-
-        /// <summary>
-        /// Vector resulting from last mouse click
-        /// </summary>
-        protected Vector3 m_lastClickVector = Vector3.Zero;
-
-        /// <summary>
-        /// A helper class for drawing things
-        /// </summary>
-        //protected DrawingHelper m_drawingHelper;
-
-        /// <summary>
-        /// ActionMap is a Project Brazil reference gets passed from the constructor
-        /// </summary>
-        protected ActionMap m_actionMap = null;
-
-        /// <summary>
-        /// Frame rate
-        /// </summary>
-        protected int m_frameRate = 0;
-
-        /// <summary>
-        /// Frame counter
-        /// </summary>
-        protected int m_frameCounter = 0;
-
-        /// <summary>
-        /// Elapse time to help calculate frame rate
-        /// </summary>
-        TimeSpan m_elapsedTime = TimeSpan.Zero;
+        protected FrameCounter m_frameCounter = new FrameCounter();
 
         /// <summary>
         /// Context holds our graphics and state context
@@ -525,6 +373,16 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         protected XygloMouse m_mouse;
 
+        /// <summary>
+        /// Keyboard handling code
+        /// </summary>
+        protected XygloKeyboard m_keyboard;
+
+        /// <summary>
+        /// XygloGraphics helper
+        /// </summary>
+        protected XygloGraphics m_graphics;
+
         /////////////////////////////// CONSTRUCTORS ////////////////////////////
         /// <summary>
         /// Default constructor
@@ -534,12 +392,12 @@ namespace Xyglo.Brazil.Xna
             // Setup context and handlers
             //
             m_context = new XygloContext();
-            m_actionMap = actionMap;
             m_context.m_componentList = componentList;
 
             // Setup BrazilContext
             //
             m_brazilContext = new BrazilContext();
+            m_brazilContext.m_actionMap = actionMap;
             m_brazilContext.m_world = world;
             m_brazilContext.m_states = states;
             m_brazilContext.m_targets = targets;
@@ -555,15 +413,20 @@ namespace Xyglo.Brazil.Xna
             m_mouse.EyeChangeEvent += new EyeChangeEventHandler(handleEyeChange);
             m_mouse.NewBufferViewEvent += new NewBufferViewEventHandler(handleNewBufferView);
 
+            // Keyboard handler
+            //
+            m_keyboard = new XygloKeyboard(m_context, world.getKeyAutoRepeatHoldTime(), world.getKeyAutoRepeatInterval());
+
             // FontManager
             //
             m_context.m_fontManager = new FontManager();
 
-            // Get these values from the World
+            // Graphics helper
             //
-            m_repeatHoldTime = world.getKeyAutoRepeatHoldTime();
-            m_repeatInterval = world.getKeyAutoRepeatInterval();
+            m_graphics = new XygloGraphics(m_context);
 
+            // Initialise
+            //
             initialise();
         }
 
@@ -580,13 +443,13 @@ namespace Xyglo.Brazil.Xna
 
             // Store project and actionmap
             //
-            m_project = project;
-            m_actionMap = actionMap;
+            m_context.m_project = project;
             m_context.m_componentList = componentList;
 
             // Setup BrazilContext
             //
             m_brazilContext = new BrazilContext();
+            m_brazilContext.m_actionMap = actionMap;
             m_brazilContext.m_world = world;
             m_brazilContext.m_states = states;
             m_brazilContext.m_targets = targets;
@@ -602,14 +465,17 @@ namespace Xyglo.Brazil.Xna
             m_mouse.EyeChangeEvent += new EyeChangeEventHandler(handleEyeChange);
             m_mouse.NewBufferViewEvent += new NewBufferViewEventHandler(handleNewBufferView);
 
+            // Keyboard handler
+            //
+            m_keyboard = new XygloKeyboard(m_context, world.getKeyAutoRepeatHoldTime(), world.getKeyAutoRepeatInterval());
+
             // FontManager
             //
             m_context.m_fontManager = new FontManager();
 
-            // Get these values from the World
+            // Graphics helper
             //
-            m_repeatHoldTime = world.getKeyAutoRepeatHoldTime();
-            m_repeatInterval = world.getKeyAutoRepeatInterval();
+            m_graphics = new XygloGraphics(m_context);
 
             // init
             initialise();
@@ -622,7 +488,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="project"></param>
         public void setProject(Project project)
         {
-            m_project = project;
+            m_context.m_project = project;
         }
 
         /// <summary>
@@ -631,7 +497,7 @@ namespace Xyglo.Brazil.Xna
         /// <returns></returns>
         public Project getProject()
         {
-            return m_project;
+            return m_context.m_project;
         }
 
         /// <summary>
@@ -643,8 +509,7 @@ namespace Xyglo.Brazil.Xna
         {
             // Get these values from the World
             //
-            m_repeatHoldTime = m_brazilContext.m_world.getKeyAutoRepeatHoldTime();
-            m_repeatInterval = m_brazilContext.m_world.getKeyAutoRepeatInterval();
+            m_keyboard.setRepeats(m_brazilContext.m_world.getKeyAutoRepeatHoldTime(), m_brazilContext.m_world.getKeyAutoRepeatInterval());
         }
 
         /// <summary>
@@ -706,11 +571,11 @@ namespace Xyglo.Brazil.Xna
 
             // Set windowed mode as default
             //
-            windowedMode();
+            m_graphics.windowedMode(this);
 
             // Check the demo status and set as necessary
             //
-            if (m_project != null && !m_project.getLicenced())
+            if (m_context.m_project != null && !m_context.m_project.getLicenced())
             {
                 m_brazilContext.m_state = State.Test("DemoExpired");
             }
@@ -722,7 +587,7 @@ namespace Xyglo.Brazil.Xna
         /// <returns></returns>
         protected int getActiveBufferIndex()
         {
-            return m_project.getFileBuffers().IndexOf(m_project.getSelectedBufferView().getFileBuffer());
+            return m_context.m_project.getFileBuffers().IndexOf(m_context.m_project.getSelectedBufferView().getFileBuffer());
         }
 
         /// <summary>
@@ -744,105 +609,7 @@ namespace Xyglo.Brazil.Xna
             m_brazilContext.m_state = state;
         }
 
-        /// <summary>
-        /// Enable windowed mode
-        /// </summary>
-        protected void windowedMode()
-        {
-            // Some of the modes we've used
-            //
-            //InitGraphicsMode(640, 480, false);
-            //InitGraphicsMode(720, 576, false);
-            //InitGraphicsMode(800, 500, false);
-            //InitGraphicsMode(960, 768, false);
-            //InitGraphicsMode(1920, 1080, true);
-
-            int maxWidth = 0;
-            int maxHeight = 0;
-
-            foreach (DisplayMode dm in GraphicsAdapter.DefaultAdapter.SupportedDisplayModes)
-            {
-                // Set both when either is greater
-                if (dm.Width > maxWidth || dm.Height > maxHeight)
-                {
-                    maxWidth = dm.Width;
-                    maxHeight = dm.Height;
-                }
-            }
-
-            // Defaults
-            //
-            if (m_project != null) m_context.m_fontManager.setSmallScreen(true);
-            int windowWidth = 640;
-            int windowHeight = 480;
-
-            if (maxWidth >= 1920)
-            {
-                windowWidth = 960;
-                windowHeight = 768;
-                if (m_project != null) m_context.m_fontManager.setSmallScreen(false);
-            }
-            else if (maxWidth >= 1280)
-            {
-                windowWidth = 800;
-                windowHeight = 500;
-            }
-            else if (maxWidth >= 1024)
-            {
-                windowWidth = 720;
-                windowHeight = 576;
-            }
-
-            // Set this for storage
-            //
-            if (m_project != null)
-            {
-                m_project.setWindowSize(windowWidth, windowHeight);
-                m_project.setFullScreen(false);
-            }
-
-            // Update this to ensure scanner appears in the right place
-            //
-            if (m_context.m_drawingHelper != null)
-            {
-                // Set the graphics modes
-                //
-                m_context.m_drawingHelper.initGraphicsMode(m_context, Components, this, windowWidth, windowHeight, false);
-                m_context.m_drawingHelper.setPreviewBoundingBox(m_context.m_graphics.GraphicsDevice.Viewport.Width, m_context.m_graphics.GraphicsDevice.Viewport.Height);
-            }
-        }
-
-        /// <summary>
-        /// Enable full screen mode
-        /// </summary>
-        protected void fullScreenMode()
-        {
-            int maxWidth = 0;
-            int maxHeight = 0;
-
-            foreach (DisplayMode dm in GraphicsAdapter.DefaultAdapter.SupportedDisplayModes)
-            {
-                // Set both when either is greater
-                if (dm.Width > maxWidth || dm.Height > maxHeight)
-                {
-                    maxWidth = dm.Width;
-                    maxHeight = dm.Height;
-                }
-            }
-
-            m_project.setFullScreen(true);
-
-            // Update this to ensure scanner appears in the right place
-            //
-            if (m_context.m_drawingHelper != null)
-            {
-                // Set the graphics modes
-                m_context.m_drawingHelper.initGraphicsMode(m_context, Components, this, maxWidth, maxHeight, true);
-                m_context.m_drawingHelper.setPreviewBoundingBox(m_context.m_graphics.GraphicsDevice.Viewport.Width, m_context.m_graphics.GraphicsDevice.Viewport.Height);
-            }
-        }
-
-        /// <summary>
+         /// <summary>
         /// Initialise the project - load all the FileBuffers and select the correct BufferView
         /// </summary>
         /// <param name="project"></param>
@@ -853,21 +620,21 @@ namespace Xyglo.Brazil.Xna
             // We need to do this to connect up all the BufferViews, FileBuffers and the other components
             // such as FontManager etc.
             //
-            m_project.connectFloatingWorld();
+            m_context.m_project.connectFloatingWorld();
 
             // Reconnect these views if they exist
             //
-            m_buildStdOutView = m_project.getStdOutView();
-            m_buildStdErrView = m_project.getStdErrView();
+            m_buildStdOutView = m_context.m_project.getStdOutView();
+            m_buildStdErrView = m_context.m_project.getStdErrView();
 
             // Set the tab space
             //
-            m_project.setTab("  ");
+            m_context.m_project.setTab("  ");
 
             // Initialise the configuration item if it's null - this is in case we've persisted
             // a version of the project without a configuration item it will create it here.
             //
-            m_project.buildInitialConfiguration();
+            m_context.m_project.buildInitialConfiguration();
 
             // Setup the sprite font
             //
@@ -876,19 +643,19 @@ namespace Xyglo.Brazil.Xna
             // Load all the files - if we have nothing in this project then create a BufferView
             // and a FileBuffer.
             //
-            if (m_project.getFileBuffers().Count == 0)
+            if (m_context.m_project.getFileBuffers().Count == 0)
             {
                 addNewFileBuffer();
             }
             else
             {
-                m_project.loadFiles(m_smartHelpWorker);
+                m_context.m_project.loadFiles(m_smartHelpWorker);
             }
 
             // Now do some jiggery pokery to make sure positioning is correct and that
             // any cursors or highlights are within bounds.
             //
-            foreach (BufferView bv in m_project.getBufferViews())
+            foreach (BufferView bv in m_context.m_project.getBufferViews())
             {
                 // check boundaries for cursor and highlighting
                 //
@@ -902,12 +669,12 @@ namespace Xyglo.Brazil.Xna
 
             // Get the BufferView id we've selected and set the BufferView
             //
-            //m_activeBufferView = m_project.getSelectedBufferView();
+            //m_activeBufferView = m_context.m_project.getSelectedBufferView();
 
             // Ensure that we are in the correct position to view this buffer so there's no initial movement
             //
-            m_eye = m_project.getEyePosition();
-            m_target = m_project.getTargetPosition();
+            m_eye = m_context.m_project.getEyePosition();
+            m_target = m_context.m_project.getTargetPosition();
             m_context.m_zoomLevel = m_eye.Z;
 
             // Set the active buffer view
@@ -916,12 +683,12 @@ namespace Xyglo.Brazil.Xna
 
             // Set-up the single FileSystemView we have
             //
-            if (m_project.getOpenDirectory() == "")
+            if (m_context.m_project.getOpenDirectory() == "")
             {
-                m_project.setOpenDirectory(@"C:\");  // set Default
+                m_context.m_project.setOpenDirectory(@"C:\");  // set Default
             }
 
-            m_context.m_fileSystemView = new FileSystemView(m_project.getOpenDirectory(), new Vector3(-800.0f, 0f, 0f), m_project, m_context.m_fontManager);
+            m_context.m_fileSystemView = new FileSystemView(m_context.m_project.getOpenDirectory(), new Vector3(-800.0f, 0f, 0f), m_context.m_project, m_context.m_fontManager);
 
             // Tree builder and model builder
             //
@@ -939,9 +706,9 @@ namespace Xyglo.Brazil.Xna
 
             // Firstly get a root directory for the FileBuffer tree
             //
-            string fileRoot = m_project.getFileBufferRoot();
+            string fileRoot = m_context.m_project.getFileBufferRoot();
 
-            TreeBuilderGraph rG = m_treeBuilder.buildTreeFromFiles(fileRoot, m_project.getNonNullFileBuffers());
+            TreeBuilderGraph rG = m_treeBuilder.buildTreeFromFiles(fileRoot, m_context.m_project.getNonNullFileBuffers());
 
             // Build a model and store it if we don't have one
             //
@@ -958,22 +725,21 @@ namespace Xyglo.Brazil.Xna
             Logger.logMsg("XygloXNA::generateTreeModel() - completed in " + sw.ElapsedMilliseconds + " ms");
         }
 
-
         /// <summary>
-        /// A event handler for FileSystemWatcher
+        /// A event handler for FileSystemWatcher.  Specify what is done when a file is changed, created, or deleted.
         /// </summary>
         /// <param name="source"></param>
         /// <param name="e"></param>
         private static void OnFileChanged(object source, FileSystemEventArgs e)
         {
-            // Specify what is done when a file is changed, created, or deleted.
             Logger.logMsg("XygloXNA::OnFileChanged() - File: " + e.FullPath + " " + e.ChangeType);
+            XygloXNA sourceObject = (XygloXNA)source;
 
-            foreach (FileBuffer fb in m_project.getFileBuffers())
+            foreach (FileBuffer fb in sourceObject.m_context.m_project.getFileBuffers())
             {
                 if (fb.getFilepath() == e.FullPath)
                 {
-                    fb.forceRefetchFile(m_project.getSyntaxManager());
+                    fb.forceRefetchFile(sourceObject.m_context.m_project.getSyntaxManager());
                 }
             }
         }
@@ -1009,7 +775,7 @@ namespace Xyglo.Brazil.Xna
 
             // Now recalculate positions
             //
-            foreach (BufferView bv in m_project.getBufferViews())
+            foreach (BufferView bv in m_context.m_project.getBufferViews())
             {
                 bv.calculateMyRelativePosition();
             }
@@ -1063,7 +829,7 @@ namespace Xyglo.Brazil.Xna
 
             // Panner spritebatch
             //
-            m_pannerSpriteBatch = new SpriteBatch(m_context.m_graphics.GraphicsDevice);
+            m_context.m_pannerSpriteBatch = new SpriteBatch(m_context.m_graphics.GraphicsDevice);
         }
 
 
@@ -1078,10 +844,9 @@ namespace Xyglo.Brazil.Xna
             // Initialise font Manager
             //
             m_context.m_fontManager.initialise(Content, "Bitstream Vera Sans Mono", GraphicsDevice.Viewport.AspectRatio, "Nuclex");
-            if (m_project != null)
+            if (m_context.m_project != null)
             {
-                m_context.m_project = m_project;
-                m_project.setFontManager(m_context.m_fontManager);
+                m_context.m_project.setFontManager(m_context.m_fontManager);
                 loadFriendlierContent();
             }
 
@@ -1103,18 +868,18 @@ namespace Xyglo.Brazil.Xna
 
             // Create the overlay SpriteBatch
             //
-            m_overlaySpriteBatch = new SpriteBatch(m_context.m_graphics.GraphicsDevice);
+            m_context.m_overlaySpriteBatch = new SpriteBatch(m_context.m_graphics.GraphicsDevice);
 
             // Create a flat texture for drawing rectangles etc
             //
             Color[] foregroundColors = new Color[1];
             foregroundColors[0] = Color.White;
-            m_flatTexture = new Texture2D(m_context.m_graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
-            m_flatTexture.SetData(foregroundColors);
+            m_context.m_flatTexture = new Texture2D(m_context.m_graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
+            m_context.m_flatTexture.SetData(foregroundColors);
 
             // Set up the text scroller width
             //
-            if (m_project != null)
+            if (m_context.m_project != null)
             {
                 setTextScrollerWidth(Convert.ToInt16(m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) * 32));
             }
@@ -1131,16 +896,9 @@ namespace Xyglo.Brazil.Xna
             m_lastWindowSize.X = Window.ClientBounds.Width;
             m_lastWindowSize.Y = Window.ClientBounds.Height;
 
-            // Initialise the DrawingHelper with this bounding box and some other stuff
+            // Initialise the DrawingHelper with our context
             //
-            if (m_project != null)
-            {
-                m_context.m_drawingHelper = new DrawingHelper(m_project, m_context.m_fontManager, m_flatTexture, m_context.m_graphics.GraphicsDevice.Viewport.Width, m_context.m_graphics.GraphicsDevice.Viewport.Height);
-            }
-            else
-            {
-                m_context.m_drawingHelper = new DrawingHelper(m_context.m_fontManager, m_flatTexture, m_context.m_graphics.GraphicsDevice.Viewport.Width, m_context.m_graphics.GraphicsDevice.Viewport.Height);
-            }
+            m_context.m_drawingHelper = new DrawingHelper(m_context);
         }
 
         /// <summary>
@@ -1148,7 +906,7 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         protected void loadFriendlierContent()
         {
-            m_splashScreen = Content.Load<Texture2D>("splash");
+            m_context.m_splashScreen = Content.Load<Texture2D>("splash");
 
             // Start up the worker thread for the performance counters
             //
@@ -1178,7 +936,7 @@ namespace Xyglo.Brazil.Xna
 
             // Initialise the project - do this only once and after the font maan
             //
-            if (m_project != null)
+            if (m_context.m_project != null)
             {
                 initialiseProject();
             }
@@ -1195,11 +953,11 @@ namespace Xyglo.Brazil.Xna
 
             // Allow user resizing if we want this
             //
-            if (m_isResizable)
-            {
+            //if (m_isResizable)
+            //{
                 this.Window.AllowUserResizing = true;
                 this.Window.ClientSizeChanged += new EventHandler<EventArgs>(Window_ClientSizeChanged);
-            }
+            //}
 
             this.Window.Title = "Friendlier v" + VersionInformation.getProductVersion();
         }
@@ -1215,7 +973,7 @@ namespace Xyglo.Brazil.Xna
 
             if (f.WindowState == System.Windows.Forms.FormWindowState.Maximized)
             {
-                fullScreenMode();
+                m_graphics.fullScreenMode(this);
             }
         }
 
@@ -1275,7 +1033,7 @@ namespace Xyglo.Brazil.Xna
 
             // Store it in the project too
             //
-            m_project.setWindowSize(m_lastWindowSize.X, m_lastWindowSize.Y);
+            m_context.m_project.setWindowSize(m_lastWindowSize.X, m_lastWindowSize.Y);
 
             // Reenable the callback
             //
@@ -1297,7 +1055,7 @@ namespace Xyglo.Brazil.Xna
 
             // Set up the text scrolling texture
             //
-            m_textScroller = new RenderTarget2D(m_context.m_graphics.GraphicsDevice, width, Convert.ToInt16(m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay)));
+            m_context.m_textScroller = new RenderTarget2D(m_context.m_graphics.GraphicsDevice, width, Convert.ToInt16(m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay)));
         }
 
         /// <summary>
@@ -1306,7 +1064,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="direction"></param>
         protected void setActiveBuffer(BufferView.ViewCycleDirection direction)
         {
-            m_project.getSelectedBufferView().rotateQuadrant(direction);
+            m_context.m_project.getSelectedBufferView().rotateQuadrant(direction);
             setActiveBuffer();
         }
 
@@ -1316,10 +1074,10 @@ namespace Xyglo.Brazil.Xna
         /// <param name="item"></param>
         protected void setActiveBuffer(int item)
         {
-            if (item >= 0 && item < m_project.getBufferViews().Count)
+            if (item >= 0 && item < m_context.m_project.getBufferViews().Count)
             {
                 Logger.logMsg("XygloXNA::setActiveBuffer() - setting active BufferView " + item);
-                setActiveBuffer(m_project.getBufferViews()[item]);
+                setActiveBuffer(m_context.m_project.getBufferViews()[item]);
             }
         }
 
@@ -1347,22 +1105,22 @@ namespace Xyglo.Brazil.Xna
                 // Either set the BufferView 
                 if (item != null)
                 {
-                    m_project.setSelectedBufferView(item);
+                    m_context.m_project.setSelectedBufferView(item);
                 }
-                else if (m_project.getBufferViews().Count == 0) // Or if we have none then create one
+                else if (m_context.m_project.getBufferViews().Count == 0) // Or if we have none then create one
                 {
                     BufferView bv = new BufferView(m_context.m_fontManager);
                     using (FileBuffer fb = new FileBuffer())
                     {
-                        m_project.addBufferView(bv);
-                        m_project.addFileBuffer(fb);
+                        m_context.m_project.addBufferView(bv);
+                        m_context.m_project.addFileBuffer(fb);
                         bv.setFileBuffer(fb);
                     }
                 }
 
                 // Unset the view selection
                 //
-                m_project.setSelectedView(null);
+                m_context.m_project.setSelectedView(null);
             }
             catch (Exception e)
             {
@@ -1370,28 +1128,28 @@ namespace Xyglo.Brazil.Xna
                 return;
             }
 
-            Logger.logMsg("XygloXNA:setActiveBuffer() - active buffer view is " + m_project.getSelectedBufferViewId());
+            Logger.logMsg("XygloXNA:setActiveBuffer() - active buffer view is " + m_context.m_project.getSelectedBufferViewId());
 
             // Set the font manager up with a zoom level
             //
-            m_context.m_fontManager.setScreenState(m_context.m_zoomLevel, m_project.isFullScreen());
+            m_context.m_fontManager.setScreenState(m_context.m_zoomLevel, m_context.m_project.isFullScreen());
 
             // Now recalculate positions
             //
-            foreach (BufferView bv in m_project.getBufferViews())
+            foreach (BufferView bv in m_context.m_project.getBufferViews())
             {
                 bv.calculateMyRelativePosition();
             }
 
             // All the maths is done in the Buffer View
             //
-            Vector3 eyePos = m_project.getSelectedBufferView().getEyePosition(m_context.m_zoomLevel);
+            Vector3 eyePos = m_context.m_project.getSelectedBufferView().getEyePosition(m_context.m_zoomLevel);
 
             flyToPosition(eyePos);
 
             // Set title to include current filename
             // (this is not thread safe - we need to synchronise)
-            //this.Window.Title = "Friendlier v" + VersionInformation.getProductVersion() + " - " + m_project.getSelectedBufferView().getFileBuffer().getShortFileName();
+            //this.Window.Title = "Friendlier v" + VersionInformation.getProductVersion() + " - " + m_context.m_project.getSelectedBufferView().getFileBuffer().getShortFileName();
         }
 
         // Set up the file save mode
@@ -1434,19 +1192,19 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         protected void closeActiveBuffer(GameTime gameTime)
         {
-            if (m_project.getBufferViews().Count > 1)
+            if (m_context.m_project.getBufferViews().Count > 1)
             {
-                int index = m_project.getBufferViews().IndexOf(m_project.getSelectedBufferView());
-                m_project.removeBufferView(m_project.getSelectedBufferView());
+                int index = m_context.m_project.getBufferViews().IndexOf(m_context.m_project.getSelectedBufferView());
+                m_context.m_project.removeBufferView(m_context.m_project.getSelectedBufferView());
 
                 // Ensure that the index is not greater than number of bufferviews
                 //
-                if (index > m_project.getBufferViews().Count - 1)
+                if (index > m_context.m_project.getBufferViews().Count - 1)
                 {
-                    index = m_project.getBufferViews().Count - 1;
+                    index = m_context.m_project.getBufferViews().Count - 1;
                 }
 
-                //m_project.setSelectedBufferViewId(index);
+                //m_context.m_project.setSelectedBufferViewId(index);
 
                 setActiveBuffer(index);
 
@@ -1522,7 +1280,7 @@ namespace Xyglo.Brazil.Xna
                         {
                             // Set the FileBuffer path
                             //
-                            m_project.getSelectedBufferView().getFileBuffer().setFilepath(m_selectedFile);
+                            m_context.m_project.getSelectedBufferView().getFileBuffer().setFilepath(m_selectedFile);
 
                             if (checkFileSave())
                             {
@@ -1570,13 +1328,13 @@ namespace Xyglo.Brazil.Xna
         /// <returns></returns>
         protected bool checkFileSave()
         {
-            if (m_project.getLicenced())
+            if (m_context.m_project.getLicenced())
             {
-                m_project.getSelectedBufferView().getFileBuffer().save();
+                m_context.m_project.getSelectedBufferView().getFileBuffer().save();
                 return true;
             }
 
-            setTemporaryMessage("Can't save due to licence issue.", 10, m_gameTime);
+            setTemporaryMessage("Can't save due to licence issue.", 10, m_context.m_gameTime);
 
             return false;
         }
@@ -1608,7 +1366,7 @@ namespace Xyglo.Brazil.Xna
             }
             catch (Exception)
             {
-                setTemporaryMessage("Failed to save to " + m_project.getSelectedBufferView().getFileBuffer().getFilepath(), 2, gameTime);
+                setTemporaryMessage("Failed to save to " + m_context.m_project.getSelectedBufferView().getFileBuffer().getFilepath(), 2, gameTime);
             }
         }
 
@@ -1626,7 +1384,7 @@ namespace Xyglo.Brazil.Xna
 
             // Immediate exit for no project (not Friendlier)
             //
-            if (m_project == null)
+            if (m_context.m_project == null)
             {
                 this.Exit();
                 return;
@@ -1634,12 +1392,12 @@ namespace Xyglo.Brazil.Xna
 
             // Only check BufferViews status if we're not forcing an exit
             //
-            if (!force && m_saveAsExit == false && m_project.getConfigurationValue("CONFIRMQUIT").ToUpper() == "TRUE")
+            if (!force && m_saveAsExit == false && m_context.m_project.getConfigurationValue("CONFIRMQUIT").ToUpper() == "TRUE")
             {
-                if (m_confirmState.notEquals("ConfirmQuit"))
+                if (m_brazilContext.m_confirmState.notEquals("ConfirmQuit"))
                 {
                     setTemporaryMessage("Confirm quit? Y/N", 0, gameTime);
-                    m_confirmState.set("ConfirmQuit");
+                    m_brazilContext.m_confirmState.set("ConfirmQuit");
                 }
 
                 if (m_confirmQuit == false)
@@ -1652,23 +1410,23 @@ namespace Xyglo.Brazil.Xna
             //
             if (!force)
             {
-                unsaved = (m_project.getFileBuffers().Where(item => item.isModified() == true).Count() > 0);
+                unsaved = (m_context.m_project.getFileBuffers().Where(item => item.isModified() == true).Count() > 0);
             }
 
             // Likewise only save if we want to
             //
             if (unsaved && !force)
             {
-                if (m_confirmState.equals("FileSaveCancel"))
+                if (m_brazilContext.m_confirmState.equals("FileSaveCancel"))
                 {
                     setTemporaryMessage("", 1, gameTime);
-                    m_confirmState.set("None");
+                    m_brazilContext.m_confirmState.set("None");
                     return;
                 }
                 else
                 {
                     setTemporaryMessage("Unsaved Buffers.  Save?  Y/N/C", 0, gameTime);
-                    m_confirmState.set("FileSaveCancel");
+                    m_brazilContext.m_confirmState.set("FileSaveCancel");
                     m_saveAsExit = true;
                     m_brazilContext.m_state = State.Test("FileSaveAs");
                 }
@@ -1712,17 +1470,17 @@ namespace Xyglo.Brazil.Xna
 
                 // Store the eye and target positions to the project before serialising it.
                 //
-                m_project.setEyePosition(m_eye);
-                m_project.setTargetPosition(m_target);
-                m_project.setOpenDirectory(m_context.m_fileSystemView.getPath());
+                m_context.m_project.setEyePosition(m_eye);
+                m_context.m_project.setTargetPosition(m_target);
+                m_context.m_project.setOpenDirectory(m_context.m_fileSystemView.getPath());
 
                 // Do some file management to ensure we have some backup copies
                 //
-                m_project.manageSerialisations();
+                m_context.m_project.manageSerialisations();
 
                 // Save our project including any updated file statuses
                 //
-                m_project.dataContractSerialise();
+                m_context.m_project.dataContractSerialise();
 
                 this.Exit();
             }
@@ -1749,14 +1507,14 @@ namespace Xyglo.Brazil.Xna
                 //
                 if (m_buildProcess != null)
                 {
-                    setTemporaryMessage("Cancel build? (Y/N)", 0, m_gameTime);
-                    m_confirmState.set("CancelBuild");
+                    setTemporaryMessage("Cancel build? (Y/N)", 0, m_context.m_gameTime);
+                    m_brazilContext.m_confirmState.set("CancelBuild");
                     return true;
                 }
 
-                if (m_confirmState.equals("ConfirmQuit"))
+                if (m_brazilContext.m_confirmState.equals("ConfirmQuit"))
                 {
-                    m_confirmState.set("None");
+                    m_brazilContext.m_confirmState.set("None");
                     setTemporaryMessage("Cancelled quit.", 1.0, gameTime);
                     m_brazilContext.m_state = State.Test("TextEditing");
                     return true;
@@ -1776,14 +1534,14 @@ namespace Xyglo.Brazil.Xna
 
                     case "FileSaveAs":
                         setTemporaryMessage("Cancelled quit.", 0.5, gameTime);
-                        m_confirmState.set("None");
+                        m_brazilContext.m_confirmState.set("None");
                         m_brazilContext.m_state = State.Test("TextEditing");
                         m_saveAsExit = false;
                         m_filesToWrite = null;
                         break;
 
                     case "ManageProject":
-                        newPosition = m_project.getSelectedBufferView().getLookPosition();
+                        newPosition = m_context.m_project.getSelectedBufferView().getLookPosition();
                         newPosition.Z = 500.0f;
                         m_brazilContext.m_state = State.Test("TextEditing");
                         m_editConfigurationItem = false;
@@ -1893,16 +1651,16 @@ namespace Xyglo.Brazil.Xna
             {
                 if (keyList.Contains(Keys.PageDown))
                 {
-                    if (m_textScreenPositionY + m_project.getSelectedBufferView().getBufferShowLength() < m_textScreenLength)
+                    if (m_textScreenPositionY + m_context.m_project.getSelectedBufferView().getBufferShowLength() < m_textScreenLength)
                     {
-                        m_textScreenPositionY += m_project.getSelectedBufferView().getBufferShowLength();
+                        m_textScreenPositionY += m_context.m_project.getSelectedBufferView().getBufferShowLength();
                     }
                 }
                 else if (keyList.Contains(Keys.PageUp))
                 {
                     if (m_textScreenPositionY > 0)
                     {
-                        m_textScreenPositionY = m_textScreenPositionY - Math.Min(m_project.getSelectedBufferView().getBufferShowLength(), m_textScreenPositionY);
+                        m_textScreenPositionY = m_textScreenPositionY - Math.Min(m_context.m_project.getSelectedBufferView().getBufferShowLength(), m_textScreenPositionY);
                     }
                 }
                 return true;
@@ -1912,8 +1670,8 @@ namespace Xyglo.Brazil.Xna
             //
             if (m_filesToWrite != null && m_filesToWrite.Count > 0)
             {
-                m_project.setSelectedBufferView(m_filesToWrite[0]);
-                m_eye = m_project.getSelectedBufferView().getEyePosition();
+                m_context.m_project.setSelectedBufferView(m_filesToWrite[0]);
+                m_eye = m_context.m_project.getSelectedBufferView().getEyePosition();
                 selectSaveFile();
             }
 
@@ -1973,14 +1731,12 @@ namespace Xyglo.Brazil.Xna
                     {
                         // Use the copy constructor
                         //
-                        BufferView newBV = new BufferView(m_context.m_fontManager, m_project.getSelectedBufferView(), m_newPosition);
-                        m_project.addBufferView(newBV);
+                        BufferView newBV = new BufferView(m_context.m_fontManager, m_context.m_project.getSelectedBufferView(), m_newPosition);
+                        m_context.m_project.addBufferView(newBV);
                         setActiveBuffer(newBV);
                         m_brazilContext.m_state = State.Test("TextEditing");
                     }
                 }
-
-
                 return true;
             }
 
@@ -2024,11 +1780,11 @@ namespace Xyglo.Brazil.Xna
                 }
                 else
                 {
-                    if (m_context.m_altDown && m_context.m_shiftDown) // Do zoom
+                    if (m_keyboard.isAltDown() && m_keyboard.isShiftDown()) // Do zoom
                     {
                         m_mouse.setZoomLevel(m_context.m_zoomLevel - m_context.m_zoomStep, m_eye);
                     }
-                    else if (m_context.m_altDown)
+                    else if (m_keyboard.isAltDown())
                     {
                         // Attempt to move right if there's a BufferView there
                         //
@@ -2036,16 +1792,16 @@ namespace Xyglo.Brazil.Xna
                     }
                     else
                     {
-                        ScreenPosition sP = m_project.getSelectedBufferView().getCursorPosition();
-                        m_project.getSelectedBufferView().moveCursorUp(m_project, false, m_context.m_shiftDown);
+                        ScreenPosition sP = m_context.m_project.getSelectedBufferView().getCursorPosition();
+                        m_context.m_project.getSelectedBufferView().moveCursorUp(m_context.m_project, false, m_keyboard.isShiftDown());
 
-                        if (m_context.m_shiftDown)
+                        if (m_keyboard.isShiftDown())
                         {
-                            m_project.getSelectedBufferView().extendHighlight(sP);  // Extend 
+                            m_context.m_project.getSelectedBufferView().extendHighlight(sP);  // Extend 
                         }
                         else
                         {
-                            m_project.getSelectedBufferView().noHighlight(); // Disable
+                            m_context.m_project.getSelectedBufferView().noHighlight(); // Disable
                         }
                     }
                 }
@@ -2072,7 +1828,7 @@ namespace Xyglo.Brazil.Xna
                 }
                 else if (m_brazilContext.m_state.equals("Configuration") && m_editConfigurationItem == false) // Configuration changes
                 {
-                    if (m_configPosition < m_project.getConfigurationListLength() - 1)
+                    if (m_configPosition < m_context.m_project.getConfigurationListLength() - 1)
                     {
                         m_configPosition++;
                     }
@@ -2093,12 +1849,12 @@ namespace Xyglo.Brazil.Xna
                 }
                 else
                 {
-                    if (m_context.m_altDown && m_context.m_shiftDown) // Do zoom
+                    if (m_keyboard.isAltDown() && m_keyboard.isShiftDown()) // Do zoom
                     {
                         m_context.m_zoomLevel += m_context.m_zoomStep;
                         setActiveBuffer();
                     }
-                    else if (m_context.m_altDown)
+                    else if (m_keyboard.isAltDown())
                     {
                         // Attempt to move right if there's a BufferView there
                         //
@@ -2106,16 +1862,16 @@ namespace Xyglo.Brazil.Xna
                     }
                     else
                     {
-                        ScreenPosition sP = m_project.getSelectedBufferView().getCursorPosition();
-                        m_project.getSelectedBufferView().moveCursorDown(false, m_context.m_shiftDown);
+                        ScreenPosition sP = m_context.m_project.getSelectedBufferView().getCursorPosition();
+                        m_context.m_project.getSelectedBufferView().moveCursorDown(false, m_keyboard.isShiftDown());
 
-                        if (m_context.m_shiftDown)
+                        if (m_keyboard.isShiftDown())
                         {
-                            m_project.getSelectedBufferView().extendHighlight(sP);
+                            m_context.m_project.getSelectedBufferView().extendHighlight(sP);
                         }
                         else
                         {
-                            m_project.getSelectedBufferView().noHighlight(); // Disable
+                            m_context.m_project.getSelectedBufferView().noHighlight(); // Disable
                         }
                     }
                 }
@@ -2147,7 +1903,7 @@ namespace Xyglo.Brazil.Xna
                             m_context.m_fileSystemView.setHighlightIndex(m_lastHighlightIndex);
                         }
                     }
-                    catch (Exception /*e*/)
+                    catch (Exception)
                     {
                         setTemporaryMessage("Cannot access " + parDirectory.ToString(), 2, gameTime);
                     }
@@ -2156,13 +1912,13 @@ namespace Xyglo.Brazil.Xna
                 {
                     // Store cursor position
                     //
-                    ScreenPosition sP = m_project.getSelectedBufferView().getCursorPosition();
+                    ScreenPosition sP = m_context.m_project.getSelectedBufferView().getCursorPosition();
 
-                    if (m_context.m_ctrlDown)
+                    if (m_keyboard.isCtrlDown())
                     {
-                        m_project.getSelectedBufferView().wordJumpCursorLeft();
+                        m_context.m_project.getSelectedBufferView().wordJumpCursorLeft();
                     }
-                    else if (m_context.m_altDown)
+                    else if (m_keyboard.isAltDown())
                     {
                         // Attempt to move right if there's a BufferView there
                         //
@@ -2170,16 +1926,16 @@ namespace Xyglo.Brazil.Xna
                     }
                     else
                     {
-                        m_project.getSelectedBufferView().moveCursorLeft(m_project, m_context.m_shiftDown);
+                        m_context.m_project.getSelectedBufferView().moveCursorLeft(m_context.m_project, m_keyboard.isShiftDown());
                     }
 
-                    if (m_context.m_shiftDown)
+                    if (m_keyboard.isShiftDown())
                     {
-                        m_project.getSelectedBufferView().extendHighlight(sP);  // Extend
+                        m_context.m_project.getSelectedBufferView().extendHighlight(sP);  // Extend
                     }
                     else
                     {
-                        m_project.getSelectedBufferView().noHighlight(); // Disable
+                        m_context.m_project.getSelectedBufferView().noHighlight(); // Disable
                     }
                 }
             }
@@ -2193,13 +1949,13 @@ namespace Xyglo.Brazil.Xna
                 {
                     // Store cursor position
                     //
-                    ScreenPosition sP = m_project.getSelectedBufferView().getCursorPosition();
+                    ScreenPosition sP = m_context.m_project.getSelectedBufferView().getCursorPosition();
 
-                    if (m_context.m_ctrlDown)
+                    if (m_keyboard.isCtrlDown())
                     {
-                        m_project.getSelectedBufferView().wordJumpCursorRight();
+                        m_context.m_project.getSelectedBufferView().wordJumpCursorRight();
                     }
-                    else if (m_context.m_altDown)
+                    else if (m_keyboard.isAltDown())
                     {
                         // Attempt to move right if there's a BufferView there
                         //
@@ -2207,47 +1963,47 @@ namespace Xyglo.Brazil.Xna
                     }
                     else
                     {
-                        m_project.getSelectedBufferView().moveCursorRight(m_project, m_context.m_shiftDown);
+                        m_context.m_project.getSelectedBufferView().moveCursorRight(m_context.m_project, m_keyboard.isShiftDown());
                     }
 
-                    if (m_context.m_shiftDown)
+                    if (m_keyboard.isShiftDown())
                     {
-                        m_project.getSelectedBufferView().extendHighlight(sP); // Extend
+                        m_context.m_project.getSelectedBufferView().extendHighlight(sP); // Extend
                     }
                     else
                     {
-                        m_project.getSelectedBufferView().noHighlight(); // Disable
+                        m_context.m_project.getSelectedBufferView().noHighlight(); // Disable
                     }
                 }
             }
             else if (keyList.Contains(Keys.End))
             {
-                ScreenPosition fp = m_project.getSelectedBufferView().getCursorPosition();
+                ScreenPosition fp = m_context.m_project.getSelectedBufferView().getCursorPosition();
                 ScreenPosition originalFp = fp;
 
                 // Set X and allow for tabs
                 //
-                if (fp.Y < m_project.getSelectedBufferView().getFileBuffer().getLineCount())
+                if (fp.Y < m_context.m_project.getSelectedBufferView().getFileBuffer().getLineCount())
                 {
-                    fp.X = m_project.getSelectedBufferView().getFileBuffer().getLine(fp.Y).Replace("\t", m_project.getTab()).Length;
+                    fp.X = m_context.m_project.getSelectedBufferView().getFileBuffer().getLine(fp.Y).Replace("\t", m_context.m_project.getTab()).Length;
                 }
-                m_project.getSelectedBufferView().setCursorPosition(fp);
+                m_context.m_project.getSelectedBufferView().setCursorPosition(fp);
 
                 // Change the X offset if the row is longer than the visible width
                 //
-                if (fp.X > m_project.getSelectedBufferView().getBufferShowWidth())
+                if (fp.X > m_context.m_project.getSelectedBufferView().getBufferShowWidth())
                 {
-                    int bufferX = fp.X - m_project.getSelectedBufferView().getBufferShowWidth();
-                    m_project.getSelectedBufferView().setBufferShowStartX(bufferX);
+                    int bufferX = fp.X - m_context.m_project.getSelectedBufferView().getBufferShowWidth();
+                    m_context.m_project.getSelectedBufferView().setBufferShowStartX(bufferX);
                 }
 
-                if (m_context.m_shiftDown)
+                if (m_keyboard.isShiftDown())
                 {
-                    m_project.getSelectedBufferView().extendHighlight(originalFp); // Extend
+                    m_context.m_project.getSelectedBufferView().extendHighlight(originalFp); // Extend
                 }
                 else
                 {
-                    m_project.getSelectedBufferView().noHighlight(); // Disable
+                    m_context.m_project.getSelectedBufferView().noHighlight(); // Disable
                 }
 
             }
@@ -2255,25 +2011,25 @@ namespace Xyglo.Brazil.Xna
             {
                 // Store cursor position
                 //
-                ScreenPosition sP = m_project.getSelectedBufferView().getCursorPosition();
+                ScreenPosition sP = m_context.m_project.getSelectedBufferView().getCursorPosition();
 
                 // Reset the cursor to zero
                 //
-                ScreenPosition fp = m_project.getSelectedBufferView().getFirstNonSpace(m_project);
+                ScreenPosition fp = m_context.m_project.getSelectedBufferView().getFirstNonSpace(m_context.m_project);
 
-                m_project.getSelectedBufferView().setCursorPosition(fp);
+                m_context.m_project.getSelectedBufferView().setCursorPosition(fp);
 
                 // Reset any X offset to zero
                 //
-                m_project.getSelectedBufferView().setBufferShowStartX(0);
+                m_context.m_project.getSelectedBufferView().setBufferShowStartX(0);
 
-                if (m_context.m_shiftDown)
+                if (m_keyboard.isShiftDown())
                 {
-                    m_project.getSelectedBufferView().extendHighlight(sP); // Extend
+                    m_context.m_project.getSelectedBufferView().extendHighlight(sP); // Extend
                 }
                 else
                 {
-                    m_project.getSelectedBufferView().noHighlight(); // Disable
+                    m_context.m_project.getSelectedBufferView().noHighlight(); // Disable
                 }
             }
             else if (keyList.Contains(Keys.F9)) // Spin anticlockwise though BVs
@@ -2292,7 +2048,7 @@ namespace Xyglo.Brazil.Xna
             }
             else if (keyList.Contains(Keys.F4))
             {
-                m_project.setViewMode(Project.ViewMode.Fun);
+                m_context.m_project.setViewMode(Project.ViewMode.Fun);
                 m_context.m_drawingHelper.startBanner(gameTime, "Friendlier\nv1.0", 5);
             }
             else if (keyList.Contains(Keys.F6))
@@ -2301,7 +2057,7 @@ namespace Xyglo.Brazil.Xna
             }
             else if (keyList.Contains(Keys.F7))
             {
-                string command = m_project.getConfigurationValue("ALTERNATEBUILDCOMMAND");
+                string command = m_context.m_project.getConfigurationValue("ALTERNATEBUILDCOMMAND");
                 doBuildCommand(gameTime, command);
             }
             else if (keyList.Contains(Keys.F8))
@@ -2310,31 +2066,31 @@ namespace Xyglo.Brazil.Xna
             }
             else if (keyList.Contains(Keys.F11)) // Toggle full screen
             {
-                if (m_project.isFullScreen())
+                if (m_context.m_project.isFullScreen())
                 {
-                    windowedMode();
+                    m_graphics.windowedMode(this);
                 }
                 else
                 {
-                    fullScreenMode();
+                    m_graphics.fullScreenMode(this);
                 }
                 setSpriteFont();
             }
             else if (keyList.Contains(Keys.F1))  // Cycle down through BufferViews
             {
-                int newValue = m_project.getSelectedBufferViewId() - 1;
+                int newValue = m_context.m_project.getSelectedBufferViewId() - 1;
                 if (newValue < 0)
                 {
-                    newValue += m_project.getBufferViews().Count;
+                    newValue += m_context.m_project.getBufferViews().Count;
                 }
 
-                m_project.setSelectedBufferViewId(newValue);
+                m_context.m_project.setSelectedBufferViewId(newValue);
                 setActiveBuffer();
             }
             else if (keyList.Contains(Keys.F2)) // Cycle up through BufferViews
             {
-                int newValue = (m_project.getSelectedBufferViewId() + 1) % m_project.getBufferViews().Count;
-                m_project.setSelectedBufferViewId(newValue);
+                int newValue = (m_context.m_project.getSelectedBufferViewId() + 1) % m_context.m_project.getBufferViews().Count;
+                m_context.m_project.setSelectedBufferViewId(newValue);
                 setActiveBuffer();
             }
             else if (keyList.Contains(Keys.PageDown))
@@ -2343,24 +2099,24 @@ namespace Xyglo.Brazil.Xna
                 {
                     // Store cursor position
                     //
-                    ScreenPosition sP = m_project.getSelectedBufferView().getCursorPosition();
+                    ScreenPosition sP = m_context.m_project.getSelectedBufferView().getCursorPosition();
 
-                    m_project.getSelectedBufferView().pageDown(m_project);
+                    m_context.m_project.getSelectedBufferView().pageDown(m_context.m_project);
 
-                    if (m_context.m_shiftDown)
+                    if (m_keyboard.isShiftDown())
                     {
-                        m_project.getSelectedBufferView().extendHighlight(sP); // Extend
+                        m_context.m_project.getSelectedBufferView().extendHighlight(sP); // Extend
                     }
                     else
                     {
-                        m_project.getSelectedBufferView().noHighlight(); // Disable
+                        m_context.m_project.getSelectedBufferView().noHighlight(); // Disable
                     }
                 }
                 else if (m_brazilContext.m_state.equals("DiffPicker"))
                 {
                     if (m_differ != null && m_diffPosition < m_differ.getMaxDiffLength())
                     {
-                        m_diffPosition += m_project.getSelectedBufferView().getBufferShowLength();
+                        m_diffPosition += m_context.m_project.getSelectedBufferView().getBufferShowLength();
 
                         if (m_diffPosition >= m_differ.getMaxDiffLength())
                         {
@@ -2375,24 +2131,24 @@ namespace Xyglo.Brazil.Xna
                 {
                     // Store cursor position
                     //
-                    ScreenPosition sP = m_project.getSelectedBufferView().getCursorPosition();
+                    ScreenPosition sP = m_context.m_project.getSelectedBufferView().getCursorPosition();
 
-                    m_project.getSelectedBufferView().pageUp(m_project);
+                    m_context.m_project.getSelectedBufferView().pageUp(m_context.m_project);
 
-                    if (m_context.m_shiftDown)
+                    if (m_keyboard.isShiftDown())
                     {
-                        m_project.getSelectedBufferView().extendHighlight(sP); // Extend
+                        m_context.m_project.getSelectedBufferView().extendHighlight(sP); // Extend
                     }
                     else
                     {
-                        m_project.getSelectedBufferView().noHighlight(); // Disable
+                        m_context.m_project.getSelectedBufferView().noHighlight(); // Disable
                     }
                 }
                 else if (m_brazilContext.m_state.equals("DiffPicker"))
                 {
                     if (m_diffPosition > 0)
                     {
-                        m_diffPosition -= m_project.getSelectedBufferView().getBufferShowLength();
+                        m_diffPosition -= m_context.m_project.getSelectedBufferView().getBufferShowLength();
 
                         if (m_diffPosition < 0)
                         {
@@ -2403,18 +2159,18 @@ namespace Xyglo.Brazil.Xna
             }
             else if (keyList.Contains(Keys.Scroll))
             {
-                if (m_project.getSelectedBufferView().isLocked())
+                if (m_context.m_project.getSelectedBufferView().isLocked())
                 {
-                    m_project.getSelectedBufferView().setLock(false, 0);
+                    m_context.m_project.getSelectedBufferView().setLock(false, 0);
                 }
                 else
                 {
-                    m_project.getSelectedBufferView().setLock(true, m_project.getSelectedBufferView().getCursorPosition().Y);
+                    m_context.m_project.getSelectedBufferView().setLock(true, m_context.m_project.getSelectedBufferView().getCursorPosition().Y);
                 }
             }
             else if (keyList.Contains(Keys.Tab)) // Insert a tab space
             {
-                m_project.getSelectedBufferView().insertText(m_project, "\t");
+                m_context.m_project.getSelectedBufferView().insertText(m_context.m_project, "\t");
                 updateSmartHelp();
             }
             else if (keyList.Contains(Keys.Insert))
@@ -2425,7 +2181,7 @@ namespace Xyglo.Brazil.Xna
                     {
                         string fileToEdit = m_modelBuilder.getSelectedModelString(m_configPosition);
 
-                        BufferView bv = m_project.getBufferView(fileToEdit);
+                        BufferView bv = m_context.m_project.getBufferView(fileToEdit);
 
                         if (bv != null)
                         {
@@ -2435,28 +2191,28 @@ namespace Xyglo.Brazil.Xna
                         {
                             try
                             {
-                                FileBuffer fb = m_project.getFileBuffer(fileToEdit);
-                                bv = new BufferView(m_context.m_fontManager, m_project.getBufferViews()[0], BufferView.ViewPosition.Left);
+                                FileBuffer fb = m_context.m_project.getFileBuffer(fileToEdit);
+                                bv = new BufferView(m_context.m_fontManager, m_context.m_project.getBufferViews()[0], BufferView.ViewPosition.Left);
                                 bv.setFileBuffer(fb);
-                                int bvIndex = m_project.addBufferView(bv);
+                                int bvIndex = m_context.m_project.addBufferView(bv);
                                 setActiveBuffer(bvIndex);
 
-                                Vector3 rootPosition = m_project.getBufferViews()[0].getPosition();
+                                Vector3 rootPosition = m_context.m_project.getBufferViews()[0].getPosition();
                                 Vector3 newPosition2 = bv.getPosition();
 
                                 Logger.logMsg(rootPosition.ToString() + newPosition2.ToString());
                                 //bv.setFileBufferIndex(
-                                fb.loadFile(m_project.getSyntaxManager());
+                                fb.loadFile(m_context.m_project.getSyntaxManager());
 
-                                if (m_project.getConfigurationValue("SYNTAXHIGHLIGHT").ToUpper() == "TRUE")
+                                if (m_context.m_project.getConfigurationValue("SYNTAXHIGHLIGHT").ToUpper() == "TRUE")
                                 {
-                                    //m_project.getSyntaxManager().generateAllHighlighting(fb, true);
-                                    m_smartHelpWorker.updateSyntaxHighlighting(m_project.getSyntaxManager(), fb);
+                                    //m_context.m_project.getSyntaxManager().generateAllHighlighting(fb, true);
+                                    m_smartHelpWorker.updateSyntaxHighlighting(m_context.m_project.getSyntaxManager(), fb);
                                 }
 
                                 // Break out of Manage mode and back to editing
                                 //
-                                Vector3 newPosition = m_project.getSelectedBufferView().getLookPosition();
+                                Vector3 newPosition = m_context.m_project.getSelectedBufferView().getLookPosition();
                                 newPosition.Z = 500.0f;
                                 m_brazilContext.m_state = State.Test("TextEditing");
                                 m_editConfigurationItem = false;
@@ -2484,12 +2240,12 @@ namespace Xyglo.Brazil.Xna
                 }
                 else if (m_brazilContext.m_state.equals("FindText") && keyList.Contains(Keys.Back))
                 {
-                    string searchText = m_project.getSelectedBufferView().getSearchText();
+                    string searchText = m_context.m_project.getSelectedBufferView().getSearchText();
                     // Delete charcters from the file name if we have one
                     //
                     if (searchText.Length > 0)
                     {
-                        m_project.getSelectedBufferView().setSearchText(searchText.Substring(0, searchText.Length - 1));
+                        m_context.m_project.getSelectedBufferView().setSearchText(searchText.Substring(0, searchText.Length - 1));
                     }
                 }
                 else if (m_brazilContext.m_state.equals("GotoLine") && keyList.Contains(Keys.Back))
@@ -2511,7 +2267,7 @@ namespace Xyglo.Brazil.Xna
                     if (m_configPosition >= 0 && m_configPosition < m_modelBuilder.getLeafNodesPlaces())
                     {
                         string fileToRemove = m_modelBuilder.getSelectedModelString(m_configPosition);
-                        if (m_project.removeFileBuffer(fileToRemove))
+                        if (m_context.m_project.removeFileBuffer(fileToRemove))
                         {
                             Logger.logMsg("XygloXNA::processActionKeys() - removed FileBuffer for " + fileToRemove);
 
@@ -2523,7 +2279,7 @@ namespace Xyglo.Brazil.Xna
                             //
                             generateTreeModel();
 
-                            setTemporaryMessage("Removed " + fileToRemove + " from project", 5, m_gameTime);
+                            setTemporaryMessage("Removed " + fileToRemove + " from project", 5, m_context.m_gameTime);
                         }
                         else
                         {
@@ -2531,38 +2287,38 @@ namespace Xyglo.Brazil.Xna
                         }
                     }
                 }
-                else if (m_project.getSelectedBufferView().gotHighlight()) // If we have a valid highlighted selection then delete it (normal editing)
+                else if (m_context.m_project.getSelectedBufferView().gotHighlight()) // If we have a valid highlighted selection then delete it (normal editing)
                 {
                     // All the clever stuff with the cursor is done at the BufferView level and it also
                     // calls the command in the FileBuffer.
                     //
-                    m_project.getSelectedBufferView().deleteCurrentSelection(m_project);
+                    m_context.m_project.getSelectedBufferView().deleteCurrentSelection(m_context.m_project);
                     updateSmartHelp();
                 }
                 else // delete at cursor
                 {
                     if (keyList.Contains(Keys.Delete))
                     {
-                        m_project.getSelectedBufferView().deleteSingle(m_project);
+                        m_context.m_project.getSelectedBufferView().deleteSingle(m_context.m_project);
                     }
                     else if (keyList.Contains(Keys.Back))
                     {
                         // Start with a file position from the screen position
                         //
-                        FilePosition fp = m_project.getSelectedBufferView().screenToFilePosition(m_project);
+                        FilePosition fp = m_context.m_project.getSelectedBufferView().screenToFilePosition(m_context.m_project);
 
                         // Get the character before the current one and backspace accordingly 
 
                         if (fp.X > 0)
                         {
-                            string fetchLine = m_project.getSelectedBufferView().getCurrentLine();
+                            string fetchLine = m_context.m_project.getSelectedBufferView().getCurrentLine();
 
                             // Decrement and set X
                             //
                             fp.X--;
 
                             // Now convert back to a screen position
-                            fp.X = fetchLine.Substring(0, fp.X).Replace("\t", m_project.getTab()).Length;
+                            fp.X = fetchLine.Substring(0, fp.X).Replace("\t", m_context.m_project.getTab()).Length;
 
                         }
                         else if (fp.Y > 0)
@@ -2571,19 +2327,19 @@ namespace Xyglo.Brazil.Xna
 
                             // Don't forget to do tab conversions here too
                             //
-                            fp.X = m_project.getSelectedBufferView().getFileBuffer().getLine(Convert.ToInt16(fp.Y)).Replace("\t", m_project.getTab()).Length;
+                            fp.X = m_context.m_project.getSelectedBufferView().getFileBuffer().getLine(Convert.ToInt16(fp.Y)).Replace("\t", m_context.m_project.getTab()).Length;
                         }
 
-                        m_project.getSelectedBufferView().setCursorPosition(new ScreenPosition(fp));
+                        m_context.m_project.getSelectedBufferView().setCursorPosition(new ScreenPosition(fp));
 
-                        m_project.getSelectedBufferView().deleteSingle(m_project);
+                        m_context.m_project.getSelectedBufferView().deleteSingle(m_context.m_project);
                     }
                     updateSmartHelp();
                 }
             }
             else if (keyList.Contains(Keys.Enter))
             {
-                //ScreenPosition fp = m_project.getSelectedBufferView().getCursorPosition();
+                //ScreenPosition fp = m_context.m_project.getSelectedBufferView().getCursorPosition();
 
                 if (m_brazilContext.m_state.equals("FileSaveAs"))
                 {
@@ -2591,9 +2347,9 @@ namespace Xyglo.Brazil.Xna
                     //
                     if (m_saveFileName != "" && m_saveFileName != null)
                     {
-                        m_project.getSelectedBufferView().getFileBuffer().setFilepath(m_context.m_fileSystemView.getPath() + m_saveFileName);
+                        m_context.m_project.getSelectedBufferView().getFileBuffer().setFilepath(m_context.m_fileSystemView.getPath() + m_saveFileName);
 
-                        Logger.logMsg("XygloXNA::processActionKeys() - file name = " + m_project.getSelectedBufferView().getFileBuffer().getFilepath());
+                        Logger.logMsg("XygloXNA::processActionKeys() - file name = " + m_context.m_project.getSelectedBufferView().getFileBuffer().getFilepath());
 
                         completeSaveFile(gameTime);
 
@@ -2601,15 +2357,15 @@ namespace Xyglo.Brazil.Xna
                         //
                         if (m_filesToWrite != null)
                         {
-                            //m_filesToWrite.Remove(m_project.getSelectedBufferView().getFileBuffer());
+                            //m_filesToWrite.Remove(m_context.m_project.getSelectedBufferView().getFileBuffer());
 
                             // If we have remaining files to edit then set the active BufferView to one that
                             // looks over this file - then fly to it and choose and file location.
                             //
                             if (m_filesToWrite.Count > 0)
                             {
-                                m_project.setSelectedBufferView(m_filesToWrite[0]);
-                                m_eye = m_project.getSelectedBufferView().getEyePosition();
+                                m_context.m_project.setSelectedBufferView(m_filesToWrite[0]);
+                                m_eye = m_context.m_project.getSelectedBufferView().getEyePosition();
                                 selectSaveFile();
                             }
                             else // We're done 
@@ -2645,14 +2401,14 @@ namespace Xyglo.Brazil.Xna
                     {
                         // Go into item edit mode and copy across the current value
                         m_editConfigurationItem = true;
-                        m_editConfigurationItemValue = m_project.getConfigurationItem(m_configPosition).Value;
+                        m_editConfigurationItemValue = m_context.m_project.getConfigurationItem(m_configPosition).Value;
                     }
                     else
                     {
                         // Completed editing the item - now set it
                         //
                         m_editConfigurationItem = false;
-                        m_project.updateConfigurationItem(m_project.getConfigurationItem(m_configPosition).Name, m_editConfigurationItemValue);
+                        m_context.m_project.updateConfigurationItem(m_context.m_project.getConfigurationItem(m_configPosition).Name, m_editConfigurationItemValue);
                     }
                 }
                 else if (m_brazilContext.m_state.equals("FindText"))
@@ -2667,10 +2423,10 @@ namespace Xyglo.Brazil.Xna
 
                         if (gotoLine > 0)
                         {
-                            if (gotoLine < m_project.getSelectedBufferView().getFileBuffer().getLineCount() - 1)
+                            if (gotoLine < m_context.m_project.getSelectedBufferView().getFileBuffer().getLineCount() - 1)
                             {
                                 ScreenPosition sp = new ScreenPosition(0, gotoLine);
-                                m_project.getSelectedBufferView().setCursorPosition(sp);
+                                m_context.m_project.getSelectedBufferView().setCursorPosition(sp);
                             }
                             else
                             {
@@ -2678,7 +2434,7 @@ namespace Xyglo.Brazil.Xna
                             }
                         }
                     }
-                    catch (Exception /* e */)
+                    catch (Exception)
                     {
                         Logger.logMsg("Probably got junk in the goto line dialog");
                         setTemporaryMessage("Lines are identified by numbers.", 2, gameTime);
@@ -2695,20 +2451,20 @@ namespace Xyglo.Brazil.Xna
 
                     try
                     {
-                        indent = m_project.getConfigurationValue("AUTOINDENT");
+                        indent = m_context.m_project.getConfigurationValue("AUTOINDENT");
                     }
                     catch (Exception e)
                     {
                         Logger.logMsg("XygloXNA::processActionKeys) - couldn't get AUTOINDENT from config - " + e.Message);
                     }
 
-                    if (m_project.getSelectedBufferView().gotHighlight())
+                    if (m_context.m_project.getSelectedBufferView().gotHighlight())
                     {
-                        m_project.getSelectedBufferView().replaceCurrentSelection(m_project, "\n");
+                        m_context.m_project.getSelectedBufferView().replaceCurrentSelection(m_context.m_project, "\n");
                     }
                     else
                     {
-                        m_project.getSelectedBufferView().insertNewLine(m_project, indent);
+                        m_context.m_project.getSelectedBufferView().insertNewLine(m_context.m_project, indent);
                     }
                     updateSmartHelp();
                 }
@@ -2732,7 +2488,7 @@ namespace Xyglo.Brazil.Xna
                 keyList.Add(keyAction.m_key);
             }
 
-            if (m_confirmState.equals("ConfirmQuit") && keyList.Contains(Keys.Y))
+            if (m_brazilContext.m_confirmState.equals("ConfirmQuit") && keyList.Contains(Keys.Y))
             {
                 m_confirmQuit = true;
                 checkExit(gameTime, true);
@@ -2741,18 +2497,18 @@ namespace Xyglo.Brazil.Xna
 
             // Check confirm state - this works out the complicated statuses of open file buffers
             //
-            if (!m_confirmState.equals("None"))
+            if (!m_brazilContext.m_confirmState.equals("None"))
             {
                 if (keyList.Contains(Keys.Y))
                 {
                     Logger.logMsg("XygloXNA::processCombinationsCommands() - confirm y/n");
                     try
                     {
-                        if (m_confirmState.equals("FileSave"))
+                        if (m_brazilContext.m_confirmState.equals("FileSave"))
                         {
                             // Select a file path if we need one
                             //
-                            if (m_project.getSelectedBufferView().getFileBuffer().getFilepath() == "")
+                            if (m_context.m_project.getSelectedBufferView().getFileBuffer().getFilepath() == "")
                             {
                                 selectSaveFile();
                             }
@@ -2771,14 +2527,14 @@ namespace Xyglo.Brazil.Xna
                                 rC = true;
                             }
                         }
-                        else if (m_confirmState.equals("FileSaveCancel"))
+                        else if (m_brazilContext.m_confirmState.equals("FileSaveCancel"))
                         {
                             // First of all save all open buffers we can write and save
                             // a list of all those we can't
                             //
                             m_filesToWrite = new List<FileBuffer>();
 
-                            foreach (FileBuffer fb in m_project.getFileBuffers())
+                            foreach (FileBuffer fb in m_context.m_project.getFileBuffers())
                             {
                                 if (fb.isModified())
                                 {
@@ -2815,13 +2571,13 @@ namespace Xyglo.Brazil.Xna
                                 checkExit(gameTime);
                             }
                         }
-                        else if (m_confirmState.equals("CancelBuild"))
+                        else if (m_brazilContext.m_confirmState.equals("CancelBuild"))
                         {
                             Logger.logMsg("XygloXNA::processCombinationsCommands() - cancel build");
                             m_buildProcess.Close();
                             m_buildProcess = null;
                         }
-                        else if (m_confirmState.equals("ConfirmQuit"))
+                        else if (m_brazilContext.m_confirmState.equals("ConfirmQuit"))
                         {
                             m_confirmQuit = true;
                             checkExit(gameTime, true);
@@ -2833,43 +2589,43 @@ namespace Xyglo.Brazil.Xna
                         setTemporaryMessage("Save failed with \"" + e.Message + "\".", 5, gameTime);
                     }
 
-                    m_confirmState.set("None");
+                    m_brazilContext.m_confirmState.set("None");
                 }
                 else if (keyList.Contains(Keys.N))
                 {
                     // If no for single file save then continue - if no for FileSaveCancel then quit
                     //
-                    if (m_confirmState.equals("FileSave"))
+                    if (m_brazilContext.m_confirmState.equals("FileSave"))
                     {
                         m_temporaryMessage = "";
-                        m_confirmState.set("None");
+                        m_brazilContext.m_confirmState.set("None");
                     }
-                    else if (m_confirmState.equals("FileSaveCancel"))
+                    else if (m_brazilContext.m_confirmState.equals("FileSaveCancel"))
                     {
                         // Exit nicely
                         //
                         checkExit(gameTime, true);
                     }
-                    else if (m_confirmState.equals("CancelBuild"))
+                    else if (m_brazilContext.m_confirmState.equals("CancelBuild"))
                     {
                         setTemporaryMessage("Continuing build..", 2, gameTime);
-                        m_confirmState.set("None");
+                        m_brazilContext.m_confirmState.set("None");
                     }
-                    else if (m_confirmState.equals("ConfirmQuit"))
+                    else if (m_brazilContext.m_confirmState.equals("ConfirmQuit"))
                     {
                         setTemporaryMessage("Cancelled quit", 2, gameTime);
-                        m_confirmState.set("None");
+                        m_brazilContext.m_confirmState.set("None");
                     }
                     rC = true; // consume this letter
                 }
-                else if (keyList.Contains(Keys.C) && m_confirmState.equals("FileSaveCancel"))
+                else if (keyList.Contains(Keys.C) && m_brazilContext.m_confirmState.equals("FileSaveCancel"))
                 {
                     setTemporaryMessage("Cancelled Quit.", 0.5, gameTime);
-                    m_confirmState.set("None");
+                    m_brazilContext.m_confirmState.set("None");
                     rC = true;
                 }
             }
-            else if (m_context.m_ctrlDown && !m_context.m_altDown)  // CTRL down and no ALT
+            else if (m_keyboard.isCtrlDown() && !m_keyboard.isAltDown())  // CTRL down and no ALT
             {
                 if (keyList.Contains(Keys.C)) // Copy
                 {
@@ -2881,7 +2637,7 @@ namespace Xyglo.Brazil.Xna
                     else
                     {
                         Logger.logMsg("XygloXNA::processCombinationsCommands() - copying to clipboard");
-                        string text = m_project.getSelectedBufferView().getSelection(m_project).getClipboardString();
+                        string text = m_context.m_project.getSelectedBufferView().getSelection(m_context.m_project).getClipboardString();
 
                         // We can only set this is the text is not empty
                         if (text != "")
@@ -2903,8 +2659,8 @@ namespace Xyglo.Brazil.Xna
                     {
                         Logger.logMsg("XygloXNA::processCombinationsCommands() - cut");
 
-                        System.Windows.Forms.Clipboard.SetText(m_project.getSelectedBufferView().getSelection(m_project).getClipboardString());
-                        m_project.getSelectedBufferView().deleteCurrentSelection(m_project);
+                        System.Windows.Forms.Clipboard.SetText(m_context.m_project.getSelectedBufferView().getSelection(m_context.m_project).getClipboardString());
+                        m_context.m_project.getSelectedBufferView().deleteCurrentSelection(m_context.m_project);
                         rC = true;
                     }
                 }
@@ -2935,13 +2691,13 @@ namespace Xyglo.Brazil.Xna
                             Logger.logMsg("XygloXNA::processCombinationsCommands() - pasting text");
                             // If we have a selection then replace it - else insert
                             //
-                            if (m_project.getSelectedBufferView().gotHighlight())
+                            if (m_context.m_project.getSelectedBufferView().gotHighlight())
                             {
-                                m_project.getSelectedBufferView().replaceCurrentSelection(m_project, System.Windows.Forms.Clipboard.GetText());
+                                m_context.m_project.getSelectedBufferView().replaceCurrentSelection(m_context.m_project, System.Windows.Forms.Clipboard.GetText());
                             }
                             else
                             {
-                                m_project.getSelectedBufferView().insertText(m_project, System.Windows.Forms.Clipboard.GetText());
+                                m_context.m_project.getSelectedBufferView().insertText(m_context.m_project, System.Windows.Forms.Clipboard.GetText());
                             }
                             updateSmartHelp();
                             rC = true;
@@ -2957,9 +2713,9 @@ namespace Xyglo.Brazil.Xna
                         // We call the undo against the FileBuffer and this returns the cursor position
                         // resulting from this action.
                         //
-                        if (m_project.getSelectedBufferView().getFileBuffer().getUndoPosition() > 0)
+                        if (m_context.m_project.getSelectedBufferView().getFileBuffer().getUndoPosition() > 0)
                         {
-                            m_project.getSelectedBufferView().undo(m_project, 1);
+                            m_context.m_project.getSelectedBufferView().undo(m_context.m_project, 1);
                             updateSmartHelp();
                         }
                         else
@@ -2987,10 +2743,10 @@ namespace Xyglo.Brazil.Xna
                         // We call the undo against the FileBuffer and this returns the cursor position
                         // resulting from this action.
                         //
-                        if (m_project.getSelectedBufferView().getFileBuffer().getUndoPosition() <
-                            m_project.getSelectedBufferView().getFileBuffer().getCommandStackLength())
+                        if (m_context.m_project.getSelectedBufferView().getFileBuffer().getUndoPosition() <
+                            m_context.m_project.getSelectedBufferView().getFileBuffer().getCommandStackLength())
                         {
-                            m_project.getSelectedBufferView().redo(m_project, 1);
+                            m_context.m_project.getSelectedBufferView().redo(m_context.m_project, 1);
                             updateSmartHelp();
                         }
                         else
@@ -3011,14 +2767,14 @@ namespace Xyglo.Brazil.Xna
                 }
                 else if (keyList.Contains(Keys.A))  // Select all
                 {
-                    m_project.getSelectedBufferView().selectAll();
+                    m_context.m_project.getSelectedBufferView().selectAll();
                     rC = true;
                 }
                 else if (keyList.Contains(Keys.OemPlus)) // increment bloom state
                 {
-                    if (m_context.m_shiftDown)
+                    if (m_keyboard.isShiftDown())
                     {
-                        m_fontScaleOriginal = m_project.getSelectedBufferView().incrementViewSize(m_context.m_graphics.GraphicsDevice.Viewport.Width, m_context.m_graphics.GraphicsDevice.Viewport.Height, m_context.m_fontManager);
+                        m_fontScaleOriginal = m_context.m_project.getSelectedBufferView().incrementViewSize(m_context.m_graphics.GraphicsDevice.Viewport.Width, m_context.m_graphics.GraphicsDevice.Viewport.Height, m_context.m_fontManager);
                         m_currentFontScale = 0.0f;
                         setActiveBuffer();
                     }
@@ -3033,9 +2789,9 @@ namespace Xyglo.Brazil.Xna
                 }
                 else if (keyList.Contains(Keys.OemMinus)) // decrement bloom state
                 {
-                    if (m_context.m_shiftDown)
+                    if (m_keyboard.isShiftDown())
                     {
-                        m_fontScaleOriginal = m_project.getSelectedBufferView().decrementViewSize(m_context.m_graphics.GraphicsDevice.Viewport.Width, m_context.m_graphics.GraphicsDevice.Viewport.Height, m_context.m_fontManager);
+                        m_fontScaleOriginal = m_context.m_project.getSelectedBufferView().decrementViewSize(m_context.m_graphics.GraphicsDevice.Viewport.Width, m_context.m_graphics.GraphicsDevice.Viewport.Height, m_context.m_fontManager);
                         m_currentFontScale = 0.0f;
                         setActiveBuffer();
                     }
@@ -3060,22 +2816,22 @@ namespace Xyglo.Brazil.Xna
                 }
 
             }
-            else if (m_context.m_altDown && !m_context.m_ctrlDown) // ALT down action and no CTRL down
+            else if (m_keyboard.isAltDown() && !m_keyboard.isCtrlDown()) // ALT down action and no CTRL down
             {
-                if (keyList.Contains(Keys.S) && m_project.getSelectedBufferView().getFileBuffer().isModified())
+                if (keyList.Contains(Keys.S) && m_context.m_project.getSelectedBufferView().getFileBuffer().isModified())
                 {
                     // If we want to confirm save then ask
                     //
                     if (m_confirmFileSave)
                     {
                         setTemporaryMessage("Confirm Save? Y/N", 0, gameTime);
-                        m_confirmState.set("FileSave");
+                        m_brazilContext.m_confirmState.set("FileSave");
                     }
                     else  // just save
                     {
                         // Select a file path if we need one
                         //
-                        if (m_project.getSelectedBufferView().getFileBuffer().getFilepath() == "")
+                        if (m_context.m_project.getSelectedBufferView().getFileBuffer().getFilepath() == "")
                         {
                             m_saveAsExit = false;
                             selectSaveFile();
@@ -3175,7 +2931,7 @@ namespace Xyglo.Brazil.Xna
 
                     // Copy current position to m_projectPosition - then rebuild model
                     //
-                    m_projectPosition = m_project.getSelectedBufferView().getPosition();
+                    m_projectPosition = m_context.m_project.getSelectedBufferView().getPosition();
                     m_projectPosition.X = -1000.0f;
                     m_projectPosition.Y = -1000.0f;
 
@@ -3199,7 +2955,7 @@ namespace Xyglo.Brazil.Xna
                             keyList.Contains(Keys.D8) ||
                             keyList.Contains(Keys.D9))
                 {
-                    m_gotoBufferView += getNumberKey();
+                    m_gotoBufferView += m_keyboard.getNumberKey();
                     rC = true;
                 }
 
@@ -3220,7 +2976,7 @@ namespace Xyglo.Brazil.Xna
 
 
             }
-            else if (m_context.m_windowsDown) // Windows keys
+            else if (m_keyboard.isWindowsDown()) // Windows keys
             {
                 // Initialially tried CTRL and ALT combinations but ran up against this:
                 //
@@ -3238,147 +2994,6 @@ namespace Xyglo.Brazil.Xna
             }
 
             return rC;
-        }
-
-        /// <summary>
-        /// Remove keyboard modifiers from a list of XNA Keys
-        /// </summary>
-        /// <param name="inList"></param>
-        /// <returns></returns>
-        protected List<Keys> removeModifiers(List<Keys> inList)
-        {
-            List<Keys> outList = new List<Keys>();
-            List<Keys> modifierList = new List<Keys>();
-            modifierList.Add(Keys.LeftShift);
-            modifierList.Add(Keys.RightShift);
-            modifierList.Add(Keys.LeftControl);
-            modifierList.Add(Keys.RightControl);
-            modifierList.Add(Keys.LeftAlt);
-            modifierList.Add(Keys.RightAlt);
-            modifierList.Add(Keys.LeftWindows);
-            modifierList.Add(Keys.RightWindows);
-
-            foreach (Keys key in inList)
-            {
-                if (!modifierList.Contains(key))
-                {
-                    outList.Add(key);
-                }
-            }
-
-            return outList;
-        }
-
-        /// <summary>
-        /// Get all the KeyActions that are currently in progress - whether keys be newly down 
-        /// or held down or released.  We can use this method to define repeat timings for individual
-        /// keys as well.
-        /// </summary>
-        /// <returns></returns>
-        protected List<KeyAction> getAllKeyActions()
-        {
-            List<KeyAction> lKA = new List<KeyAction>();
-            List<Keys> newKeys = XygloConvert.keyMappings(Keyboard.GetState().GetPressedKeys());
-            List<Keys> lastKeys = XygloConvert.keyMappings(m_lastKeyboardState.GetPressedKeys());
-            KeyboardModifier modifier = KeyboardModifier.None;
-
-            // Check for modifiers - flag and remove
-            //
-            if (newKeys.Contains(Keys.LeftShift))
-            {
-                modifier |= KeyboardModifier.Shift;
-                //newKeys.Remove(Keys.LeftShift);
-            }
-
-            if (newKeys.Contains(Keys.RightShift))
-            {
-                modifier |= KeyboardModifier.Shift;
-                //newKeys.Remove(Keys.RightShift);
-            }
-
-            if (newKeys.Contains(Keys.LeftControl))
-            {
-                modifier |= KeyboardModifier.Control;
-                //newKeys.Remove(Keys.LeftControl);
-            }
-
-            if (newKeys.Contains(Keys.RightControl))
-            {
-                modifier |= KeyboardModifier.Control;
-                //newKeys.Remove(Keys.RightControl);
-            }
-
-            if (newKeys.Contains(Keys.LeftAlt))
-            {
-                modifier |= KeyboardModifier.Alt;
-                //newKeys.Remove(Keys.LeftAlt);
-            }
-
-            if (newKeys.Contains(Keys.RightAlt))
-            {
-                modifier |= KeyboardModifier.Alt;
-                //newKeys.Remove(Keys.RightAlt);
-            }
-
-            if (newKeys.Contains(Keys.LeftWindows))
-            {
-                modifier |= KeyboardModifier.Windows;
-                //newKeys.Remove(Keys.LeftWindows);
-            }
-
-            if (newKeys.Contains(Keys.RightWindows))
-            {
-                modifier |= KeyboardModifier.Windows;
-                //newKeys.Remove(Keys.RightWindows);
-            }
-
-            // At this point we can work out if we have any new keys pressed or any held
-            // 
-            foreach (Keys key in removeModifiers(newKeys))
-            {
-                bool pressed = true;
-
-                foreach (Keys lastKey in XygloConvert.keyMappings(m_lastKeyboardState.GetPressedKeys()))
-                {
-                    if (lastKey == key) // was down last time so hasn't been pressed - is held
-                    {
-                        pressed = false;  // set flag
-                        lastKeys.Remove(lastKey); // and remove from lastKeys
-                        break;
-                    }
-                }
-
-                KeyAction keyAction = new KeyAction(key, modifier);
-
-                if (pressed)
-                {
-                    keyAction.m_state = KeyButtonState.Pressed;
-                }
-                else
-                {
-                    keyAction.m_state = KeyButtonState.Held;
-                }
-
-                lKA.Add(keyAction);
-            }
-
-            // Now any keys that are were and have been released.
-            //
-            foreach (Keys key in removeModifiers(lastKeys))
-            {
-                KeyAction keyAction = new KeyAction(key, modifier);
-                keyAction.m_state = KeyButtonState.Released;
-                lKA.Add(keyAction);
-            }
-
-            // Finally set the convenience flags for the modifiers already worked out
-            //
-            m_context.m_shiftDown = ((modifier & KeyboardModifier.Shift) == KeyboardModifier.Shift);
-            m_context.m_ctrlDown = ((modifier & KeyboardModifier.Control) == KeyboardModifier.Control);
-            m_context.m_altDown = ((modifier & KeyboardModifier.Alt) == KeyboardModifier.Alt);
-            m_context.m_windowsDown = ((modifier & KeyboardModifier.Windows) == KeyboardModifier.Windows);
-
-            return lKA;
         }
 
         /// <summary>
@@ -3403,14 +3018,11 @@ namespace Xyglo.Brazil.Xna
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         protected override void Update(GameTime gameTime)
         {
-            m_elapsedTime += gameTime.ElapsedGameTime;
-
-            if (m_elapsedTime > TimeSpan.FromSeconds(1))
-            {
-                m_elapsedTime -= TimeSpan.FromSeconds(1);
-                m_frameRate = m_frameCounter;
-                m_frameCounter = 0;
-            }
+            // Do some frame counting
+            //
+            m_frameCounter.incrementElapsedTime(gameTime.ElapsedGameTime);
+            if (m_frameCounter.getElapsedTime() > TimeSpan.FromSeconds(1))
+                m_frameCounter.setFrameRate();
 
             // Update the frustrum matrix
             //
@@ -3436,7 +3048,7 @@ namespace Xyglo.Brazil.Xna
             // to the KeyActions in the list.  This also sets the relevant shift,
             // alt, ctrl, windows flags.
             //
-            List<KeyAction> keyActionList = getAllKeyActions();
+            List<KeyAction> keyActionList = m_keyboard.getAllKeyActions();
 
             // Do we consume a key?  Has it been used in a Metacommand?
             //
@@ -3447,12 +3059,12 @@ namespace Xyglo.Brazil.Xna
                 // We check and discard key events that aren't within the repeat or press
                 // window at this point.  So we apply the same delays for all keys currently.
                 //
-                if (!checkKeyRepeat(gameTime, keyAction))
+                if (!m_keyboard.checkKeyRepeat(gameTime, keyAction))
                     continue;
 
                 // Process action keys
                 //
-                if (m_project != null)
+                if (m_context.m_project != null)
                 {
                     processActionKey(gameTime, keyAction);
 
@@ -3464,7 +3076,7 @@ namespace Xyglo.Brazil.Xna
 
                 // Get a target for this (potential) combination of keys
                 //
-                Target target = m_actionMap.getTargetForKey(m_brazilContext.m_state, keyAction);
+                Target target = m_brazilContext.m_actionMap.getTargetForKey(m_brazilContext.m_state, keyAction);
 
                 // Now fire off the keys according to the Target
                 switch (target.m_name)
@@ -3621,7 +3233,7 @@ namespace Xyglo.Brazil.Xna
 
             // Return after these commands have been processed for the demo version
             //
-            if (m_project != null && !m_project.getLicenced())
+            if (m_context.m_project != null && !m_context.m_project.getLicenced())
             {
                 // Allow the game to exit
                 //
@@ -3639,22 +3251,18 @@ namespace Xyglo.Brazil.Xna
 
             // Set the startup banner on the first pass through
             //
-            if (m_project != null & m_gameTime == null)
+            if (m_context.m_project != null & m_context.m_gameTime == null)
             {
                 m_context.m_drawingHelper.startBanner(gameTime, VersionInformation.getProductName() + "\n" + VersionInformation.getProductVersion(), 5);
             }
 
             // Store gameTime for use in helper functions
             //
-            m_gameTime = gameTime;
+            m_context.m_gameTime = gameTime;
 
             // Check for any mouse actions here
             //
-            m_mouse.checkMouse(gameTime, m_eye, m_target);
-
-            // limit number of keys
-            //
-            m_processKeyboardAllowed = gameTime.TotalGameTime + new TimeSpan(0, 0, 0, 0, 100);
+            m_mouse.checkMouse(gameTime, m_keyboard, m_eye, m_target);
 
             // Check for this change as necessary
             //
@@ -3682,20 +3290,6 @@ namespace Xyglo.Brazil.Xna
 
                 m_eye = XygloConvert.getVector3(m_eyePerturber.getPerturbedPosition(gameTime.TotalGameTime.TotalSeconds));
             }*/
-
-            // Save the last state if it has changed and clear any temporary message
-            //
-            if (m_lastKeyboardState != Keyboard.GetState())
-            {
-                m_lastKeyboardState = Keyboard.GetState();
-            }
-
-            // Save this to ensure we can keep processing
-            //
-            if (m_processKeyboardAllowed < gameTime.TotalGameTime)
-            {
-                m_processKeyboardAllowed = gameTime.TotalGameTime;
-            }
 
             // Process components for MOVEMENT or creation depending on key context
             //
@@ -4177,61 +3771,6 @@ namespace Xyglo.Brazil.Xna
             return (collisionList.Count > 0);
         }
 
-        /// <summary>
-        /// Check to see whether a key is available for repeat yet and ensure that the m_keyMap is
-        /// updated with the latest status.  Returns true if we can do something with this key.
-        /// </summary>
-        /// <param name="gameTime"></param>
-        /// <param name="keyAction"></param>
-        /// <returns></returns>
-        protected bool checkKeyRepeat(GameTime gameTime, KeyAction keyAction)
-        {
-            // Skip all repeats except the ones we want
-            //
-            if (keyAction.m_state == KeyButtonState.Released)
-            {
-                // Release the value of the key pressed
-                m_keyMap[keyAction.m_key] = null;
-                m_keyMap.Remove(keyAction.m_key);
-                return false;
-            }
-
-            // Create new key storage if it's not available yet - might want to
-            // optimise this later.
-            //
-            if (!m_keyMap.ContainsKey(keyAction.m_key))
-            {
-                m_keyMap[keyAction.m_key] = new Pair<bool, double>();
-            }
-
-            // For the held state we have to check to see if it's ready to repeat this key yet
-            //
-            if (keyAction.m_state == KeyButtonState.Held)
-            {
-                if (m_keyMap[keyAction.m_key].First) // Within the first hold interval
-                {
-                    if ((gameTime.TotalGameTime.TotalSeconds - m_keyMap[keyAction.m_key].Second) < m_repeatHoldTime)
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    if ((gameTime.TotalGameTime.TotalSeconds - m_keyMap[keyAction.m_key].Second) < m_repeatInterval)
-                    {
-                        //Logger.logMsg("LS = " + gameTime.TotalGameTime.TotalSeconds + ", MS = " + m_keyMap[keyAction.m_key].Second);
-                        return false;
-                    }
-                }
-            }
-
-            // For pressed and held store the last time this event was issued
-            //
-            m_keyMap[keyAction.m_key].First = (keyAction.m_state == KeyButtonState.Pressed);
-            m_keyMap[keyAction.m_key].Second = gameTime.TotalGameTime.TotalSeconds;
-
-            return true;
-        }
 
         /// <summary>
         /// Process any keys that need to be printed
@@ -4245,363 +3784,43 @@ namespace Xyglo.Brazil.Xna
 
             // Ok, let's see if we can translate a key
             //
-            string key = "";
+            string key = m_keyboard.getKey(keyAction);
 
-            // Iterate the list and provide some output according to timing conditions on keys and repeats
+            if (key == "")
+                return;
+
+            // Now handle
             //
-            //foreach (KeyAction keyAction in keyActionList)
-            //{
-                // Check for key repeats and handle as necessary
-                //
-                //if (!checkKeyRepeat(gameTime, keyAction))
-                    //continue;
-
-                switch (keyAction.m_key)
-                {
-                    case Keys.LeftShift:
-                    case Keys.RightShift:
-                    case Keys.LeftControl:
-                    case Keys.RightControl:
-                    case Keys.LeftAlt:
-                    case Keys.RightAlt:
-                        break;
-
-                    case Keys.OemPipe:
-                        if (m_context.m_shiftDown)
-                        {
-                            key += "|";
-                        }
-                        else
-                        {
-                            key += "\\";
-                        }
-                        break;
-
-                    case Keys.OemQuestion:
-                        if (m_context.m_shiftDown)
-                        {
-                            key += "?";
-                        }
-                        else
-                        {
-                            key += "/";
-                        }
-                        break;
-
-                    case Keys.OemSemicolon:
-                        if (m_context.m_shiftDown)
-                        {
-                            key += ":";
-                        }
-                        else
-                        {
-                            key += ";";
-                        }
-                        break;
-
-                    case Keys.OemQuotes:
-                        if (m_context.m_shiftDown)
-                        {
-                            key += "\"";
-                        }
-                        else
-                        {
-                            key += "'";
-                        }
-                        break;
-
-                    case Keys.OemTilde:
-                        if (m_context.m_shiftDown)
-                        {
-                            key += "@";
-                        }
-                        else
-                        {
-                            key += "'";
-                        }
-                        break;
-
-                    case Keys.OemOpenBrackets:
-                        if (m_context.m_shiftDown)
-                        {
-                            key += "{";
-                        }
-                        else
-                        {
-                            key += "[";
-                        }
-                        break;
-
-                    case Keys.OemCloseBrackets:
-                        if (m_context.m_shiftDown)
-                        {
-                            key += "}";
-                        }
-                        else
-                        {
-                            key += "]";
-                        }
-                        break;
-
-                    case Keys.D0:
-                        if (m_context.m_shiftDown)
-                        {
-                            key += ")";
-                        }
-                        else
-                        {
-                            key += "0";
-                        }
-                        break;
-
-                    case Keys.D1:
-                        if (m_context.m_shiftDown)
-                        {
-                            key += "!";
-                        }
-                        else
-                        {
-                            key += "1";
-                        }
-                        break;
-
-                    case Keys.D2:
-                        if (m_context.m_shiftDown)
-                        {
-                            key += "@";
-                        }
-                        else
-                        {
-                            key += "2";
-                        }
-                        break;
-
-                    case Keys.D3:
-                        if (m_context.m_shiftDown)
-                        {
-                            key += "#";
-                        }
-                        else
-                        {
-                            key += "3";
-                        }
-                        break;
-
-                    case Keys.D4:
-                        if (m_context.m_shiftDown)
-                        {
-                            key += "$";
-                        }
-                        else
-                        {
-                            key += "4";
-                        }
-                        break;
-
-                    case Keys.D5:
-                        if (m_context.m_shiftDown)
-                        {
-                            key += "%";
-                        }
-                        else
-                        {
-                            key += "5";
-                        }
-                        break;
-
-                    case Keys.D6:
-                        if (m_context.m_shiftDown)
-                        {
-                            key += "^";
-                        }
-                        else
-                        {
-                            key += "6";
-                        }
-                        break;
-
-                    case Keys.D7:
-                        if (m_context.m_shiftDown)
-                        {
-                            key += "&";
-                        }
-                        else
-                        {
-                            key += "7";
-                        }
-                        break;
-
-                    case Keys.D8:
-                        if (m_context.m_shiftDown)
-                        {
-                            key += "*";
-                        }
-                        else
-                        {
-                            key += "8";
-                        }
-                        break;
-
-                    case Keys.D9:
-                        if (m_context.m_shiftDown)
-                        {
-                            key += "(";
-                        }
-                        else
-                        {
-                            key += "9";
-                        }
-                        break;
-
-
-                    case Keys.Space:
-                        key += " ";
-                        break;
-
-                    case Keys.OemPlus:
-                        if (m_context.m_shiftDown)
-                        {
-                            key += "+";
-                        }
-                        else
-                        {
-                            key += "=";
-                        }
-                        break;
-
-                    case Keys.OemMinus:
-                        if (m_context.m_shiftDown)
-                        {
-                            key += "_";
-                        }
-                        else
-                        {
-                            key += "-";
-                        }
-                        break;
-
-                    case Keys.OemPeriod:
-                        if (m_context.m_shiftDown)
-                        {
-                            key += ">";
-                        }
-                        else
-                        {
-                            key += ".";
-                        }
-                        break;
-
-                    case Keys.OemComma:
-                        if (m_context.m_shiftDown)
-                        {
-                            key += "<";
-                        }
-                        else
-                        {
-                            key += ",";
-                        }
-                        break;
-
-                    case Keys.A:
-                    case Keys.B:
-                    case Keys.C:
-                    case Keys.D:
-                    case Keys.E:
-                    case Keys.F:
-                    case Keys.G:
-                    case Keys.H:
-                    case Keys.I:
-                    case Keys.J:
-                    case Keys.K:
-                    case Keys.L:
-                    case Keys.M:
-                    case Keys.N:
-                    case Keys.O:
-                    case Keys.P:
-                    case Keys.Q:
-                    case Keys.R:
-                    case Keys.S:
-                    case Keys.U:
-                    case Keys.V:
-                    case Keys.W:
-                    case Keys.X:
-                    case Keys.Y:
-                    case Keys.Z:
-                        if (m_context.m_shiftDown)
-                        {
-                            key += keyAction.m_key.ToString().ToUpper();
-                        }
-                        else
-                        {
-                            key += keyAction.m_key.ToString().ToLower();
-                        }
-                        break;
-
-                    case Keys.T:
-                        if (m_brazilContext.m_state.equals("FileOpen"))
-                        {
-                            // Open a file as read only and tail it
-                            //
-                            traverseDirectory(gameTime, true, true);
-                        }
-                        else
-                        {
-                            if (m_context.m_shiftDown)
-                            {
-                                key += keyAction.m_key.ToString().ToUpper();
-                            }
-                            else
-                            {
-                                key += keyAction.m_key.ToString().ToLower();
-                            }
-                        }
-                        break;
-
-
-                    // Do nothing as default
-                    //
-                    default:
-                        key += "";
-                        break;
-                }
-            //}
-
-
-            if (key != "")
+            if (m_brazilContext.m_state.equals("FileSaveAs")) // File name
             {
-                //Logger.logMsg("XygloXNA::processKeys() - processing key " + key);
-
-                if (m_brazilContext.m_state.equals("FileSaveAs")) // File name
+                //Logger.logMsg("Writing letter " + key);
+                m_saveFileName += key;
+            }
+            else if (m_brazilContext.m_state.equals("Configuration") && m_editConfigurationItem) // Configuration item
+            {
+                m_editConfigurationItemValue += key;
+            }
+            else if (m_brazilContext.m_state.equals("FindText"))
+            {
+                m_context.m_project.getSelectedBufferView().appendToSearchText(key);
+            }
+            else if (m_brazilContext.m_state.equals("GotoLine"))
+            {
+                m_gotoLine += key;
+            }
+            else if (m_brazilContext.m_state.equals("TextEditing"))
+            {
+                // Do we need to do some deletion or replacing?
+                //
+                if (m_context.m_project.getSelectedBufferView().gotHighlight())
                 {
-                    //Logger.logMsg("Writing letter " + key);
-                    m_saveFileName += key;
+                    m_context.m_project.getSelectedBufferView().replaceCurrentSelection(m_context.m_project, key);
                 }
-                else if (m_brazilContext.m_state.equals("Configuration") && m_editConfigurationItem) // Configuration item
+                else
                 {
-                    m_editConfigurationItemValue += key;
+                    m_context.m_project.getSelectedBufferView().insertText(m_context.m_project, key);
                 }
-                else if (m_brazilContext.m_state.equals("FindText"))
-                {
-                    m_project.getSelectedBufferView().appendToSearchText(key);
-                }
-                else if (m_brazilContext.m_state.equals("GotoLine"))
-                {
-                    m_gotoLine += key;
-                }
-                else if (m_brazilContext.m_state.equals("TextEditing"))
-                {
-                    // Do we need to do some deletion or replacing?
-                    //
-                    if (m_project.getSelectedBufferView().gotHighlight())
-                    {
-                        m_project.getSelectedBufferView().replaceCurrentSelection(m_project, key);
-                    }
-                    else
-                    {
-                        m_project.getSelectedBufferView().insertText(m_project, key);
-                    }
-                    updateSmartHelp();
-                }
+                updateSmartHelp();
             }
         }
 
@@ -4612,11 +3831,11 @@ namespace Xyglo.Brazil.Xna
         {
             // Update the syntax highlighting
             //
-            if (m_project.getConfigurationValue("SYNTAXHIGHLIGHT").ToUpper() == "TRUE")
+            if (m_context.m_project.getConfigurationValue("SYNTAXHIGHLIGHT").ToUpper() == "TRUE")
             {
-                FileBuffer fb = m_project.getSelectedBufferView().getFileBuffer();
-                int startLine = m_project.getSelectedBufferView().getBufferShowStartY();
-                int endLine = m_project.getSelectedBufferView().getBufferShowStartY() + m_project.getSelectedBufferView().getBufferShowLength();
+                FileBuffer fb = m_context.m_project.getSelectedBufferView().getFileBuffer();
+                int startLine = m_context.m_project.getSelectedBufferView().getBufferShowStartY();
+                int endLine = m_context.m_project.getSelectedBufferView().getBufferShowStartY() + m_context.m_project.getSelectedBufferView().getBufferShowLength();
 
                 // Limit end line as necessary
                 if (endLine >= fb.getLineCount())
@@ -4629,18 +3848,18 @@ namespace Xyglo.Brazil.Xna
 
                 // Process immediately the current visible buffer
                 //
-                m_project.getSyntaxManager().generateHighlighting(fb, startPosition, endPosition, false);
+                m_context.m_project.getSyntaxManager().generateHighlighting(fb, startPosition, endPosition, false);
 
                 // Ensure that the syntax manager isn't processing highlights at the time of the next request.
                 //
-                m_project.getSyntaxManager().interruptProcessing();
+                m_context.m_project.getSyntaxManager().interruptProcessing();
 
                 // We process all highlighting in the SmartHelpWorker thread.  Note that you have to do this
                 // all in the same thread or the main GUI gets locked out.  Although it would make sense to
                 // do just the on-screen bit in main thread we can minimise latency by keeping the highlight
                 // thread sleep
                 //
-                m_smartHelpWorker.updateSyntaxHighlighting(m_project.getSyntaxManager(), m_project.getSelectedBufferView().getFileBuffer(),
+                m_smartHelpWorker.updateSyntaxHighlighting(m_context.m_project.getSyntaxManager(), m_context.m_project.getSelectedBufferView().getFileBuffer(),
                     startLine, endLine);
             }
         }
@@ -4656,95 +3875,33 @@ namespace Xyglo.Brazil.Xna
 
             // Don't search for nothing
             //
-            if (m_project.getSelectedBufferView().getSearchText() == "")
+            if (m_context.m_project.getSelectedBufferView().getSearchText() == "")
             {
                 return;
             }
 
             // If we find something from cursor we're finished here
             //
-            if (m_project.getSelectedBufferView().findFromCursor(false))
+            if (m_context.m_project.getSelectedBufferView().findFromCursor(false))
             {
                 return;
             }
 
             // Now try to find from the top of the file
             //
-            if (m_project.getSelectedBufferView().getCursorPosition().Y > 0)
+            if (m_context.m_project.getSelectedBufferView().getCursorPosition().Y > 0)
             {
                 // Try find from the top - if it finds something then let user know we've
                 // wrapped around.
                 //
-                if (m_project.getSelectedBufferView().find(new ScreenPosition(0, 0), false))
+                if (m_context.m_project.getSelectedBufferView().find(new ScreenPosition(0, 0), false))
                 {
                     setTemporaryMessage("Search wrapped around end of file", 1.5f, gameTime);
                     return;
                 }
             }
 
-            setTemporaryMessage("\"" + m_project.getSelectedBufferView().getSearchText() + "\" not found", 3, gameTime);
-        }
-
-
-        /// <summary>
-        /// Are we pressing on a number key?
-        /// </summary>
-        /// <returns></returns>
-        protected string getNumberKey()
-        {
-            string key = "";
-
-            foreach (Keys keyDown in Keyboard.GetState().GetPressedKeys())
-            {
-                switch (keyDown)
-                {
-                    case Keys.D0:
-                        key = "0";
-                        break;
-
-                    case Keys.D1:
-                        key = "1";
-                        break;
-
-                    case Keys.D2:
-                        key = "2";
-                        break;
-
-                    case Keys.D3:
-                        key = "3";
-                        break;
-
-                    case Keys.D4:
-                        key = "4";
-                        break;
-
-                    case Keys.D5:
-                        key = "5";
-                        break;
-
-                    case Keys.D6:
-                        key = "6";
-                        break;
-
-                    case Keys.D7:
-                        key = "7";
-                        break;
-
-                    case Keys.D8:
-                        key = "8";
-                        break;
-
-                    case Keys.D9:
-                        key = "9";
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-
-            return key;
-
+            setTemporaryMessage("\"" + m_context.m_project.getSelectedBufferView().getSearchText() + "\" not found", 3, gameTime);
         }
 
         /// <summary>
@@ -4779,28 +3936,28 @@ namespace Xyglo.Brazil.Xna
 
             if (filename != null)
             {
-                newFB.loadFile(m_project.getSyntaxManager());
+                newFB.loadFile(m_context.m_project.getSyntaxManager());
             }
 
             // Add the FileBuffer and keep the index for our BufferView
             //
-            int fileIndex = m_project.addFileBuffer(newFB);
+            int fileIndex = m_context.m_project.addFileBuffer(newFB);
 
             // Always assign a new bufferview to the right if we have one - else default position
             //
             Vector3 newPos = Vector3.Zero;
-            if (m_project.getSelectedBufferView() != null)
+            if (m_context.m_project.getSelectedBufferView() != null)
             {
                 newPos = getFreeBufferViewPosition(m_newPosition); // use the m_newPosition for the direction
             }
 
             newBV = new BufferView(m_context.m_fontManager, newFB, newPos, 0, 20, fileIndex, readOnly);
             newBV.setTailing(tailFile);
-            m_project.addBufferView(newBV);
+            m_context.m_project.addBufferView(newBV);
 
             // Set the background colour
             //
-            newBV.setBackgroundColour(m_project.getNewFileBufferColour());
+            newBV.setBackgroundColour(m_context.m_project.getNewFileBufferColour());
 
             // Only do the following if tailing
             //
@@ -4812,10 +3969,10 @@ namespace Xyglo.Brazil.Xna
 
                 // Now generate highlighting
                 //
-                if (m_project.getConfigurationValue("SYNTAXHIGHLIGHT").ToUpper() == "TRUE")
+                if (m_context.m_project.getConfigurationValue("SYNTAXHIGHLIGHT").ToUpper() == "TRUE")
                 {
-                    //m_project.getSyntaxManager().generateAllHighlighting(newFB, true);
-                    m_smartHelpWorker.updateSyntaxHighlighting(m_project.getSyntaxManager(), newFB);
+                    //m_context.m_project.getSyntaxManager().generateAllHighlighting(newFB, true);
+                    m_smartHelpWorker.updateSyntaxHighlighting(m_context.m_project.getSyntaxManager(), newFB);
                 }
             }
 
@@ -4833,12 +3990,12 @@ namespace Xyglo.Brazil.Xna
 
             // Initial new pos is here from active BufferView
             //
-            Vector3 newPos = m_project.getSelectedBufferView().calculateRelativePositionVector(position);
+            Vector3 newPos = m_context.m_project.getSelectedBufferView().calculateRelativePositionVector(position);
             do
             {
                 occupied = false;
 
-                foreach (BufferView cur in m_project.getBufferViews())
+                foreach (BufferView cur in m_context.m_project.getBufferViews())
                 {
                     if (cur.getPosition() == newPos)
                     {
@@ -4862,9 +4019,9 @@ namespace Xyglo.Brazil.Xna
         {
             Vector3 newPos = getFreeBufferViewPosition(position);
 
-            BufferView newBufferView = new BufferView(m_context.m_fontManager, m_project.getSelectedBufferView(), newPos);
+            BufferView newBufferView = new BufferView(m_context.m_fontManager, m_context.m_project.getSelectedBufferView(), newPos);
             //newBufferView.m_textColour = Color.LawnGreen;
-            m_project.addBufferView(newBufferView);
+            m_context.m_project.addBufferView(newBufferView);
             setActiveBuffer(newBufferView);
         }
 
@@ -4878,26 +4035,26 @@ namespace Xyglo.Brazil.Xna
         {
             // First get the position of a potential BufferView
             //
-            BoundingBox searchBox = m_project.getSelectedBufferView().calculateRelativePositionBoundingBox(position);
+            BoundingBox searchBox = m_context.m_project.getSelectedBufferView().calculateRelativePositionBoundingBox(position);
 
             // Store the id of the current view
             //
-            int fromView = m_project.getSelectedBufferViewId();
+            int fromView = m_context.m_project.getSelectedBufferViewId();
 
             // Search by index
             //
-            for (int i = 0; i < m_project.getBufferViews().Count; i++)
+            for (int i = 0; i < m_context.m_project.getBufferViews().Count; i++)
             {
-                if (m_project.getBufferViews()[i].getBoundingBox().Intersects(searchBox))
+                if (m_context.m_project.getBufferViews()[i].getBoundingBox().Intersects(searchBox))
                 {
-                    m_project.setSelectedBufferViewId(i);
+                    m_context.m_project.setSelectedBufferViewId(i);
                     break;
                 }
             }
 
             // Now set the active buffer if we need to - if not give a warning
             //
-            if (fromView != m_project.getSelectedBufferViewId())
+            if (fromView != m_context.m_project.getSelectedBufferViewId())
             {
                 setActiveBuffer();
             }
@@ -4930,7 +4087,7 @@ namespace Xyglo.Brazil.Xna
             //
             if (!e.setActiveOnly())
             {
-                m_project.getSelectedBufferView().mouseCursorTo(e.isExtendingHighlight(), e.getScreenPosition());
+                m_context.m_project.getSelectedBufferView().mouseCursorTo(e.isExtendingHighlight(), e.getScreenPosition());
             }
         }
 
@@ -5147,8 +4304,7 @@ namespace Xyglo.Brazil.Xna
         protected override void Draw(GameTime gameTime)
         {
             // Increment the frame counter
-            //
-            m_frameCounter++;
+            m_frameCounter.incrementFrameCounter();
 
             // Draw onto the Bloom component
             //
@@ -5159,7 +4315,7 @@ namespace Xyglo.Brazil.Xna
             setupDrawWorld(gameTime);
 
             // Are we drawing Friendlier - we cheat a bit here
-            if (m_project != null)
+            if (m_context.m_project != null)
             {
                 drawFriendlier(gameTime);
             }
@@ -5183,20 +4339,11 @@ namespace Xyglo.Brazil.Xna
 
             // If we are resizing then do nothing
             //
-            if (m_isResizing)
-            {
-                base.Draw(gameTime);
-                return;
-            }
-
-            // If spinning then spin around current position based on time.
-            //
-            if (m_spinning)
-            {
-                float angle = (float)gameTime.TotalGameTime.TotalSeconds;
-                m_eye.X = (float)Math.Cos(angle * .5f) * 12f;
-                m_eye.Z = (float)Math.Sin(angle * .5f) * 12f;
-            }
+            //if (m_isResizing)
+            //{
+                //base.Draw(gameTime);
+                //return;
+            //}
 
             // Duplicate of what we have in the Initialize()
             //
@@ -5332,7 +4479,7 @@ namespace Xyglo.Brazil.Xna
                         // The helper method does all the hard work in getting this position
                         //
                         Vector3 position = XygloConvert.getTextPosition(bt, m_context.m_fontManager, m_context.m_graphics.GraphicsDevice.Viewport.Width, m_context.m_graphics.GraphicsDevice.Viewport.Height);
-                        XygloBannerText bannerText = new XygloBannerText(m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(bt.getColour()), position, bt.getSize(), bt.getText());
+                        XygloBannerText bannerText = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(bt.getColour()), position, bt.getSize(), bt.getText());
                         bannerText.draw(m_context.m_graphics.GraphicsDevice);
                     }
                     else if (component.GetType() == typeof(Xyglo.Brazil.BrazilHud))
@@ -5340,9 +4487,12 @@ namespace Xyglo.Brazil.Xna
                         BrazilHud bh = (Xyglo.Brazil.BrazilHud)component;
                         Vector3 position = XygloConvert.getVector3(bh.getPosition());
 
-                        string fpsText = "FPS = " + m_frameRate;
-                        XygloBannerText bannerText = new XygloBannerText(m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(bh.getColour()), position, bh.getSize(), fpsText);
-                        bannerText.draw(m_context.m_graphics.GraphicsDevice);
+                        if (m_frameCounter.getFrameRate() > 0)
+                        {
+                            string fpsText = "FPS = " + m_frameCounter.getFrameRate();
+                            XygloBannerText bannerText = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(bh.getColour()), position, bh.getSize(), fpsText);
+                            bannerText.draw(m_context.m_graphics.GraphicsDevice);
+                        }
 
                         if (m_interloper != null)
                         {
@@ -5350,17 +4500,17 @@ namespace Xyglo.Brazil.Xna
                             //
                             Vector3 ipPos = m_context.m_drawableComponents[m_interloper].getPosition();
                             string ipText = "Interloper Position X = " + ipPos.X + ", Y = " + ipPos.Y + ", Z = " + ipPos.Z;
-                            XygloBannerText ipBanner = new XygloBannerText(m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(BrazilColour.Blue), new Vector3(0, m_context.m_fontManager.getOverlayFont().LineSpacing, 0), 1.0f, ipText);
+                            XygloBannerText ipBanner = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(BrazilColour.Blue), new Vector3(0, m_context.m_fontManager.getOverlayFont().LineSpacing, 0), 1.0f, ipText);
                             ipBanner.draw(m_context.m_graphics.GraphicsDevice);
 
                             // Interloper score
                             //
                             string ipScore = "Score = " + m_interloper.getScore();
-                            XygloBannerText ipScoreText = new XygloBannerText(m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(BrazilColour.Green), new Vector3(0, m_context.m_fontManager.getOverlayFont().LineSpacing * 2, 0), 1.0f, ipScore);
+                            XygloBannerText ipScoreText = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(BrazilColour.Green), new Vector3(0, m_context.m_fontManager.getOverlayFont().LineSpacing * 2, 0), 1.0f, ipScore);
                             ipScoreText.draw(m_context.m_graphics.GraphicsDevice);
 
                             string ipLives = "Lives = " + m_brazilContext.m_world.getLives();
-                            XygloBannerText ipLivesText = new XygloBannerText(m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(BrazilColour.Green), new Vector3(0, m_context.m_fontManager.getOverlayFont().LineSpacing * 3, 0), 1.0f, ipLives);
+                            XygloBannerText ipLivesText = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(BrazilColour.Green), new Vector3(0, m_context.m_fontManager.getOverlayFont().LineSpacing * 3, 0), 1.0f, ipLives);
                             ipLivesText.draw(m_context.m_graphics.GraphicsDevice);
                         }
 
@@ -5401,7 +4551,7 @@ namespace Xyglo.Brazil.Xna
 
                         // Line effect or Basic effect here?
                         //
-                        XygloMenu menu = new XygloMenu(m_context.m_fontManager, m_context.m_spriteBatch,  Color.DarkGray, m_context.m_lineEffect, m_lastClickWorldPosition, m_lastClickCursorOffsetPosition, m_project.getSelectedBufferView().getViewSize());
+                        XygloMenu menu = new XygloMenu(m_context.m_fontManager, m_context.m_spriteBatch, Color.DarkGray, m_context.m_lineEffect, m_mouse.getLastClickWorldPosition(), m_mouse.geLastClickCursorOffset(), m_context.m_project.getSelectedBufferView().getViewSize());
 
                         foreach (BrazilMenuOption item in bMenu.getMenuOptions().Keys)
                         {
@@ -5497,7 +4647,7 @@ namespace Xyglo.Brazil.Xna
         {
             // If we're not licenced then render this
             //
-            if (!m_project.getLicenced())
+            if (!m_context.m_project.getLicenced())
             {
                 if (gameTime.TotalGameTime.TotalSeconds > m_nextLicenceMessage)
                 {
@@ -5530,33 +4680,33 @@ namespace Xyglo.Brazil.Xna
             //
             if (m_brazilContext.m_state.equals("ManageProject"))
             {
-                m_context.m_drawingHelper.drawManageProject(m_overlaySpriteBatch, gameTime, m_modelBuilder, m_context.m_graphics, m_configPosition, out m_textScreenLength);
+                m_context.m_drawingHelper.drawManageProject(m_context.m_overlaySpriteBatch, gameTime, m_modelBuilder, m_context.m_graphics, m_configPosition, out m_textScreenLength);
                 base.Draw(gameTime);
                 return;
             }
 
             // Here we need to vary the parameters to the SpriteBatch - to the BasicEffect and also the font size.
             // For large fonts we need to be able to downscale them effectively so that they will still look good
-            // at higher reoslutions.
+            // at higher resolutions.
             //
             m_context.m_spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.DepthRead, RasterizerState.CullNone, m_context.m_basicEffect);
 
             // Draw all the BufferViews for all remaining modes
             //
-            for (int i = 0; i < m_project.getBufferViews().Count; i++)
+            for (int i = 0; i < m_context.m_project.getBufferViews().Count; i++)
             {
                 if (m_differ != null && m_differ.hasDiffs() &&
-                    (m_differ.getSourceBufferViewLhs() == m_project.getBufferViews()[i] ||
-                        m_differ.getSourceBufferViewRhs() == m_project.getBufferViews()[i]))
+                    (m_differ.getSourceBufferViewLhs() == m_context.m_project.getBufferViews()[i] ||
+                        m_differ.getSourceBufferViewRhs() == m_context.m_project.getBufferViews()[i]))
                 {
-                    drawDiffBuffer(m_project.getBufferViews()[i], gameTime);
+                    drawDiffBuffer(m_context.m_project.getBufferViews()[i], gameTime);
                 }
                 else
                 {
                     // We have to invert the BoundingBox along the Y axis to ensure that
                     // it matches with the frustrum we're culling against.
                     //
-                    BoundingBox bb = m_project.getBufferViews()[i].getBoundingBox();
+                    BoundingBox bb = m_context.m_project.getBufferViews()[i].getBoundingBox();
                     bb.Min.Y = -bb.Min.Y;
                     bb.Max.Y = -bb.Max.Y;
 
@@ -5567,15 +4717,15 @@ namespace Xyglo.Brazil.Xna
                     //if (m_context.m_frustrum.Intersects(bb))
                     if (m_context.m_frustrum.Contains(bb) != ContainmentType.Disjoint)
                     {
-                        m_context.m_drawingHelper.drawFileBuffer(m_context.m_spriteBatch, m_project.getBufferViews()[i], gameTime, m_brazilContext.m_state, m_buildStdOutView, m_buildStdErrView, m_context.m_zoomLevel, m_currentFontScale);
-                        //m_context.m_drawingHelper.drawFileBuffer(m_context.m_spriteBatch, m_project.getBufferViews()[i], gameTime, m_brazilContext.m_state, m_buildStdOutView, m_buildStdErrView, m_context.m_zoomLevel, m_currentFontScale);
+                        m_context.m_drawingHelper.drawFileBuffer(m_context.m_spriteBatch, m_context.m_project.getBufferViews()[i], gameTime, m_brazilContext.m_state, m_buildStdOutView, m_buildStdErrView, m_context.m_zoomLevel, m_currentFontScale);
+                        //m_context.m_drawingHelper.drawFileBuffer(m_context.m_spriteBatch, m_context.m_project.getBufferViews()[i], gameTime, m_brazilContext.m_state, m_buildStdOutView, m_buildStdErrView, m_context.m_zoomLevel, m_currentFontScale);
                     }
 
                     // Draw a background square for all buffer views if they are coloured
                     //
-                    //if (m_project.getViewMode() == Project.ViewMode.Coloured)
+                    //if (m_context.m_project.getViewMode() == Project.ViewMode.Coloured)
                     //{
-                        m_context.m_drawingHelper.renderQuad(m_project.getBufferViews()[i].getTopLeft(), m_project.getBufferViews()[i].getBottomRight(), m_project.getBufferViews()[i].getBackgroundColour() * 0.05f, m_context.m_spriteBatch);
+                        m_context.m_drawingHelper.renderQuad(m_context.m_project.getBufferViews()[i].getTopLeft(), m_context.m_project.getBufferViews()[i].getBottomRight(), m_context.m_project.getBufferViews()[i].getBackgroundColour() * 0.05f, m_context.m_spriteBatch);
                     //}
                 }
             }
@@ -5584,7 +4734,7 @@ namespace Xyglo.Brazil.Xna
             //
             if (m_brazilContext.m_state.equals("TextEditing"))
             {
-                drawScrollbar(m_project.getSelectedBufferView());
+                drawScrollbar(m_context.m_project.getSelectedBufferView());
             }
 
             // Cursor and cursor highlight
@@ -5596,7 +4746,12 @@ namespace Xyglo.Brazil.Xna
                 m_context.m_spriteBatch.End();
                 m_context.m_spriteBatch.Begin(SpriteSortMode.Texture, BlendState.Additive, SamplerState.PointClamp, DepthStencilState.DepthRead, RasterizerState.CullNone, m_context.m_basicEffect);
 
-                drawCursor(gameTime, m_context.m_spriteBatch);
+
+                if (this.IsActive && m_brazilContext.m_confirmState.equals("None") && m_brazilContext.m_state.notEquals("FindText") && m_brazilContext.m_state.notEquals("GotoLine"))
+                {
+                    m_mouse.drawCursor(gameTime, m_context.m_spriteBatch);
+                }
+                
                 m_context.m_drawingHelper.drawHighlight(gameTime, m_context.m_spriteBatch);
             }
 
@@ -5604,9 +4759,9 @@ namespace Xyglo.Brazil.Xna
 
             // Draw our generic views
             //
-            foreach (XygloView view in m_project.getGenericViews())
+            foreach (XygloView view in m_context.m_project.getGenericViews())
             {
-                view.draw(m_project, m_brazilContext.m_state, gameTime, m_context.m_spriteBatch, m_context.m_basicEffect);
+                view.draw(m_context.m_project, m_brazilContext.m_state, gameTime, m_context.m_spriteBatch, m_context.m_basicEffect);
             }
 
             // If we're choosing a file then
@@ -5620,11 +4775,11 @@ namespace Xyglo.Brazil.Xna
             {
                 // Get the text screen length back from the drawing method
                 //
-                m_textScreenLength = m_context.m_drawingHelper.drawHelpScreen(m_overlaySpriteBatch, gameTime, m_context.m_graphics, m_textScreenPositionY);
+                m_textScreenLength = m_context.m_drawingHelper.drawHelpScreen(m_context.m_overlaySpriteBatch, gameTime, m_context.m_graphics, m_textScreenPositionY);
             }
             else if (m_brazilContext.m_state.equals("Information"))
             {
-                m_context.m_drawingHelper.drawInformationScreen(m_overlaySpriteBatch, gameTime, m_context.m_graphics, out m_textScreenLength);
+                m_context.m_drawingHelper.drawInformationScreen(m_context.m_overlaySpriteBatch, gameTime, m_context.m_graphics, out m_textScreenLength);
             }
             else if (m_brazilContext.m_state.equals("Configuration"))
             {
@@ -5634,46 +4789,46 @@ namespace Xyglo.Brazil.Xna
             {
                 // http://forums.create.msdn.com/forums/p/61995/381650.aspx
                 //
-                m_overlaySpriteBatch.Begin();
+                m_context.m_overlaySpriteBatch.Begin();
 
                 // Draw the Overlay HUD
                 //
-                m_context.m_drawingHelper.drawOverlay(m_overlaySpriteBatch, gameTime, m_context.m_graphics, m_brazilContext.m_state, m_gotoLine, m_context.m_shiftDown, m_context.m_ctrlDown, m_context.m_altDown,
+                m_context.m_drawingHelper.drawOverlay(m_context.m_overlaySpriteBatch, gameTime, m_context.m_graphics, m_brazilContext.m_state, m_gotoLine, m_keyboard.isShiftDown(), m_keyboard.isCtrlDown(), m_keyboard.isAltDown(),
                                             m_eye, m_temporaryMessage, m_temporaryMessageStartTime, m_temporaryMessageEndTime);
 
                 // Draw map of BufferViews - want to get rid of this way of doing things and
                 // move it to the XnaDrawableOverview way.
                 //
-                m_context.m_drawingHelper.drawBufferViewMap(gameTime, m_overlaySpriteBatch);
-                m_overlaySpriteBatch.End();
+                m_context.m_drawingHelper.drawBufferViewMap(gameTime, m_context.m_overlaySpriteBatch);
+                m_context.m_overlaySpriteBatch.End();
 
                 // Draw any differ overlay
                 //
-                m_pannerSpriteBatch.Begin(SpriteSortMode.Texture, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.DepthRead, RasterizerState.CullNone /*, m_pannerEffect */ );
+                m_context.m_pannerSpriteBatch.Begin(SpriteSortMode.Texture, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.DepthRead, RasterizerState.CullNone /*, m_pannerEffect */ );
 
                 // Draw the differ
                 //
-                drawDiffer(gameTime, m_pannerSpriteBatch);
+                drawDiffer(gameTime, m_context.m_pannerSpriteBatch);
 
                 // Draw system load
                 //
-                drawSystemLoad(gameTime, m_pannerSpriteBatch);
+                drawSystemLoad(gameTime, m_context.m_pannerSpriteBatch);
 
-                m_pannerSpriteBatch.End();
+                m_context.m_pannerSpriteBatch.End();
             }
 
             // Draw the textures for generic views
             //
-            //foreach (XygloView view in m_project.getGenericViews())
+            //foreach (XygloView view in m_context.m_project.getGenericViews())
             //{
             //view.drawTextures(m_basicEffect);
             //}
 
             // Draw a welcome banner
             //
-            if (m_context.m_drawingHelper.getBannerStartTime() != -1 && m_project.getViewMode() != Project.ViewMode.Formal)
+            if (m_context.m_drawingHelper.getBannerStartTime() != -1 && m_context.m_project.getViewMode() != Project.ViewMode.Formal)
             {
-                m_context.m_drawingHelper.drawBanner(m_context.m_spriteBatch, gameTime, m_context.m_basicEffect, m_splashScreen);
+                m_context.m_drawingHelper.drawBanner(m_context.m_spriteBatch, gameTime, m_context.m_basicEffect, m_context.m_splashScreen);
             }
 
             // Any Kinect information to share
@@ -5714,7 +4869,7 @@ namespace Xyglo.Brazil.Xna
             int linesHigh = 6;
 
             // Bufferview
-            BufferView bv = m_project.getSelectedBufferView();
+            BufferView bv = m_context.m_project.getSelectedBufferView();
 
             startPosition.X += m_context.m_graphics.GraphicsDevice.Viewport.Width - m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) * 3;
             startPosition.Y += (m_context.m_graphics.GraphicsDevice.Viewport.Height / 2) - m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay) * linesHigh / 2;
@@ -5861,7 +5016,7 @@ namespace Xyglo.Brazil.Xna
             float endY = Math.Min(m_differ.getLeftBoxEnd().Y - m_differ.getYMargin(), m_differ.getRightBoxEnd().Y - m_differ.getYMargin());
 
             double diffPercent = ((double)m_diffPosition) / ((double)m_differ.getMaxDiffLength());
-            double height = ((double)m_project.getSelectedBufferView().getBufferShowLength()) / ((double)m_differ.getMaxDiffLength());
+            double height = ((double)m_context.m_project.getSelectedBufferView().getBufferShowLength()) / ((double)m_differ.getMaxDiffLength());
 
             Vector2 topLeft = new Vector2(m_differ.getLeftBox().X - 10.0f, startY + ((endY - startY) * ((float)diffPercent)));
             Vector2 topRight = new Vector2(m_differ.getRightBoxEnd().X + 10.0f, startY + ((endY - startY) * ((float)diffPercent)));
@@ -5871,61 +5026,6 @@ namespace Xyglo.Brazil.Xna
             // Now render the quad
             //
             m_context.m_drawingHelper.drawQuad(spriteBatch, topLeft, bottomRight, Color.LightYellow, 0.3f);
-        }
-
-        /// <summary>
-        /// Draw a cursor and make it blink in position on a FileBuffer
-        /// </summary>
-        /// <param name="v"></param>
-        protected void drawCursor(GameTime gameTime, SpriteBatch spriteBatch)
-        {
-            // Don't draw the cursor if we're not the active window or if we're confirming 
-            // something on the screen.
-            //
-            if (!this.IsActive || m_confirmState.notEquals("None") || m_brazilContext.m_state.equals("FindText") || m_brazilContext.m_state.equals("GotoLine"))
-            {
-                return;
-            }
-
-            // No cursor for tailing BufferViews
-            //
-            if (!m_project.getSelectedBufferView().isTailing())
-            {
-                double dTS = gameTime.TotalGameTime.TotalSeconds;
-                int blinkRate = 4;
-
-                // Test for when we're showing this
-                //
-                if (Convert.ToInt32(dTS * blinkRate) % 2 != 0)
-                {
-                    return;
-                }
-
-                // Blinks rate
-                //
-                Vector3 v1 = m_project.getSelectedBufferView().getCursorCoordinates();
-                v1.Y += m_project.getSelectedBufferView().getLineSpacing();
-
-                Vector3 v2 = m_project.getSelectedBufferView().getCursorCoordinates();
-                v2.X += 1;
-
-                m_context.m_drawingHelper.renderQuad(v1, v2, m_project.getSelectedBufferView().getHighlightColor(), spriteBatch);
-            }
-            // Draw any temporary highlight
-            //
-            if (m_clickHighlight.First != null &&
-                ((BufferView)m_clickHighlight.First) == m_project.getSelectedBufferView())
-            {
-                Highlight h = (Highlight)m_clickHighlight.Second;
-                Vector3 h1 = m_project.getSelectedBufferView().getSpaceCoordinates(h.m_startHighlight.asScreenPosition());
-                Vector3 h2 = m_project.getSelectedBufferView().getSpaceCoordinates(h.m_endHighlight.asScreenPosition());
-
-                // Add some height here so we can see the highlight
-                //
-                h2.Y += m_context.m_fontManager.getLineSpacing(m_project.getSelectedBufferView().getViewSize());
-
-                m_context.m_drawingHelper.renderQuad(h1, h2, h.getColour(), spriteBatch);
-            }
         }
 
         /// <summary>
@@ -5971,17 +5071,17 @@ namespace Xyglo.Brazil.Xna
 
             // Overlay batch
             //
-            m_overlaySpriteBatch.Begin();
+            m_context.m_overlaySpriteBatch.Begin();
 
             // Draw header line
             //
-            m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), line, new Vector2((int)startPosition.X, (int)(startPosition.Y - m_project.getSelectedBufferView().getLineSpacing() * 3)), Color.White, 0, lineOrigin, 1.0f, 0, 0);
+            m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), line, new Vector2((int)startPosition.X, (int)(startPosition.Y - m_context.m_project.getSelectedBufferView().getLineSpacing() * 3)), Color.White, 0, lineOrigin, 1.0f, 0, 0);
 
             // If we're using this method to position a new window only then don't show the directory chooser part..
             //
             if (m_brazilContext.m_state.equals("PositionScreenNew") || m_brazilContext.m_state.equals("PositionScreenCopy"))
             {
-                m_overlaySpriteBatch.End();
+                m_context.m_overlaySpriteBatch.End();
                 return;
             }
 
@@ -6029,7 +5129,7 @@ namespace Xyglo.Brazil.Xna
                             line = "...";
                         }
 
-                        m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(),
+                        m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(),
                              line,
                              new Vector2((int)startPosition.X, (int)(startPosition.Y + yPosition)),
                              (lineNumber == m_context.m_fileSystemView.getHighlightIndex() ? m_highlightColour : (lineNumber == endShowing ? Color.White : dirColour)),
@@ -6065,7 +5165,7 @@ namespace Xyglo.Brazil.Xna
 #endif
 
                 line = m_context.m_fileSystemView.getPath() + m_saveFileName;
-                m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), line, new Vector2((int)startPosition.X, (int)startPosition.Y), (m_context.m_fileSystemView.getHighlightIndex() == 0 ? m_highlightColour : dirColour), 0, lineOrigin, 1.0f, 0, 0);
+                m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), line, new Vector2((int)startPosition.X, (int)startPosition.Y), (m_context.m_fileSystemView.getHighlightIndex() == 0 ? m_highlightColour : dirColour), 0, lineOrigin, 1.0f, 0, 0);
 
                 yPosition += m_context.m_fontManager.getOverlayFont().LineSpacing * 3.0f;
 
@@ -6084,7 +5184,7 @@ namespace Xyglo.Brazil.Xna
                             line = "...";
                         }
 
-                        m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(),
+                        m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(),
                              line,
                              new Vector2(startPosition.X, startPosition.Y + yPosition),
                              (lineNumber == m_context.m_fileSystemView.getHighlightIndex() ? m_highlightColour : (lineNumber == endShowing ? Color.White : dirColour)),
@@ -6114,7 +5214,7 @@ namespace Xyglo.Brazil.Xna
                             line = "...";
                         }
 
-                        m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(),
+                        m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(),
                                                  line,
                                                  new Vector2((int)startPosition.X, (int)(startPosition.Y + yPosition)),
                                                  (lineNumber == m_context.m_fileSystemView.getHighlightIndex() ? m_highlightColour : (lineNumber == endShowing ? Color.White : m_itemColour)),
@@ -6133,7 +5233,7 @@ namespace Xyglo.Brazil.Xna
             {
                 // Add any temporary message on to the end of the message
                 //
-                m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(),
+                m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(),
                                          m_temporaryMessage,
                                          new Vector2((int)startPosition.X, (int)(startPosition.Y - 30.0f)),
                                          Color.LightGoldenrodYellow,
@@ -6146,7 +5246,7 @@ namespace Xyglo.Brazil.Xna
 
             // Close the SpriteBatch
             //
-            m_overlaySpriteBatch.End();
+            m_context.m_overlaySpriteBatch.End();
         }
 
         /// <summary>
@@ -6303,28 +5403,28 @@ namespace Xyglo.Brazil.Xna
 
             // Set the render target and clear the buffer
             //
-            m_context.m_graphics.GraphicsDevice.SetRenderTarget(m_textScroller);
+            m_context.m_graphics.GraphicsDevice.SetRenderTarget(m_context.m_textScroller);
             m_context.m_graphics.GraphicsDevice.Clear(Color.Black);
 
             // Start with whole message showing and scroll it left
             //
-            int newPosition = (int)((m_gameTime.TotalGameTime.TotalSeconds - m_temporaryMessageStartTime) * -speed);
+            int newPosition = (int)((m_context.m_gameTime.TotalGameTime.TotalSeconds - m_temporaryMessageStartTime) * -speed);
 
             if ((newPosition + (int)(m_temporaryMessage.Length * m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay))) < 0)
             {
                 // Set the temporary message to start again and adjust position/time 
                 // by width of the textScroller.
                 //
-                m_temporaryMessageStartTime = m_gameTime.TotalGameTime.TotalSeconds + m_textScroller.Width / speed;
+                m_temporaryMessageStartTime = m_context.m_gameTime.TotalGameTime.TotalSeconds + m_context.m_textScroller.Width / speed;
             }
 
             // xPosition holds the scrolling position of the text in the temporary message window
             int xPosition = 0;
             float delayScroll = 0.7f; // delay the scrolling by this amount so we can read it before it starts moving
 
-            if (m_gameTime.TotalGameTime.TotalSeconds - m_temporaryMessageStartTime > delayScroll)
+            if (m_context.m_gameTime.TotalGameTime.TotalSeconds - m_temporaryMessageStartTime > delayScroll)
             {
-                xPosition = (int)((m_gameTime.TotalGameTime.TotalSeconds - delayScroll - m_temporaryMessageStartTime) * -120.0f);
+                xPosition = (int)((m_context.m_gameTime.TotalGameTime.TotalSeconds - delayScroll - m_temporaryMessageStartTime) * -120.0f);
             }
 
             // Draw to the render target
@@ -6336,7 +5436,7 @@ namespace Xyglo.Brazil.Xna
             // Now reset the render target to the back buffer
             //
             m_context.m_graphics.GraphicsDevice.SetRenderTarget(null);
-            m_textScrollTexture = (Texture2D)m_textScroller;
+            m_context.m_textScrollTexture = (Texture2D)m_context.m_textScroller;
         }
 
         /// <summary>
@@ -6356,7 +5456,7 @@ namespace Xyglo.Brazil.Xna
 
             // Draw scroll bar
             //
-            m_context.m_spriteBatch.Draw(m_flatTexture, sbBackGround, Color.DarkCyan);
+            m_context.m_spriteBatch.Draw(m_context.m_flatTexture, sbBackGround, Color.DarkCyan);
 
             // Draw viewing window
             //
@@ -6427,7 +5527,7 @@ namespace Xyglo.Brazil.Xna
 
                 // Draw scroll bar window position
                 //
-                m_context.m_spriteBatch.Draw(m_flatTexture, sb, Color.LightGoldenrodYellow);
+                m_context.m_spriteBatch.Draw(m_context.m_flatTexture, sb, Color.LightGoldenrodYellow);
             }
 
             // Draw a highlight overview
@@ -6444,7 +5544,7 @@ namespace Xyglo.Brazil.Xna
                                              1,
                                              Convert.ToInt16(highlightEnd - highlightStart));
 
-                m_context.m_spriteBatch.Draw(m_flatTexture, hl, view.getHighlightColor());
+                m_context.m_spriteBatch.Draw(m_context.m_flatTexture, hl, view.getHighlightColor());
             }
         }
 
@@ -6462,7 +5562,7 @@ namespace Xyglo.Brazil.Xna
             //
             if (m_kinectWorker != null || m_counterWorker != null)
             {
-                checkExit(m_gameTime, true);
+                checkExit(m_context.m_gameTime, true);
             }
         }
 
@@ -6474,7 +5574,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="text"></param>
         protected void drawConfigurationScreen(GameTime gameTime)
         {
-            Vector3 fp = m_project.getSelectedBufferView().getPosition();
+            Vector3 fp = m_context.m_project.getSelectedBufferView().getPosition();
 
             // Starting positions
             //
@@ -6483,57 +5583,57 @@ namespace Xyglo.Brazil.Xna
 
             // Start the spritebatch
             //
-            m_overlaySpriteBatch.Begin();
+            m_context.m_overlaySpriteBatch.Begin();
 
             if (m_editConfigurationItem) // Edit a single configuration item
             {
                 string text = "Edit configuration item";
 
-                m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), text, new Vector2((int)xPos, (int)yPos), Color.White, 0, Vector2.Zero, 1.0f, 0, 0);
+                m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), text, new Vector2((int)xPos, (int)yPos), Color.White, 0, Vector2.Zero, 1.0f, 0, 0);
                 yPos += m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay) * 2;
 
-                m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), m_project.getConfigurationItem(m_configPosition).Name, new Vector2((int)xPos, (int)yPos), m_itemColour, 0, Vector2.Zero, 1.0f, 0, 0);
+                m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), m_context.m_project.getConfigurationItem(m_configPosition).Name, new Vector2((int)xPos, (int)yPos), m_itemColour, 0, Vector2.Zero, 1.0f, 0, 0);
                 yPos += m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay);
 
                 string configString = m_editConfigurationItemValue;
-                if (configString.Length > m_project.getSelectedBufferView().getBufferShowWidth())
+                if (configString.Length > m_context.m_project.getSelectedBufferView().getBufferShowWidth())
                 {
-                    configString = "[..]" + configString.Substring(configString.Length - m_project.getSelectedBufferView().getBufferShowWidth() + 4, m_project.getSelectedBufferView().getBufferShowWidth() - 4);
+                    configString = "[..]" + configString.Substring(configString.Length - m_context.m_project.getSelectedBufferView().getBufferShowWidth() + 4, m_context.m_project.getSelectedBufferView().getBufferShowWidth() - 4);
                 }
 
-                m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), configString, new Vector2((int)xPos, (int)yPos), m_highlightColour, 0, Vector2.Zero, 1.0f, 0, 0);
+                m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), configString, new Vector2((int)xPos, (int)yPos), m_highlightColour, 0, Vector2.Zero, 1.0f, 0, 0);
             }
             else
             {
                 string text = "Configuration Items";
 
-                m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), text, new Vector2((int)xPos, (int)yPos), Color.White, 0, Vector2.Zero, 1.0f, 0, 0);
+                m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), text, new Vector2((int)xPos, (int)yPos), Color.White, 0, Vector2.Zero, 1.0f, 0, 0);
                 yPos += m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay) * 2;
 
                 // Write all the configuration items out - if we're highlight one of them then change
                 // the colour.
                 //
-                for (int i = 0; i < m_project.getConfigurationListLength(); i++)
+                for (int i = 0; i < m_context.m_project.getConfigurationListLength(); i++)
                 {
-                    string configItem = m_project.estimateFileStringTruncation("", m_project.getConfigurationItem(i).Value, 60 - m_project.getConfigurationItem(i).Name.Length);
-                    //string item = m_project.getConfigurationItem(i).Name + "  =  " + m_project.getConfigurationItem(i).Value;
-                    string item = m_project.getConfigurationItem(i).Name + "  =  " + configItem;
+                    string configItem = m_context.m_project.estimateFileStringTruncation("", m_context.m_project.getConfigurationItem(i).Value, 60 - m_context.m_project.getConfigurationItem(i).Name.Length);
+                    //string item = m_context.m_project.getConfigurationItem(i).Name + "  =  " + m_context.m_project.getConfigurationItem(i).Value;
+                    string item = m_context.m_project.getConfigurationItem(i).Name + "  =  " + configItem;
 
-                    item = m_project.estimateFileStringTruncation("", item, m_project.getSelectedBufferView().getBufferShowWidth());
+                    item = m_context.m_project.estimateFileStringTruncation("", item, m_context.m_project.getSelectedBufferView().getBufferShowWidth());
 
                     /*
-                    if (item.Length > m_project.getSelectedBufferView().getBufferShowWidth())
+                    if (item.Length > m_context.m_project.getSelectedBufferView().getBufferShowWidth())
                     {
-                        item = item.Substring(m_configXOffset, m_project.getSelectedBufferView().getBufferShowWidth());
+                        item = item.Substring(m_configXOffset, m_context.m_project.getSelectedBufferView().getBufferShowWidth());
                     }
                     */
 
-                    m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), item, new Vector2((int)xPos, (int)yPos), (i == m_configPosition ? m_highlightColour : m_itemColour), 0, Vector2.Zero, 1.0f, 0, 0);
+                    m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), item, new Vector2((int)xPos, (int)yPos), (i == m_configPosition ? m_highlightColour : m_itemColour), 0, Vector2.Zero, 1.0f, 0, 0);
                     yPos += m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay);
                 }
             }
 
-            m_overlaySpriteBatch.End();
+            m_context.m_overlaySpriteBatch.End();
         }
 
         /// <summary>
@@ -6547,7 +5647,7 @@ namespace Xyglo.Brazil.Xna
             {
                 Logger.logMsg("XygloXNA::doBuildCommand() - build in progress");
                 setActiveBuffer(m_buildStdOutView);
-                setTemporaryMessage("Checking build status", 3, m_gameTime);
+                setTemporaryMessage("Checking build status", 3, m_context.m_gameTime);
                 return;
             }
 
@@ -6557,8 +5657,8 @@ namespace Xyglo.Brazil.Xna
             //
             try
             {
-                //string[] commandList = m_project.getBuildCommand().Split(' ');
-                string[] commandList = m_project.getConfigurationValue("BUILDCOMMAND").Split(' ');
+                //string[] commandList = m_context.m_project.getBuildCommand().Split(' ');
+                string[] commandList = m_context.m_project.getConfigurationValue("BUILDCOMMAND").Split(' ');
 
                 // Override the default build command
                 //
@@ -6634,9 +5734,9 @@ namespace Xyglo.Brazil.Xna
                     }
                     else
                     {
-                        string buildDir = m_project.getConfigurationValue("BUILDDIRECTORY");
-                        string buildStdOutLog = m_project.getConfigurationValue("BUILDSTDOUTLOG");
-                        string buildStdErrLog = m_project.getConfigurationValue("BUILDSTDERRLOG");
+                        string buildDir = m_context.m_project.getConfigurationValue("BUILDDIRECTORY");
+                        string buildStdOutLog = m_context.m_project.getConfigurationValue("BUILDSTDOUTLOG");
+                        string buildStdErrLog = m_context.m_project.getConfigurationValue("BUILDSTDERRLOG");
 
                         // Check the build directory
                         //
@@ -6654,7 +5754,7 @@ namespace Xyglo.Brazil.Xna
                             newStdErr.Close();
                         }
 
-                        m_buildStdErrView = m_project.findBufferView(buildStdErrLog);
+                        m_buildStdErrView = m_context.m_project.findBufferView(buildStdErrLog);
 
                         if (m_buildStdErrView == null)
                         {
@@ -6667,7 +5767,7 @@ namespace Xyglo.Brazil.Xna
 
                         // Store the line length of the existing file
                         //
-                        m_project.setStdErrLastLine(m_buildStdErrView.getFileBuffer().getLineCount());
+                        m_context.m_project.setStdErrLastLine(m_buildStdErrView.getFileBuffer().getLineCount());
 
                         // If the build log doesn't exist then create it
                         //
@@ -6679,7 +5779,7 @@ namespace Xyglo.Brazil.Xna
 
                         // Now ensure that the build log is visible on the screen somewhere
                         //
-                        m_buildStdOutView = m_project.findBufferView(buildStdOutLog);
+                        m_buildStdOutView = m_context.m_project.findBufferView(buildStdOutLog);
 
                         if (m_buildStdOutView == null)
                         {
@@ -6689,7 +5789,7 @@ namespace Xyglo.Brazil.Xna
 
                         // Store the line length of the existing file
                         //
-                        m_project.setStdOutLastLine(m_buildStdOutView.getFileBuffer().getLineCount());
+                        m_context.m_project.setStdOutLastLine(m_buildStdOutView.getFileBuffer().getLineCount());
 
                         // Move to that BufferView
                         //
@@ -6703,11 +5803,11 @@ namespace Xyglo.Brazil.Xna
                         //info.EnvironmentVariables.Add("PATH", "C:\\Q\\mingw\\bin");
                         //info.EnvironmentVariables.Add("TempPath", "C:\\Temp");
                         info.UseShellExecute = false;
-                        info.FileName = m_project.getCommand(commandList);
+                        info.FileName = m_context.m_project.getCommand(commandList);
                         info.WindowStyle = ProcessWindowStyle.Hidden;
                         info.CreateNoWindow = true;
-                        //info.Arguments = m_project.getArguments() + (options == "" ? "" : " " + options);
-                        info.Arguments = m_project.getArguments(commandList);
+                        //info.Arguments = m_context.m_project.getArguments() + (options == "" ? "" : " " + options);
+                        info.Arguments = m_context.m_project.getArguments(commandList);
                         info.RedirectStandardOutput = true;
                         info.RedirectStandardError = true;
 
@@ -6737,7 +5837,7 @@ namespace Xyglo.Brazil.Xna
                         // Inform that we're starting the build
                         //
                         setTemporaryMessage("Starting build..", 4, gameTime);
-                        m_context.m_drawingHelper.startBanner(m_gameTime, "Build started", 5);
+                        m_context.m_drawingHelper.startBanner(m_context.m_gameTime, "Build started", 5);
 
                         /*
                         // Handle any immediate exit error code
@@ -6799,7 +5899,7 @@ namespace Xyglo.Brazil.Xna
             m_buildStdOutView.getFileBuffer().setReadOnly(true);
 #if WRITE_LOG_FILE
 
-            System.IO.TextWriter logFile = new StreamWriter(m_project.getConfigurationValue("BUILDLOG"), true);
+            System.IO.TextWriter logFile = new StreamWriter(m_context.m_project.getConfigurationValue("BUILDLOG"), true);
             logFile.WriteLine("INF:" + time + ":" + logBody);
             logFile.Flush();
             logFile.Close();
@@ -6836,7 +5936,7 @@ namespace Xyglo.Brazil.Xna
             m_buildStdErrView.getFileBuffer().setReadOnly(true);
 
 #if WRITE_LOG_FILE
-            System.IO.TextWriter logFile = new StreamWriter(m_project.getConfigurationValue("BUILDLOG"), true);
+            System.IO.TextWriter logFile = new StreamWriter(m_context.m_project.getConfigurationValue("BUILDLOG"), true);
             logFile.WriteLine("ERR:" + time + ":" + logBody);
             logFile.Flush();
             logFile.Close();
@@ -6861,20 +5961,20 @@ namespace Xyglo.Brazil.Xna
             if (m_buildProcess.ExitCode != 0)
             {
                 setActiveBuffer(m_buildStdErrView);
-                setTemporaryMessage("Build failed with exit code " + m_buildProcess.ExitCode, 5, m_gameTime);
+                setTemporaryMessage("Build failed with exit code " + m_buildProcess.ExitCode, 5, m_context.m_gameTime);
                 m_buildStdErrView.setTailColour(Color.Red);
 
-                m_context.m_drawingHelper.startBanner(m_gameTime, "Build failed", 5);
+                m_context.m_drawingHelper.startBanner(m_context.m_gameTime, "Build failed", 5);
             }
             else
             {
-                setTemporaryMessage("Build completed successfully.", 3, m_gameTime);
+                setTemporaryMessage("Build completed successfully.", 3, m_context.m_gameTime);
 
                 // Also colour the error log green
                 //
                 m_buildStdErrView.setTailColour(Color.Green);
 
-                m_context.m_drawingHelper.startBanner(m_gameTime, "Build completed", 5);
+                m_context.m_drawingHelper.startBanner(m_context.m_gameTime, "Build completed", 5);
             }
 
             // Invalidate the build process
@@ -7003,7 +6103,7 @@ namespace Xyglo.Brazil.Xna
                 //
                 if (message != "")
                 {
-                    setTemporaryMessage(message, 5, m_gameTime);
+                    setTemporaryMessage(message, 5, m_context.m_gameTime);
                 }
             }
         }

@@ -7,8 +7,12 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Xyglo.Brazil.Xna
 {
+    /// <summary>
+    /// Currently not used for anything
+    /// </summary>
     public class Model
     {
+        /*
         /// Projection Matrix
         /// </summary>
         protected Matrix m_projection;
@@ -57,6 +61,7 @@ namespace Xyglo.Brazil.Xna
         public Model()
         {
         }
+        */
 
         /*
         public void update(GameTime gameTime)
