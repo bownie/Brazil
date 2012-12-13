@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Security.Permissions;
+using System.Threading;
+using System.Diagnostics;
 using Microsoft.Xna.Framework;
 
 namespace Xyglo.Brazil.Xna
@@ -13,20 +15,90 @@ namespace Xyglo.Brazil.Xna
     /// </summary>
     public class XygloKeyboardHandler : XygloEventEmitter
     {
-        public XygloKeyboardHandler(XygloContext context, BrazilContext brazilContext, XygloKeyboard keyboard)
+        public XygloKeyboardHandler(XygloContext context, BrazilContext brazilContext, XygloGraphics graphics, XygloKeyboard keyboard)
         {
             m_context = context;
             m_brazilContext = brazilContext;
             m_keyboard = keyboard;
+            m_graphics = graphics;
         }
 
-        /*
+        /// <summary>
+        /// Set a current zoom level
+        /// </summary>
+        /// <param name="zoomLevel"></param>
+        public void setZoomLevel(float zoomLevel, Vector3 eye)
+        {
+            m_context.m_zoomLevel = zoomLevel;
+
+            if (m_context.m_zoomLevel < 500.0f)
+            {
+                m_context.m_zoomLevel = 500.0f;
+            }
+
+            Vector3 eyePos = eye;
+            eyePos.Z = m_context.m_zoomLevel;
+
+            //flyToPosition(eyePos);
+            OnChangePosition(new PositionEventArgs(eyePos));
+        }
+
+        /// <summary>
+        /// When the worker has been initiliased then pass in the reference
+        /// </summary>
+        /// <param name="smartHelpWorker"></param>
+        public void setSmartHelpWorker(SmartHelpWorker smartHelpWorker)
+        {
+            m_smartHelpWorker = smartHelpWorker;
+        }
+
+        /// <summary>
+        /// Run a search on the current BufferView
+        /// </summary>
+        /// <returns></returns>
+        protected void doSearch(GameTime gameTime)
+        {
+            m_brazilContext.m_state = State.Test("TextEditing");
+
+            // Don't search for nothing
+            //
+            if (m_context.m_project.getSelectedBufferView().getSearchText() == "")
+            {
+                return;
+            }
+
+            // If we find something from cursor we're finished here
+            //
+            if (m_context.m_project.getSelectedBufferView().findFromCursor(false))
+            {
+                return;
+            }
+
+            // Now try to find from the top of the file
+            //
+            if (m_context.m_project.getSelectedBufferView().getCursorPosition().Y > 0)
+            {
+                // Try find from the top - if it finds something then let user know we've
+                // wrapped around.
+                //
+                if (m_context.m_project.getSelectedBufferView().find(new ScreenPosition(0, 0), false))
+                {
+                    //setTemporaryMessage("Search wrapped around end of file", 1.5f, gameTime);
+                    OnTemporaryMessage(new TextEventArgs("Search wrapped around end of file", 1.5f, gameTime));
+                    return;
+                }
+            }
+
+            //setTemporaryMessage("\"" + m_context.m_project.getSelectedBufferView().getSearchText() + "\" not found", 3, gameTime);
+            OnTemporaryMessage(new TextEventArgs("\"" + m_context.m_project.getSelectedBufferView().getSearchText() + "\" not found", 3, gameTime));
+        }
+
         /// <summary>
         /// Process action keys for commands
         /// </summary>
         /// <param name="gameTime"></param>
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
-        protected void processActionKey(GameTime gameTime, KeyAction keyAction)
+        public void processActionKey(GameTime gameTime, Game game, Vector3 eye, KeyAction keyAction)
         {
             List<Keys> keyList = new List<Keys>();
             keyList.Add(keyAction.m_key);
@@ -60,7 +132,7 @@ namespace Xyglo.Brazil.Xna
                 {
                     if (m_keyboard.isAltDown() && m_keyboard.isShiftDown()) // Do zoom
                     {
-                        m_mouse.setZoomLevel(m_context.m_zoomLevel - m_context.m_zoomStep, m_eye);
+                        setZoomLevel(m_context.m_zoomLevel - m_context.m_zoomStep, eye);
                     }
                     else if (m_keyboard.isAltDown())
                     {
@@ -130,7 +202,9 @@ namespace Xyglo.Brazil.Xna
                     if (m_keyboard.isAltDown() && m_keyboard.isShiftDown()) // Do zoom
                     {
                         m_context.m_zoomLevel += m_context.m_zoomStep;
-                        setActiveBuffer();
+
+                        //setActiveBuffer();
+                        OnBufferViewChange(new BufferViewEventArgs(m_context.m_project.getSelectedBufferView()));
                     }
                     else if (m_keyboard.isAltDown())
                     {
@@ -183,7 +257,8 @@ namespace Xyglo.Brazil.Xna
                     }
                     catch (Exception)
                     {
-                        setTemporaryMessage("Cannot access " + parDirectory.ToString(), 2, gameTime);
+                        //setTemporaryMessage("Cannot access " + parDirectory.ToString(), 2, gameTime);
+                        OnTemporaryMessage(new TextEventArgs("Cannot access " + parDirectory.ToString(), 2, gameTime));
                     }
                 }
                 else
@@ -313,12 +388,12 @@ namespace Xyglo.Brazil.Xna
             else if (keyList.Contains(Keys.F9)) // Spin anticlockwise though BVs
             {
                 m_context.m_zoomLevel = 1000.0f;
-                setActiveBuffer(BufferView.ViewCycleDirection.Anticlockwise);
+                //setActiveBuffer(BufferView.ViewCycleDirection.Anticlockwise);
             }
             else if (keyList.Contains(Keys.F10)) // Spin clockwise through BVs
             {
                 m_context.m_zoomLevel = 1000.0f;
-                setActiveBuffer(BufferView.ViewCycleDirection.Clockwise);
+                //setActiveBuffer(BufferView.ViewCycleDirection.Clockwise);
             }
             else if (keyList.Contains(Keys.F3))
             {
@@ -331,28 +406,28 @@ namespace Xyglo.Brazil.Xna
             }
             else if (keyList.Contains(Keys.F6))
             {
-                doBuildCommand(gameTime);
+                //doBuildCommand(gameTime);
             }
             else if (keyList.Contains(Keys.F7))
             {
                 string command = m_context.m_project.getConfigurationValue("ALTERNATEBUILDCOMMAND");
-                doBuildCommand(gameTime, command);
+                //doBuildCommand(gameTime, command);
             }
             else if (keyList.Contains(Keys.F8))
             {
-                startGame(gameTime);
+                //startGame(gameTime);
             }
             else if (keyList.Contains(Keys.F11)) // Toggle full screen
             {
                 if (m_context.m_project.isFullScreen())
                 {
-                    m_graphics.windowedMode(this);
+                    m_graphics.windowedMode(game);
                 }
                 else
                 {
-                    m_graphics.fullScreenMode(this);
+                    m_graphics.fullScreenMode(game);
                 }
-                setSpriteFont();
+                //setSpriteFont();
             }
             else if (keyList.Contains(Keys.F1))  // Cycle down through BufferViews
             {
@@ -363,13 +438,15 @@ namespace Xyglo.Brazil.Xna
                 }
 
                 m_context.m_project.setSelectedBufferViewId(newValue);
-                setActiveBuffer();
+                //setActiveBuffer();
+                OnBufferViewChange(new BufferViewEventArgs(m_context.m_project.getSelectedBufferView()));
             }
             else if (keyList.Contains(Keys.F2)) // Cycle up through BufferViews
             {
                 int newValue = (m_context.m_project.getSelectedBufferViewId() + 1) % m_context.m_project.getBufferViews().Count;
                 m_context.m_project.setSelectedBufferViewId(newValue);
-                setActiveBuffer();
+                //setActiveBuffer();
+                OnBufferViewChange(new BufferViewEventArgs(m_context.m_project.getSelectedBufferView()));
             }
             else if (keyList.Contains(Keys.PageDown))
             {
@@ -449,7 +526,8 @@ namespace Xyglo.Brazil.Xna
             else if (keyList.Contains(Keys.Tab)) // Insert a tab space
             {
                 m_context.m_project.getSelectedBufferView().insertText(m_context.m_project, "\t");
-                updateSmartHelp();
+                // NEED THIS
+                //updateSmartHelp();
             }
             else if (keyList.Contains(Keys.Insert))
             {
@@ -463,7 +541,8 @@ namespace Xyglo.Brazil.Xna
 
                         if (bv != null)
                         {
-                            setActiveBuffer(bv);
+                            //setActiveBuffer(bv);
+                            OnBufferViewChange(new BufferViewEventArgs(bv));
                         }
                         else // create and activate
                         {
@@ -473,7 +552,8 @@ namespace Xyglo.Brazil.Xna
                                 bv = new BufferView(m_context.m_fontManager, m_context.m_project.getBufferViews()[0], BufferView.ViewPosition.Left);
                                 bv.setFileBuffer(fb);
                                 int bvIndex = m_context.m_project.addBufferView(bv);
-                                setActiveBuffer(bvIndex);
+                                OnBufferViewChange(new BufferViewEventArgs(bv));
+                                //setActiveBuffer(bvIndex);
 
                                 Vector3 rootPosition = m_context.m_project.getBufferViews()[0].getPosition();
                                 Vector3 newPosition2 = bv.getPosition();
@@ -484,8 +564,8 @@ namespace Xyglo.Brazil.Xna
 
                                 if (m_context.m_project.getConfigurationValue("SYNTAXHIGHLIGHT").ToUpper() == "TRUE")
                                 {
-                                    //m_context.m_project.getSyntaxManager().generateAllHighlighting(fb, true);
-                                    m_smartHelpWorker.updateSyntaxHighlighting(m_context.m_project.getSyntaxManager(), fb);
+                                    // NEED THIS
+                                    //m_smartHelpWorker.updateSyntaxHighlighting(m_context.m_project.getSyntaxManager(), fb);
                                 }
 
                                 // Break out of Manage mode and back to editing
@@ -497,7 +577,8 @@ namespace Xyglo.Brazil.Xna
                             }
                             catch (Exception e)
                             {
-                                setTemporaryMessage("Failed to load file " + e.Message, 2, gameTime);
+                                //setTemporaryMessage("Failed to load file " + e.Message, 2, gameTime);
+                                OnTemporaryMessage(new TextEventArgs("Failed to load file " + e.Message, 2, gameTime));
                             }
                         }
                     }
@@ -551,13 +632,15 @@ namespace Xyglo.Brazil.Xna
 
                             // Update Active Buffer as necessary
                             //
-                            setActiveBuffer();
+                            //setActiveBuffer();
+                            OnBufferViewChange(new BufferViewEventArgs(m_context.m_project.getSelectedBufferView()));
 
-                            // Rebuild the file model
+                            // Rebuild the file model - NEED TO SEND THIS
                             //
                             generateTreeModel();
 
-                            setTemporaryMessage("Removed " + fileToRemove + " from project", 5, m_context.m_gameTime);
+                            //setTemporaryMessage("Removed " + fileToRemove + " from project", 5, m_context.m_gameTime);
+                            OnTemporaryMessage(new TextEventArgs("Removed " + fileToRemove + " from project", 5, m_context.m_gameTime));
                         }
                         else
                         {
@@ -571,7 +654,8 @@ namespace Xyglo.Brazil.Xna
                     // calls the command in the FileBuffer.
                     //
                     m_context.m_project.getSelectedBufferView().deleteCurrentSelection(m_context.m_project);
-                    updateSmartHelp();
+                    // NEED THIS
+                    //updateSmartHelp();
                 }
                 else // delete at cursor
                 {
@@ -612,7 +696,8 @@ namespace Xyglo.Brazil.Xna
 
                         m_context.m_project.getSelectedBufferView().deleteSingle(m_context.m_project);
                     }
-                    updateSmartHelp();
+                    // NEED THIS
+                    //updateSmartHelp();
                 }
             }
             else if (keyList.Contains(Keys.Enter))
@@ -643,8 +728,10 @@ namespace Xyglo.Brazil.Xna
                             if (m_filesToWrite.Count > 0)
                             {
                                 m_context.m_project.setSelectedBufferView(m_filesToWrite[0]);
-                                m_eye = m_context.m_project.getSelectedBufferView().getEyePosition();
-                                selectSaveFile();
+                                //m_eye = m_context.m_project.getSelectedBufferView().getEyePosition();
+                                OnChangePosition(new PositionEventArgs(m_context.m_project.getSelectedBufferView().getEyePosition()));
+
+                                selectSaveFile(gameTime);
                             }
                             else // We're done 
                             {
@@ -653,7 +740,8 @@ namespace Xyglo.Brazil.Xna
 
                                 // Exit nicely and ensure we serialise
                                 //
-                                checkExit(gameTime);
+                                //checkExit(gameTime);
+                                OnCleanExitEvent(new CleanExitEventArgs(gameTime));
                             }
                         }
                         else
@@ -662,7 +750,8 @@ namespace Xyglo.Brazil.Xna
                             //
                             if (m_saveAsExit)
                             {
-                                checkExit(gameTime);
+                                //checkExit(gameTime);
+                                OnCleanExitEvent(new CleanExitEventArgs(gameTime));
                             }
                         }
                     }
@@ -691,7 +780,7 @@ namespace Xyglo.Brazil.Xna
                 }
                 else if (m_brazilContext.m_state.equals("FindText"))
                 {
-                    doSearch(gameTime);
+                    //doSearch(gameTime);
                 }
                 else if (m_brazilContext.m_state.equals("GotoLine"))
                 {
@@ -708,14 +797,16 @@ namespace Xyglo.Brazil.Xna
                             }
                             else
                             {
-                                setTemporaryMessage("Attempted to go beyond end of file.", 2, gameTime);
+                                //setTemporaryMessage("Attempted to go beyond end of file.", 2, gameTime);
+                                OnTemporaryMessage(new TextEventArgs("Attempted to go beyond end of file.", 2, gameTime));
                             }
                         }
                     }
                     catch (Exception)
                     {
                         Logger.logMsg("Probably got junk in the goto line dialog");
-                        setTemporaryMessage("Lines are identified by numbers.", 2, gameTime);
+                        //setTemporaryMessage("Lines are identified by numbers.", 2, gameTime);
+                        OnTemporaryMessage(new TextEventArgs("Lines are identified by numbers.", 2, gameTime));
                     }
 
                     m_gotoLine = "";
@@ -744,13 +835,42 @@ namespace Xyglo.Brazil.Xna
                     {
                         m_context.m_project.getSelectedBufferView().insertNewLine(m_context.m_project, indent);
                     }
-                    updateSmartHelp();
+                    // NEED THIS
+                    //updateSmartHelp();
                 }
             }
         }
-        */
 
-        /*
+        /// <summary>
+        /// Generate a model from the Project
+        /// </summary>
+        public void generateTreeModel()
+        {
+            Logger.logMsg("XygloXNA::generateTreeModel() - starting");
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
+
+            // Firstly get a root directory for the FileBuffer tree
+            //
+            string fileRoot = m_context.m_project.getFileBufferRoot();
+
+            TreeBuilderGraph rG = m_treeBuilder.buildTreeFromFiles(fileRoot, m_context.m_project.getNonNullFileBuffers());
+
+            // Build a model and store it if we don't have one
+            //
+            if (m_modelBuilder == null)
+            {
+                m_modelBuilder = new ModelBuilder();
+            }
+
+            // Rebuild it in a given position
+            //
+            m_modelBuilder.build(rG, m_projectPosition);
+
+            sw.Stop();
+            Logger.logMsg("XygloXNA::generateTreeModel() - completed in " + sw.ElapsedMilliseconds + " ms");
+        }
+
         /// <summary>
         /// Process key combinations and commands from the keyboard - return true if we've
         /// captured a command so we don't print that character
@@ -758,7 +878,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="?"></param>
         /// <returns></returns>
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
-        protected bool processCombinationsCommands(GameTime gameTime, List<KeyAction> keyActionList)
+        public bool processCombinationsCommands(GameTime gameTime, List<KeyAction> keyActionList)
         {
             bool rC = false;
             List<Keys> keyList = new List<Keys>();
@@ -770,7 +890,8 @@ namespace Xyglo.Brazil.Xna
             if (m_brazilContext.m_confirmState.equals("ConfirmQuit") && keyList.Contains(Keys.Y))
             {
                 m_confirmQuit = true;
-                checkExit(gameTime, true);
+                //checkExit(gameTime, true);
+                OnCleanExitEvent(new CleanExitEventArgs(gameTime, true));
                 return true;
             }
 
@@ -789,7 +910,7 @@ namespace Xyglo.Brazil.Xna
                             //
                             if (m_context.m_project.getSelectedBufferView().getFileBuffer().getFilepath() == "")
                             {
-                                selectSaveFile();
+                                selectSaveFile(gameTime);
                             }
                             else
                             {
@@ -799,7 +920,8 @@ namespace Xyglo.Brazil.Xna
                                 {
                                     // Save has completed without error
                                     //
-                                    setTemporaryMessage("Saved.", 2, gameTime);
+                                    //setTemporaryMessage("Saved.", 2, gameTime);
+                                    OnTemporaryMessage(new TextEventArgs("Saved.", 2, gameTime));
                                 }
 
                                 m_brazilContext.m_state = State.Test("TextEditing");
@@ -847,7 +969,8 @@ namespace Xyglo.Brazil.Xna
                             //
                             if (m_filesToWrite.Count == 0)
                             {
-                                checkExit(gameTime);
+                                //checkExit(gameTime);
+                                OnCleanExitEvent(new CleanExitEventArgs(gameTime));
                             }
                         }
                         else if (m_brazilContext.m_confirmState.equals("CancelBuild"))
@@ -859,13 +982,15 @@ namespace Xyglo.Brazil.Xna
                         else if (m_brazilContext.m_confirmState.equals("ConfirmQuit"))
                         {
                             m_confirmQuit = true;
-                            checkExit(gameTime, true);
+                            //checkExit(gameTime, true);
+                            OnCleanExitEvent(new CleanExitEventArgs(gameTime, true));
                         }
                         rC = true; // consume this letter
                     }
                     catch (Exception e)
                     {
-                        setTemporaryMessage("Save failed with \"" + e.Message + "\".", 5, gameTime);
+                        //setTemporaryMessage("Save failed with \"" + e.Message + "\".", 5, gameTime);
+                        OnTemporaryMessage(new TextEventArgs("Save failed with \"" + e.Message + "\".", 5, gameTime));
                     }
 
                     m_brazilContext.m_confirmState.set("None");
@@ -876,30 +1001,35 @@ namespace Xyglo.Brazil.Xna
                     //
                     if (m_brazilContext.m_confirmState.equals("FileSave"))
                     {
-                        m_temporaryMessage = "";
+                        //m_temporaryMessage = "";
+                        OnTemporaryMessage(new TextEventArgs("", 0.0f, gameTime));
                         m_brazilContext.m_confirmState.set("None");
                     }
                     else if (m_brazilContext.m_confirmState.equals("FileSaveCancel"))
                     {
                         // Exit nicely
                         //
-                        checkExit(gameTime, true);
+                        //checkExit(gameTime, true);
+                        OnCleanExitEvent(new CleanExitEventArgs(gameTime, true));
                     }
                     else if (m_brazilContext.m_confirmState.equals("CancelBuild"))
                     {
-                        setTemporaryMessage("Continuing build..", 2, gameTime);
+                        //setTemporaryMessage("Continuing build..", 2, gameTime);
+                        OnTemporaryMessage(new TextEventArgs("Continuing build..", 2, gameTime));
                         m_brazilContext.m_confirmState.set("None");
                     }
                     else if (m_brazilContext.m_confirmState.equals("ConfirmQuit"))
                     {
-                        setTemporaryMessage("Cancelled quit", 2, gameTime);
+                        //setTemporaryMessage("Cancelled quit", 2, gameTime);
+                        OnTemporaryMessage(new TextEventArgs("Cancelled quit", 2, gameTime));
                         m_brazilContext.m_confirmState.set("None");
                     }
                     rC = true; // consume this letter
                 }
                 else if (keyList.Contains(Keys.C) && m_brazilContext.m_confirmState.equals("FileSaveCancel"))
                 {
-                    setTemporaryMessage("Cancelled Quit.", 0.5, gameTime);
+                    //setTemporaryMessage("Cancelled Quit.", 0.5, gameTime);
+                    OnTemporaryMessage(new TextEventArgs("Cancelled Quit.", 0.5, gameTime));
                     m_brazilContext.m_confirmState.set("None");
                     rC = true;
                 }
@@ -978,7 +1108,8 @@ namespace Xyglo.Brazil.Xna
                             {
                                 m_context.m_project.getSelectedBufferView().insertText(m_context.m_project, System.Windows.Forms.Clipboard.GetText());
                             }
-                            updateSmartHelp();
+                            // NEED THIS
+                            //updateSmartHelp();
                             rC = true;
                         }
                     }
@@ -995,18 +1126,21 @@ namespace Xyglo.Brazil.Xna
                         if (m_context.m_project.getSelectedBufferView().getFileBuffer().getUndoPosition() > 0)
                         {
                             m_context.m_project.getSelectedBufferView().undo(m_context.m_project, 1);
-                            updateSmartHelp();
+                            // NEED THIS
+                            //updateSmartHelp();
                         }
                         else
                         {
-                            setTemporaryMessage("Nothing to undo.", 1.0, gameTime);
+                            //setTemporaryMessage("Nothing to undo.", 1.0, gameTime);
+                            OnTemporaryMessage(new TextEventArgs("Nothing to undo.", 1.0, gameTime));
                         }
                     }
                     catch (Exception e)
                     {
                         //System.Windows.Forms.MessageBox.Show("Undo stack is empty - " + e.Message);
                         Logger.logMsg("XygloXNA::processCombinationsCommands() - got exception " + e.Message);
-                        setTemporaryMessage("Nothing to undo with exception.", 2, gameTime);
+                        //setTemporaryMessage("Nothing to undo with exception.", 2, gameTime);
+                        OnTemporaryMessage(new TextEventArgs("Nothing to undo with exception.", 2, gameTime));
                     }
 
                     // Always return true
@@ -1026,18 +1160,22 @@ namespace Xyglo.Brazil.Xna
                             m_context.m_project.getSelectedBufferView().getFileBuffer().getCommandStackLength())
                         {
                             m_context.m_project.getSelectedBufferView().redo(m_context.m_project, 1);
-                            updateSmartHelp();
+
+                            // NEED THIS
+                            //updateSmartHelp();
                         }
                         else
                         {
-                            setTemporaryMessage("Nothing to redo.", 1.0, gameTime);
+                            //setTemporaryMessage("Nothing to redo.", 1.0, gameTime);
+                            OnTemporaryMessage(new TextEventArgs("Nothing to redo.", 1.0, gameTime));
                         }
                     }
                     catch (Exception e)
                     {
                         //System.Windows.Forms.MessageBox.Show("Undo stack is empty - " + e.Message);
                         Logger.logMsg("XygloXNA::processCombinationsCommands() - got exception " + e.Message);
-                        setTemporaryMessage("Nothing to redo.", 2, gameTime);
+                        //setTemporaryMessage("Nothing to redo.", 2, gameTime);
+                        OnTemporaryMessage(new TextEventArgs("Nothing to redo.", 2, gameTime));
                     }
 
                     // Always return true as we've captured the event
@@ -1053,9 +1191,14 @@ namespace Xyglo.Brazil.Xna
                 {
                     if (m_keyboard.isShiftDown())
                     {
-                        m_fontScaleOriginal = m_context.m_project.getSelectedBufferView().incrementViewSize(m_context.m_graphics.GraphicsDevice.Viewport.Width, m_context.m_graphics.GraphicsDevice.Viewport.Height, m_context.m_fontManager);
+                        // Increment view size and flash the bufferview
+                        //
+                        m_fontScaleOriginal = m_context.m_project.getSelectedBufferView().incrementViewSize(gameTime, m_context.m_graphics.GraphicsDevice.Viewport.Width, m_context.m_graphics.GraphicsDevice.Viewport.Height, m_context.m_fontManager);
+
                         m_currentFontScale = 0.0f;
-                        setActiveBuffer();
+
+                        //setActiveBuffer();
+                        OnBufferViewChange(new BufferViewEventArgs(m_context.m_project.getSelectedBufferView()));
                     }
                     else
                     {
@@ -1063,16 +1206,21 @@ namespace Xyglo.Brazil.Xna
                         m_context.m_bloom.Settings = BloomSettings.PresetSettings[m_context.m_bloomSettingsIndex];
                         m_context.m_bloom.Visible = true;
 
-                        setTemporaryMessage("Bloom set to " + BloomSettings.PresetSettings[m_context.m_bloomSettingsIndex].Name, 3, gameTime);
+                        //setTemporaryMessage("Bloom set to " + BloomSettings.PresetSettings[m_context.m_bloomSettingsIndex].Name, 3, gameTime);
+                        OnTemporaryMessage(new TextEventArgs("Bloom set to " + BloomSettings.PresetSettings[m_context.m_bloomSettingsIndex].Name, 3, gameTime));
                     }
                 }
                 else if (keyList.Contains(Keys.OemMinus)) // decrement bloom state
                 {
                     if (m_keyboard.isShiftDown())
                     {
-                        m_fontScaleOriginal = m_context.m_project.getSelectedBufferView().decrementViewSize(m_context.m_graphics.GraphicsDevice.Viewport.Width, m_context.m_graphics.GraphicsDevice.Viewport.Height, m_context.m_fontManager);
+                        // Modify view size and flash the bufferview
+                        //
+                        m_fontScaleOriginal = m_context.m_project.getSelectedBufferView().decrementViewSize(gameTime, m_context.m_graphics.GraphicsDevice.Viewport.Width, m_context.m_graphics.GraphicsDevice.Viewport.Height, m_context.m_fontManager);
+
                         m_currentFontScale = 0.0f;
-                        setActiveBuffer();
+                        //setActiveBuffer();
+                        OnBufferViewChange(new BufferViewEventArgs(m_context.m_project.getSelectedBufferView()));
                     }
                     else
                     {
@@ -1085,13 +1233,15 @@ namespace Xyglo.Brazil.Xna
 
                         m_context.m_bloom.Settings = BloomSettings.PresetSettings[m_context.m_bloomSettingsIndex];
                         m_context.m_bloom.Visible = true;
-                        setTemporaryMessage("Bloom set to " + BloomSettings.PresetSettings[m_context.m_bloomSettingsIndex].Name, 3, gameTime);
+                        //setTemporaryMessage("Bloom set to " + BloomSettings.PresetSettings[m_context.m_bloomSettingsIndex].Name, 3, gameTime);
+                        OnTemporaryMessage(new TextEventArgs("Bloom set to " + BloomSettings.PresetSettings[m_context.m_bloomSettingsIndex].Name, 3, gameTime));
                     }
                 }
                 else if (keyList.Contains(Keys.B)) // Toggle bloom
                 {
                     m_context.m_bloom.Visible = !m_context.m_bloom.Visible;
-                    setTemporaryMessage("Bloom " + (m_context.m_bloom.Visible ? "on" : "off"), 3, gameTime);
+                    //setTemporaryMessage("Bloom " + (m_context.m_bloom.Visible ? "on" : "off"), 3, gameTime);
+                    OnTemporaryMessage(new TextEventArgs("Bloom " + (m_context.m_bloom.Visible ? "on" : "off"), 3, gameTime));
                 }
 
             }
@@ -1103,7 +1253,8 @@ namespace Xyglo.Brazil.Xna
                     //
                     if (m_confirmFileSave)
                     {
-                        setTemporaryMessage("Confirm Save? Y/N", 0, gameTime);
+                        //setTemporaryMessage("Confirm Save? Y/N", 0, gameTime);
+                        OnTemporaryMessage(new TextEventArgs("Confirm Save? Y/N", 0, gameTime));
                         m_brazilContext.m_confirmState.set("FileSave");
                     }
                     else  // just save
@@ -1113,7 +1264,7 @@ namespace Xyglo.Brazil.Xna
                         if (m_context.m_project.getSelectedBufferView().getFileBuffer().getFilepath() == "")
                         {
                             m_saveAsExit = false;
-                            selectSaveFile();
+                            selectSaveFile(gameTime);
                         }
                         else
                         {
@@ -1123,7 +1274,8 @@ namespace Xyglo.Brazil.Xna
                             {
                                 // Save has completed without error
                                 //
-                                setTemporaryMessage("Saved.", 2, gameTime);
+                                //setTemporaryMessage("Saved.", 2, gameTime);
+                                OnTemporaryMessage(new TextEventArgs("Saved.", 2, gameTime));
                             }
 
                             m_brazilContext.m_state = State.Test("TextEditing");
@@ -1134,7 +1286,7 @@ namespace Xyglo.Brazil.Xna
                 else if (keyList.Contains(Keys.A)) // Explicit save as
                 {
                     m_saveAsExit = false;
-                    selectSaveFile();
+                    selectSaveFile(gameTime);
                     rC = true;
                 }
                 else if (keyList.Contains(Keys.N)) // New BufferView on new FileBuffer
@@ -1149,7 +1301,9 @@ namespace Xyglo.Brazil.Xna
                 }
                 else if (keyList.Contains(Keys.O)) // Open a file
                 {
-                    selectOpenFile();
+                    // NEED THIS
+                    //selectOpenFile();
+                    m_brazilContext.m_state = State.Test("FileOpen");
                     rC = true;
                 }
                 else if (keyList.Contains(Keys.H)) // Show the help screen
@@ -1173,18 +1327,23 @@ namespace Xyglo.Brazil.Xna
                     // Reset page position and set information mode
                     //
                     m_textScreenPositionY = 0;
-                    showConfigurationScreen();
+
+                    // NEED THIS
+                    //showConfigurationScreen();
+                    m_brazilContext.m_state = State.Test("Configuration");
                     rC = true;
                 }
                 else if (keyList.Contains(Keys.C)) // Close current BufferView
                 {
+                    // NEED THIS
                     closeActiveBuffer(gameTime);
                     rC = true;
                 }
                 else if (keyList.Contains(Keys.D))
                 {
                     m_brazilContext.m_state = State.Test("DiffPicker");
-                    setTemporaryMessage("Pick a BufferView to diff against", 5, gameTime);
+                    //setTemporaryMessage("Pick a BufferView to diff against", 5, gameTime);
+                    OnTemporaryMessage(new TextEventArgs("Pick a BufferView to diff against", 5, gameTime));
 
                     // Set up the differ
                     //
@@ -1214,13 +1373,15 @@ namespace Xyglo.Brazil.Xna
                     m_projectPosition.X = -1000.0f;
                     m_projectPosition.Y = -1000.0f;
 
+                    // NEED THIS
                     generateTreeModel();
 
                     // Fly to a new position in this mode to view the model
                     //
                     Vector3 newPos = m_projectPosition;
                     newPos.Z = 800.0f;
-                    flyToPosition(newPos);
+                    //flyToPosition(newPos);
+                    OnChangePosition(new PositionEventArgs(newPos));
                     rC = true;
                 }
                 else if (keyList.Contains(Keys.D0) ||
@@ -1272,7 +1433,71 @@ namespace Xyglo.Brazil.Xna
 
             return rC;
         }
-        */
+
+
+        /// <summary>
+        /// Close the active buffer view
+        /// </summary>
+        protected void closeActiveBuffer(GameTime gameTime)
+        {
+            if (m_context.m_project.getBufferViews().Count > 1)
+            {
+                int index = m_context.m_project.getBufferViews().IndexOf(m_context.m_project.getSelectedBufferView());
+                m_context.m_project.removeBufferView(m_context.m_project.getSelectedBufferView());
+
+                // Ensure that the index is not greater than number of bufferviews
+                //
+                if (index > m_context.m_project.getBufferViews().Count - 1)
+                {
+                    index = m_context.m_project.getBufferViews().Count - 1;
+                }
+
+                m_context.m_project.setSelectedBufferViewId(index);
+                //setActiveBuffer(index);
+                OnBufferViewChange(new BufferViewEventArgs(m_context.m_project.getBufferViews()[index]));
+
+                //setTemporaryMessage("Removed BufferView.", 2, gameTime);
+                OnTemporaryMessage(new TextEventArgs("Removed BufferView.", 2, gameTime));
+            }
+            else
+            {
+                //setTemporaryMessage("Can't remove the last BufferView.", 2, gameTime);
+                OnTemporaryMessage(new TextEventArgs("Can't remove the last BufferView.", 2, gameTime));
+            }
+        }
+
+        /// <summary>
+        /// Completing a File->Save operation
+        /// </summary>
+        /// <param name="gameTime"></param>
+        protected void completeSaveFile(GameTime gameTime)
+        {
+            try
+            {
+                checkFileSave();
+
+                if (m_filesToWrite != null && m_filesToWrite.Count > 0)
+                {
+                    m_filesToWrite.RemoveAt(0);
+                    Logger.logMsg("XygloXNA::completeSaveFile() - files remaining to be written " + m_filesToWrite.Count);
+                }
+
+                Vector3 newPosition = m_context.m_project.getSelectedBufferView().getEyePosition();
+                newPosition.Z = 500.0f;
+
+                //flyToPosition(newPosition);
+                OnChangePosition(new PositionEventArgs(newPosition));
+                m_brazilContext.m_state = State.Test("TextEditing");
+
+                //setTemporaryMessage("Saved.", 2, gameTime);
+                OnTemporaryMessage(new TextEventArgs("Saved.", 2, gameTime));
+            }
+            catch (Exception)
+            {
+                //setTemporaryMessage("Failed to save to " + m_context.m_project.getSelectedBufferView().getFileBuffer().getFilepath(), 2, gameTime);
+                OnTemporaryMessage(new TextEventArgs("Failed to save to " + m_context.m_project.getSelectedBufferView().getFileBuffer().getFilepath(), 2, gameTime));
+            }
+        }
 
         /// <summary>
         /// Locate a BufferView located in a specified direction - if we find one then
@@ -1314,16 +1539,458 @@ namespace Xyglo.Brazil.Xna
             }
         }
 
+        /// <summary>
+        /// Traverse a directory and allow opening/saving at that point according to state
+        /// </summary>
+        protected void traverseDirectory(GameTime gameTime, bool readOnly = false, bool tailFile = false)
+        {
+            //string fileToOpen = m_fileSystemView.getHighlightedFile();
+            if (m_context.m_fileSystemView.atDriveLevel())
+            {
+                // First extract the drive letter and set the path
+                //
+                m_context.m_fileSystemView.setHighlightedDrive();
+            }
+
+            // If we're not at the root directory
+            //
+            if (m_context.m_fileSystemView.getHighlightIndex() > 0)
+            {
+                string subDirectory = "";
+
+                // Set the directory to the sub directory and reset the highlighter
+                //
+                try
+                {
+                    if (m_context.m_fileSystemView.getHighlightIndex() - 1 < m_context.m_fileSystemView.getDirectoryInfo().GetDirectories().Length)
+                    {
+                        // Set error directory in case of failure to test access
+                        //
+                        DirectoryInfo directoryToAccess = m_context.m_fileSystemView.getDirectoryInfo().GetDirectories()[m_context.m_fileSystemView.getHighlightIndex() - 1];
+                        subDirectory = directoryToAccess.Name;
+
+                        // Test access
+                        //
+                        DirectoryInfo[] testAccess = directoryToAccess.GetDirectories();
+
+
+                        FileInfo[] testFiles = directoryToAccess.GetFiles();
+
+                        m_context.m_fileSystemView.setDirectory(directoryToAccess.FullName);
+                        m_context.m_fileSystemView.setHighlightIndex(0);
+                        m_lastHighlightIndex = m_context.m_fileSystemView.getHighlightIndex();
+                    }
+                    else
+                    {
+                        int fileIndex = m_context.m_fileSystemView.getHighlightIndex() - 1 - m_context.m_fileSystemView.getDirectoryInfo().GetDirectories().Length;
+                        FileInfo fileInfo = m_context.m_fileSystemView.getDirectoryInfo().GetFiles()[fileIndex];
+
+                        Logger.logMsg("Friendler::traverseDirectory() - selected a file " + fileInfo.Name);
+
+                        // Set these values and the status
+                        //
+                        m_fileIsReadOnly = readOnly;
+                        m_fileIsTailing = tailFile;
+                        m_selectedFile = fileInfo.FullName;
+
+                        if (m_brazilContext.m_state.equals("FileOpen"))
+                        {
+                            // Now we need to choose a position for the new file we're opening
+                            //
+                            m_brazilContext.m_state = State.Test("PositionScreenOpen");
+                        }
+                        else if (m_brazilContext.m_state.equals("FileSaveAs"))
+                        {
+                            // Set the FileBuffer path
+                            //
+                            m_context.m_project.getSelectedBufferView().getFileBuffer().setFilepath(m_selectedFile);
+
+                            if (checkFileSave())
+                            {
+                                if (m_filesToWrite != null)
+                                {
+                                    // Check if we need to remove this FileBuffer from the todo list - it's not important if we can't
+                                    // remove it here but we should try to anyway.
+                                    //
+                                    m_filesToWrite.RemoveAt(0);
+                                    Logger.logMsg("XygloXNA::traverseDirectory() - total files left to write is now " + m_filesToWrite.Count);
+
+                                    // If we have finished saving all of our files then we can exit (although we check once again)
+                                    //
+                                    if (m_filesToWrite.Count == 0)
+                                    {
+                                        if (m_saveAsExit == true)
+                                        {
+                                            //checkExit(gameTime);
+                                            OnCleanExitEvent(new CleanExitEventArgs(gameTime));
+                                        }
+                                        else
+                                        {
+                                            //setActiveBuffer();
+                                            OnBufferViewChange(new BufferViewEventArgs(m_context.m_project.getSelectedBufferView()));
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    m_brazilContext.m_state = State.Test("TextEditing");
+                                    //setActiveBuffer();
+                                    OnBufferViewChange(new BufferViewEventArgs(m_context.m_project.getSelectedBufferView()));
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    //setTemporaryMessage("XygloXNA::traverseDirectory() - Cannot access \"" + subDirectory + "\"", 2, gameTime);
+                    OnTemporaryMessage(new TextEventArgs("XygloXNA::traverseDirectory() - Cannot access \"" + subDirectory + "\"", 2, gameTime));
+                }
+            }
+        }
+
+        // Set up the file save mode
+        //
+        public void selectSaveFile(GameTime gameTime)
+        {
+            // Enter this mode and clear and existing message
+            //
+            m_brazilContext.m_state = State.Test("FileSaveAs");
+
+            OnTemporaryMessage(new TextEventArgs("", 0.0f, gameTime));
+            //m_temporaryMessage = "";
+
+            // Clear the filename
+            //
+            m_saveFileName = "";
+        }
 
         /// <summary>
-        /// Position in configuration list when selecting something
+        /// Checks to see if we are licenced before saving
         /// </summary>
-        protected int m_configPosition;
+        /// <returns></returns>
+        protected bool checkFileSave()
+        {
+            if (m_context.m_project.getLicenced())
+            {
+                m_context.m_project.getSelectedBufferView().getFileBuffer().save();
+                return true;
+            }
+
+            //setTemporaryMessage("Can't save due to licence issue.", 10, m_context.m_gameTime);
+            OnTemporaryMessage(new TextEventArgs("Can't save due to licence issue.", 10, m_context.m_gameTime));
+
+            return false;
+        }
+
+        /// <summary>
+        /// Update syntax highlighting if we need to 
+        /// </summary>
+        public void updateSmartHelp()
+        {
+            // Update the syntax highlighting
+            //
+            if (m_context.m_project.getConfigurationValue("SYNTAXHIGHLIGHT").ToUpper() == "TRUE")
+            {
+                FileBuffer fb = m_context.m_project.getSelectedBufferView().getFileBuffer();
+                int startLine = m_context.m_project.getSelectedBufferView().getBufferShowStartY();
+                int endLine = m_context.m_project.getSelectedBufferView().getBufferShowStartY() + m_context.m_project.getSelectedBufferView().getBufferShowLength();
+
+                // Limit end line as necessary
+                if (endLine >= fb.getLineCount())
+                {
+                    endLine = Math.Max(fb.getLineCount() - 1, 0);
+                }
+
+                FilePosition startPosition = new FilePosition(0, startLine);
+                FilePosition endPosition = new FilePosition(fb.getLine(endLine).Length, endLine);
+
+                // Process immediately the current visible buffer
+                //
+                m_context.m_project.getSyntaxManager().generateHighlighting(fb, startPosition, endPosition, false);
+
+                // Ensure that the syntax manager isn't processing highlights at the time of the next request.
+                //
+                m_context.m_project.getSyntaxManager().interruptProcessing();
+
+                // We process all highlighting in the SmartHelpWorker thread.  Note that you have to do this
+                // all in the same thread or the main GUI gets locked out.  Although it would make sense to
+                // do just the on-screen bit in main thread we can minimise latency by keeping the highlight
+                // thread sleep
+                //
+                m_smartHelpWorker.updateSyntaxHighlighting(m_context.m_project.getSyntaxManager(), m_context.m_project.getSelectedBufferView().getFileBuffer(),
+                    startLine, endLine);
+            }
+        }
+
+        /// <summary>
+        /// Process any keys that need to be printed
+        /// </summary>
+        /// <param name="gameTime"></param>
+        public void processKey(GameTime gameTime, KeyAction keyAction)
+        {
+            // Do nothing if no keys are pressed except check for auto repeat and clear if necessary.
+            // We have to adjust for any held down modifier keys here and also clear the variable as 
+            // necessary.
+
+            // Ok, let's see if we can translate a key
+            //
+            string key = m_keyboard.getKey(keyAction);
+
+            if (key == "")
+                return;
+
+            // Now handle
+            //
+            if (m_brazilContext.m_state.equals("FileSaveAs")) // File name
+            {
+                //Logger.logMsg("Writing letter " + key);
+                m_saveFileName += key;
+            }
+            else if (m_brazilContext.m_state.equals("Configuration") && m_editConfigurationItem) // Configuration item
+            {
+                m_editConfigurationItemValue += key;
+            }
+            else if (m_brazilContext.m_state.equals("FindText"))
+            {
+                m_context.m_project.getSelectedBufferView().appendToSearchText(key);
+            }
+            else if (m_brazilContext.m_state.equals("GotoLine"))
+            {
+                m_gotoLine += key;
+            }
+            else if (m_brazilContext.m_state.equals("TextEditing"))
+            {
+                // Do we need to do some deletion or replacing?
+                //
+                if (m_context.m_project.getSelectedBufferView().gotHighlight())
+                {
+                    m_context.m_project.getSelectedBufferView().replaceCurrentSelection(m_context.m_project, key);
+                }
+                else
+                {
+                    m_context.m_project.getSelectedBufferView().insertText(m_context.m_project, key);
+                }
+                updateSmartHelp();
+            }
+        }
+
+        /// <summary>
+        /// Do font scaling on an acceleration - yes I don't quite know either
+        /// </summary>
+        /// <param name="acc"></param>
+        public void doFontScaling(float acc)
+        {
+            // Font scaling - should this be in here?
+            //
+            if (m_currentFontScale == 0.0f)
+            {
+                m_currentFontScale = m_fontScaleOriginal;
+            }
+            else if (m_currentFontScale != 1.0f)
+            {
+                if (m_fontScaleOriginal < 1.0f)
+                {
+                    m_currentFontScale = m_fontScaleOriginal + ((1.0f - m_fontScaleOriginal) * acc);
+                }
+                else
+                {
+                    m_currentFontScale = m_fontScaleOriginal - ((m_fontScaleOriginal - 1.0f) * acc);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Page up a text screen
+        /// </summary>
+        public void textScreenPageDown(int textScreenLength)
+        {
+            if (m_textScreenPositionY + m_context.m_project.getSelectedBufferView().getBufferShowLength() < textScreenLength)
+                m_textScreenPositionY += m_context.m_project.getSelectedBufferView().getBufferShowLength();
+        }
+
+        /// <summary>
+        /// Page down a text screen
+        /// </summary>
+        public void textScreenPageUp()
+        {
+            if (m_textScreenPositionY > 0)
+                m_textScreenPositionY = m_textScreenPositionY - Math.Min(m_context.m_project.getSelectedBufferView().getBufferShowLength(), m_textScreenPositionY);
+        }
+
+
+
+        public int getDiffPosition() { return m_diffPosition; }
+        public int getConfigPosition() { return m_configPosition; }
+        public Differ getDiffer() { return m_differ; }
+
+        public string getEditConfigurationItemValue() { return m_editConfigurationItemValue; }
+        public bool getEditConfigurationItem() { return m_editConfigurationItem; }
+        public void setEditConfigurationItem(bool item) { m_editConfigurationItem = item; }
+
+        public ModelBuilder getModelBuilder() { return m_modelBuilder; }
+
+        public string getGotoLine() { return m_gotoLine; }
+
+        public List<FileBuffer> getFilesToWrite() { return m_filesToWrite; }
+        public void setFilesToWrite(List<FileBuffer> buffer) { m_filesToWrite = buffer; }
+
+        public int getTextScreenPositionY() { return m_textScreenPositionY; }
+        /// <summary>
+        /// Return selected file
+        /// </summary>
+        /// <returns></returns>
+        public string getSelectedFile() { return m_selectedFile; }
+
+        public bool getFileIsReadOnly() { return m_fileIsReadOnly; }
+        public bool getFileIsTailing() { return m_fileIsTailing; }
+
+        public bool getConfirmQuit() { return m_confirmQuit; }
+        public bool getSaveAsExit() { return m_saveAsExit; }
+        public void setSaveAsExit(bool value) { m_saveAsExit = value; }
+
+        public double getCurrentFontScale() { return m_currentFontScale; }
+        public void setCurrentFontScale(double scale) { m_currentFontScale = scale; }
+
+        public double getFontScaleOriginal() { return m_fontScaleOriginal; }
+        public void setFontScaleOriginal(double scale) { m_fontScaleOriginal = scale; }
+
+        public string getSaveFileName() { return m_saveFileName; }
 
         // Some contexts and 'globals'
         //
         protected XygloContext m_context;
         protected BrazilContext m_brazilContext;
         protected XygloKeyboard m_keyboard;
+        protected XygloGraphics m_graphics;
+
+        /// <summary>
+        /// Position in configuration list when selecting something
+        /// </summary>
+        protected int m_configPosition;
+
+        /// <summary>
+        /// Position we are in the diff
+        /// </summary>
+        protected int m_diffPosition = 0;
+
+        /// <summary>
+        /// A local Differ object
+        /// </summary>
+        protected Differ m_differ = null;
+
+        /// <summary>
+        /// Use this to store number when we've got ALT down - to select a new BufferView
+        /// </summary>
+        protected string m_gotoBufferView = "";
+
+        /// <summary>
+        /// If we're in the Configuration state then look at this variable
+        /// </summary>
+        protected bool m_editConfigurationItem = false;
+
+        /// <summary>
+        /// The new value of the configuration item
+        /// </summary>
+        protected string m_editConfigurationItemValue;
+
+        /// <summary>
+        /// The index of the last directory we went into so we can save it
+        /// </summary>
+        protected int m_lastHighlightIndex = 0;
+
+        /// <summary>
+        /// Model builder realises a model from a tree
+        /// </summary>
+        protected ModelBuilder m_modelBuilder;
+
+        /// Goto line string holder
+        /// </summary>
+        protected string m_gotoLine = "";
+
+        /// <summary>
+        /// List of files that need writing
+        /// </summary>
+        protected List<FileBuffer> m_filesToWrite;
+
+        /// <summary>
+        /// File selected in Open state - to be opened
+        /// </summary>
+        protected string m_selectedFile;
+
+        /// <summary>
+        /// Read only status of file to be opened (m_selectedFile)
+        /// </summary>
+        protected bool m_fileIsReadOnly = false;
+
+        /// <summary>
+        /// Tailing status of file to be opened (m_selectedFile)
+        /// </summary>
+        protected bool m_fileIsTailing = false;
+
+        /// <summary>
+        /// Exit after save as
+        /// </summary>
+        protected bool m_saveAsExit = false;
+
+        /// <summary>
+        /// Flag used to confirm quit
+        /// </summary>
+        protected bool m_confirmQuit = false;
+
+        /// <summary>
+        /// View for the Standard Output of a build command
+        /// </summary>
+        protected BufferView m_buildStdOutView;
+
+        /// <summary>
+        /// View for the Standard Error of a build command
+        /// </summary>
+        protected BufferView m_buildStdErrView;
+
+        /// <summary>
+        /// Process for running builds
+        /// </summary>
+        protected Process m_buildProcess = null;
+
+        /// <summary>
+        /// Turn on and off file save confirmation
+        /// </summary>
+        protected bool m_confirmFileSave = false;
+
+        /// <summary>
+        /// Used to hold initial fractional value of a target font size when changing font sizes
+        /// </summary>
+        protected double m_fontScaleOriginal;
+
+        /// <summary>
+        /// Holds current font scale whilst scaling current BufferView
+        /// </summary>
+        protected double m_currentFontScale;
+
+        /// <summary>
+        /// A variable we use to store our save filename as we edit it (we have no forms)
+        /// </summary>
+        protected string m_saveFileName;
+
+        /// <summary>
+        /// Text information screen y offset for page up and page down purposes
+        /// </summary>
+        protected int m_textScreenPositionY = 0;
+
+        /// <summary>
+        /// Generate a tree from a Friendlier structure
+        /// </summary>
+        protected TreeBuilder m_treeBuilder = new TreeBuilder();
+
+        /// <summary>
+        /// The position where the project model will be viewable
+        /// </summary>
+        protected Vector3 m_projectPosition = Vector3.Zero;
+
+        /// <summary>
+        /// Smarthelp worker - this is the same reference as that from XygloXNA
+        /// </summary>
+        protected SmartHelpWorker m_smartHelpWorker;
     }
 }

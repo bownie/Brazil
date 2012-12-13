@@ -100,6 +100,23 @@ namespace Xyglo.Brazil.Xna
         protected ScreenPosition m_screenPosition;
     }
 
+    /// <summary>
+    /// Take a gametime with an event
+    /// </summary>
+    public class CleanExitEventArgs : System.EventArgs
+    {
+        public CleanExitEventArgs(GameTime gameTime, bool forceExit = false)
+        {
+            m_gameTime = gameTime;
+            m_forceExit = forceExit;
+        }
+
+        public GameTime getGameTime() { return m_gameTime; }
+        public bool getForceExit() { return m_forceExit; }
+
+        protected GameTime m_gameTime;
+        protected bool m_forceExit = false;
+    }
 
     // Declare some delegates
     //
@@ -108,6 +125,6 @@ namespace Xyglo.Brazil.Xna
     public delegate void BufferViewChangeEventHandler(object sender, BufferViewEventArgs e);
     public delegate void EyeChangeEventHandler(object sender, PositionEventArgs eye, PositionEventArgs target);
     public delegate void NewBufferViewEventHandler(object sender, NewBufferViewEventArgs e);
-
+    public delegate void CleanExitEventHandler(object sender, CleanExitEventArgs e);
 
 }

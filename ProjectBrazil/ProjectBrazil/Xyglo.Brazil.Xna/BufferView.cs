@@ -145,7 +145,7 @@ namespace Xyglo.Brazil.Xna
         /// Background colour for this bufferview
         /// </summary>
         [DataMember]
-        protected Color m_backgroundColour = Color.Black;  //new Color(0, 191, 255, 10);//Color.DeepSkyBlue;
+        protected Color m_backgroundColour = new Color(180, 180, 180); //Color.DeepSkyBlue;
 
         /// <summary>
         /// Store the search text per BufferView
@@ -284,16 +284,6 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         public void setDefaults()
         {
-            /*
-            if (m_backgroundColour == null || m_backgroundColour == Color.Black)
-            {
-                m_backgroundColour = new Color(0, 191, 255, 190);//Color.DeepSkyBlue;
-            }
-
-            m_backgroundColour = Color.Black;
-            */
-
-
             if (m_searchText == null)
             {
                 m_searchText = "";
@@ -2518,9 +2508,19 @@ namespace Xyglo.Brazil.Xna
         /// Background colour
         /// </summary>
         /// <returns></returns>
-        public Color getBackgroundColour()
+        public Color getBackgroundColour(GameTime gameTime)
         {
-            return m_backgroundColour;
+            double nowTime = gameTime.TotalGameTime.TotalSeconds;
+            //Logger.logMsg("START TIME = " + m_startFlashTime);
+            if (nowTime > m_startFlashTime && nowTime < m_endFlashTime)
+            {
+                float alphaFlash = m_minAlpha + 0.8f * (float)((nowTime - m_startFlashTime) / (m_endFlashTime - m_startFlashTime));
+                return ColourScheme.getFlashColour() * alphaFlash;
+            }
+            else
+            {
+                return m_backgroundColour * m_minAlpha;
+            }
         }
 
         /// <summary>

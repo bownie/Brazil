@@ -26,23 +26,6 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
-        /// XygloMouse constructor
-        /// </summary>
-        /// <param name="project"></param>
-        /// <param name="projectionMatrix"></param>
-        /// <param name="viewMatrix"></param>
-        //public XygloMouse(Project project, Matrix projectionMatrix, Matrix viewMatrix, BoundingFrustum frustrum, FileSystemView fileSystemView, FontManager fontManager, GraphicsDeviceManager graphics)
-        //{
-            //m_project = project;
-            //m_projection = projectionMatrix;
-            //m_viewMatrix = viewMatrix;
-            //m_frustrum = frustrum;
-            //m_fileSystemView = fileSystemView;
-            //m_fontManager = fontManager;
-            //m_graphics = graphics;
-        //}
-
-        /// <summary>
         /// Get a list of mouse actions since the last time we had a mouse action - create an
         /// event based interface for the mouse.
         /// </summary>
@@ -68,47 +51,6 @@ namespace Xyglo.Brazil.Xna
                 lMA.Add(mouseAction);
             }
 
-            // If nothing has changed then at least update the positional information
-            //
-            /*
-            if (lMA.Count == 0)
-            {
-                // No mouse action but we might have movement
-                //
-                MouseAction mouseAction = new MouseAction();
-                if (mouseState.X != m_lastMouseState.X)
-                {
-                    mouseAction.m_position.X = mouseState.X;
-                }
-
-                if (mouseState.Y != m_lastMouseState.Y)
-                {
-                    mouseAction.m_position.Y = mouseState.Y;
-                }
-
-                if (mouseState.ScrollWheelValue != m_lastMouseState.ScrollWheelValue)
-                {
-                    mouseAction.m_scrollWheel = mouseState.ScrollWheelValue;
-                }
-                lMA.Add(mouseAction);
-            }
-            */
-
-            /*
-            // Now get the inverse state
-            //
-            foreach (Mouse lastMouse in lastMouseList)
-            {
-                if (!currentMouseList.Contains(lastMouse))
-                {
-                    MouseAction mouseAction = new MouseAction(lastMouse);
-                    mouseAction.m_position.X = mouseState.X;
-                    mouseAction.m_position.Y = mouseState.Y;
-                    mouseAction.m_scrollWheel = mouseState.ScrollWheelValue;
-                    lMA.Add(mouseAction);
-                }
-            }*/
-
             return lMA;
         }
 
@@ -117,8 +59,9 @@ namespace Xyglo.Brazil.Xna
         /// helper methods.
         /// </summary>
         /// <param name="gameTime"></param>
-        public void checkMouse(GameTime gameTime, XygloKeyboard keyboard, Vector3 eye, Vector3 target)
+        public void checkMouse(Game game, GameTime gameTime, XygloKeyboard keyboard, Vector3 eye, Vector3 target)
         {
+            
             // Fetch all the mouse actions too
             //
             List<MouseAction> mouseActionList = getAllMouseActions();
@@ -130,7 +73,7 @@ namespace Xyglo.Brazil.Xna
 
             // If our main XNA window is inactive then ignore mouse clicks
             //
-            //if (IsActive == false) return;
+            if (game.IsActive == false) return;
 
             // If we are flying somewhere then ignore mouse clicks
             //
@@ -666,7 +609,7 @@ namespace Xyglo.Brazil.Xna
             //
             Pair <BufferView, ScreenPosition> bS = getBufferViewIntersection();
 
-            if (bS.First == m_context.m_project.getSelectedBufferView() && (bS.Second.X != -1 || bS.Second.Y != -1))
+            if (bS.First == m_context.m_project.getSelectedBufferView() && bS.Second.X != -1 && bS.Second.Y != -1 && bS.Second.Y < m_context.m_project.getSelectedBufferView().getFileBuffer().getLineCount())
             {
                 ScreenPosition sP = bS.Second;
                 string line = m_context.m_project.getSelectedBufferView().getFileBuffer().getLine(bS.Second.Y);
@@ -1168,7 +1111,6 @@ namespace Xyglo.Brazil.Xna
                     // Set wait default
                     //
                     System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.IBeam;
-
                     Logger.logMsg("XygloXNA::handleDiffPick() - diff pick took " + sw.ElapsedMilliseconds + " ms to run");
                 }
                 else

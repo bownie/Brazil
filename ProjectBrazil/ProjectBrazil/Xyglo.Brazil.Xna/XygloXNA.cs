@@ -25,364 +25,6 @@ namespace Xyglo.Brazil.Xna
     /// </summary>
     public class XygloXNA : Game, IBrazilApp
     {
-        ///////////////// MEMBER VARIABLES //////////////////
-        /// <summary>
-        /// Eye/Camera location
-        /// </summary>
-        protected Vector3 m_eye = new Vector3(0f, 0f, 500f);  // 275 is good
-
-        /// <summary>
-        /// Camera target
-        /// </summary>
-        protected Vector3 m_target;
-
-        /// <summary>
-        /// A local Differ object
-        /// </summary>
-        protected Differ m_differ = null;
-
-        /// <summary>
-        /// Interloper object - our game 
-        /// </summary>
-        protected BrazilInterloper m_interloper = null;
-
-        /// <summary>
-        /// Position we are in the diff
-        /// </summary>
-        protected int m_diffPosition = 0;
-
-        /// <summary>
-        /// Use this to store number when we've got ALT down - to select a new BufferView
-        /// </summary>
-        protected string m_gotoBufferView = "";
-
-        /// <summary>
-        /// The position where the project model will be viewable
-        /// </summary>
-        protected Vector3 m_projectPosition = Vector3.Zero;
-
-        /// <summary>
-        /// Goto line string holder
-        /// </summary>
-        protected string m_gotoLine = "";
-
-        /// <summary>
-        /// Flag used to confirm quit
-        /// </summary>
-        protected bool m_confirmQuit = false;
-
-        /// <summary>
-        /// The index of the last directory we went into so we can save it
-        /// </summary>
-        protected int m_lastHighlightIndex = 0;
-
-        /// <summary>
-        /// Turn on and off file save confirmation
-        /// </summary>
-        protected bool m_confirmFileSave = false;
-
-        /// <summary>
-        /// Confirmation state - expecting Y/N
-        /// </summary>
-        //public ConfirmState m_brazilContext.m_confirmState = ConfirmState.Test("None");
-
-        /// <summary>
-        /// We can use this to communicate something to the user about the last command
-        /// </summary>
-        protected string m_temporaryMessage = "";
-
-        /// <summary>
-        /// Start time for the temporary message
-        /// </summary>
-        protected double m_temporaryMessageStartTime;
-
-        /// <summary>
-        /// End time for the temporary message
-        /// </summary>
-        protected double m_temporaryMessageEndTime;
-
-        /// <summary>
-        /// Used when displaying licence messages
-        /// </summary>
-        private bool m_flipFlop = true;
-
-        /// <summary>
-        /// Something to do with licence messages
-        /// </summary>
-        private double m_nextLicenceMessage = 0.0f;
-
-        /// <summary>
-        /// File system watcher
-        /// </summary>
-        protected List<FileSystemWatcher> m_watcherList = new List<FileSystemWatcher>();
-
-        /// <summary>
-        /// Position in which we should open or create a new screen
-        /// </summary>
-        protected BufferView.ViewPosition m_newPosition;
-
-        /// <summary>
-        /// Store the last performance counter for CPU
-        /// </summary>
-        protected CounterSample m_lastCPUSample;
-
-        /// <summary>
-        /// Store the last performance counter for CPU
-        /// </summary>
-        protected CounterSample m_lastMemSample;
-
-        /// <summary>
-        /// Number of milliseconds between system status fetches
-        /// </summary>
-        protected TimeSpan m_systemFetchSpan = new TimeSpan(0, 0, 0, 1, 0);
-
-        /// <summary>
-        /// When we last fetched the system status
-        /// </summary>
-        protected TimeSpan m_lastSystemFetch = new TimeSpan(0, 0, 0, 0, 0);
-
-        /// <summary>
-        /// Percentage of system load
-        /// </summary>
-        protected float m_systemLoad = 0.0f;
-
-        /// <summary>
-        /// Percentage of system load
-        /// </summary>
-        protected float m_memoryAvailable = 0.0f;
-
-        /// <summary>
-        /// Physical Memory 
-        /// </summary>
-        protected float m_physicalMemory;
-
-        /// <summary>
-        /// List of files that need writing
-        /// </summary>
-        protected List<FileBuffer> m_filesToWrite;
-
-        /// <summary>
-        /// File selected in Open state - to be opened
-        /// </summary>
-        protected string m_selectedFile;
-
-        /// <summary>
-        /// Read only status of file to be opened (m_selectedFile)
-        /// </summary>
-        protected bool m_fileIsReadOnly = false;
-
-        /// <summary>
-        /// Tailing status of file to be opened (m_selectedFile)
-        /// </summary>
-        protected bool m_fileIsTailing = false;
-
-        /// <summary>
-        /// The new destination for our Eye position
-        /// </summary>
-        protected Vector3 m_newEyePosition;
-
-        /// <summary>
-        /// Original eye position - we know where we came from
-        /// </summary>
-        protected Vector3 m_originalEyePosition;
-
-        /// <summary>
-        /// Eye acceleration vector
-        /// </summary>
-        protected Vector3 m_eyeAcc = Vector3.Zero;
-
-        /// <summary>
-        /// Eye velocity vector
-        /// </summary>
-        protected Vector3 m_eyeVely = Vector3.Zero;
-
-        /// <summary>
-        /// Used to hold initial fractional value of a target font size when changing font sizes
-        /// </summary>
-        protected double m_fontScaleOriginal;
-
-        /// <summary>
-        /// Holds current font scale whilst scaling current BufferView
-        /// </summary>
-        protected double m_currentFontScale;
-
-        /// <summary>
-        /// Are we changing eye position?
-        /// </summary>
-        protected bool m_changingEyePosition = false;
-
-        /// <summary>
-        /// Used when changing the eye position - movement timer
-        /// </summary>
-        protected TimeSpan m_changingPositionLastGameTime;
-
-        /// <summary>
-        /// Frame rate of animation when moving between eye positions
-        /// </summary>
-        protected TimeSpan m_movementPause = new TimeSpan(0, 0, 0, 0, 10);
-
-        /// <summary>
-        /// This is the vector we're flying in - used to increment position each frame when
-        /// moving between eye positions.
-        /// </summary>
-        protected Vector3 m_vFly;
-
-        /// <summary>
-        /// If our target position is not centred below our eye then we also have a vector here we need to
-        /// modify.
-        /// </summary>
-        protected Vector3 m_vFlyTarget;
-
-        /// <summary>
-        /// How many steps between eye start and eye end fly position
-        /// </summary>
-        protected int m_flySteps = 10;
-
-        /// <summary>
-        /// A variable we use to store our save filename as we edit it (we have no forms)
-        /// </summary>
-        protected string m_saveFileName;
-
-        /// <summary>
-        /// Position in configuration list when selecting something
-        /// </summary>
-        protected int m_configPosition;
-
-        /// <summary>
-        /// Item colour for a list of things
-        /// </summary>
-        protected Color m_itemColour = Color.DarkOrange;
-
-        /// <summary>
-        /// Highlight color for an element in a list
-        /// </summary>
-        protected Color m_highlightColour = Color.LightGreen;
-
-        /// <summary>
-        /// If we're in the Configuration state then look at this variable
-        /// </summary>
-        protected bool m_editConfigurationItem = false;
-
-        /// <summary>
-        /// The new value of the configuration item
-        /// </summary>
-        protected string m_editConfigurationItemValue;
-
-        /// <summary>
-        /// Worker thread for the PerformanceCounters
-        /// </summary>
-        protected PerformanceWorker m_counterWorker;
-
-        /// <summary>
-        /// The thread that is used for the counter
-        /// </summary>
-        protected Thread m_counterWorkerThread;
-
-        /// <summary>
-        /// SmartHelp worker thread
-        /// </summary>
-        protected SmartHelpWorker m_smartHelpWorker;
-
-        /// <summary>
-        /// The thread that is used for the counter
-        /// </summary>
-        protected Thread m_smartHelpWorkerThread;
-
-        /// <summary>
-        /// Worker thread for the Kinect management
-        /// </summary>
-        protected KinectWorker m_kinectWorker;
-
-        /// <summary>
-        /// The thread that is used for Kinect
-        /// </summary>
-        protected Thread m_kinectWorkerThread;
-
-        /// <summary>
-        /// View for the Standard Output of a build command
-        /// </summary>
-        protected BufferView m_buildStdOutView;
-
-        /// <summary>
-        /// View for the Standard Error of a build command
-        /// </summary>
-        protected BufferView m_buildStdErrView;
-
-        /// <summary>
-        /// Process for running builds
-        /// </summary>
-        protected Process m_buildProcess = null;
-
-        /// <summary>
-        /// Exit after save as
-        /// </summary>
-        protected bool m_saveAsExit = false;
-
-        /// <summary>
-        /// Generate a tree from a Friendlier structure
-        /// </summary>
-        protected TreeBuilder m_treeBuilder = new TreeBuilder();
-
-        /// <summary>
-        /// Model builder realises a model from a tree
-        /// </summary>
-        protected ModelBuilder m_modelBuilder;
-
-        /// <summary>
-        /// Text information screen y offset for page up and page down purposes
-        /// </summary>
-        protected int m_textScreenPositionY = 0;
-
-        /// <summary>
-        /// Length of information screen - so we know if we can page up or down
-        /// </summary>
-        protected int m_textScreenLength = 0;
-
-        /// <summary>
-        /// Testing whether arrived in bounding sphere
-        /// </summary>
-        protected BoundingSphere m_testArrived = new BoundingSphere();
-
-        /// <summary>
-        /// Test result
-        /// </summary>
-        protected ContainmentType m_testResult;
-
-        /// <summary>
-        /// Store the last window size in case we're resizing
-        /// </summary>
-        protected Vector2 m_lastWindowSize = Vector2.Zero;
-
-        /// <summary>
-        /// FrameCounter for counting frames
-        /// </summary>
-        protected FrameCounter m_frameCounter = new FrameCounter();
-
-        /// <summary>
-        /// Context holds our graphics and state context
-        /// </summary>
-        protected XygloContext m_context;
-
-        /// <summary>
-        /// The BrazilContext
-        /// </summary>
-        protected BrazilContext m_brazilContext;
-
-        /// <summary>
-        /// Holds our mouse handling code
-        /// </summary>
-        protected XygloMouse m_mouse;
-
-        /// <summary>
-        /// Keyboard handling code
-        /// </summary>
-        protected XygloKeyboard m_keyboard;
-
-        /// <summary>
-        /// XygloGraphics helper
-        /// </summary>
-        protected XygloGraphics m_graphics;
-
         /////////////////////////////// CONSTRUCTORS ////////////////////////////
         /// <summary>
         /// Default constructor
@@ -406,17 +48,26 @@ namespace Xyglo.Brazil.Xna
             //
             m_mouse = new XygloMouse(m_context, m_brazilContext);
 
-            // Link signal up to the handler
+            // Link signals up to the handlers
             //
             m_mouse.ChangePositionEvent += new PositionChangeEventHandler(handleFlyToPosition);
             m_mouse.BufferViewChangeEvent += new BufferViewChangeEventHandler(handleBufferViewChange);
             m_mouse.EyeChangeEvent += new EyeChangeEventHandler(handleEyeChange);
             m_mouse.NewBufferViewEvent += new NewBufferViewEventHandler(handleNewBufferView);
+            m_mouse.TemporaryMessageEvent += new TemporaryMessageEventHandler(handleTemporaryMessage);
 
-            // Keyboard handler
+            // Keyboard wrapper class
             //
             m_keyboard = new XygloKeyboard(m_context, world.getKeyAutoRepeatHoldTime(), world.getKeyAutoRepeatInterval());
 
+            // Keyboard handling class - performs interpretation of the key commands into
+            // whatever we want to do.
+            //
+            m_keyboardHandler = new XygloKeyboardHandler(m_context, m_brazilContext, m_graphics, m_keyboard);
+            m_keyboardHandler.TemporaryMessageEvent += new TemporaryMessageEventHandler(handleTemporaryMessage);
+            m_keyboardHandler.BufferViewChangeEvent += new BufferViewChangeEventHandler(handleBufferViewChange);
+            m_keyboardHandler.ChangePositionEvent += new PositionChangeEventHandler(handleFlyToPosition);
+            m_keyboardHandler.CleanExitEvent += new CleanExitEventHandler(handleCleanExit);
             // FontManager
             //
             m_context.m_fontManager = new FontManager();
@@ -430,58 +81,7 @@ namespace Xyglo.Brazil.Xna
             initialise();
         }
 
-        /// <summary>
-        /// Construct with Project and ActionMap (reference)
-        /// </summary>
-        /// <param name="project"></param>
-        /// <param name="actionMap"></param>
-        public XygloXNA(ActionMap actionMap, Project project, List<Component> componentList, BrazilWorld world, List<State> states, List<Target> targets)
-        {
-            // Setup context and handlers
-            //
-            m_context = new XygloContext();
-
-            // Store project and actionmap
-            //
-            m_context.m_project = project;
-            m_context.m_componentList = componentList;
-
-            // Setup BrazilContext
-            //
-            m_brazilContext = new BrazilContext();
-            m_brazilContext.m_actionMap = actionMap;
-            m_brazilContext.m_world = world;
-            m_brazilContext.m_states = states;
-            m_brazilContext.m_targets = targets;
-
-            // Setup the XygloMouse
-            //
-            m_mouse = new XygloMouse(m_context, m_brazilContext);
-
-            // Link signal up to the handler
-            //
-            m_mouse.ChangePositionEvent += new PositionChangeEventHandler(handleFlyToPosition);
-            m_mouse.BufferViewChangeEvent += new BufferViewChangeEventHandler(handleBufferViewChange);
-            m_mouse.EyeChangeEvent += new EyeChangeEventHandler(handleEyeChange);
-            m_mouse.NewBufferViewEvent += new NewBufferViewEventHandler(handleNewBufferView);
-
-            // Keyboard handler
-            //
-            m_keyboard = new XygloKeyboard(m_context, world.getKeyAutoRepeatHoldTime(), world.getKeyAutoRepeatInterval());
-
-            // FontManager
-            //
-            m_context.m_fontManager = new FontManager();
-
-            // Graphics helper
-            //
-            m_graphics = new XygloGraphics(m_context);
-
-            // init
-            initialise();
-        }
-
-        /////////////////////////////// METHODS //////////////////////////////////////
+         /////////////////////////////// METHODS //////////////////////////////////////
         /// <summary>
         /// Set the project
         /// </summary>
@@ -489,6 +89,10 @@ namespace Xyglo.Brazil.Xna
         public void setProject(Project project)
         {
             m_context.m_project = project;
+
+            // Reset windowed mode
+            //
+            m_graphics.windowedMode(this);
         }
 
         /// <summary>
@@ -692,37 +296,7 @@ namespace Xyglo.Brazil.Xna
 
             // Tree builder and model builder
             //
-            generateTreeModel();
-        }
-
-        /// <summary>
-        /// Generate a model from the Project
-        /// </summary>
-        private void generateTreeModel()
-        {
-            Logger.logMsg("XygloXNA::generateTreeModel() - starting");
-            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-            sw.Start();
-
-            // Firstly get a root directory for the FileBuffer tree
-            //
-            string fileRoot = m_context.m_project.getFileBufferRoot();
-
-            TreeBuilderGraph rG = m_treeBuilder.buildTreeFromFiles(fileRoot, m_context.m_project.getNonNullFileBuffers());
-
-            // Build a model and store it if we don't have one
-            //
-            if (m_modelBuilder == null)
-            {
-                m_modelBuilder = new ModelBuilder();
-            }
-
-            // Rebuild it in a given position
-            //
-            m_modelBuilder.build(rG, m_projectPosition);
-
-            sw.Stop();
-            Logger.logMsg("XygloXNA::generateTreeModel() - completed in " + sw.ElapsedMilliseconds + " ms");
+            m_keyboardHandler.generateTreeModel();
         }
 
         /// <summary>
@@ -941,6 +515,11 @@ namespace Xyglo.Brazil.Xna
                 initialiseProject();
             }
 
+            // Send the smart help worker to the keyboard handler so it
+            // can call for updates.
+            //
+            m_keyboardHandler.setSmartHelpWorker(m_smartHelpWorker);
+
             // Make mouse invisible
             //
             IsMouseVisible = true;
@@ -1152,225 +731,6 @@ namespace Xyglo.Brazil.Xna
             //this.Window.Title = "Friendlier v" + VersionInformation.getProductVersion() + " - " + m_context.m_project.getSelectedBufferView().getFileBuffer().getShortFileName();
         }
 
-        // Set up the file save mode
-        //
-        protected void selectSaveFile()
-        {
-            // Enter this mode and clear and existing message
-            //
-            m_brazilContext.m_state = State.Test("FileSaveAs");
-            m_temporaryMessage = "";
-
-            // Clear the filename
-            //
-            m_saveFileName = "";
-        }
-
-        /// <summary>
-        /// Got to the FileOpen mode in the overall application state.  This will zoom out from the
-        /// bufferview and grey it out and allow us to select a file
-        /// </summary>
-        protected void selectOpenFile()
-        {
-            // Enter this mode and clear and existing message
-            //
-            m_brazilContext.m_state = State.Test("FileOpen");
-            m_temporaryMessage = "";
-        }
-
-        /// <summary>
-        /// Switch to the Configuration mode
-        /// </summary>
-        protected void showConfigurationScreen()
-        {
-            m_brazilContext.m_state = State.Test("Configuration");
-            m_temporaryMessage = "";
-        }
-
-        /// <summary>
-        /// Close the active buffer view
-        /// </summary>
-        protected void closeActiveBuffer(GameTime gameTime)
-        {
-            if (m_context.m_project.getBufferViews().Count > 1)
-            {
-                int index = m_context.m_project.getBufferViews().IndexOf(m_context.m_project.getSelectedBufferView());
-                m_context.m_project.removeBufferView(m_context.m_project.getSelectedBufferView());
-
-                // Ensure that the index is not greater than number of bufferviews
-                //
-                if (index > m_context.m_project.getBufferViews().Count - 1)
-                {
-                    index = m_context.m_project.getBufferViews().Count - 1;
-                }
-
-                //m_context.m_project.setSelectedBufferViewId(index);
-
-                setActiveBuffer(index);
-
-                setTemporaryMessage("Removed BufferView.", 2, gameTime);
-            }
-            else
-            {
-                setTemporaryMessage("Can't remove the last BufferView.", 2, gameTime);
-            }
-        }
-
-        /// <summary>
-        /// Traverse a directory and allow opening/saving at that point according to state
-        /// </summary>
-        protected void traverseDirectory(GameTime gameTime, bool readOnly = false, bool tailFile = false)
-        {
-            //string fileToOpen = m_fileSystemView.getHighlightedFile();
-            if (m_context.m_fileSystemView.atDriveLevel())
-            {
-                // First extract the drive letter and set the path
-                //
-                m_context.m_fileSystemView.setHighlightedDrive();
-            }
-
-            // If we're not at the root directory
-            //
-            if (m_context.m_fileSystemView.getHighlightIndex() > 0)
-            {
-                string subDirectory = "";
-
-                // Set the directory to the sub directory and reset the highlighter
-                //
-                try
-                {
-                    if (m_context.m_fileSystemView.getHighlightIndex() - 1 < m_context.m_fileSystemView.getDirectoryInfo().GetDirectories().Length)
-                    {
-                        // Set error directory in case of failure to test access
-                        //
-                        DirectoryInfo directoryToAccess = m_context.m_fileSystemView.getDirectoryInfo().GetDirectories()[m_context.m_fileSystemView.getHighlightIndex() - 1];
-                        subDirectory = directoryToAccess.Name;
-
-                        // Test access
-                        //
-                        DirectoryInfo[] testAccess = directoryToAccess.GetDirectories();
-
-
-                        FileInfo[] testFiles = directoryToAccess.GetFiles();
-
-                        m_context.m_fileSystemView.setDirectory(directoryToAccess.FullName);
-                        m_context.m_fileSystemView.setHighlightIndex(0);
-                        m_lastHighlightIndex = m_context.m_fileSystemView.getHighlightIndex();
-                    }
-                    else
-                    {
-                        int fileIndex = m_context.m_fileSystemView.getHighlightIndex() - 1 - m_context.m_fileSystemView.getDirectoryInfo().GetDirectories().Length;
-                        FileInfo fileInfo = m_context.m_fileSystemView.getDirectoryInfo().GetFiles()[fileIndex];
-
-                        Logger.logMsg("Friendler::traverseDirectory() - selected a file " + fileInfo.Name);
-
-                        // Set these values and the status
-                        //
-                        m_fileIsReadOnly = readOnly;
-                        m_fileIsTailing = tailFile;
-                        m_selectedFile = fileInfo.FullName;
-
-                        if (m_brazilContext.m_state.equals("FileOpen"))
-                        {
-                            // Now we need to choose a position for the new file we're opening
-                            //
-                            m_brazilContext.m_state = State.Test("PositionScreenOpen");
-                        }
-                        else if (m_brazilContext.m_state.equals("FileSaveAs"))
-                        {
-                            // Set the FileBuffer path
-                            //
-                            m_context.m_project.getSelectedBufferView().getFileBuffer().setFilepath(m_selectedFile);
-
-                            if (checkFileSave())
-                            {
-                                if (m_filesToWrite != null)
-                                {
-                                    // Check if we need to remove this FileBuffer from the todo list - it's not important if we can't
-                                    // remove it here but we should try to anyway.
-                                    //
-                                    m_filesToWrite.RemoveAt(0);
-                                    Logger.logMsg("XygloXNA::traverseDirectory() - total files left to write is now " + m_filesToWrite.Count);
-
-                                    // If we have finished saving all of our files then we can exit (although we check once again)
-                                    //
-                                    if (m_filesToWrite.Count == 0)
-                                    {
-                                        if (m_saveAsExit == true)
-                                        {
-                                            checkExit(gameTime);
-                                        }
-                                        else
-                                        {
-                                            setActiveBuffer();
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    m_brazilContext.m_state = State.Test("TextEditing");
-                                    setActiveBuffer();
-                                }
-                            }
-                        }
-                    }
-                }
-                catch (Exception)
-                {
-                    setTemporaryMessage("XygloXNA::traverseDirectory() - Cannot access \"" + subDirectory + "\"", 2, gameTime);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Checks to see if we are licenced before saving
-        /// </summary>
-        /// <returns></returns>
-        protected bool checkFileSave()
-        {
-            if (m_context.m_project.getLicenced())
-            {
-                m_context.m_project.getSelectedBufferView().getFileBuffer().save();
-                return true;
-            }
-
-            setTemporaryMessage("Can't save due to licence issue.", 10, m_context.m_gameTime);
-
-            return false;
-        }
-
-
-        /// <summary>
-        /// Completing a File->Save operation
-        /// </summary>
-        /// <param name="gameTime"></param>
-        protected void completeSaveFile(GameTime gameTime)
-        {
-            try
-            {
-                checkFileSave();
-
-                if (m_filesToWrite != null && m_filesToWrite.Count > 0)
-                {
-                    m_filesToWrite.RemoveAt(0);
-                    Logger.logMsg("XygloXNA::completeSaveFile() - files remaining to be written " + m_filesToWrite.Count);
-                }
-
-                Vector3 newPosition = m_eye;
-                newPosition.Z = 500.0f;
-
-                flyToPosition(newPosition);
-                m_brazilContext.m_state = State.Test("TextEditing");
-
-                setTemporaryMessage("Saved.", 2, gameTime);
-            }
-            catch (Exception)
-            {
-                setTemporaryMessage("Failed to save to " + m_context.m_project.getSelectedBufferView().getFileBuffer().getFilepath(), 2, gameTime);
-            }
-        }
-
-
         /// <summary>
         /// Exit but ensuring that buffers are saved
         /// </summary>
@@ -1392,7 +752,7 @@ namespace Xyglo.Brazil.Xna
 
             // Only check BufferViews status if we're not forcing an exit
             //
-            if (!force && m_saveAsExit == false && m_context.m_project.getConfigurationValue("CONFIRMQUIT").ToUpper() == "TRUE")
+            if (!force && m_keyboardHandler.getSaveAsExit() == false && m_context.m_project.getConfigurationValue("CONFIRMQUIT").ToUpper() == "TRUE")
             {
                 if (m_brazilContext.m_confirmState.notEquals("ConfirmQuit"))
                 {
@@ -1400,10 +760,8 @@ namespace Xyglo.Brazil.Xna
                     m_brazilContext.m_confirmState.set("ConfirmQuit");
                 }
 
-                if (m_confirmQuit == false)
-                {
+                if (m_keyboardHandler.getConfirmQuit() == false)
                     return;
-                }
             }
 
             // Check for unsaved like this
@@ -1427,7 +785,7 @@ namespace Xyglo.Brazil.Xna
                 {
                     setTemporaryMessage("Unsaved Buffers.  Save?  Y/N/C", 0, gameTime);
                     m_brazilContext.m_confirmState.set("FileSaveCancel");
-                    m_saveAsExit = true;
+                    m_keyboardHandler.setSaveAsExit(true);
                     m_brazilContext.m_state = State.Test("FileSaveAs");
                 }
             }
@@ -1536,15 +894,16 @@ namespace Xyglo.Brazil.Xna
                         setTemporaryMessage("Cancelled quit.", 0.5, gameTime);
                         m_brazilContext.m_confirmState.set("None");
                         m_brazilContext.m_state = State.Test("TextEditing");
-                        m_saveAsExit = false;
-                        m_filesToWrite = null;
+                        m_keyboardHandler.setSaveAsExit(false);
+                        //m_filesToWrite = null;
+                        m_keyboardHandler.setFilesToWrite(null);
                         break;
 
                     case "ManageProject":
                         newPosition = m_context.m_project.getSelectedBufferView().getLookPosition();
                         newPosition.Z = 500.0f;
                         m_brazilContext.m_state = State.Test("TextEditing");
-                        m_editConfigurationItem = false;
+                        m_keyboardHandler.setEditConfigurationItem(false);
                         break;
 
                     case "DiffPicker":
@@ -1553,8 +912,8 @@ namespace Xyglo.Brazil.Xna
                         // Before we clear the differ we want to translate the current viewed differ
                         // position back to the Bufferviews we originally generated them from.
                         //
-                        BufferView bv1 = m_differ.getSourceBufferViewLhs();
-                        BufferView bv2 = m_differ.getSourceBufferViewRhs();
+                        BufferView bv1 = m_keyboardHandler.getDiffer().getSourceBufferViewLhs();
+                        BufferView bv2 = m_keyboardHandler.getDiffer().getSourceBufferViewRhs();
 
 
                         // Ensure that these are valid
@@ -1562,17 +921,17 @@ namespace Xyglo.Brazil.Xna
                         if (bv1 != null && bv2 != null)
                         {
 
-                            bv1.setBufferShowStartY(m_differ.diffPositionLhsToOriginalPosition(m_diffPosition));
-                            bv2.setBufferShowStartY(m_differ.diffPositionRhsToOriginalPosition(m_diffPosition));
+                            bv1.setBufferShowStartY(m_keyboardHandler.getDiffer().diffPositionLhsToOriginalPosition(m_keyboardHandler.getDiffPosition()));
+                            bv2.setBufferShowStartY(m_keyboardHandler.getDiffer().diffPositionRhsToOriginalPosition(m_keyboardHandler.getDiffPosition()));
 
                             ScreenPosition sp1 = new ScreenPosition();
                             ScreenPosition sp2 = new ScreenPosition();
 
                             sp1.X = 0;
-                            sp1.Y = m_differ.diffPositionLhsToOriginalPosition(m_diffPosition);
+                            sp1.Y = m_keyboardHandler.getDiffer().diffPositionLhsToOriginalPosition(m_keyboardHandler.getDiffPosition());
 
                             sp2.X = 0;
-                            sp2.Y = m_differ.diffPositionRhsToOriginalPosition(m_diffPosition);
+                            sp2.Y = m_keyboardHandler.getDiffer().diffPositionRhsToOriginalPosition(m_keyboardHandler.getDiffPosition());
 
                             // Limit Y in case it overruns file length
                             //
@@ -1591,23 +950,23 @@ namespace Xyglo.Brazil.Xna
 
                         // Clear the differ object if it exists
                         //
-                        if (m_differ != null)
+                        if (m_keyboardHandler.getDiffer() != null)
                         {
-                            m_differ.clear();
+                            m_keyboardHandler.getDiffer().clear();
                         }
                         break;
 
                     // Two stage exit from the Configuration edit
                     //
                     case "Configuration":
-                        if (m_editConfigurationItem == true)
+                        if (m_keyboardHandler.getEditConfigurationItem() == true)
                         {
-                            m_editConfigurationItem = false;
+                            m_keyboardHandler.setEditConfigurationItem(false);
                         }
                         else
                         {
                             m_brazilContext.m_state = State.Test("TextEditing");
-                            m_editConfigurationItem = false;
+                            m_keyboardHandler.setEditConfigurationItem(false);
                         }
                         break;
 
@@ -1619,7 +978,7 @@ namespace Xyglo.Brazil.Xna
                     case "SplashScreen":
                     case "Help":
                         m_brazilContext.m_state = State.Test("TextEditing");
-                        m_editConfigurationItem = false;
+                        m_keyboardHandler.setEditConfigurationItem(false);
                         break;
 
                     // These are PAULO states
@@ -1651,28 +1010,22 @@ namespace Xyglo.Brazil.Xna
             {
                 if (keyList.Contains(Keys.PageDown))
                 {
-                    if (m_textScreenPositionY + m_context.m_project.getSelectedBufferView().getBufferShowLength() < m_textScreenLength)
-                    {
-                        m_textScreenPositionY += m_context.m_project.getSelectedBufferView().getBufferShowLength();
-                    }
+                    m_keyboardHandler.textScreenPageDown(m_textScreenLength);
                 }
                 else if (keyList.Contains(Keys.PageUp))
                 {
-                    if (m_textScreenPositionY > 0)
-                    {
-                        m_textScreenPositionY = m_textScreenPositionY - Math.Min(m_context.m_project.getSelectedBufferView().getBufferShowLength(), m_textScreenPositionY);
-                    }
+                    m_keyboardHandler.textScreenPageUp();
                 }
                 return true;
             }
 
             // This helps us count through our lists of file to save if we're trying to exit
             //
-            if (m_filesToWrite != null && m_filesToWrite.Count > 0)
+            if (m_keyboardHandler.getFilesToWrite() != null && m_keyboardHandler.getFilesToWrite().Count > 0)
             {
-                m_context.m_project.setSelectedBufferView(m_filesToWrite[0]);
+                m_context.m_project.setSelectedBufferView(m_keyboardHandler.getFilesToWrite()[0]);
                 m_eye = m_context.m_project.getSelectedBufferView().getEyePosition();
-                selectSaveFile();
+                m_keyboardHandler.selectSaveFile(gameTime);
             }
 
             // For PositionScreen state we want not handle events here other than direction keys - this section
@@ -1715,7 +1068,7 @@ namespace Xyglo.Brazil.Xna
                     {
                         // Open the file 
                         //
-                        BufferView newBV = addNewFileBuffer(m_selectedFile, m_fileIsReadOnly, m_fileIsTailing);
+                        BufferView newBV = addNewFileBuffer(m_keyboardHandler.getSelectedFile(), m_keyboardHandler.getFileIsReadOnly(), m_keyboardHandler.getFileIsTailing());
                         setActiveBuffer(newBV);
                         m_brazilContext.m_state = State.Test("TextEditing");
                     }
@@ -1741,1259 +1094,6 @@ namespace Xyglo.Brazil.Xna
             }
 
             return false;
-        }
-
-        /// <summary>
-        /// Process action keys for commands
-        /// </summary>
-        /// <param name="gameTime"></param>
-        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
-        protected void processActionKey(GameTime gameTime, KeyAction keyAction)
-        {
-            List<Keys> keyList = new List<Keys>();
-            keyList.Add(keyAction.m_key);
-
-            // Main key handling statement
-            //
-            if (keyList.Contains(Keys.Up))
-            {
-                if (m_brazilContext.m_state.equals("FileSaveAs") || m_brazilContext.m_state.equals("FileOpen"))
-                {
-                    if (m_context.m_fileSystemView.getHighlightIndex() > 0)
-                    {
-                        m_context.m_fileSystemView.incrementHighlightIndex(-1);
-                    }
-                }
-                else if (m_brazilContext.m_state.equals("ManageProject") || (m_brazilContext.m_state.equals("Configuration") && m_editConfigurationItem == false)) // Configuration changes
-                {
-                    if (m_configPosition > 0)
-                    {
-                        m_configPosition--;
-                    }
-                }
-                else if (m_brazilContext.m_state.equals("DiffPicker"))
-                {
-                    if (m_diffPosition > 0)
-                    {
-                        m_diffPosition--;
-                    }
-                }
-                else
-                {
-                    if (m_keyboard.isAltDown() && m_keyboard.isShiftDown()) // Do zoom
-                    {
-                        m_mouse.setZoomLevel(m_context.m_zoomLevel - m_context.m_zoomStep, m_eye);
-                    }
-                    else if (m_keyboard.isAltDown())
-                    {
-                        // Attempt to move right if there's a BufferView there
-                        //
-                        detectMove(BufferView.ViewPosition.Above, gameTime);
-                    }
-                    else
-                    {
-                        ScreenPosition sP = m_context.m_project.getSelectedBufferView().getCursorPosition();
-                        m_context.m_project.getSelectedBufferView().moveCursorUp(m_context.m_project, false, m_keyboard.isShiftDown());
-
-                        if (m_keyboard.isShiftDown())
-                        {
-                            m_context.m_project.getSelectedBufferView().extendHighlight(sP);  // Extend 
-                        }
-                        else
-                        {
-                            m_context.m_project.getSelectedBufferView().noHighlight(); // Disable
-                        }
-                    }
-                }
-            }
-            //else if (keyActionList.Find(item => item.m_key == Keys.Down && item.m_modifier == KeyboardModifier.None).ToString() != "")
-            else if (keyList.Contains(Keys.Down))
-            {
-                if (m_brazilContext.m_state.equals("FileSaveAs") || m_brazilContext.m_state.equals("FileOpen"))
-                {
-                    if (m_context.m_fileSystemView.atDriveLevel())
-                    {
-                        // Drives are highlighted slightly differently to directories as the zero index is 
-                        // counted for drives (1 for directories) hence the adjustment in the RH term
-                        //
-                        if (m_context.m_fileSystemView.getHighlightIndex() < m_context.m_fileSystemView.countActiveDrives() - 1)
-                        {
-                            m_context.m_fileSystemView.incrementHighlightIndex(1);
-                        }
-                    }
-                    else if (m_context.m_fileSystemView.getHighlightIndex() < m_context.m_fileSystemView.getDirectoryLength())
-                    {
-                        m_context.m_fileSystemView.incrementHighlightIndex(1);
-                    }
-                }
-                else if (m_brazilContext.m_state.equals("Configuration") && m_editConfigurationItem == false) // Configuration changes
-                {
-                    if (m_configPosition < m_context.m_project.getConfigurationListLength() - 1)
-                    {
-                        m_configPosition++;
-                    }
-                }
-                else if (m_brazilContext.m_state.equals("ManageProject"))
-                {
-                    if (m_configPosition < m_modelBuilder.getLeafNodesPlaces() - 1)
-                    {
-                        m_configPosition++;
-                    }
-                }
-                else if (m_brazilContext.m_state.equals("DiffPicker"))
-                {
-                    if (m_differ != null && m_diffPosition < m_differ.getMaxDiffLength())
-                    {
-                        m_diffPosition++;
-                    }
-                }
-                else
-                {
-                    if (m_keyboard.isAltDown() && m_keyboard.isShiftDown()) // Do zoom
-                    {
-                        m_context.m_zoomLevel += m_context.m_zoomStep;
-                        setActiveBuffer();
-                    }
-                    else if (m_keyboard.isAltDown())
-                    {
-                        // Attempt to move right if there's a BufferView there
-                        //
-                        detectMove(BufferView.ViewPosition.Below, gameTime);
-                    }
-                    else
-                    {
-                        ScreenPosition sP = m_context.m_project.getSelectedBufferView().getCursorPosition();
-                        m_context.m_project.getSelectedBufferView().moveCursorDown(false, m_keyboard.isShiftDown());
-
-                        if (m_keyboard.isShiftDown())
-                        {
-                            m_context.m_project.getSelectedBufferView().extendHighlight(sP);
-                        }
-                        else
-                        {
-                            m_context.m_project.getSelectedBufferView().noHighlight(); // Disable
-                        }
-                    }
-                }
-            }
-            else if (keyList.Contains(Keys.Left))
-            {
-                if (m_brazilContext.m_state.equals("FileSaveAs") || m_brazilContext.m_state.equals("FileOpen"))
-                {
-                    string parDirectory = "";
-
-                    // Set the directory to the sub directory and reset the highlighter
-                    //
-                    try
-                    {
-                        DirectoryInfo parentTest = m_context.m_fileSystemView.getParent();
-
-                        if (parentTest == null)
-                        {
-                            Logger.logMsg("Check devices");
-                            m_context.m_fileSystemView.setDirectory(null);
-                        }
-                        else
-                        {
-                            parDirectory = m_context.m_fileSystemView.getParent().Name;
-                            DirectoryInfo[] testAccess = m_context.m_fileSystemView.getParent().GetDirectories();
-                            FileInfo[] testFiles = m_context.m_fileSystemView.getParent().GetFiles();
-
-                            m_context.m_fileSystemView.setDirectory(m_context.m_fileSystemView.getParent().FullName);
-                            m_context.m_fileSystemView.setHighlightIndex(m_lastHighlightIndex);
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        setTemporaryMessage("Cannot access " + parDirectory.ToString(), 2, gameTime);
-                    }
-                }
-                else
-                {
-                    // Store cursor position
-                    //
-                    ScreenPosition sP = m_context.m_project.getSelectedBufferView().getCursorPosition();
-
-                    if (m_keyboard.isCtrlDown())
-                    {
-                        m_context.m_project.getSelectedBufferView().wordJumpCursorLeft();
-                    }
-                    else if (m_keyboard.isAltDown())
-                    {
-                        // Attempt to move right if there's a BufferView there
-                        //
-                        detectMove(BufferView.ViewPosition.Left, gameTime);
-                    }
-                    else
-                    {
-                        m_context.m_project.getSelectedBufferView().moveCursorLeft(m_context.m_project, m_keyboard.isShiftDown());
-                    }
-
-                    if (m_keyboard.isShiftDown())
-                    {
-                        m_context.m_project.getSelectedBufferView().extendHighlight(sP);  // Extend
-                    }
-                    else
-                    {
-                        m_context.m_project.getSelectedBufferView().noHighlight(); // Disable
-                    }
-                }
-            }
-            else if (keyList.Contains(Keys.Right))
-            {
-                if (m_brazilContext.m_state.equals("FileSaveAs") || m_brazilContext.m_state.equals("FileOpen"))
-                {
-                    traverseDirectory(gameTime);
-                }
-                else
-                {
-                    // Store cursor position
-                    //
-                    ScreenPosition sP = m_context.m_project.getSelectedBufferView().getCursorPosition();
-
-                    if (m_keyboard.isCtrlDown())
-                    {
-                        m_context.m_project.getSelectedBufferView().wordJumpCursorRight();
-                    }
-                    else if (m_keyboard.isAltDown())
-                    {
-                        // Attempt to move right if there's a BufferView there
-                        //
-                        detectMove(BufferView.ViewPosition.Right, gameTime);
-                    }
-                    else
-                    {
-                        m_context.m_project.getSelectedBufferView().moveCursorRight(m_context.m_project, m_keyboard.isShiftDown());
-                    }
-
-                    if (m_keyboard.isShiftDown())
-                    {
-                        m_context.m_project.getSelectedBufferView().extendHighlight(sP); // Extend
-                    }
-                    else
-                    {
-                        m_context.m_project.getSelectedBufferView().noHighlight(); // Disable
-                    }
-                }
-            }
-            else if (keyList.Contains(Keys.End))
-            {
-                ScreenPosition fp = m_context.m_project.getSelectedBufferView().getCursorPosition();
-                ScreenPosition originalFp = fp;
-
-                // Set X and allow for tabs
-                //
-                if (fp.Y < m_context.m_project.getSelectedBufferView().getFileBuffer().getLineCount())
-                {
-                    fp.X = m_context.m_project.getSelectedBufferView().getFileBuffer().getLine(fp.Y).Replace("\t", m_context.m_project.getTab()).Length;
-                }
-                m_context.m_project.getSelectedBufferView().setCursorPosition(fp);
-
-                // Change the X offset if the row is longer than the visible width
-                //
-                if (fp.X > m_context.m_project.getSelectedBufferView().getBufferShowWidth())
-                {
-                    int bufferX = fp.X - m_context.m_project.getSelectedBufferView().getBufferShowWidth();
-                    m_context.m_project.getSelectedBufferView().setBufferShowStartX(bufferX);
-                }
-
-                if (m_keyboard.isShiftDown())
-                {
-                    m_context.m_project.getSelectedBufferView().extendHighlight(originalFp); // Extend
-                }
-                else
-                {
-                    m_context.m_project.getSelectedBufferView().noHighlight(); // Disable
-                }
-
-            }
-            else if (keyList.Contains(Keys.Home))
-            {
-                // Store cursor position
-                //
-                ScreenPosition sP = m_context.m_project.getSelectedBufferView().getCursorPosition();
-
-                // Reset the cursor to zero
-                //
-                ScreenPosition fp = m_context.m_project.getSelectedBufferView().getFirstNonSpace(m_context.m_project);
-
-                m_context.m_project.getSelectedBufferView().setCursorPosition(fp);
-
-                // Reset any X offset to zero
-                //
-                m_context.m_project.getSelectedBufferView().setBufferShowStartX(0);
-
-                if (m_keyboard.isShiftDown())
-                {
-                    m_context.m_project.getSelectedBufferView().extendHighlight(sP); // Extend
-                }
-                else
-                {
-                    m_context.m_project.getSelectedBufferView().noHighlight(); // Disable
-                }
-            }
-            else if (keyList.Contains(Keys.F9)) // Spin anticlockwise though BVs
-            {
-                m_context.m_zoomLevel = 1000.0f;
-                setActiveBuffer(BufferView.ViewCycleDirection.Anticlockwise);
-            }
-            else if (keyList.Contains(Keys.F10)) // Spin clockwise through BVs
-            {
-                m_context.m_zoomLevel = 1000.0f;
-                setActiveBuffer(BufferView.ViewCycleDirection.Clockwise);
-            }
-            else if (keyList.Contains(Keys.F3))
-            {
-                doSearch(gameTime);
-            }
-            else if (keyList.Contains(Keys.F4))
-            {
-                m_context.m_project.setViewMode(Project.ViewMode.Fun);
-                m_context.m_drawingHelper.startBanner(gameTime, "Friendlier\nv1.0", 5);
-            }
-            else if (keyList.Contains(Keys.F6))
-            {
-                doBuildCommand(gameTime);
-            }
-            else if (keyList.Contains(Keys.F7))
-            {
-                string command = m_context.m_project.getConfigurationValue("ALTERNATEBUILDCOMMAND");
-                doBuildCommand(gameTime, command);
-            }
-            else if (keyList.Contains(Keys.F8))
-            {
-                startGame(gameTime);
-            }
-            else if (keyList.Contains(Keys.F11)) // Toggle full screen
-            {
-                if (m_context.m_project.isFullScreen())
-                {
-                    m_graphics.windowedMode(this);
-                }
-                else
-                {
-                    m_graphics.fullScreenMode(this);
-                }
-                setSpriteFont();
-            }
-            else if (keyList.Contains(Keys.F1))  // Cycle down through BufferViews
-            {
-                int newValue = m_context.m_project.getSelectedBufferViewId() - 1;
-                if (newValue < 0)
-                {
-                    newValue += m_context.m_project.getBufferViews().Count;
-                }
-
-                m_context.m_project.setSelectedBufferViewId(newValue);
-                setActiveBuffer();
-            }
-            else if (keyList.Contains(Keys.F2)) // Cycle up through BufferViews
-            {
-                int newValue = (m_context.m_project.getSelectedBufferViewId() + 1) % m_context.m_project.getBufferViews().Count;
-                m_context.m_project.setSelectedBufferViewId(newValue);
-                setActiveBuffer();
-            }
-            else if (keyList.Contains(Keys.PageDown))
-            {
-                if (m_brazilContext.m_state.equals("TextEditing"))
-                {
-                    // Store cursor position
-                    //
-                    ScreenPosition sP = m_context.m_project.getSelectedBufferView().getCursorPosition();
-
-                    m_context.m_project.getSelectedBufferView().pageDown(m_context.m_project);
-
-                    if (m_keyboard.isShiftDown())
-                    {
-                        m_context.m_project.getSelectedBufferView().extendHighlight(sP); // Extend
-                    }
-                    else
-                    {
-                        m_context.m_project.getSelectedBufferView().noHighlight(); // Disable
-                    }
-                }
-                else if (m_brazilContext.m_state.equals("DiffPicker"))
-                {
-                    if (m_differ != null && m_diffPosition < m_differ.getMaxDiffLength())
-                    {
-                        m_diffPosition += m_context.m_project.getSelectedBufferView().getBufferShowLength();
-
-                        if (m_diffPosition >= m_differ.getMaxDiffLength())
-                        {
-                            m_diffPosition = m_differ.getMaxDiffLength() - 1;
-                        }
-                    }
-                }
-            }
-            else if (keyList.Contains(Keys.PageUp))
-            {
-                if (m_brazilContext.m_state.equals("TextEditing"))
-                {
-                    // Store cursor position
-                    //
-                    ScreenPosition sP = m_context.m_project.getSelectedBufferView().getCursorPosition();
-
-                    m_context.m_project.getSelectedBufferView().pageUp(m_context.m_project);
-
-                    if (m_keyboard.isShiftDown())
-                    {
-                        m_context.m_project.getSelectedBufferView().extendHighlight(sP); // Extend
-                    }
-                    else
-                    {
-                        m_context.m_project.getSelectedBufferView().noHighlight(); // Disable
-                    }
-                }
-                else if (m_brazilContext.m_state.equals("DiffPicker"))
-                {
-                    if (m_diffPosition > 0)
-                    {
-                        m_diffPosition -= m_context.m_project.getSelectedBufferView().getBufferShowLength();
-
-                        if (m_diffPosition < 0)
-                        {
-                            m_diffPosition = 0;
-                        }
-                    }
-                }
-            }
-            else if (keyList.Contains(Keys.Scroll))
-            {
-                if (m_context.m_project.getSelectedBufferView().isLocked())
-                {
-                    m_context.m_project.getSelectedBufferView().setLock(false, 0);
-                }
-                else
-                {
-                    m_context.m_project.getSelectedBufferView().setLock(true, m_context.m_project.getSelectedBufferView().getCursorPosition().Y);
-                }
-            }
-            else if (keyList.Contains(Keys.Tab)) // Insert a tab space
-            {
-                m_context.m_project.getSelectedBufferView().insertText(m_context.m_project, "\t");
-                updateSmartHelp();
-            }
-            else if (keyList.Contains(Keys.Insert))
-            {
-                if (m_brazilContext.m_state.equals("ManageProject"))
-                {
-                    if (m_configPosition >= 0 && m_configPosition < m_modelBuilder.getLeafNodesPlaces())
-                    {
-                        string fileToEdit = m_modelBuilder.getSelectedModelString(m_configPosition);
-
-                        BufferView bv = m_context.m_project.getBufferView(fileToEdit);
-
-                        if (bv != null)
-                        {
-                            setActiveBuffer(bv);
-                        }
-                        else // create and activate
-                        {
-                            try
-                            {
-                                FileBuffer fb = m_context.m_project.getFileBuffer(fileToEdit);
-                                bv = new BufferView(m_context.m_fontManager, m_context.m_project.getBufferViews()[0], BufferView.ViewPosition.Left);
-                                bv.setFileBuffer(fb);
-                                int bvIndex = m_context.m_project.addBufferView(bv);
-                                setActiveBuffer(bvIndex);
-
-                                Vector3 rootPosition = m_context.m_project.getBufferViews()[0].getPosition();
-                                Vector3 newPosition2 = bv.getPosition();
-
-                                Logger.logMsg(rootPosition.ToString() + newPosition2.ToString());
-                                //bv.setFileBufferIndex(
-                                fb.loadFile(m_context.m_project.getSyntaxManager());
-
-                                if (m_context.m_project.getConfigurationValue("SYNTAXHIGHLIGHT").ToUpper() == "TRUE")
-                                {
-                                    //m_context.m_project.getSyntaxManager().generateAllHighlighting(fb, true);
-                                    m_smartHelpWorker.updateSyntaxHighlighting(m_context.m_project.getSyntaxManager(), fb);
-                                }
-
-                                // Break out of Manage mode and back to editing
-                                //
-                                Vector3 newPosition = m_context.m_project.getSelectedBufferView().getLookPosition();
-                                newPosition.Z = 500.0f;
-                                m_brazilContext.m_state = State.Test("TextEditing");
-                                m_editConfigurationItem = false;
-                            }
-                            catch (Exception e)
-                            {
-                                setTemporaryMessage("Failed to load file " + e.Message, 2, gameTime);
-                            }
-                        }
-                    }
-                }
-
-            }
-            else if (keyList.Contains(Keys.Delete) || keyList.Contains(Keys.Back))
-            {
-
-                if (m_brazilContext.m_state.equals("FileSaveAs") && keyList.Contains(Keys.Back))
-                {
-                    // Delete charcters from the file name if we have one
-                    //
-                    if (m_saveFileName.Length > 0)
-                    {
-                        m_saveFileName = m_saveFileName.Substring(0, m_saveFileName.Length - 1);
-                    }
-                }
-                else if (m_brazilContext.m_state.equals("FindText") && keyList.Contains(Keys.Back))
-                {
-                    string searchText = m_context.m_project.getSelectedBufferView().getSearchText();
-                    // Delete charcters from the file name if we have one
-                    //
-                    if (searchText.Length > 0)
-                    {
-                        m_context.m_project.getSelectedBufferView().setSearchText(searchText.Substring(0, searchText.Length - 1));
-                    }
-                }
-                else if (m_brazilContext.m_state.equals("GotoLine") && keyList.Contains(Keys.Back))
-                {
-                    if (m_gotoLine.Length > 0)
-                    {
-                        m_gotoLine = m_gotoLine.Substring(0, m_gotoLine.Length - 1);
-                    }
-                }
-                else if (m_brazilContext.m_state.equals("Configuration") && m_editConfigurationItem && keyList.Contains(Keys.Back))
-                {
-                    if (m_editConfigurationItemValue.Length > 0)
-                    {
-                        m_editConfigurationItemValue = m_editConfigurationItemValue.Substring(0, m_editConfigurationItemValue.Length - 1);
-                    }
-                }
-                else if (m_brazilContext.m_state.equals("ManageProject"))
-                {
-                    if (m_configPosition >= 0 && m_configPosition < m_modelBuilder.getLeafNodesPlaces())
-                    {
-                        string fileToRemove = m_modelBuilder.getSelectedModelString(m_configPosition);
-                        if (m_context.m_project.removeFileBuffer(fileToRemove))
-                        {
-                            Logger.logMsg("XygloXNA::processActionKeys() - removed FileBuffer for " + fileToRemove);
-
-                            // Update Active Buffer as necessary
-                            //
-                            setActiveBuffer();
-
-                            // Rebuild the file model
-                            //
-                            generateTreeModel();
-
-                            setTemporaryMessage("Removed " + fileToRemove + " from project", 5, m_context.m_gameTime);
-                        }
-                        else
-                        {
-                            Logger.logMsg("XygloXNA::processActionKeys() - failed to remove FileBuffer for " + fileToRemove);
-                        }
-                    }
-                }
-                else if (m_context.m_project.getSelectedBufferView().gotHighlight()) // If we have a valid highlighted selection then delete it (normal editing)
-                {
-                    // All the clever stuff with the cursor is done at the BufferView level and it also
-                    // calls the command in the FileBuffer.
-                    //
-                    m_context.m_project.getSelectedBufferView().deleteCurrentSelection(m_context.m_project);
-                    updateSmartHelp();
-                }
-                else // delete at cursor
-                {
-                    if (keyList.Contains(Keys.Delete))
-                    {
-                        m_context.m_project.getSelectedBufferView().deleteSingle(m_context.m_project);
-                    }
-                    else if (keyList.Contains(Keys.Back))
-                    {
-                        // Start with a file position from the screen position
-                        //
-                        FilePosition fp = m_context.m_project.getSelectedBufferView().screenToFilePosition(m_context.m_project);
-
-                        // Get the character before the current one and backspace accordingly 
-
-                        if (fp.X > 0)
-                        {
-                            string fetchLine = m_context.m_project.getSelectedBufferView().getCurrentLine();
-
-                            // Decrement and set X
-                            //
-                            fp.X--;
-
-                            // Now convert back to a screen position
-                            fp.X = fetchLine.Substring(0, fp.X).Replace("\t", m_context.m_project.getTab()).Length;
-
-                        }
-                        else if (fp.Y > 0)
-                        {
-                            fp.Y -= 1;
-
-                            // Don't forget to do tab conversions here too
-                            //
-                            fp.X = m_context.m_project.getSelectedBufferView().getFileBuffer().getLine(Convert.ToInt16(fp.Y)).Replace("\t", m_context.m_project.getTab()).Length;
-                        }
-
-                        m_context.m_project.getSelectedBufferView().setCursorPosition(new ScreenPosition(fp));
-
-                        m_context.m_project.getSelectedBufferView().deleteSingle(m_context.m_project);
-                    }
-                    updateSmartHelp();
-                }
-            }
-            else if (keyList.Contains(Keys.Enter))
-            {
-                //ScreenPosition fp = m_context.m_project.getSelectedBufferView().getCursorPosition();
-
-                if (m_brazilContext.m_state.equals("FileSaveAs"))
-                {
-                    // Check that the filename is valid
-                    //
-                    if (m_saveFileName != "" && m_saveFileName != null)
-                    {
-                        m_context.m_project.getSelectedBufferView().getFileBuffer().setFilepath(m_context.m_fileSystemView.getPath() + m_saveFileName);
-
-                        Logger.logMsg("XygloXNA::processActionKeys() - file name = " + m_context.m_project.getSelectedBufferView().getFileBuffer().getFilepath());
-
-                        completeSaveFile(gameTime);
-
-                        // Now if we have remaining files to write then we need to carry on saving files
-                        //
-                        if (m_filesToWrite != null)
-                        {
-                            //m_filesToWrite.Remove(m_context.m_project.getSelectedBufferView().getFileBuffer());
-
-                            // If we have remaining files to edit then set the active BufferView to one that
-                            // looks over this file - then fly to it and choose and file location.
-                            //
-                            if (m_filesToWrite.Count > 0)
-                            {
-                                m_context.m_project.setSelectedBufferView(m_filesToWrite[0]);
-                                m_eye = m_context.m_project.getSelectedBufferView().getEyePosition();
-                                selectSaveFile();
-                            }
-                            else // We're done 
-                            {
-                                m_filesToWrite = null;
-                                Logger.logMsg("XygloXNA::processActionKeys() - saved some files.  Quitting.");
-
-                                // Exit nicely and ensure we serialise
-                                //
-                                checkExit(gameTime);
-                            }
-                        }
-                        else
-                        {
-                            // Exit nicely and ensure we serialise
-                            //
-                            if (m_saveAsExit)
-                            {
-                                checkExit(gameTime);
-                            }
-                        }
-                    }
-                }
-                else if (m_brazilContext.m_state.equals("FileOpen"))
-                {
-                    traverseDirectory(gameTime);
-                }
-                else if (m_brazilContext.m_state.equals("Configuration"))
-                {
-                    // Set this status so that we edit the item
-                    //
-                    if (m_editConfigurationItem == false)
-                    {
-                        // Go into item edit mode and copy across the current value
-                        m_editConfigurationItem = true;
-                        m_editConfigurationItemValue = m_context.m_project.getConfigurationItem(m_configPosition).Value;
-                    }
-                    else
-                    {
-                        // Completed editing the item - now set it
-                        //
-                        m_editConfigurationItem = false;
-                        m_context.m_project.updateConfigurationItem(m_context.m_project.getConfigurationItem(m_configPosition).Name, m_editConfigurationItemValue);
-                    }
-                }
-                else if (m_brazilContext.m_state.equals("FindText"))
-                {
-                    doSearch(gameTime);
-                }
-                else if (m_brazilContext.m_state.equals("GotoLine"))
-                {
-                    try
-                    {
-                        int gotoLine = Convert.ToInt16(m_gotoLine);
-
-                        if (gotoLine > 0)
-                        {
-                            if (gotoLine < m_context.m_project.getSelectedBufferView().getFileBuffer().getLineCount() - 1)
-                            {
-                                ScreenPosition sp = new ScreenPosition(0, gotoLine);
-                                m_context.m_project.getSelectedBufferView().setCursorPosition(sp);
-                            }
-                            else
-                            {
-                                setTemporaryMessage("Attempted to go beyond end of file.", 2, gameTime);
-                            }
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        Logger.logMsg("Probably got junk in the goto line dialog");
-                        setTemporaryMessage("Lines are identified by numbers.", 2, gameTime);
-                    }
-
-                    m_gotoLine = "";
-                    m_brazilContext.m_state = State.Test("TextEditing");
-                }
-                else
-                {
-                    // Insert a line into the editor
-                    //
-                    string indent = "";
-
-                    try
-                    {
-                        indent = m_context.m_project.getConfigurationValue("AUTOINDENT");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.logMsg("XygloXNA::processActionKeys) - couldn't get AUTOINDENT from config - " + e.Message);
-                    }
-
-                    if (m_context.m_project.getSelectedBufferView().gotHighlight())
-                    {
-                        m_context.m_project.getSelectedBufferView().replaceCurrentSelection(m_context.m_project, "\n");
-                    }
-                    else
-                    {
-                        m_context.m_project.getSelectedBufferView().insertNewLine(m_context.m_project, indent);
-                    }
-                    updateSmartHelp();
-                }
-            }
-        }
-
-
-        /// <summary>
-        /// Process key combinations and commands from the keyboard - return true if we've
-        /// captured a command so we don't print that character
-        /// </summary>
-        /// <param name="?"></param>
-        /// <returns></returns>
-        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
-        protected bool processCombinationsCommands(GameTime gameTime, List<KeyAction> keyActionList)
-        {
-            bool rC = false;
-            List<Keys> keyList = new List<Keys>();
-            foreach (KeyAction keyAction in keyActionList)
-            {
-                keyList.Add(keyAction.m_key);
-            }
-
-            if (m_brazilContext.m_confirmState.equals("ConfirmQuit") && keyList.Contains(Keys.Y))
-            {
-                m_confirmQuit = true;
-                checkExit(gameTime, true);
-                return true;
-            }
-
-            // Check confirm state - this works out the complicated statuses of open file buffers
-            //
-            if (!m_brazilContext.m_confirmState.equals("None"))
-            {
-                if (keyList.Contains(Keys.Y))
-                {
-                    Logger.logMsg("XygloXNA::processCombinationsCommands() - confirm y/n");
-                    try
-                    {
-                        if (m_brazilContext.m_confirmState.equals("FileSave"))
-                        {
-                            // Select a file path if we need one
-                            //
-                            if (m_context.m_project.getSelectedBufferView().getFileBuffer().getFilepath() == "")
-                            {
-                                selectSaveFile();
-                            }
-                            else
-                            {
-                                // Attempt save
-                                //
-                                if (checkFileSave())
-                                {
-                                    // Save has completed without error
-                                    //
-                                    setTemporaryMessage("Saved.", 2, gameTime);
-                                }
-
-                                m_brazilContext.m_state = State.Test("TextEditing");
-                                rC = true;
-                            }
-                        }
-                        else if (m_brazilContext.m_confirmState.equals("FileSaveCancel"))
-                        {
-                            // First of all save all open buffers we can write and save
-                            // a list of all those we can't
-                            //
-                            m_filesToWrite = new List<FileBuffer>();
-
-                            foreach (FileBuffer fb in m_context.m_project.getFileBuffers())
-                            {
-                                if (fb.isModified())
-                                {
-                                    if (fb.isWriteable())
-                                    {
-                                        fb.save();
-                                    }
-                                    else
-                                    {
-                                        // Only add a filebuffer if it's not the same physical file
-                                        //
-                                        bool addFileBuffer = true;
-                                        foreach (FileBuffer fb2 in m_filesToWrite)
-                                        {
-                                            if (fb2.getFilepath() == fb.getFilepath())
-                                            {
-                                                addFileBuffer = false;
-                                                break;
-                                            }
-                                        }
-
-                                        if (addFileBuffer)
-                                        {
-                                            m_filesToWrite.Add(fb);
-                                        }
-                                    }
-                                }
-                            }
-
-                            // All files saved then exit
-                            //
-                            if (m_filesToWrite.Count == 0)
-                            {
-                                checkExit(gameTime);
-                            }
-                        }
-                        else if (m_brazilContext.m_confirmState.equals("CancelBuild"))
-                        {
-                            Logger.logMsg("XygloXNA::processCombinationsCommands() - cancel build");
-                            m_buildProcess.Close();
-                            m_buildProcess = null;
-                        }
-                        else if (m_brazilContext.m_confirmState.equals("ConfirmQuit"))
-                        {
-                            m_confirmQuit = true;
-                            checkExit(gameTime, true);
-                        }
-                        rC = true; // consume this letter
-                    }
-                    catch (Exception e)
-                    {
-                        setTemporaryMessage("Save failed with \"" + e.Message + "\".", 5, gameTime);
-                    }
-
-                    m_brazilContext.m_confirmState.set("None");
-                }
-                else if (keyList.Contains(Keys.N))
-                {
-                    // If no for single file save then continue - if no for FileSaveCancel then quit
-                    //
-                    if (m_brazilContext.m_confirmState.equals("FileSave"))
-                    {
-                        m_temporaryMessage = "";
-                        m_brazilContext.m_confirmState.set("None");
-                    }
-                    else if (m_brazilContext.m_confirmState.equals("FileSaveCancel"))
-                    {
-                        // Exit nicely
-                        //
-                        checkExit(gameTime, true);
-                    }
-                    else if (m_brazilContext.m_confirmState.equals("CancelBuild"))
-                    {
-                        setTemporaryMessage("Continuing build..", 2, gameTime);
-                        m_brazilContext.m_confirmState.set("None");
-                    }
-                    else if (m_brazilContext.m_confirmState.equals("ConfirmQuit"))
-                    {
-                        setTemporaryMessage("Cancelled quit", 2, gameTime);
-                        m_brazilContext.m_confirmState.set("None");
-                    }
-                    rC = true; // consume this letter
-                }
-                else if (keyList.Contains(Keys.C) && m_brazilContext.m_confirmState.equals("FileSaveCancel"))
-                {
-                    setTemporaryMessage("Cancelled Quit.", 0.5, gameTime);
-                    m_brazilContext.m_confirmState.set("None");
-                    rC = true;
-                }
-            }
-            else if (m_keyboard.isCtrlDown() && !m_keyboard.isAltDown())  // CTRL down and no ALT
-            {
-                if (keyList.Contains(Keys.C)) // Copy
-                {
-                    if (m_brazilContext.m_state.equals("Configuration") && m_editConfigurationItem)
-                    {
-                        Logger.logMsg("XygloXNA::processCombinationsCommands() - copying from configuration");
-                        System.Windows.Forms.Clipboard.SetText(m_editConfigurationItemValue);
-                    }
-                    else
-                    {
-                        Logger.logMsg("XygloXNA::processCombinationsCommands() - copying to clipboard");
-                        string text = m_context.m_project.getSelectedBufferView().getSelection(m_context.m_project).getClipboardString();
-
-                        // We can only set this is the text is not empty
-                        if (text != "")
-                        {
-                            System.Windows.Forms.Clipboard.SetText(text);
-                        }
-                        rC = true;
-                    }
-                }
-                else if (keyList.Contains(Keys.X)) // Cut
-                {
-                    if (m_brazilContext.m_state.equals("Configuration") && m_editConfigurationItem)
-                    {
-                        Logger.logMsg("XygloXNA::processCombinationsCommands() - cutting from configuration");
-                        System.Windows.Forms.Clipboard.SetText(m_editConfigurationItemValue);
-                        m_editConfigurationItemValue = "";
-                    }
-                    else
-                    {
-                        Logger.logMsg("XygloXNA::processCombinationsCommands() - cut");
-
-                        System.Windows.Forms.Clipboard.SetText(m_context.m_project.getSelectedBufferView().getSelection(m_context.m_project).getClipboardString());
-                        m_context.m_project.getSelectedBufferView().deleteCurrentSelection(m_context.m_project);
-                        rC = true;
-                    }
-                }
-                else if (keyList.Contains(Keys.V)) // Paste
-                {
-                    if (System.Windows.Forms.Clipboard.ContainsText())
-                    {
-                        if (m_brazilContext.m_state.equals("Configuration") && m_editConfigurationItem)
-                        {
-                            Logger.logMsg("XygloXNA::processCombinationsCommands() - pasting into configuration");
-
-                            // Ensure that we only get one line out of the clipboard and make sure
-                            // it's the last meaningful one.
-                            //
-                            string lastPasteText = "";
-                            foreach (string text in System.Windows.Forms.Clipboard.GetText().Split('\n'))
-                            {
-                                if (text != "")
-                                {
-                                    lastPasteText = text;
-                                }
-                            }
-
-                            m_editConfigurationItemValue = lastPasteText;
-                        }
-                        else
-                        {
-                            Logger.logMsg("XygloXNA::processCombinationsCommands() - pasting text");
-                            // If we have a selection then replace it - else insert
-                            //
-                            if (m_context.m_project.getSelectedBufferView().gotHighlight())
-                            {
-                                m_context.m_project.getSelectedBufferView().replaceCurrentSelection(m_context.m_project, System.Windows.Forms.Clipboard.GetText());
-                            }
-                            else
-                            {
-                                m_context.m_project.getSelectedBufferView().insertText(m_context.m_project, System.Windows.Forms.Clipboard.GetText());
-                            }
-                            updateSmartHelp();
-                            rC = true;
-                        }
-                    }
-                }
-                else if (keyList.Contains(Keys.Z))  // Undo
-                {
-                    // Undo a certain number of steps
-                    //
-                    try
-                    {
-                        // We call the undo against the FileBuffer and this returns the cursor position
-                        // resulting from this action.
-                        //
-                        if (m_context.m_project.getSelectedBufferView().getFileBuffer().getUndoPosition() > 0)
-                        {
-                            m_context.m_project.getSelectedBufferView().undo(m_context.m_project, 1);
-                            updateSmartHelp();
-                        }
-                        else
-                        {
-                            setTemporaryMessage("Nothing to undo.", 1.0, gameTime);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        //System.Windows.Forms.MessageBox.Show("Undo stack is empty - " + e.Message);
-                        Logger.logMsg("XygloXNA::processCombinationsCommands() - got exception " + e.Message);
-                        setTemporaryMessage("Nothing to undo with exception.", 2, gameTime);
-                    }
-
-                    // Always return true
-                    //
-                    rC = true;
-                }
-                else if (keyList.Contains(Keys.Y))  // Redo
-                {
-                    // Undo a certain number of steps
-                    //
-                    try
-                    {
-                        // We call the undo against the FileBuffer and this returns the cursor position
-                        // resulting from this action.
-                        //
-                        if (m_context.m_project.getSelectedBufferView().getFileBuffer().getUndoPosition() <
-                            m_context.m_project.getSelectedBufferView().getFileBuffer().getCommandStackLength())
-                        {
-                            m_context.m_project.getSelectedBufferView().redo(m_context.m_project, 1);
-                            updateSmartHelp();
-                        }
-                        else
-                        {
-                            setTemporaryMessage("Nothing to redo.", 1.0, gameTime);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        //System.Windows.Forms.MessageBox.Show("Undo stack is empty - " + e.Message);
-                        Logger.logMsg("XygloXNA::processCombinationsCommands() - got exception " + e.Message);
-                        setTemporaryMessage("Nothing to redo.", 2, gameTime);
-                    }
-
-                    // Always return true as we've captured the event
-                    //
-                    rC = true;
-                }
-                else if (keyList.Contains(Keys.A))  // Select all
-                {
-                    m_context.m_project.getSelectedBufferView().selectAll();
-                    rC = true;
-                }
-                else if (keyList.Contains(Keys.OemPlus)) // increment bloom state
-                {
-                    if (m_keyboard.isShiftDown())
-                    {
-                        m_fontScaleOriginal = m_context.m_project.getSelectedBufferView().incrementViewSize(m_context.m_graphics.GraphicsDevice.Viewport.Width, m_context.m_graphics.GraphicsDevice.Viewport.Height, m_context.m_fontManager);
-                        m_currentFontScale = 0.0f;
-                        setActiveBuffer();
-                    }
-                    else
-                    {
-                        m_context.m_bloomSettingsIndex = (m_context.m_bloomSettingsIndex + 1) % BloomSettings.PresetSettings.Length;
-                        m_context.m_bloom.Settings = BloomSettings.PresetSettings[m_context.m_bloomSettingsIndex];
-                        m_context.m_bloom.Visible = true;
-
-                        setTemporaryMessage("Bloom set to " + BloomSettings.PresetSettings[m_context.m_bloomSettingsIndex].Name, 3, gameTime);
-                    }
-                }
-                else if (keyList.Contains(Keys.OemMinus)) // decrement bloom state
-                {
-                    if (m_keyboard.isShiftDown())
-                    {
-                        m_fontScaleOriginal = m_context.m_project.getSelectedBufferView().decrementViewSize(m_context.m_graphics.GraphicsDevice.Viewport.Width, m_context.m_graphics.GraphicsDevice.Viewport.Height, m_context.m_fontManager);
-                        m_currentFontScale = 0.0f;
-                        setActiveBuffer();
-                    }
-                    else
-                    {
-                        m_context.m_bloomSettingsIndex = (m_context.m_bloomSettingsIndex - 1);
-
-                        if (m_context.m_bloomSettingsIndex < 0)
-                        {
-                            m_context.m_bloomSettingsIndex += BloomSettings.PresetSettings.Length;
-                        }
-
-                        m_context.m_bloom.Settings = BloomSettings.PresetSettings[m_context.m_bloomSettingsIndex];
-                        m_context.m_bloom.Visible = true;
-                        setTemporaryMessage("Bloom set to " + BloomSettings.PresetSettings[m_context.m_bloomSettingsIndex].Name, 3, gameTime);
-                    }
-                }
-                else if (keyList.Contains(Keys.B)) // Toggle bloom
-                {
-                    m_context.m_bloom.Visible = !m_context.m_bloom.Visible;
-                    setTemporaryMessage("Bloom " + (m_context.m_bloom.Visible ? "on" : "off"), 3, gameTime);
-                }
-
-            }
-            else if (m_keyboard.isAltDown() && !m_keyboard.isCtrlDown()) // ALT down action and no CTRL down
-            {
-                if (keyList.Contains(Keys.S) && m_context.m_project.getSelectedBufferView().getFileBuffer().isModified())
-                {
-                    // If we want to confirm save then ask
-                    //
-                    if (m_confirmFileSave)
-                    {
-                        setTemporaryMessage("Confirm Save? Y/N", 0, gameTime);
-                        m_brazilContext.m_confirmState.set("FileSave");
-                    }
-                    else  // just save
-                    {
-                        // Select a file path if we need one
-                        //
-                        if (m_context.m_project.getSelectedBufferView().getFileBuffer().getFilepath() == "")
-                        {
-                            m_saveAsExit = false;
-                            selectSaveFile();
-                        }
-                        else
-                        {
-                            // Attempt save
-                            //
-                            if (checkFileSave())
-                            {
-                                // Save has completed without error
-                                //
-                                setTemporaryMessage("Saved.", 2, gameTime);
-                            }
-
-                            m_brazilContext.m_state = State.Test("TextEditing");
-                        }
-                        rC = true;
-                    }
-                }
-                else if (keyList.Contains(Keys.A)) // Explicit save as
-                {
-                    m_saveAsExit = false;
-                    selectSaveFile();
-                    rC = true;
-                }
-                else if (keyList.Contains(Keys.N)) // New BufferView on new FileBuffer
-                {
-                    m_brazilContext.m_state = State.Test("PositionScreenNew");
-                    rC = true;
-                }
-                else if (keyList.Contains(Keys.B)) // New BufferView on same FileBuffer (copy the existing BufferView)
-                {
-                    m_brazilContext.m_state = State.Test("PositionScreenCopy");
-                    rC = true;
-                }
-                else if (keyList.Contains(Keys.O)) // Open a file
-                {
-                    selectOpenFile();
-                    rC = true;
-                }
-                else if (keyList.Contains(Keys.H)) // Show the help screen
-                {
-                    // Reset page position and set information mode
-                    //
-                    m_textScreenPositionY = 0;
-                    m_brazilContext.m_state = State.Test("Help");
-                    rC = true;
-                }
-                else if (keyList.Contains(Keys.I)) // Show the information screen
-                {
-                    // Reset page position and set information mode
-                    //
-                    m_textScreenPositionY = 0;
-                    m_brazilContext.m_state = State.Test("Information");
-                    rC = true;
-                }
-                else if (keyList.Contains(Keys.G)) // Show the config screen
-                {
-                    // Reset page position and set information mode
-                    //
-                    m_textScreenPositionY = 0;
-                    showConfigurationScreen();
-                    rC = true;
-                }
-                else if (keyList.Contains(Keys.C)) // Close current BufferView
-                {
-                    closeActiveBuffer(gameTime);
-                    rC = true;
-                }
-                else if (keyList.Contains(Keys.D))
-                {
-                    m_brazilContext.m_state = State.Test("DiffPicker");
-                    setTemporaryMessage("Pick a BufferView to diff against", 5, gameTime);
-
-                    // Set up the differ
-                    //
-                    if (m_differ == null)
-                    {
-                        m_differ = new Differ();
-                    }
-                    else
-                    {
-                        m_differ.clear();
-                    }
-
-                    rC = true;
-                }
-                else if (keyList.Contains(Keys.M))
-                {
-                    // Set the config position - we (re)use this to hold menu position in the manage
-                    // project screen for removing file items.
-                    //
-                    m_configPosition = 0;
-
-                    m_brazilContext.m_state = State.Test("ManageProject"); // Manage the files in the project
-
-                    // Copy current position to m_projectPosition - then rebuild model
-                    //
-                    m_projectPosition = m_context.m_project.getSelectedBufferView().getPosition();
-                    m_projectPosition.X = -1000.0f;
-                    m_projectPosition.Y = -1000.0f;
-
-                    generateTreeModel();
-
-                    // Fly to a new position in this mode to view the model
-                    //
-                    Vector3 newPos = m_projectPosition;
-                    newPos.Z = 800.0f;
-                    flyToPosition(newPos);
-                    rC = true;
-                }
-                else if (keyList.Contains(Keys.D0) ||
-                            keyList.Contains(Keys.D1) ||
-                            keyList.Contains(Keys.D2) ||
-                            keyList.Contains(Keys.D3) ||
-                            keyList.Contains(Keys.D4) ||
-                            keyList.Contains(Keys.D5) ||
-                            keyList.Contains(Keys.D6) ||
-                            keyList.Contains(Keys.D7) ||
-                            keyList.Contains(Keys.D8) ||
-                            keyList.Contains(Keys.D9))
-                {
-                    m_gotoBufferView += m_keyboard.getNumberKey();
-                    rC = true;
-                }
-
-
-                /*
-                // Don't do any state transitions in this class now
-                //  
-                else if (keyList.Contains(Keys.F)) // Find text
-                {
-                    Logger.logMsg("XygloXNA::processCombinationsCommands() - find");
-                    m_state = State.Test("FindText");
-                }
-                else if (keyList.Contains(Keys.L)) // go to line
-                {
-                    Logger.logMsg("XygloXNA::processCombinationsCommands() - goto line");
-                    m_state = State.Test("GotoLine");
-                }*/ 
-
-
-            }
-            else if (m_keyboard.isWindowsDown()) // Windows keys
-            {
-                // Initialially tried CTRL and ALT combinations but ran up against this:
-                //
-                // http://forums.create.msdn.com/forums/t/41522.aspx
-                // 
-                // and then this solution which I ignored:
-                //
-                // http://bnoerj.codeplex.com/wikipage?title=Bnoerj.Winshoked&referringTitle=Home
-                //
-                //
-                if (keyList.Contains(Keys.A))
-                {
-                    Logger.logMsg("RELAYOUT AND FLY");  //???
-                }
-            }
-
-            return rC;
         }
 
         /// <summary>
@@ -3066,11 +1166,14 @@ namespace Xyglo.Brazil.Xna
                 //
                 if (m_context.m_project != null)
                 {
-                    processActionKey(gameTime, keyAction);
+                    //processActionKey(gameTime, keyAction);
+                    m_keyboardHandler.processActionKey(gameTime, this, m_eye, keyAction);
 
                     // do any key combinations
                     //
-                    if (processCombinationsCommands(gameTime, keyActionList))
+                    //if (processCombinationsCommands(gameTime, keyActionList))
+                        //continue;
+                    if (m_keyboardHandler.processCombinationsCommands(gameTime, keyActionList))
                         continue;
                 }
 
@@ -3093,7 +1196,7 @@ namespace Xyglo.Brazil.Xna
                     case "CurrentBufferView":
                         // The default target will process meta key commands
                         //
-                        processKey(gameTime, keyAction);
+                        m_keyboardHandler.processKey(gameTime, keyAction);
                         /* consume = */ processMetaCommand(gameTime, keyAction);
                         break;
                     
@@ -3110,7 +1213,7 @@ namespace Xyglo.Brazil.Xna
 
                     //case Target.SaveFile:
                     case "SaveFile":
-                        selectSaveFile();
+                        m_keyboardHandler.selectSaveFile(gameTime);
                         break;
 
                     case "ShowInformation":
@@ -3144,7 +1247,7 @@ namespace Xyglo.Brazil.Xna
                     case "Exit":
                         // The default target will process meta key commands
                         //
-                        processKey(gameTime, keyAction);
+                        m_keyboardHandler.processKey(gameTime, keyAction);
                         /* consume = */ processMetaCommand(gameTime, keyAction);
                         break;
 
@@ -3248,6 +1351,7 @@ namespace Xyglo.Brazil.Xna
             // Set the cursor to something useful
             //
             System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.IBeam;
+            //System.Windows.Forms.Cursor.Hide();
 
             // Set the startup banner on the first pass through
             //
@@ -3262,7 +1366,7 @@ namespace Xyglo.Brazil.Xna
 
             // Check for any mouse actions here
             //
-            m_mouse.checkMouse(gameTime, m_keyboard, m_eye, m_target);
+            m_mouse.checkMouse(this, gameTime, m_keyboard, m_eye, m_target);
 
             // Check for this change as necessary
             //
@@ -3771,139 +1875,6 @@ namespace Xyglo.Brazil.Xna
             return (collisionList.Count > 0);
         }
 
-
-        /// <summary>
-        /// Process any keys that need to be printed
-        /// </summary>
-        /// <param name="gameTime"></param>
-        protected void processKey(GameTime gameTime, KeyAction keyAction)
-        {
-            // Do nothing if no keys are pressed except check for auto repeat and clear if necessary.
-            // We have to adjust for any held down modifier keys here and also clear the variable as 
-            // necessary.
-
-            // Ok, let's see if we can translate a key
-            //
-            string key = m_keyboard.getKey(keyAction);
-
-            if (key == "")
-                return;
-
-            // Now handle
-            //
-            if (m_brazilContext.m_state.equals("FileSaveAs")) // File name
-            {
-                //Logger.logMsg("Writing letter " + key);
-                m_saveFileName += key;
-            }
-            else if (m_brazilContext.m_state.equals("Configuration") && m_editConfigurationItem) // Configuration item
-            {
-                m_editConfigurationItemValue += key;
-            }
-            else if (m_brazilContext.m_state.equals("FindText"))
-            {
-                m_context.m_project.getSelectedBufferView().appendToSearchText(key);
-            }
-            else if (m_brazilContext.m_state.equals("GotoLine"))
-            {
-                m_gotoLine += key;
-            }
-            else if (m_brazilContext.m_state.equals("TextEditing"))
-            {
-                // Do we need to do some deletion or replacing?
-                //
-                if (m_context.m_project.getSelectedBufferView().gotHighlight())
-                {
-                    m_context.m_project.getSelectedBufferView().replaceCurrentSelection(m_context.m_project, key);
-                }
-                else
-                {
-                    m_context.m_project.getSelectedBufferView().insertText(m_context.m_project, key);
-                }
-                updateSmartHelp();
-            }
-        }
-
-        /// <summary>
-        /// Update syntax highlighting if we need to 
-        /// </summary>
-        protected void updateSmartHelp()
-        {
-            // Update the syntax highlighting
-            //
-            if (m_context.m_project.getConfigurationValue("SYNTAXHIGHLIGHT").ToUpper() == "TRUE")
-            {
-                FileBuffer fb = m_context.m_project.getSelectedBufferView().getFileBuffer();
-                int startLine = m_context.m_project.getSelectedBufferView().getBufferShowStartY();
-                int endLine = m_context.m_project.getSelectedBufferView().getBufferShowStartY() + m_context.m_project.getSelectedBufferView().getBufferShowLength();
-
-                // Limit end line as necessary
-                if (endLine >= fb.getLineCount())
-                {
-                    endLine = Math.Max(fb.getLineCount() - 1, 0);
-                }
-
-                FilePosition startPosition = new FilePosition(0, startLine);
-                FilePosition endPosition = new FilePosition(fb.getLine(endLine).Length, endLine);
-
-                // Process immediately the current visible buffer
-                //
-                m_context.m_project.getSyntaxManager().generateHighlighting(fb, startPosition, endPosition, false);
-
-                // Ensure that the syntax manager isn't processing highlights at the time of the next request.
-                //
-                m_context.m_project.getSyntaxManager().interruptProcessing();
-
-                // We process all highlighting in the SmartHelpWorker thread.  Note that you have to do this
-                // all in the same thread or the main GUI gets locked out.  Although it would make sense to
-                // do just the on-screen bit in main thread we can minimise latency by keeping the highlight
-                // thread sleep
-                //
-                m_smartHelpWorker.updateSyntaxHighlighting(m_context.m_project.getSyntaxManager(), m_context.m_project.getSelectedBufferView().getFileBuffer(),
-                    startLine, endLine);
-            }
-        }
-
-
-        /// <summary>
-        /// Run a search on the current BufferView
-        /// </summary>
-        /// <returns></returns>
-        protected void doSearch(GameTime gameTime)
-        {
-            m_brazilContext.m_state = State.Test("TextEditing");
-
-            // Don't search for nothing
-            //
-            if (m_context.m_project.getSelectedBufferView().getSearchText() == "")
-            {
-                return;
-            }
-
-            // If we find something from cursor we're finished here
-            //
-            if (m_context.m_project.getSelectedBufferView().findFromCursor(false))
-            {
-                return;
-            }
-
-            // Now try to find from the top of the file
-            //
-            if (m_context.m_project.getSelectedBufferView().getCursorPosition().Y > 0)
-            {
-                // Try find from the top - if it finds something then let user know we've
-                // wrapped around.
-                //
-                if (m_context.m_project.getSelectedBufferView().find(new ScreenPosition(0, 0), false))
-                {
-                    setTemporaryMessage("Search wrapped around end of file", 1.5f, gameTime);
-                    return;
-                }
-            }
-
-            setTemporaryMessage("\"" + m_context.m_project.getSelectedBufferView().getSearchText() + "\" not found", 3, gameTime);
-        }
-
         /// <summary>
         /// Set a temporary message until a given end time (seconds into the future)
         /// </summary>
@@ -3965,7 +1936,7 @@ namespace Xyglo.Brazil.Xna
             {
                 // We've add a new file so regenerate the model
                 //
-                generateTreeModel();
+                m_keyboardHandler.generateTreeModel();
 
                 // Now generate highlighting
                 //
@@ -4025,43 +1996,14 @@ namespace Xyglo.Brazil.Xna
             setActiveBuffer(newBufferView);
         }
 
-
         /// <summary>
-        /// Locate a BufferView located in a specified direction - if we find one then
-        /// we set that as the active buffer view.
+        /// Hook for handling temporary messages
         /// </summary>
-        /// <param name="position"></param>
-        protected void detectMove(BufferView.ViewPosition position, GameTime gameTime)
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected void handleTemporaryMessage(object sender, TextEventArgs e)
         {
-            // First get the position of a potential BufferView
-            //
-            BoundingBox searchBox = m_context.m_project.getSelectedBufferView().calculateRelativePositionBoundingBox(position);
-
-            // Store the id of the current view
-            //
-            int fromView = m_context.m_project.getSelectedBufferViewId();
-
-            // Search by index
-            //
-            for (int i = 0; i < m_context.m_project.getBufferViews().Count; i++)
-            {
-                if (m_context.m_project.getBufferViews()[i].getBoundingBox().Intersects(searchBox))
-                {
-                    m_context.m_project.setSelectedBufferViewId(i);
-                    break;
-                }
-            }
-
-            // Now set the active buffer if we need to - if not give a warning
-            //
-            if (fromView != m_context.m_project.getSelectedBufferViewId())
-            {
-                setActiveBuffer();
-            }
-            else
-            {
-                setTemporaryMessage("No BufferView.", 2.0, gameTime);
-            }
+            setTemporaryMessage(e.getText(), e.getDuration(), e.getGameTime());
         }
 
         /// <summary>
@@ -4072,6 +2014,16 @@ namespace Xyglo.Brazil.Xna
         protected void handleFlyToPosition(object sender, PositionEventArgs e)
         {
             flyToPosition(e.getPosition());
+        }
+
+        /// <summary>
+        /// Hook for Clean Exit
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected void handleCleanExit(object sender, CleanExitEventArgs e)
+        {
+            checkExit(e.getGameTime(), e.getForceExit());
         }
 
         /// <summary>
@@ -4233,23 +2185,9 @@ namespace Xyglo.Brazil.Xna
                 m_changingPositionLastGameTime = gameTime.TotalGameTime;
             }
 
-            // Font scaling - should this be in here?
+            // Font scaling
             //
-            if (m_currentFontScale == 0.0f)
-            {
-                m_currentFontScale = m_fontScaleOriginal;
-            }
-            else if (m_currentFontScale != 1.0f)
-            {
-                if (m_fontScaleOriginal < 1.0f)
-                {
-                    m_currentFontScale = m_fontScaleOriginal + ((1.0f - m_fontScaleOriginal) * acc);
-                }
-                else
-                {
-                    m_currentFontScale = m_fontScaleOriginal - ((m_fontScaleOriginal - 1.0f) * acc);
-                }
-            }
+            m_keyboardHandler.doFontScaling(acc);
 
             // Test arrival of the eye at destination position
             //
@@ -4263,8 +2201,9 @@ namespace Xyglo.Brazil.Xna
                 m_target.X = m_newEyePosition.X;
                 m_target.Y = m_newEyePosition.Y;
                 m_changingEyePosition = false;
-                m_currentFontScale = 1.0f;
+                m_keyboardHandler.setCurrentFontScale(1.0f);
             }
+                /*
             else
             {
                 float distanceToTarget = (m_newEyePosition - m_eye).Length();
@@ -4276,7 +2215,7 @@ namespace Xyglo.Brazil.Xna
                 {
                     Logger.logMsg("OVERSHOT");
                 }
-            }
+            }*/
         }
 
         /// <summary>
@@ -4680,7 +2619,7 @@ namespace Xyglo.Brazil.Xna
             //
             if (m_brazilContext.m_state.equals("ManageProject"))
             {
-                m_context.m_drawingHelper.drawManageProject(m_context.m_overlaySpriteBatch, gameTime, m_modelBuilder, m_context.m_graphics, m_configPosition, out m_textScreenLength);
+                m_context.m_drawingHelper.drawManageProject(m_context.m_overlaySpriteBatch, gameTime, m_keyboardHandler.getModelBuilder(), m_context.m_graphics, m_keyboardHandler.getConfigPosition(), out m_textScreenLength);
                 base.Draw(gameTime);
                 return;
             }
@@ -4695,11 +2634,11 @@ namespace Xyglo.Brazil.Xna
             //
             for (int i = 0; i < m_context.m_project.getBufferViews().Count; i++)
             {
-                if (m_differ != null && m_differ.hasDiffs() &&
-                    (m_differ.getSourceBufferViewLhs() == m_context.m_project.getBufferViews()[i] ||
-                        m_differ.getSourceBufferViewRhs() == m_context.m_project.getBufferViews()[i]))
+                if (m_keyboardHandler.getDiffer() != null && m_keyboardHandler.getDiffer().hasDiffs() &&
+                    (m_keyboardHandler.getDiffer().getSourceBufferViewLhs() == m_context.m_project.getBufferViews()[i] ||
+                        m_keyboardHandler.getDiffer().getSourceBufferViewRhs() == m_context.m_project.getBufferViews()[i]))
                 {
-                    drawDiffBuffer(m_context.m_project.getBufferViews()[i], gameTime);
+                    m_context.m_drawingHelper.drawDiffBuffer(m_context.m_project.getBufferViews()[i], gameTime, m_keyboardHandler);
                 }
                 else
                 {
@@ -4717,15 +2656,14 @@ namespace Xyglo.Brazil.Xna
                     //if (m_context.m_frustrum.Intersects(bb))
                     if (m_context.m_frustrum.Contains(bb) != ContainmentType.Disjoint)
                     {
-                        m_context.m_drawingHelper.drawFileBuffer(m_context.m_spriteBatch, m_context.m_project.getBufferViews()[i], gameTime, m_brazilContext.m_state, m_buildStdOutView, m_buildStdErrView, m_context.m_zoomLevel, m_currentFontScale);
-                        //m_context.m_drawingHelper.drawFileBuffer(m_context.m_spriteBatch, m_context.m_project.getBufferViews()[i], gameTime, m_brazilContext.m_state, m_buildStdOutView, m_buildStdErrView, m_context.m_zoomLevel, m_currentFontScale);
+                        m_context.m_drawingHelper.drawFileBuffer(m_context.m_spriteBatch, m_context.m_project.getBufferViews()[i], gameTime, m_brazilContext.m_state, m_buildStdOutView, m_buildStdErrView, m_context.m_zoomLevel, m_keyboardHandler.getCurrentFontScale());
                     }
 
                     // Draw a background square for all buffer views if they are coloured
                     //
                     //if (m_context.m_project.getViewMode() == Project.ViewMode.Coloured)
                     //{
-                        m_context.m_drawingHelper.renderQuad(m_context.m_project.getBufferViews()[i].getTopLeft(), m_context.m_project.getBufferViews()[i].getBottomRight(), m_context.m_project.getBufferViews()[i].getBackgroundColour() * 0.05f, m_context.m_spriteBatch);
+                        m_context.m_drawingHelper.renderQuad(m_context.m_project.getBufferViews()[i].getTopLeft(), m_context.m_project.getBufferViews()[i].getBottomRight(), m_context.m_project.getBufferViews()[i].getBackgroundColour(gameTime), m_context.m_spriteBatch);
                     //}
                 }
             }
@@ -4775,7 +2713,7 @@ namespace Xyglo.Brazil.Xna
             {
                 // Get the text screen length back from the drawing method
                 //
-                m_textScreenLength = m_context.m_drawingHelper.drawHelpScreen(m_context.m_overlaySpriteBatch, gameTime, m_context.m_graphics, m_textScreenPositionY);
+                m_textScreenLength = m_context.m_drawingHelper.drawHelpScreen(m_context.m_overlaySpriteBatch, gameTime, m_context.m_graphics, m_keyboardHandler.getTextScreenPositionY());
             }
             else if (m_brazilContext.m_state.equals("Information"))
             {
@@ -4783,7 +2721,7 @@ namespace Xyglo.Brazil.Xna
             }
             else if (m_brazilContext.m_state.equals("Configuration"))
             {
-                drawConfigurationScreen(gameTime);
+                m_context.m_drawingHelper.drawConfigurationScreen(gameTime, m_keyboardHandler);
             }
             else
             {
@@ -4793,7 +2731,7 @@ namespace Xyglo.Brazil.Xna
 
                 // Draw the Overlay HUD
                 //
-                m_context.m_drawingHelper.drawOverlay(m_context.m_overlaySpriteBatch, gameTime, m_context.m_graphics, m_brazilContext.m_state, m_gotoLine, m_keyboard.isShiftDown(), m_keyboard.isCtrlDown(), m_keyboard.isAltDown(),
+                m_context.m_drawingHelper.drawOverlay(m_context.m_overlaySpriteBatch, gameTime, m_context.m_graphics, m_brazilContext.m_state, m_keyboardHandler.getGotoLine(), m_keyboard.isShiftDown(), m_keyboard.isCtrlDown(), m_keyboard.isAltDown(),
                                             m_eye, m_temporaryMessage, m_temporaryMessageStartTime, m_temporaryMessageEndTime);
 
                 // Draw map of BufferViews - want to get rid of this way of doing things and
@@ -4808,7 +2746,7 @@ namespace Xyglo.Brazil.Xna
 
                 // Draw the differ
                 //
-                drawDiffer(gameTime, m_context.m_pannerSpriteBatch);
+                m_context.m_drawingHelper.drawDiffer(gameTime, m_context.m_pannerSpriteBatch, m_brazilContext, m_keyboardHandler);
 
                 // Draw system load
                 //
@@ -4955,80 +2893,6 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
-        /// Draw the differ - it's two mini document overviews and we provide an overlay so that
-        /// we know what position in the diff we're currently looking at.
-        /// </summary>
-        /// <param name="v"></param>
-        protected void drawDiffer(GameTime gameTime, SpriteBatch spriteBatch)
-        {
-            // Don't draw the cursor if we're not the active window or if we're confirming 
-            // something on the screen.
-            //
-            if (m_differ == null || m_brazilContext.m_state .notEquals("DiffPicker") || m_differ.hasDiffs() == false)
-            {
-                return;
-            }
-
-            Color myColour = Color.White;
-
-            m_context.m_drawingHelper.drawBox(spriteBatch, m_differ.getLeftBox(), m_differ.getLeftBoxEnd(), myColour, 0.5f);
-            m_context.m_drawingHelper.drawBox(spriteBatch, m_differ.getRightBox(), m_differ.getRightBoxEnd(), myColour, 0.5f);
-
-            // Modify alpha according to the type of the line
-            //
-            float alpha = 1.0f;
-
-            // Draw LHS preview
-            //
-            foreach (DiffPreview dp in m_differ.getLhsDiffPreview())
-            {
-                if (dp.m_colour == m_differ.m_unchangedColour)
-                {
-                    alpha = 0.5f;
-                }
-                else
-                {
-                    alpha = 0.8f;
-                }
-
-                m_context.m_drawingHelper.drawLine(spriteBatch, dp.m_startPos, dp.m_endPos, dp.m_colour, alpha);
-            }
-
-            // Draw RHS preview
-            //
-            foreach (DiffPreview dp in m_differ.getRhsDiffPreview())
-            {
-                if (dp.m_colour == m_differ.m_unchangedColour)
-                {
-                    alpha = 0.5f;
-                }
-                else
-                {
-                    alpha = 0.8f;
-                }
-
-                m_context.m_drawingHelper.drawLine(spriteBatch, dp.m_startPos, dp.m_endPos, dp.m_colour, alpha);
-            }
-
-            // Now we want to render a position viewer box overlay
-            //
-            float startY = Math.Min(m_differ.getLeftBox().Y + m_differ.getYMargin(), m_differ.getRightBox().Y + m_differ.getYMargin());
-            float endY = Math.Min(m_differ.getLeftBoxEnd().Y - m_differ.getYMargin(), m_differ.getRightBoxEnd().Y - m_differ.getYMargin());
-
-            double diffPercent = ((double)m_diffPosition) / ((double)m_differ.getMaxDiffLength());
-            double height = ((double)m_context.m_project.getSelectedBufferView().getBufferShowLength()) / ((double)m_differ.getMaxDiffLength());
-
-            Vector2 topLeft = new Vector2(m_differ.getLeftBox().X - 10.0f, startY + ((endY - startY) * ((float)diffPercent)));
-            Vector2 topRight = new Vector2(m_differ.getRightBoxEnd().X + 10.0f, startY + ((endY - startY) * ((float)diffPercent)));
-            Vector2 bottomRight = topRight;
-            bottomRight.Y += Math.Max(((float)height * (endY - startY)), 3.0f);
-
-            // Now render the quad
-            //
-            m_context.m_drawingHelper.drawQuad(spriteBatch, topLeft, bottomRight, Color.LightYellow, 0.3f);
-        }
-
-        /// <summary>
         /// This is a list of directories and files based on the current position of the FileSystemView
         /// </summary>
         /// <param name="gameTime"></param>
@@ -5132,7 +2996,7 @@ namespace Xyglo.Brazil.Xna
                         m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(),
                              line,
                              new Vector2((int)startPosition.X, (int)(startPosition.Y + yPosition)),
-                             (lineNumber == m_context.m_fileSystemView.getHighlightIndex() ? m_highlightColour : (lineNumber == endShowing ? Color.White : dirColour)),
+                             (lineNumber == m_context.m_fileSystemView.getHighlightIndex() ? ColourScheme.getHighlightColour() : (lineNumber == endShowing ? Color.White : dirColour)),
                              0,
                              lineOrigin,
                              1.0f,
@@ -5164,8 +3028,8 @@ namespace Xyglo.Brazil.Xna
                 Logger.logMsg("m_directoryHighlight = " + m_directoryHighlight);
 #endif
 
-                line = m_context.m_fileSystemView.getPath() + m_saveFileName;
-                m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), line, new Vector2((int)startPosition.X, (int)startPosition.Y), (m_context.m_fileSystemView.getHighlightIndex() == 0 ? m_highlightColour : dirColour), 0, lineOrigin, 1.0f, 0, 0);
+                line = m_context.m_fileSystemView.getPath() + m_keyboardHandler.getSaveFileName();
+                m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), line, new Vector2((int)startPosition.X, (int)startPosition.Y), (m_context.m_fileSystemView.getHighlightIndex() == 0 ? ColourScheme.getHighlightColour() : dirColour), 0, lineOrigin, 1.0f, 0, 0);
 
                 yPosition += m_context.m_fontManager.getOverlayFont().LineSpacing * 3.0f;
 
@@ -5187,7 +3051,7 @@ namespace Xyglo.Brazil.Xna
                         m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(),
                              line,
                              new Vector2(startPosition.X, startPosition.Y + yPosition),
-                             (lineNumber == m_context.m_fileSystemView.getHighlightIndex() ? m_highlightColour : (lineNumber == endShowing ? Color.White : dirColour)),
+                             (lineNumber == m_context.m_fileSystemView.getHighlightIndex() ? ColourScheme.getHighlightColour() : (lineNumber == endShowing ? Color.White : dirColour)),
                              0,
                              lineOrigin,
                              1.0f,
@@ -5217,7 +3081,7 @@ namespace Xyglo.Brazil.Xna
                         m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(),
                                                  line,
                                                  new Vector2((int)startPosition.X, (int)(startPosition.Y + yPosition)),
-                                                 (lineNumber == m_context.m_fileSystemView.getHighlightIndex() ? m_highlightColour : (lineNumber == endShowing ? Color.White : m_itemColour)),
+                                                 (lineNumber == m_context.m_fileSystemView.getHighlightIndex() ? ColourScheme.getHighlightColour() : (lineNumber == endShowing ? Color.White : ColourScheme.getItemColour())),
                                                  0,
                                                  lineOrigin,
                                                  1.0f,
@@ -5248,138 +3112,6 @@ namespace Xyglo.Brazil.Xna
             //
             m_context.m_overlaySpriteBatch.End();
         }
-
-        /// <summary>
-        /// How to draw a diff'd BufferView on the screen - we key on m_diffPosition rather
-        /// than using the cursor.  Always start from the translated lhs window position.
-        /// </summary>
-        /// <param name="view"></param>
-        /// <param name="gameTime"></param>
-        protected void drawDiffBuffer(BufferView view, GameTime gameTime)
-        {
-            // Only process for diff views
-            //
-            if (view != m_differ.getSourceBufferViewLhs() && view != m_differ.getSourceBufferViewRhs())
-            {
-                return;
-            }
-
-            int sourceLine = m_diffPosition;
-            string line = "";
-            Color colour = Color.White;
-            Vector3 viewSpaceTextPosition = view.getPosition();
-            float yPosition = 0;
-            List<Pair<DiffResult, int>> diffList;
-
-            // Get the diffList generated in the Differ object - this holds all the expanded
-            // diff information which we'll need to adjust for (on the right hand side) if we're
-            // to generate a meaningful side by side diff whilst we scroll through it.
-            //
-            if (view == m_differ.getSourceBufferViewLhs())
-            {
-                diffList = m_differ.getLhsDiff();
-            }
-            else
-            {
-                diffList = m_differ.getRhsDiff();
-            }
-
-
-            // Need to adjust the sourceLine by the number of padding lines in the diffList up to this
-            // point - otherwise we lost alignment as we scroll through the document.
-            //
-            for (int j = 0; j < m_diffPosition; j++)
-            {
-                if (j < diffList.Count)
-                {
-                    if (diffList[j].First == DiffResult.Padding)
-                    {
-                        sourceLine--;
-                    }
-                }
-            }
-
-            // Now iterate down the view and pull in the lines as required
-            //
-            for (int i = 0; i < view.getBufferShowLength(); i++)
-            {
-                if ((i + m_diffPosition) < diffList.Count)
-                {
-                    switch (diffList[i + m_diffPosition].First)
-                    {
-                        case DiffResult.Unchanged:
-                            colour = m_differ.m_unchangedColour;
-
-                            if (sourceLine < view.getFileBuffer().getLineCount())
-                            {
-                                line = view.getFileBuffer().getLine(sourceLine++);
-                            }
-                            // print line
-                            break;
-
-                        case DiffResult.Deleted:
-                            // print deleted line (colour change?)
-                            colour = m_differ.m_deletedColour;
-
-                            if (sourceLine < view.getFileBuffer().getLineCount())
-                            {
-                                line = view.getFileBuffer().getLine(sourceLine++);
-                            }
-                            break;
-
-                        case DiffResult.Inserted:
-                            // print inserted line (colour)
-                            colour = m_differ.m_insertedColour;
-
-                            if (sourceLine < view.getFileBuffer().getLineCount())
-                            {
-                                line = view.getFileBuffer().getLine(sourceLine++);
-                            }
-                            break;
-
-                        case DiffResult.Padding:
-                        default:
-                            colour = m_differ.m_paddingColour;
-                            line = "";
-                            // add a padding line
-                            break;
-                    }
-
-                }
-                else
-                {
-                    // Do something to handle blank lines beyond end of list
-                    //
-                    colour = m_differ.m_paddingColour;
-                    line = "";
-                }
-
-                // Truncate the line as necessary
-                //
-                string drawLine = line.Substring(view.getBufferShowStartX(), Math.Min(line.Length - view.getBufferShowStartX(), view.getBufferShowWidth()));
-                if (view.getBufferShowStartX() + view.getBufferShowWidth() < line.Length)
-                {
-                    drawLine += " [>]";
-                }
-
-                m_context.m_spriteBatch.DrawString(
-                                m_context.m_fontManager.getViewFont(view.getViewSize()),
-                                drawLine,
-                                new Vector2((int)viewSpaceTextPosition.X /* + m_context.m_fontManager.getCharWidth() * xPos */, (int)(viewSpaceTextPosition.Y + yPosition)),
-                                colour,
-                                0,
-                                Vector2.Zero,
-                                m_context.m_fontManager.getTextScale(),
-                                0,
-                                0);
-
-                //sourceLine++;
-
-                yPosition += m_context.m_fontManager.getLineSpacing(view.getViewSize());
-
-            }
-        }
-
 
 
         /// <summary>
@@ -5464,9 +3196,9 @@ namespace Xyglo.Brazil.Xna
 
             // Override this for the diff view
             //
-            if (m_differ != null && m_brazilContext.m_state.equals("DiffPicker"))
+            if (m_keyboardHandler.getDiffer() != null && m_brazilContext.m_state.equals("DiffPicker"))
             {
-                start = m_diffPosition;
+                start = m_keyboardHandler.getDiffPosition();
             }
 
             float length = 0;
@@ -5477,9 +3209,9 @@ namespace Xyglo.Brazil.Xna
             {
                 // Make this work for diff view as well as normal view
                 //
-                if (m_differ != null && m_brazilContext.m_state.equals("DiffPicker"))
+                if (m_keyboardHandler.getDiffer() != null && m_brazilContext.m_state.equals("DiffPicker"))
                 {
-                    length = m_differ.getMaxDiffLength();
+                    length = m_keyboardHandler.getDiffer().getMaxDiffLength();
                 }
                 else
                 {
@@ -5567,74 +3299,6 @@ namespace Xyglo.Brazil.Xna
         }
 
 
-        /// <summary>
-        /// Draw a screen which allows us to configure some settings
-        /// </summary>
-        /// <param name="gameTime"></param>
-        /// <param name="text"></param>
-        protected void drawConfigurationScreen(GameTime gameTime)
-        {
-            Vector3 fp = m_context.m_project.getSelectedBufferView().getPosition();
-
-            // Starting positions
-            //
-            float yPos = 5.5f * m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay);
-            float xPos = 10 * m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay);
-
-            // Start the spritebatch
-            //
-            m_context.m_overlaySpriteBatch.Begin();
-
-            if (m_editConfigurationItem) // Edit a single configuration item
-            {
-                string text = "Edit configuration item";
-
-                m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), text, new Vector2((int)xPos, (int)yPos), Color.White, 0, Vector2.Zero, 1.0f, 0, 0);
-                yPos += m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay) * 2;
-
-                m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), m_context.m_project.getConfigurationItem(m_configPosition).Name, new Vector2((int)xPos, (int)yPos), m_itemColour, 0, Vector2.Zero, 1.0f, 0, 0);
-                yPos += m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay);
-
-                string configString = m_editConfigurationItemValue;
-                if (configString.Length > m_context.m_project.getSelectedBufferView().getBufferShowWidth())
-                {
-                    configString = "[..]" + configString.Substring(configString.Length - m_context.m_project.getSelectedBufferView().getBufferShowWidth() + 4, m_context.m_project.getSelectedBufferView().getBufferShowWidth() - 4);
-                }
-
-                m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), configString, new Vector2((int)xPos, (int)yPos), m_highlightColour, 0, Vector2.Zero, 1.0f, 0, 0);
-            }
-            else
-            {
-                string text = "Configuration Items";
-
-                m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), text, new Vector2((int)xPos, (int)yPos), Color.White, 0, Vector2.Zero, 1.0f, 0, 0);
-                yPos += m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay) * 2;
-
-                // Write all the configuration items out - if we're highlight one of them then change
-                // the colour.
-                //
-                for (int i = 0; i < m_context.m_project.getConfigurationListLength(); i++)
-                {
-                    string configItem = m_context.m_project.estimateFileStringTruncation("", m_context.m_project.getConfigurationItem(i).Value, 60 - m_context.m_project.getConfigurationItem(i).Name.Length);
-                    //string item = m_context.m_project.getConfigurationItem(i).Name + "  =  " + m_context.m_project.getConfigurationItem(i).Value;
-                    string item = m_context.m_project.getConfigurationItem(i).Name + "  =  " + configItem;
-
-                    item = m_context.m_project.estimateFileStringTruncation("", item, m_context.m_project.getSelectedBufferView().getBufferShowWidth());
-
-                    /*
-                    if (item.Length > m_context.m_project.getSelectedBufferView().getBufferShowWidth())
-                    {
-                        item = item.Substring(m_configXOffset, m_context.m_project.getSelectedBufferView().getBufferShowWidth());
-                    }
-                    */
-
-                    m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), item, new Vector2((int)xPos, (int)yPos), (i == m_configPosition ? m_highlightColour : m_itemColour), 0, Vector2.Zero, 1.0f, 0, 0);
-                    yPos += m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay);
-                }
-            }
-
-            m_context.m_overlaySpriteBatch.End();
-        }
 
         /// <summary>
         /// Perform an external build
@@ -6200,5 +3864,243 @@ namespace Xyglo.Brazil.Xna
                 throw new Exception("Unrecognized state " + state.m_name);
             }
         }
+
+        ///////////////// MEMBER VARIABLES //////////////////
+        /// <summary>
+        /// Eye/Camera location
+        /// </summary>
+        protected Vector3 m_eye = new Vector3(0f, 0f, 500f);  // 275 is good
+
+        /// <summary>
+        /// Camera target
+        /// </summary>
+        protected Vector3 m_target;
+
+        /// <summary>
+        /// Interloper object - our game 
+        /// </summary>
+        protected BrazilInterloper m_interloper = null;
+
+        /// <summary>
+        /// We can use this to communicate something to the user about the last command
+        /// </summary>
+        protected string m_temporaryMessage = "";
+
+        /// <summary>
+        /// Start time for the temporary message
+        /// </summary>
+        protected double m_temporaryMessageStartTime;
+
+        /// <summary>
+        /// End time for the temporary message
+        /// </summary>
+        protected double m_temporaryMessageEndTime;
+
+        /// <summary>
+        /// Used when displaying licence messages
+        /// </summary>
+        private bool m_flipFlop = true;
+
+        /// <summary>
+        /// Something to do with licence messages
+        /// </summary>
+        private double m_nextLicenceMessage = 0.0f;
+
+        /// <summary>
+        /// File system watcher
+        /// </summary>
+        protected List<FileSystemWatcher> m_watcherList = new List<FileSystemWatcher>();
+
+        /// <summary>
+        /// Position in which we should open or create a new screen
+        /// </summary>
+        protected BufferView.ViewPosition m_newPosition;
+
+        /// <summary>
+        /// Store the last performance counter for CPU
+        /// </summary>
+        protected CounterSample m_lastCPUSample;
+
+        /// <summary>
+        /// Store the last performance counter for CPU
+        /// </summary>
+        protected CounterSample m_lastMemSample;
+
+        /// <summary>
+        /// Number of milliseconds between system status fetches
+        /// </summary>
+        protected TimeSpan m_systemFetchSpan = new TimeSpan(0, 0, 0, 1, 0);
+
+        /// <summary>
+        /// When we last fetched the system status
+        /// </summary>
+        protected TimeSpan m_lastSystemFetch = new TimeSpan(0, 0, 0, 0, 0);
+
+        /// <summary>
+        /// Percentage of system load
+        /// </summary>
+        protected float m_systemLoad = 0.0f;
+
+        /// <summary>
+        /// Percentage of system load
+        /// </summary>
+        protected float m_memoryAvailable = 0.0f;
+
+        /// <summary>
+        /// Physical Memory 
+        /// </summary>
+        protected float m_physicalMemory;
+
+        /// <summary>
+        /// The new destination for our Eye position
+        /// </summary>
+        protected Vector3 m_newEyePosition;
+
+        /// <summary>
+        /// Original eye position - we know where we came from
+        /// </summary>
+        protected Vector3 m_originalEyePosition;
+
+        /// <summary>
+        /// Eye acceleration vector
+        /// </summary>
+        protected Vector3 m_eyeAcc = Vector3.Zero;
+
+        /// <summary>
+        /// Eye velocity vector
+        /// </summary>
+        protected Vector3 m_eyeVely = Vector3.Zero;
+
+        /// <summary>
+        /// Are we changing eye position?
+        /// </summary>
+        protected bool m_changingEyePosition = false;
+
+        /// <summary>
+        /// Used when changing the eye position - movement timer
+        /// </summary>
+        protected TimeSpan m_changingPositionLastGameTime;
+
+        /// <summary>
+        /// Frame rate of animation when moving between eye positions
+        /// </summary>
+        protected TimeSpan m_movementPause = new TimeSpan(0, 0, 0, 0, 10);
+
+        /// <summary>
+        /// This is the vector we're flying in - used to increment position each frame when
+        /// moving between eye positions.
+        /// </summary>
+        protected Vector3 m_vFly;
+
+        /// <summary>
+        /// If our target position is not centred below our eye then we also have a vector here we need to
+        /// modify.
+        /// </summary>
+        protected Vector3 m_vFlyTarget;
+
+        /// <summary>
+        /// How many steps between eye start and eye end fly position
+        /// </summary>
+        protected int m_flySteps = 10;
+
+        /// <summary>
+        /// Worker thread for the PerformanceCounters
+        /// </summary>
+        protected PerformanceWorker m_counterWorker;
+
+        /// <summary>
+        /// The thread that is used for the counter
+        /// </summary>
+        protected Thread m_counterWorkerThread;
+
+        /// <summary>
+        /// SmartHelp worker thread
+        /// </summary>
+        protected SmartHelpWorker m_smartHelpWorker;
+
+        /// <summary>
+        /// The thread that is used for the counter
+        /// </summary>
+        protected Thread m_smartHelpWorkerThread;
+
+        /// <summary>
+        /// Worker thread for the Kinect management
+        /// </summary>
+        protected KinectWorker m_kinectWorker;
+
+        /// <summary>
+        /// The thread that is used for Kinect
+        /// </summary>
+        protected Thread m_kinectWorkerThread;
+
+        /// <summary>
+        /// View for the Standard Output of a build command
+        /// </summary>
+        protected BufferView m_buildStdOutView;
+
+        /// <summary>
+        /// View for the Standard Error of a build command
+        /// </summary>
+        protected BufferView m_buildStdErrView;
+
+        /// <summary>
+        /// Process for running builds
+        /// </summary>
+        protected Process m_buildProcess = null;
+
+        /// <summary>
+        /// Length of information screen - so we know if we can page up or down
+        /// </summary>
+        protected int m_textScreenLength = 0;
+
+        /// <summary>
+        /// Testing whether arrived in bounding sphere
+        /// </summary>
+        protected BoundingSphere m_testArrived = new BoundingSphere();
+
+        /// <summary>
+        /// Test result
+        /// </summary>
+        protected ContainmentType m_testResult;
+
+        /// <summary>
+        /// Store the last window size in case we're resizing
+        /// </summary>
+        protected Vector2 m_lastWindowSize = Vector2.Zero;
+
+        /// <summary>
+        /// FrameCounter for counting frames
+        /// </summary>
+        protected FrameCounter m_frameCounter = new FrameCounter();
+
+        /// <summary>
+        /// Context holds our graphics and state context
+        /// </summary>
+        protected XygloContext m_context;
+
+        /// <summary>
+        /// The BrazilContext
+        /// </summary>
+        protected BrazilContext m_brazilContext;
+
+        /// <summary>
+        /// Holds our mouse handling code
+        /// </summary>
+        protected XygloMouse m_mouse;
+
+        /// <summary>
+        /// Keyboard manager
+        /// </summary>
+        protected XygloKeyboard m_keyboard;
+
+        /// <summary>
+        /// Keyboard handler
+        /// </summary>
+        protected XygloKeyboardHandler m_keyboardHandler;
+
+        /// <summary>
+        /// XygloGraphics helper
+        /// </summary>
+        protected XygloGraphics m_graphics;
     }
 }

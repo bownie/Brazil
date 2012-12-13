@@ -1394,5 +1394,288 @@ namespace Xyglo.Brazil.Xna
             spriteBatch.End();
         }
 
+        /// <summary>
+        /// Draw the differ - it's two mini document overviews and we provide an overlay so that
+        /// we know what position in the diff we're currently looking at.
+        /// </summary>
+        /// <param name="v"></param>
+        public void drawDiffer(GameTime gameTime, SpriteBatch spriteBatch, BrazilContext brazilContext, XygloKeyboardHandler keyboardHandler)
+        {
+            // Fetch local ref
+            //
+            Differ differ = keyboardHandler.getDiffer();
+
+            // Don't draw the cursor if we're not the active window or if we're confirming 
+            // something on the screen.
+            //
+            if (differ == null || brazilContext.m_state.notEquals("DiffPicker") || differ.hasDiffs() == false)
+            {
+                return;
+            }
+
+            Color myColour = Color.White;
+
+            m_context.m_drawingHelper.drawBox(spriteBatch, differ.getLeftBox(), differ.getLeftBoxEnd(), myColour, 0.5f);
+            m_context.m_drawingHelper.drawBox(spriteBatch, differ.getRightBox(), differ.getRightBoxEnd(), myColour, 0.5f);
+
+            // Modify alpha according to the type of the line
+            //
+            float alpha = 1.0f;
+
+            // Draw LHS preview
+            //
+            foreach (DiffPreview dp in differ.getLhsDiffPreview())
+            {
+                if (dp.m_colour == differ.m_unchangedColour)
+                {
+                    alpha = 0.5f;
+                }
+                else
+                {
+                    alpha = 0.8f;
+                }
+
+                m_context.m_drawingHelper.drawLine(spriteBatch, dp.m_startPos, dp.m_endPos, dp.m_colour, alpha);
+            }
+
+            // Draw RHS preview
+            //
+            foreach (DiffPreview dp in differ.getRhsDiffPreview())
+            {
+                if (dp.m_colour == differ.m_unchangedColour)
+                {
+                    alpha = 0.5f;
+                }
+                else
+                {
+                    alpha = 0.8f;
+                }
+
+                m_context.m_drawingHelper.drawLine(spriteBatch, dp.m_startPos, dp.m_endPos, dp.m_colour, alpha);
+            }
+
+            // Now we want to render a position viewer box overlay
+            //
+            float startY = Math.Min(differ.getLeftBox().Y + differ.getYMargin(), differ.getRightBox().Y + differ.getYMargin());
+            float endY = Math.Min(differ.getLeftBoxEnd().Y - differ.getYMargin(), differ.getRightBoxEnd().Y - differ.getYMargin());
+
+            double diffPercent = ((double)keyboardHandler.getDiffPosition()) / ((double)differ.getMaxDiffLength());
+            double height = ((double)m_context.m_project.getSelectedBufferView().getBufferShowLength()) / ((double)differ.getMaxDiffLength());
+
+            Vector2 topLeft = new Vector2(differ.getLeftBox().X - 10.0f, startY + ((endY - startY) * ((float)diffPercent)));
+            Vector2 topRight = new Vector2(differ.getRightBoxEnd().X + 10.0f, startY + ((endY - startY) * ((float)diffPercent)));
+            Vector2 bottomRight = topRight;
+            bottomRight.Y += Math.Max(((float)height * (endY - startY)), 3.0f);
+
+            // Now render the quad
+            //
+            m_context.m_drawingHelper.drawQuad(spriteBatch, topLeft, bottomRight, Color.LightYellow, 0.3f);
+        }
+
+        /// <summary>
+        /// How to draw a diff'd BufferView on the screen - we key on m_diffPosition rather
+        /// than using the cursor.  Always start from the translated lhs window position.
+        /// </summary>
+        /// <param name="view"></param>
+        /// <param name="gameTime"></param>
+        public void drawDiffBuffer(BufferView view, GameTime gameTime, XygloKeyboardHandler keyboardHandler)
+        {
+            Differ differ = keyboardHandler.getDiffer();
+
+            // Only process for diff views
+            //
+            if (view != differ.getSourceBufferViewLhs() && view != differ.getSourceBufferViewRhs())
+            {
+                return;
+            }
+
+            int sourceLine = keyboardHandler.getDiffPosition();
+            string line = "";
+            Color colour = Color.White;
+            Vector3 viewSpaceTextPosition = view.getPosition();
+            float yPosition = 0;
+            List<Pair<DiffResult, int>> diffList;
+
+            // Get the diffList generated in the Differ object - this holds all the expanded
+            // diff information which we'll need to adjust for (on the right hand side) if we're
+            // to generate a meaningful side by side diff whilst we scroll through it.
+            //
+            if (view == differ.getSourceBufferViewLhs())
+            {
+                diffList = differ.getLhsDiff();
+            }
+            else
+            {
+                diffList = differ.getRhsDiff();
+            }
+
+
+            // Need to adjust the sourceLine by the number of padding lines in the diffList up to this
+            // point - otherwise we lost alignment as we scroll through the document.
+            //
+            for (int j = 0; j < keyboardHandler.getDiffPosition(); j++)
+            {
+                if (j < diffList.Count)
+                {
+                    if (diffList[j].First == DiffResult.Padding)
+                    {
+                        sourceLine--;
+                    }
+                }
+            }
+
+            // Now iterate down the view and pull in the lines as required
+            //
+            for (int i = 0; i < view.getBufferShowLength(); i++)
+            {
+                if ((i + keyboardHandler.getDiffPosition()) < diffList.Count)
+                {
+                    switch (diffList[i + keyboardHandler.getDiffPosition()].First)
+                    {
+                        case DiffResult.Unchanged:
+                            colour = differ.m_unchangedColour;
+
+                            if (sourceLine < view.getFileBuffer().getLineCount())
+                            {
+                                line = view.getFileBuffer().getLine(sourceLine++);
+                            }
+                            // print line
+                            break;
+
+                        case DiffResult.Deleted:
+                            // print deleted line (colour change?)
+                            colour = differ.m_deletedColour;
+
+                            if (sourceLine < view.getFileBuffer().getLineCount())
+                            {
+                                line = view.getFileBuffer().getLine(sourceLine++);
+                            }
+                            break;
+
+                        case DiffResult.Inserted:
+                            // print inserted line (colour)
+                            colour = differ.m_insertedColour;
+
+                            if (sourceLine < view.getFileBuffer().getLineCount())
+                            {
+                                line = view.getFileBuffer().getLine(sourceLine++);
+                            }
+                            break;
+
+                        case DiffResult.Padding:
+                        default:
+                            colour = differ.m_paddingColour;
+                            line = "";
+                            // add a padding line
+                            break;
+                    }
+
+                }
+                else
+                {
+                    // Do something to handle blank lines beyond end of list
+                    //
+                    colour = differ.m_paddingColour;
+                    line = "";
+                }
+
+                // Truncate the line as necessary
+                //
+                string drawLine = line.Substring(view.getBufferShowStartX(), Math.Min(line.Length - view.getBufferShowStartX(), view.getBufferShowWidth()));
+                if (view.getBufferShowStartX() + view.getBufferShowWidth() < line.Length)
+                {
+                    drawLine += " [>]";
+                }
+
+                m_context.m_spriteBatch.DrawString(
+                                m_context.m_fontManager.getViewFont(view.getViewSize()),
+                                drawLine,
+                                new Vector2((int)viewSpaceTextPosition.X /* + m_context.m_fontManager.getCharWidth() * xPos */, (int)(viewSpaceTextPosition.Y + yPosition)),
+                                colour,
+                                0,
+                                Vector2.Zero,
+                                m_context.m_fontManager.getTextScale(),
+                                0,
+                                0);
+
+                //sourceLine++;
+
+                yPosition += m_context.m_fontManager.getLineSpacing(view.getViewSize());
+
+            }
+        }
+
+        /// <summary>
+        /// Draw a screen which allows us to configure some settings
+        /// </summary>
+        /// <param name="gameTime"></param>
+        /// <param name="text"></param>
+        public void drawConfigurationScreen(GameTime gameTime, XygloKeyboardHandler keyboardHandler)
+        {
+            bool editConfigurationItem = keyboardHandler.getEditConfigurationItem();
+            string editConfigurationItemValue = keyboardHandler.getEditConfigurationItemValue();
+
+            Vector3 fp = m_context.m_project.getSelectedBufferView().getPosition();
+
+            // Starting positions
+            //
+            float yPos = 5.5f * m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay);
+            float xPos = 10 * m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay);
+
+            // Start the spritebatch
+            //
+            m_context.m_overlaySpriteBatch.Begin();
+
+            if (editConfigurationItem) // Edit a single configuration item
+            {
+                string text = "Edit configuration item";
+
+                m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), text, new Vector2((int)xPos, (int)yPos), Color.White, 0, Vector2.Zero, 1.0f, 0, 0);
+                yPos += m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay) * 2;
+
+                m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), m_context.m_project.getConfigurationItem(keyboardHandler.getConfigPosition()).Name, new Vector2((int)xPos, (int)yPos), ColourScheme.getItemColour(), 0, Vector2.Zero, 1.0f, 0, 0);
+                yPos += m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay);
+
+                string configString = editConfigurationItemValue;
+                if (configString.Length > m_context.m_project.getSelectedBufferView().getBufferShowWidth())
+                {
+                    configString = "[..]" + configString.Substring(configString.Length - m_context.m_project.getSelectedBufferView().getBufferShowWidth() + 4, m_context.m_project.getSelectedBufferView().getBufferShowWidth() - 4);
+                }
+
+                m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), configString, new Vector2((int)xPos, (int)yPos), ColourScheme.getHighlightColour(), 0, Vector2.Zero, 1.0f, 0, 0);
+            }
+            else
+            {
+                string text = "Configuration Items";
+
+                m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), text, new Vector2((int)xPos, (int)yPos), Color.White, 0, Vector2.Zero, 1.0f, 0, 0);
+                yPos += m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay) * 2;
+
+                // Write all the configuration items out - if we're highlight one of them then change
+                // the colour.
+                //
+                for (int i = 0; i < m_context.m_project.getConfigurationListLength(); i++)
+                {
+                    string configItem = m_context.m_project.estimateFileStringTruncation("", m_context.m_project.getConfigurationItem(i).Value, 60 - m_context.m_project.getConfigurationItem(i).Name.Length);
+                    //string item = m_context.m_project.getConfigurationItem(i).Name + "  =  " + m_context.m_project.getConfigurationItem(i).Value;
+                    string item = m_context.m_project.getConfigurationItem(i).Name + "  =  " + configItem;
+
+                    item = m_context.m_project.estimateFileStringTruncation("", item, m_context.m_project.getSelectedBufferView().getBufferShowWidth());
+
+                    /*
+                    if (item.Length > m_context.m_project.getSelectedBufferView().getBufferShowWidth())
+                    {
+                        item = item.Substring(m_configXOffset, m_context.m_project.getSelectedBufferView().getBufferShowWidth());
+                    }
+                    */
+
+                    m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), item, new Vector2((int)xPos, (int)yPos), (i == keyboardHandler.getConfigPosition() ? ColourScheme.getHighlightColour() : ColourScheme.getItemColour()), 0, Vector2.Zero, 1.0f, 0, 0);
+                    yPos += m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay);
+                }
+            }
+
+            m_context.m_overlaySpriteBatch.End();
+        }
     }
+
 }

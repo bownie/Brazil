@@ -17,6 +17,7 @@ namespace Xyglo.Brazil.Xna
         public event BufferViewChangeEventHandler BufferViewChangeEvent;
         public event EyeChangeEventHandler EyeChangeEvent;
         public event NewBufferViewEventHandler NewBufferViewEvent;
+        public event CleanExitEventHandler CleanExitEvent;
 
         /// <summary>
         /// Convenience method for using the event
@@ -63,6 +64,16 @@ namespace Xyglo.Brazil.Xna
         {
             if (NewBufferViewEvent != null) NewBufferViewEvent(this, e);
         }
+
+        /// <summary>
+        ///  Clean exit event
+        /// </summary>
+        /// <param name="e"></param>
+        protected virtual void OnCleanExitEvent(CleanExitEventArgs e)
+        {
+            if (CleanExitEvent != null) CleanExitEvent(this, e);
+        }
+         
 
     }
 }

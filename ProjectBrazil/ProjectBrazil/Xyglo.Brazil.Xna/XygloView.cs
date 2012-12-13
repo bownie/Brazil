@@ -298,7 +298,7 @@ namespace Xyglo.Brazil.Xna
         /// Increment view size - returning the scale of the current font according to the new font we're
         /// selecting so we can scale up smoothly.
         /// </summary>
-        public double incrementViewSize(int windowWidth, int windowHeight, FontManager fontManager)
+        public double incrementViewSize(GameTime gameTime, int windowWidth, int windowHeight, FontManager fontManager)
         {
             double scale = 1.0f;
 
@@ -310,6 +310,10 @@ namespace Xyglo.Brazil.Xna
 
             setViewSize(m_viewSize, windowWidth, windowHeight, fontManager);
 
+            // Keep cursor visible and flash
+            keepVisible();
+            flashBufferView(gameTime);
+
             return scale;
         }
 
@@ -317,7 +321,7 @@ namespace Xyglo.Brazil.Xna
         /// Decrement view size - returning the scale of the current font according to the new font
         /// we're selecting so we can scale down smoothly.
         /// </summary>
-        public double decrementViewSize(int windowWidth, int windowHeight, FontManager fontManager)
+        public double decrementViewSize(GameTime gameTime, int windowWidth, int windowHeight, FontManager fontManager)
         {
             double scale = 1.0f;
             if (m_viewSize > ViewSize.Micro)
@@ -327,6 +331,11 @@ namespace Xyglo.Brazil.Xna
             }
 
             setViewSize(m_viewSize, windowWidth, windowHeight, fontManager);
+
+            // Keep cursor visible and flash
+            keepVisible();
+            flashBufferView(gameTime);
+
 
             return scale;
         }
@@ -359,6 +368,21 @@ namespace Xyglo.Brazil.Xna
             }
         }
 
+        protected float m_minAlpha = 0.05f; 
+        protected double m_startFlashTime = 0.0f;  // seconds
+        protected double m_endFlashTime = 0.0f; // seconds
+        protected double m_flashInterval = 0.1f; // seconds
+
+        /// <summary>
+        /// Provoke the background to flash for a period
+        /// </summary>
+        /// <param name="gameTime"></param>
+        protected void flashBufferView(GameTime gameTime)
+        {
+            m_startFlashTime = gameTime.TotalGameTime.TotalSeconds;
+            m_endFlashTime = m_startFlashTime + m_flashInterval;
+            //Logger.logMsg("START GAME TIME = " + m_startFlashTime);
+        }
 
     }
 }

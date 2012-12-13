@@ -106,6 +106,7 @@
     <Compile Include="BrazilWorld.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BrazilContext.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BufferView.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\ColourScheme.cs" />
     <Compile Include="Xyglo.Brazil.Xna\EyePerturber.cs" />
     <Compile Include="Xyglo.Brazil.Xna\FrameCounter.cs" />
     <Compile Include="Xyglo.Brazil.Xna\Model.cs" />
