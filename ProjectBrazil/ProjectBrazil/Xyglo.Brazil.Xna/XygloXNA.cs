@@ -68,6 +68,8 @@ namespace Xyglo.Brazil.Xna
             m_keyboardHandler.BufferViewChangeEvent += new BufferViewChangeEventHandler(handleBufferViewChange);
             m_keyboardHandler.ChangePositionEvent += new PositionChangeEventHandler(handleFlyToPosition);
             m_keyboardHandler.CleanExitEvent += new CleanExitEventHandler(handleCleanExit);
+            m_keyboardHandler.CommandEvent += new CommandEventHandler(handleCommand);
+
             // FontManager
             //
             m_context.m_fontManager = new FontManager();
@@ -249,7 +251,7 @@ namespace Xyglo.Brazil.Xna
             //
             if (m_context.m_project.getFileBuffers().Count == 0)
             {
-                addNewFileBuffer();
+                addNewFileBuffer(BufferView.ViewPosition.Right);
             }
             else
             {
@@ -1031,33 +1033,32 @@ namespace Xyglo.Brazil.Xna
             // For PositionScreen state we want not handle events here other than direction keys - this section
             // decides where to place a new, opened or copied BufferView.
             //
+            BufferView.ViewPosition position = XygloView.ViewPosition.Above;
+
             if (m_brazilContext.m_state.equals("PositionScreenOpen") || m_brazilContext.m_state.equals("PositionScreenNew") || m_brazilContext.m_state.equals("PositionScreenCopy"))
             {
                 bool gotSelection = false;
 
                 if (keyList.Contains(Keys.Left))
                 {
-                    Logger.logMsg("XygloXNA::processMetaCommands() - position screen left");
-                    m_newPosition = BufferView.ViewPosition.Left;
+                    position = BufferView.ViewPosition.Left;
                     gotSelection = true;
                 }
                 else if (keyList.Contains(Keys.Right))
                 {
-                    m_newPosition = BufferView.ViewPosition.Right;
+                    position = BufferView.ViewPosition.Right;
+                    //return true;
                     gotSelection = true;
-                    Logger.logMsg("XygloXNA::processMetaCommands() - position screen right");
                 }
                 else if (keyList.Contains(Keys.Up))
                 {
-                    m_newPosition = BufferView.ViewPosition.Above;
+                    position = BufferView.ViewPosition.Above;
                     gotSelection = true;
-                    Logger.logMsg("XygloXNA::processMetaCommands() - position screen up");
                 }
                 else if (keyList.Contains(Keys.Down))
                 {
-                    m_newPosition = BufferView.ViewPosition.Below;
+                    position = BufferView.ViewPosition.Below;
                     gotSelection = true;
-                    Logger.logMsg("XygloXNA::processMetaCommands() - position screen down");
                 }
 
                 // If we have discovered a position for our pending new window
@@ -1068,7 +1069,7 @@ namespace Xyglo.Brazil.Xna
                     {
                         // Open the file 
                         //
-                        BufferView newBV = addNewFileBuffer(m_keyboardHandler.getSelectedFile(), m_keyboardHandler.getFileIsReadOnly(), m_keyboardHandler.getFileIsTailing());
+                        BufferView newBV = addNewFileBuffer(position, m_keyboardHandler.getSelectedFile(), m_keyboardHandler.getFileIsReadOnly(), m_keyboardHandler.getFileIsTailing());
                         setActiveBuffer(newBV);
                         m_brazilContext.m_state = State.Test("TextEditing");
                     }
@@ -1076,7 +1077,7 @@ namespace Xyglo.Brazil.Xna
                     {
                         // Use the convenience function
                         //
-                        BufferView newBV = addNewFileBuffer();
+                        BufferView newBV = addNewFileBuffer(position);
                         setActiveBuffer(newBV);
                         m_brazilContext.m_state = State.Test("TextEditing");
                     }
@@ -1084,7 +1085,7 @@ namespace Xyglo.Brazil.Xna
                     {
                         // Use the copy constructor
                         //
-                        BufferView newBV = new BufferView(m_context.m_fontManager, m_context.m_project.getSelectedBufferView(), m_newPosition);
+                        BufferView newBV = new BufferView(m_context.m_fontManager, m_context.m_project.getSelectedBufferView(), position);
                         m_context.m_project.addBufferView(newBV);
                         setActiveBuffer(newBV);
                         m_brazilContext.m_state = State.Test("TextEditing");
@@ -1166,13 +1167,13 @@ namespace Xyglo.Brazil.Xna
                 //
                 if (m_context.m_project != null)
                 {
-                    //processActionKey(gameTime, keyAction);
-                    m_keyboardHandler.processActionKey(gameTime, this, m_eye, keyAction);
-
-                    // do any key combinations
+                    // Check and continue if consumed
                     //
-                    //if (processCombinationsCommands(gameTime, keyActionList))
-                        //continue;
+                    if (m_keyboardHandler.processActionKey(gameTime, this, m_eye, keyAction))
+                        continue;
+
+                    // Check and continue if consumed
+                    //
                     if (m_keyboardHandler.processCombinationsCommands(gameTime, keyActionList))
                         continue;
                 }
@@ -1900,7 +1901,7 @@ namespace Xyglo.Brazil.Xna
         /// <summary>
         /// Add a new FileBuffer and a new BufferView and set this as active
         /// </summary>
-        protected BufferView addNewFileBuffer(string filename = null, bool readOnly = false, bool tailFile = false)
+        protected BufferView addNewFileBuffer(BufferView.ViewPosition position, string filename = null, bool readOnly = false, bool tailFile = false)
         {
             BufferView newBV = null;
             FileBuffer newFB = (filename == null ? new FileBuffer() : new FileBuffer(filename, readOnly));
@@ -1919,7 +1920,7 @@ namespace Xyglo.Brazil.Xna
             Vector3 newPos = Vector3.Zero;
             if (m_context.m_project.getSelectedBufferView() != null)
             {
-                newPos = getFreeBufferViewPosition(m_newPosition); // use the m_newPosition for the direction
+                newPos = getFreeBufferViewPosition(position); // use the m_newPosition for the direction
             }
 
             newBV = new BufferView(m_context.m_fontManager, newFB, newPos, 0, 20, fileIndex, readOnly);
@@ -1950,36 +1951,70 @@ namespace Xyglo.Brazil.Xna
             return newBV;
         }
 
+        protected Vector3 getFreeBufferViewPosition(BufferView.ViewPosition position)
+        {
+            return getFreeBufferViewBoundingBox(position).Min;
+        }
+
         /// <summary>
         /// Find a free position around the active view
         /// </summary>
         /// <param name="position"></param>
         /// <returns></returns>
-        protected Vector3 getFreeBufferViewPosition(BufferView.ViewPosition position)
+        protected BoundingBox getFreeBufferViewBoundingBox(BufferView.ViewPosition position)
         {
             bool occupied = false;
 
             // Initial new pos is here from active BufferView
             //
-            Vector3 newPos = m_context.m_project.getSelectedBufferView().calculateRelativePositionVector(position);
+            //Vector3 newPos = m_context.m_project.getSelectedBufferView().calculateRelativePositionVector(position);
+            BoundingBox bb = m_context.m_project.getSelectedBufferView().calculateRelativePositionBoundingBox(position, XygloView.getDefaultBufferShowWidth(), XygloView.getDefaultBufferShowLength());
+
             do
             {
                 occupied = false;
 
                 foreach (BufferView cur in m_context.m_project.getBufferViews())
                 {
-                    if (cur.getPosition() == newPos)
+                    BoundingBox curBB = cur.getSpacedBoundingBox();
+                    while (cur.getBoundingBox().Intersects(bb))
                     {
                         // We get the next available slot in the same direction away from original
                         //
-                        newPos = cur.calculateRelativePositionVector(position);
+                        //bb = cur.calculateRelativePositionBoundingBox(position, XygloView.getDefaultBufferShowWidth(), XygloView.getDefaultBufferShowLength());
+
+                        // Move the new bounding box away by position
+                        switch (position)
+                        {
+                            case XygloView.ViewPosition.Left:
+                                bb.Min.X -= m_context.m_fontManager.getCharWidth(XygloView.getDefaultViewSize());
+                                bb.Max.X -= m_context.m_fontManager.getCharWidth(XygloView.getDefaultViewSize());
+                                break;
+
+                            case XygloView.ViewPosition.Right:
+                                bb.Min.X += m_context.m_fontManager.getCharWidth(XygloView.getDefaultViewSize());
+                                bb.Max.X += m_context.m_fontManager.getCharWidth(XygloView.getDefaultViewSize());
+                                break;
+
+                            case XygloView.ViewPosition.Above:
+                                bb.Min.Y -= m_context.m_fontManager.getCharHeight(XygloView.getDefaultViewSize());
+                                bb.Max.Y -= m_context.m_fontManager.getCharHeight(XygloView.getDefaultViewSize());
+                                break;
+
+                            case XygloView.ViewPosition.Below:
+                                bb.Min.Y += m_context.m_fontManager.getCharHeight(XygloView.getDefaultViewSize());
+                                bb.Max.Y += m_context.m_fontManager.getCharHeight(XygloView.getDefaultViewSize());
+                                break;
+
+                        }
+
                         occupied = true;
                         break;
                     }
                 }
             } while (occupied);
 
-            return newPos;
+            return bb;
         }
 
         /// <summary>
@@ -2004,6 +2039,28 @@ namespace Xyglo.Brazil.Xna
         protected void handleTemporaryMessage(object sender, TextEventArgs e)
         {
             setTemporaryMessage(e.getText(), e.getDuration(), e.getGameTime());
+        }
+
+        /// <summary>
+        /// Handle commands
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected void handleCommand(object sender, CommandEventArgs e)
+        {
+            switch (e.getCommand())
+            {
+                case XygloCommand.Build:
+                    doBuildCommand(e.getGameTime());
+                    break;
+
+                case XygloCommand.AlternateBuild:
+                    doBuildCommand(e.getGameTime(), e.getArguments());
+                    break;
+
+                default:
+                    throw new XygloException("handleCommand", "Unrecognised command event");
+            }
         }
 
         /// <summary>
@@ -2062,7 +2119,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="e"></param>
         protected void handleNewBufferView(object sender, NewBufferViewEventArgs e)
         {
-            BufferView newBv = addNewFileBuffer(e.getFileName());
+            BufferView newBv = addNewFileBuffer(e.getViewPosition(), e.getFileName());
             setHighlightAndCenter(newBv, e.getScreenPosition());
         }
 
@@ -2534,8 +2591,6 @@ namespace Xyglo.Brazil.Xna
 
             //m_spriteBatch.End();
 
-            
-
             // Now we can draw any temporary drawables:
             // List to remove
             //
@@ -2575,7 +2630,10 @@ namespace Xyglo.Brazil.Xna
             //
             List<XygloXnaDrawable> overviewList = m_context.m_drawableComponents.Values.ToList();
             overviewList.AddRange(m_context.m_temporaryDrawables.Values.ToList());
-            m_context.m_drawingHelper.drawXnaDrawableOverview(m_context.m_graphics.GraphicsDevice, gameTime, overviewList);
+
+            m_context.m_overlaySpriteBatch.Begin();
+            m_context.m_drawingHelper.drawXnaDrawableOverview(m_context.m_graphics.GraphicsDevice, gameTime, overviewList, m_context.m_overlaySpriteBatch);
+            m_context.m_overlaySpriteBatch.End();
         }
 
         /// <summary>
@@ -2717,7 +2775,7 @@ namespace Xyglo.Brazil.Xna
             }
             else if (m_brazilContext.m_state.equals("Information"))
             {
-                m_context.m_drawingHelper.drawInformationScreen(m_context.m_overlaySpriteBatch, gameTime, m_context.m_graphics, out m_textScreenLength);
+                m_context.m_drawingHelper.drawInformationScreen(m_context.m_overlaySpriteBatch, gameTime, m_context.m_graphics, m_keyboardHandler.getTextScreenPositionY(), out m_textScreenLength);
             }
             else if (m_brazilContext.m_state.equals("Configuration"))
             {
@@ -3299,7 +3357,6 @@ namespace Xyglo.Brazil.Xna
         }
 
 
-
         /// <summary>
         /// Perform an external build
         /// </summary>
@@ -3334,188 +3391,196 @@ namespace Xyglo.Brazil.Xna
                 if (commandList.Length == 0)
                 {
                     setTemporaryMessage("Build command not defined", 2, gameTime);
+                    return;
                 }
-                else
+                
+
+                // If the end of the build command is no a .exe or a .bat then assume we've got a 
+                // space in the file name somewhere.  This code fixes spaces in file names for us
+                // in the command list for the first argument but could (and should) be extended
+                // to all arguments that don't make any sense.
+                //
+                if (!File.Exists(commandList[0]))
                 {
-                    // If the end of the build command is no a .exe or a .bat then assume we've got a 
-                    // space in the file name somewhere.  This code fixes spaces in file names for us
-                    // in the command list for the first argument but could (and should) be extended
-                    // to all arguments that don't make any sense.
-                    //
-                    if (!File.Exists(commandList[0]))
+                    if (commandList[0].Length > 5)
                     {
-                        if (commandList[0].Length > 5)
+                        int pos = 0;
+
+                        while (pos < commandList.Length)
                         {
-                            int pos = 0;
+                            string endCommand = commandList[pos].Substring(commandList[pos].Length - 4, 4).ToUpper();
 
-                            while (pos < commandList.Length)
+                            if (endCommand == ".EXE" || endCommand == ".BAT")
                             {
-                                string endCommand = commandList[pos].Substring(commandList[pos].Length - 4, 4).ToUpper();
+                                // Create a new command list and combine the first 'pos' commands into
+                                // a single correct one.
+                                //
+                                string[] newCommandList = new string[commandList.Length - pos];
 
-                                if (endCommand == ".EXE" || endCommand == ".BAT")
+                                for (int i = 0; i < commandList.Length; i++)
                                 {
-                                    // Create a new command list and combine the first 'pos' commands into
-                                    // a single correct one.
-                                    //
-                                    string[] newCommandList = new string[commandList.Length - pos];
-
-                                    for (int i = 0; i < commandList.Length; i++)
+                                    if (i <= pos)
                                     {
-                                        if (i <= pos)
-                                        {
-                                            newCommandList[0] += commandList[i];
+                                        newCommandList[0] += commandList[i];
 
-                                            if (i < pos)
-                                            {
-                                                newCommandList[0] += " ";
-                                            }
-                                        }
-                                        else
+                                        if (i < pos)
                                         {
-                                            newCommandList[i - pos] = commandList[i];
+                                            newCommandList[0] += " ";
                                         }
                                     }
+                                    else
+                                    {
+                                        newCommandList[i - pos] = commandList[i];
+                                    }
+                                }
 
-                                    // Now assigned command list from newCommandList
-                                    commandList = newCommandList;
-                                    break;
-                                }
-                                else
-                                {
-                                    pos++;
-                                }
+                                // Now assigned command list from newCommandList
+                                commandList = newCommandList;
+                                break;
                             }
-
-                            //if (commandList[0].Substring(commandList[0].Length - 4, 3).ToUpper() != "EXE
+                            else
+                            {
+                                pos++;
+                            }
                         }
+
+                        //if (commandList[0].Substring(commandList[0].Length - 4, 3).ToUpper() != "EXE
                     }
+
+                    string buildCommand = commandList[0];
 
                     // We ensure that full path is given to build command at this time
                     //
                     if (!File.Exists(commandList[0]))
                     {
-                        setTemporaryMessage("Build command not found : \"" + commandList[0] + "\"", 5, gameTime);
+                        // Try again expanding the path
+                        //
+                        buildCommand = FileSystemHelper.FindExePath(commandList[0]);
+                        if (!(File.Exists(buildCommand)))
+                        {
+                            setTemporaryMessage("Build command not found : \"" + commandList[0] + "\"", 5, gameTime);
+                            return;
+                        }
+                    }
+
+                    string buildDir = m_context.m_project.getConfigurationValue("BUILDDIRECTORY");
+                    string buildStdOutLog = m_context.m_project.getConfigurationValue("BUILDSTDOUTLOG");
+                    string buildStdErrLog = m_context.m_project.getConfigurationValue("BUILDSTDERRLOG");
+
+                    // Check the build directory
+                    //
+                    if (!Directory.Exists(buildDir))
+                    {
+                        setTemporaryMessage("Build directory doesn't exist : \"" + buildDir + "\"", 2, gameTime);
+                        return;
+                    }
+
+                    // Add a standard error view
+                    //
+                    if (!File.Exists(buildStdErrLog))
+                    {
+                        StreamWriter newStdErr = File.CreateText(buildStdErrLog);
+                        newStdErr.Close();
+                    }
+
+                    m_buildStdErrView = m_context.m_project.findBufferView(buildStdErrLog);
+
+                    if (m_buildStdErrView == null)
+                    {
+                        m_buildStdErrView = addNewFileBuffer(BufferView.ViewPosition.Right, buildStdErrLog, true, true);
+                    }
+                    m_buildStdErrView.setTailColour(Color.Orange);
+                    m_buildStdErrView.noHighlight();
+
+                    //m_buildStdErrView.setReadOnlyColour(Color.DarkRed);
+
+                    // Store the line length of the existing file
+                    //
+                    m_context.m_project.setStdErrLastLine(m_buildStdErrView.getFileBuffer().getLineCount());
+
+                    // If the build log doesn't exist then create it
+                    //
+                    if (!File.Exists(buildStdOutLog))
+                    {
+                        StreamWriter newStdOut = File.CreateText(buildStdOutLog);
+                        newStdOut.Close();
+                    }
+
+                    // Now ensure that the build log is visible on the screen somewhere
+                    //
+                    m_buildStdOutView = m_context.m_project.findBufferView(buildStdOutLog);
+
+                    if (m_buildStdOutView == null)
+                    {
+                        m_buildStdOutView = addNewFileBuffer(BufferView.ViewPosition.Right, buildStdOutLog, true, true);
+                    }
+                    m_buildStdOutView.noHighlight();
+
+                    // Store the line length of the existing file
+                    //
+                    m_context.m_project.setStdOutLastLine(m_buildStdOutView.getFileBuffer().getLineCount());
+
+                    // Move to that BufferView
+                    //
+                    setActiveBuffer(m_buildStdOutView);
+
+                    // Build the argument list
+                    //
+                    ProcessStartInfo info = new ProcessStartInfo();
+                    info.WorkingDirectory = buildDir;
+                    //info.WorkingDirectory = "C:\\Q\\mingw\\bin";
+                    //info.EnvironmentVariables.Add("PATH", "C:\\Q\\mingw\\bin");
+                    //info.EnvironmentVariables.Add("TempPath", "C:\\Temp");
+                    info.UseShellExecute = false;
+                    info.FileName = m_context.m_project.getCommand(commandList);
+                    info.WindowStyle = ProcessWindowStyle.Hidden;
+                    info.CreateNoWindow = true;
+                    //info.Arguments = m_context.m_project.getArguments() + (options == "" ? "" : " " + options);
+                    info.Arguments = m_context.m_project.getArguments(commandList);
+                    info.RedirectStandardOutput = true;
+                    info.RedirectStandardError = true;
+
+                    // Append the command to the stdout file
+                    //
+                    m_buildStdOutView.getFileBuffer().appendLine("Running command: " + string.Join(" ", commandList));
+                    m_buildStdOutView.getFileBuffer().save();
+
+                    m_buildProcess = new Process();
+                    m_buildProcess.StartInfo = info;
+                    m_buildProcess.OutputDataReceived += new DataReceivedEventHandler(logBuildStdOut);
+                    m_buildProcess.ErrorDataReceived += new DataReceivedEventHandler(logBuildStdErr);
+                    m_buildProcess.Exited += new EventHandler(buildCompleted);
+
+                    m_buildProcess.EnableRaisingEvents = true;
+
+                    Logger.logMsg("XygloXNA::doBuildCommand() - working directory = " + info.WorkingDirectory);
+                    Logger.logMsg("XygloXNA::doBuildCommand() - filename = " + info.FileName);
+                    Logger.logMsg("XygloXNA::doBuildCommand() - arguments = " + info.Arguments);
+
+                    // Start the external build command and check the logs
+                    //
+                    m_buildProcess.Start();
+                    m_buildProcess.BeginOutputReadLine();
+                    m_buildProcess.BeginErrorReadLine();
+
+                    // Inform that we're starting the build
+                    //
+                    setTemporaryMessage("Starting build..", 4, gameTime);
+                    m_context.m_drawingHelper.startBanner(m_context.m_gameTime, "Build started", 5);
+
+                    /*
+                    // Handle any immediate exit error code
+                    //
+                    if (m_buildProcess.ExitCode != 0)
+                    {
+                        Logger.logMsg("XygloXNA::doBuildCommand() - build process failed with code " + m_buildProcess.ExitCode);
                     }
                     else
                     {
-                        string buildDir = m_context.m_project.getConfigurationValue("BUILDDIRECTORY");
-                        string buildStdOutLog = m_context.m_project.getConfigurationValue("BUILDSTDOUTLOG");
-                        string buildStdErrLog = m_context.m_project.getConfigurationValue("BUILDSTDERRLOG");
-
-                        // Check the build directory
-                        //
-                        if (!Directory.Exists(buildDir))
-                        {
-                            setTemporaryMessage("Build directory doesn't exist : \"" + buildDir + "\"", 2, gameTime);
-                            return;
-                        }
-
-                        // Add a standard error view
-                        //
-                        if (!File.Exists(buildStdErrLog))
-                        {
-                            StreamWriter newStdErr = File.CreateText(buildStdErrLog);
-                            newStdErr.Close();
-                        }
-
-                        m_buildStdErrView = m_context.m_project.findBufferView(buildStdErrLog);
-
-                        if (m_buildStdErrView == null)
-                        {
-                            m_buildStdErrView = addNewFileBuffer(buildStdErrLog, true, true);
-                        }
-                        m_buildStdErrView.setTailColour(Color.Orange);
-                        m_buildStdErrView.noHighlight();
-
-                        //m_buildStdErrView.setReadOnlyColour(Color.DarkRed);
-
-                        // Store the line length of the existing file
-                        //
-                        m_context.m_project.setStdErrLastLine(m_buildStdErrView.getFileBuffer().getLineCount());
-
-                        // If the build log doesn't exist then create it
-                        //
-                        if (!File.Exists(buildStdOutLog))
-                        {
-                            StreamWriter newStdOut = File.CreateText(buildStdOutLog);
-                            newStdOut.Close();
-                        }
-
-                        // Now ensure that the build log is visible on the screen somewhere
-                        //
-                        m_buildStdOutView = m_context.m_project.findBufferView(buildStdOutLog);
-
-                        if (m_buildStdOutView == null)
-                        {
-                            m_buildStdOutView = addNewFileBuffer(buildStdOutLog, true, true);
-                        }
-                        m_buildStdOutView.noHighlight();
-
-                        // Store the line length of the existing file
-                        //
-                        m_context.m_project.setStdOutLastLine(m_buildStdOutView.getFileBuffer().getLineCount());
-
-                        // Move to that BufferView
-                        //
-                        setActiveBuffer(m_buildStdOutView);
-
-                        // Build the argument list
-                        //
-                        ProcessStartInfo info = new ProcessStartInfo();
-                        info.WorkingDirectory = buildDir;
-                        //info.WorkingDirectory = "C:\\Q\\mingw\\bin";
-                        //info.EnvironmentVariables.Add("PATH", "C:\\Q\\mingw\\bin");
-                        //info.EnvironmentVariables.Add("TempPath", "C:\\Temp");
-                        info.UseShellExecute = false;
-                        info.FileName = m_context.m_project.getCommand(commandList);
-                        info.WindowStyle = ProcessWindowStyle.Hidden;
-                        info.CreateNoWindow = true;
-                        //info.Arguments = m_context.m_project.getArguments() + (options == "" ? "" : " " + options);
-                        info.Arguments = m_context.m_project.getArguments(commandList);
-                        info.RedirectStandardOutput = true;
-                        info.RedirectStandardError = true;
-
-                        // Append the command to the stdout file
-                        //
-                        m_buildStdOutView.getFileBuffer().appendLine("Running command: " + string.Join(" ", commandList));
-                        m_buildStdOutView.getFileBuffer().save();
-
-                        m_buildProcess = new Process();
-                        m_buildProcess.StartInfo = info;
-                        m_buildProcess.OutputDataReceived += new DataReceivedEventHandler(logBuildStdOut);
-                        m_buildProcess.ErrorDataReceived += new DataReceivedEventHandler(logBuildStdErr);
-                        m_buildProcess.Exited += new EventHandler(buildCompleted);
-
-                        m_buildProcess.EnableRaisingEvents = true;
-
-                        Logger.logMsg("XygloXNA::doBuildCommand() - working directory = " + info.WorkingDirectory);
-                        Logger.logMsg("XygloXNA::doBuildCommand() - filename = " + info.FileName);
-                        Logger.logMsg("XygloXNA::doBuildCommand() - arguments = " + info.Arguments);
-
-                        // Start the external build command and check the logs
-                        //
-                        m_buildProcess.Start();
-                        m_buildProcess.BeginOutputReadLine();
-                        m_buildProcess.BeginErrorReadLine();
-
-                        // Inform that we're starting the build
-                        //
-                        setTemporaryMessage("Starting build..", 4, gameTime);
-                        m_context.m_drawingHelper.startBanner(m_context.m_gameTime, "Build started", 5);
-
-                        /*
-                        // Handle any immediate exit error code
-                        //
-                        if (m_buildProcess.ExitCode != 0)
-                        {
-                            Logger.logMsg("XygloXNA::doBuildCommand() - build process failed with code " + m_buildProcess.ExitCode);
-                        }
-                        else
-                        {
-                            Logger.logMsg("XygloXNA::doBuildCommand() - started build command succesfully");
-                        }
-                         * */
+                        Logger.logMsg("XygloXNA::doBuildCommand() - started build command succesfully");
                     }
+                        * */
+                    
                 }
             }
             catch (Exception e)
@@ -3524,9 +3589,12 @@ namespace Xyglo.Brazil.Xna
 
                 // Disconnect the file handlers and the exit handler
                 //
-                m_buildProcess.OutputDataReceived -= new DataReceivedEventHandler(logBuildStdOut);
-                m_buildProcess.ErrorDataReceived -= new DataReceivedEventHandler(logBuildStdErr);
-                m_buildProcess.Exited -= new EventHandler(buildCompleted);
+                if (m_buildProcess != null)
+                {
+                    m_buildProcess.OutputDataReceived -= new DataReceivedEventHandler(logBuildStdOut);
+                    m_buildProcess.ErrorDataReceived -= new DataReceivedEventHandler(logBuildStdErr);
+                    m_buildProcess.Exited -= new EventHandler(buildCompleted);
+                }
 
                 // Set an error message
                 //
@@ -3704,7 +3772,7 @@ namespace Xyglo.Brazil.Xna
                     else
                     {
                         Logger.logMsg("XygloXNA::friendlierDragDrop() - adding file " + newFile);
-                        newView = addNewFileBuffer(newFile);
+                        newView = addNewFileBuffer(BufferView.ViewPosition.Right, newFile);
                         filesAdded.Add(newFile);
                     }
                 }
@@ -3910,11 +3978,6 @@ namespace Xyglo.Brazil.Xna
         /// File system watcher
         /// </summary>
         protected List<FileSystemWatcher> m_watcherList = new List<FileSystemWatcher>();
-
-        /// <summary>
-        /// Position in which we should open or create a new screen
-        /// </summary>
-        protected BufferView.ViewPosition m_newPosition;
 
         /// <summary>
         /// Store the last performance counter for CPU

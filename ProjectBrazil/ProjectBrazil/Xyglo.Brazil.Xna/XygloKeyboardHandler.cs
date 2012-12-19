@@ -98,10 +98,15 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="gameTime"></param>
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
-        public void processActionKey(GameTime gameTime, Game game, Vector3 eye, KeyAction keyAction)
+        public bool processActionKey(GameTime gameTime, Game game, Vector3 eye, KeyAction keyAction)
         {
             List<Keys> keyList = new List<Keys>();
             keyList.Add(keyAction.m_key);
+            bool consumed = false;
+
+            if (m_brazilContext.m_state.equals("PositionScreenOpen") ||
+                m_brazilContext.m_state.equals("PositionScreenNew"))
+                return false;
 
             // Main key handling statement
             //
@@ -112,6 +117,7 @@ namespace Xyglo.Brazil.Xna
                     if (m_context.m_fileSystemView.getHighlightIndex() > 0)
                     {
                         m_context.m_fileSystemView.incrementHighlightIndex(-1);
+                        consumed = true;
                     }
                 }
                 else if (m_brazilContext.m_state.equals("ManageProject") || (m_brazilContext.m_state.equals("Configuration") && m_editConfigurationItem == false)) // Configuration changes
@@ -119,6 +125,7 @@ namespace Xyglo.Brazil.Xna
                     if (m_configPosition > 0)
                     {
                         m_configPosition--;
+                        consumed = true;
                     }
                 }
                 else if (m_brazilContext.m_state.equals("DiffPicker"))
@@ -126,6 +133,7 @@ namespace Xyglo.Brazil.Xna
                     if (m_diffPosition > 0)
                     {
                         m_diffPosition--;
+                        consumed = true;
                     }
                 }
                 else
@@ -133,12 +141,14 @@ namespace Xyglo.Brazil.Xna
                     if (m_keyboard.isAltDown() && m_keyboard.isShiftDown()) // Do zoom
                     {
                         setZoomLevel(m_context.m_zoomLevel - m_context.m_zoomStep, eye);
+                        consumed = true;
                     }
                     else if (m_keyboard.isAltDown())
                     {
                         // Attempt to move right if there's a BufferView there
                         //
                         detectMove(BufferView.ViewPosition.Above, gameTime);
+                        consumed = true;
                     }
                     else
                     {
@@ -153,6 +163,8 @@ namespace Xyglo.Brazil.Xna
                         {
                             m_context.m_project.getSelectedBufferView().noHighlight(); // Disable
                         }
+
+                        consumed = true;
                     }
                 }
             }
@@ -169,11 +181,13 @@ namespace Xyglo.Brazil.Xna
                         if (m_context.m_fileSystemView.getHighlightIndex() < m_context.m_fileSystemView.countActiveDrives() - 1)
                         {
                             m_context.m_fileSystemView.incrementHighlightIndex(1);
+                            consumed = true;
                         }
                     }
                     else if (m_context.m_fileSystemView.getHighlightIndex() < m_context.m_fileSystemView.getDirectoryLength())
                     {
                         m_context.m_fileSystemView.incrementHighlightIndex(1);
+                        consumed = true;
                     }
                 }
                 else if (m_brazilContext.m_state.equals("Configuration") && m_editConfigurationItem == false) // Configuration changes
@@ -181,6 +195,7 @@ namespace Xyglo.Brazil.Xna
                     if (m_configPosition < m_context.m_project.getConfigurationListLength() - 1)
                     {
                         m_configPosition++;
+                        consumed = true;
                     }
                 }
                 else if (m_brazilContext.m_state.equals("ManageProject"))
@@ -188,6 +203,7 @@ namespace Xyglo.Brazil.Xna
                     if (m_configPosition < m_modelBuilder.getLeafNodesPlaces() - 1)
                     {
                         m_configPosition++;
+                        consumed = true;
                     }
                 }
                 else if (m_brazilContext.m_state.equals("DiffPicker"))
@@ -195,6 +211,7 @@ namespace Xyglo.Brazil.Xna
                     if (m_differ != null && m_diffPosition < m_differ.getMaxDiffLength())
                     {
                         m_diffPosition++;
+                        consumed = true;
                     }
                 }
                 else
@@ -205,12 +222,14 @@ namespace Xyglo.Brazil.Xna
 
                         //setActiveBuffer();
                         OnBufferViewChange(new BufferViewEventArgs(m_context.m_project.getSelectedBufferView()));
+                        consumed = true;
                     }
                     else if (m_keyboard.isAltDown())
                     {
                         // Attempt to move right if there's a BufferView there
                         //
                         detectMove(BufferView.ViewPosition.Below, gameTime);
+                        consumed = true;
                     }
                     else
                     {
@@ -225,6 +244,7 @@ namespace Xyglo.Brazil.Xna
                         {
                             m_context.m_project.getSelectedBufferView().noHighlight(); // Disable
                         }
+                        consumed = true;
                     }
                 }
             }
@@ -244,6 +264,7 @@ namespace Xyglo.Brazil.Xna
                         {
                             Logger.logMsg("Check devices");
                             m_context.m_fileSystemView.setDirectory(null);
+                            consumed = true;
                         }
                         else
                         {
@@ -253,6 +274,7 @@ namespace Xyglo.Brazil.Xna
 
                             m_context.m_fileSystemView.setDirectory(m_context.m_fileSystemView.getParent().FullName);
                             m_context.m_fileSystemView.setHighlightIndex(m_lastHighlightIndex);
+                            consumed = true;
                         }
                     }
                     catch (Exception)
@@ -290,6 +312,8 @@ namespace Xyglo.Brazil.Xna
                     {
                         m_context.m_project.getSelectedBufferView().noHighlight(); // Disable
                     }
+
+                    consumed = true;
                 }
             }
             else if (keyList.Contains(Keys.Right))
@@ -328,6 +352,7 @@ namespace Xyglo.Brazil.Xna
                         m_context.m_project.getSelectedBufferView().noHighlight(); // Disable
                     }
                 }
+                consumed = true;
             }
             else if (keyList.Contains(Keys.End))
             {
@@ -358,7 +383,7 @@ namespace Xyglo.Brazil.Xna
                 {
                     m_context.m_project.getSelectedBufferView().noHighlight(); // Disable
                 }
-
+                consumed = true;
             }
             else if (keyList.Contains(Keys.Home))
             {
@@ -384,38 +409,48 @@ namespace Xyglo.Brazil.Xna
                 {
                     m_context.m_project.getSelectedBufferView().noHighlight(); // Disable
                 }
+                consumed = true;
             }
             else if (keyList.Contains(Keys.F9)) // Spin anticlockwise though BVs
             {
                 m_context.m_zoomLevel = 1000.0f;
                 //setActiveBuffer(BufferView.ViewCycleDirection.Anticlockwise);
+                consumed = true;
             }
             else if (keyList.Contains(Keys.F10)) // Spin clockwise through BVs
             {
                 m_context.m_zoomLevel = 1000.0f;
                 //setActiveBuffer(BufferView.ViewCycleDirection.Clockwise);
+                consumed = true;
             }
             else if (keyList.Contains(Keys.F3))
             {
                 doSearch(gameTime);
+                consumed = true;
             }
             else if (keyList.Contains(Keys.F4))
             {
                 m_context.m_project.setViewMode(Project.ViewMode.Fun);
-                m_context.m_drawingHelper.startBanner(gameTime, "Friendlier\nv1.0", 5);
+                m_context.m_drawingHelper.startBanner(gameTime, VersionInformation.getProductName() + "\nv" + VersionInformation.getProductVersion(), 5);
+                consumed = true;
             }
             else if (keyList.Contains(Keys.F6))
             {
                 //doBuildCommand(gameTime);
+                OnCommandEvent(new CommandEventArgs(gameTime, XygloCommand.Build));
+                consumed = true;
             }
             else if (keyList.Contains(Keys.F7))
             {
                 string command = m_context.m_project.getConfigurationValue("ALTERNATEBUILDCOMMAND");
                 //doBuildCommand(gameTime, command);
+                OnCommandEvent(new CommandEventArgs(gameTime, XygloCommand.AlternateBuild, command));
+                consumed = true;
             }
             else if (keyList.Contains(Keys.F8))
             {
                 //startGame(gameTime);
+                consumed = true;
             }
             else if (keyList.Contains(Keys.F11)) // Toggle full screen
             {
@@ -428,6 +463,7 @@ namespace Xyglo.Brazil.Xna
                     m_graphics.fullScreenMode(game);
                 }
                 //setSpriteFont();
+                consumed = true;
             }
             else if (keyList.Contains(Keys.F1))  // Cycle down through BufferViews
             {
@@ -440,6 +476,7 @@ namespace Xyglo.Brazil.Xna
                 m_context.m_project.setSelectedBufferViewId(newValue);
                 //setActiveBuffer();
                 OnBufferViewChange(new BufferViewEventArgs(m_context.m_project.getSelectedBufferView()));
+                consumed = true;
             }
             else if (keyList.Contains(Keys.F2)) // Cycle up through BufferViews
             {
@@ -447,6 +484,7 @@ namespace Xyglo.Brazil.Xna
                 m_context.m_project.setSelectedBufferViewId(newValue);
                 //setActiveBuffer();
                 OnBufferViewChange(new BufferViewEventArgs(m_context.m_project.getSelectedBufferView()));
+                consumed = true;
             }
             else if (keyList.Contains(Keys.PageDown))
             {
@@ -466,6 +504,7 @@ namespace Xyglo.Brazil.Xna
                     {
                         m_context.m_project.getSelectedBufferView().noHighlight(); // Disable
                     }
+                    consumed = true;
                 }
                 else if (m_brazilContext.m_state.equals("DiffPicker"))
                 {
@@ -478,6 +517,7 @@ namespace Xyglo.Brazil.Xna
                             m_diffPosition = m_differ.getMaxDiffLength() - 1;
                         }
                     }
+                    consumed = true;
                 }
             }
             else if (keyList.Contains(Keys.PageUp))
@@ -498,6 +538,7 @@ namespace Xyglo.Brazil.Xna
                     {
                         m_context.m_project.getSelectedBufferView().noHighlight(); // Disable
                     }
+                    consumed = true;
                 }
                 else if (m_brazilContext.m_state.equals("DiffPicker"))
                 {
@@ -510,6 +551,7 @@ namespace Xyglo.Brazil.Xna
                             m_diffPosition = 0;
                         }
                     }
+                    consumed = true;
                 }
             }
             else if (keyList.Contains(Keys.Scroll))
@@ -522,12 +564,14 @@ namespace Xyglo.Brazil.Xna
                 {
                     m_context.m_project.getSelectedBufferView().setLock(true, m_context.m_project.getSelectedBufferView().getCursorPosition().Y);
                 }
+                consumed = true;
             }
             else if (keyList.Contains(Keys.Tab)) // Insert a tab space
             {
                 m_context.m_project.getSelectedBufferView().insertText(m_context.m_project, "\t");
                 // NEED THIS
                 //updateSmartHelp();
+                consumed = true;
             }
             else if (keyList.Contains(Keys.Insert))
             {
@@ -583,7 +627,7 @@ namespace Xyglo.Brazil.Xna
                         }
                     }
                 }
-
+                consumed = true;
             }
             else if (keyList.Contains(Keys.Delete) || keyList.Contains(Keys.Back))
             {
@@ -699,6 +743,8 @@ namespace Xyglo.Brazil.Xna
                     // NEED THIS
                     //updateSmartHelp();
                 }
+
+                consumed = true;
             }
             else if (keyList.Contains(Keys.Enter))
             {
@@ -755,10 +801,13 @@ namespace Xyglo.Brazil.Xna
                             }
                         }
                     }
+
+                    consumed = true;
                 }
                 else if (m_brazilContext.m_state.equals("FileOpen"))
                 {
                     traverseDirectory(gameTime);
+                    consumed = true;
                 }
                 else if (m_brazilContext.m_state.equals("Configuration"))
                 {
@@ -777,6 +826,7 @@ namespace Xyglo.Brazil.Xna
                         m_editConfigurationItem = false;
                         m_context.m_project.updateConfigurationItem(m_context.m_project.getConfigurationItem(m_configPosition).Name, m_editConfigurationItemValue);
                     }
+                    consumed = true;
                 }
                 else if (m_brazilContext.m_state.equals("FindText"))
                 {
@@ -838,7 +888,10 @@ namespace Xyglo.Brazil.Xna
                     // NEED THIS
                     //updateSmartHelp();
                 }
+                consumed = true;
             }
+
+            return consumed;
         }
 
         /// <summary>
@@ -1516,13 +1569,60 @@ namespace Xyglo.Brazil.Xna
 
             // Search by index
             //
-            for (int i = 0; i < m_context.m_project.getBufferViews().Count; i++)
+            bool found = false;
+            int iterations = 10;
+
+            while (found == false && iterations > 0)
             {
-                if (m_context.m_project.getBufferViews()[i].getBoundingBox().Intersects(searchBox))
+                for (int i = 0; i < m_context.m_project.getBufferViews().Count; i++)
                 {
-                    m_context.m_project.setSelectedBufferViewId(i);
-                    break;
+                    if (i == fromView)
+                        continue;
+
+                    if (m_context.m_project.getBufferViews()[i].getBoundingBox().Intersects(searchBox))
+                    {
+                        m_context.m_project.setSelectedBufferViewId(i);
+                        found = true;
+                        break;
+                    }
                 }
+
+                // If not found then iterate the position
+                //
+                if (!found)
+                {
+                    // On position
+                    switch (position)
+                    {
+                        case XygloView.ViewPosition.Above:
+                            searchBox.Min.Y += m_context.m_fontManager.getCharHeight(m_context.m_project.getSelectedBufferView().getViewSize()) + m_context.m_project.getSelectedBufferView().getBufferShowLength() / 2;
+                            searchBox.Max.Y += m_context.m_fontManager.getCharHeight(m_context.m_project.getSelectedBufferView().getViewSize()) + m_context.m_project.getSelectedBufferView().getBufferShowLength() / 2;
+                            break;
+
+                        case XygloView.ViewPosition.Below:
+                            searchBox.Min.Y -= m_context.m_fontManager.getCharHeight(m_context.m_project.getSelectedBufferView().getViewSize()) + m_context.m_project.getSelectedBufferView().getBufferShowLength() / 2;
+                            searchBox.Max.Y -= m_context.m_fontManager.getCharHeight(m_context.m_project.getSelectedBufferView().getViewSize()) + m_context.m_project.getSelectedBufferView().getBufferShowLength() / 2;
+                            break;
+
+                        case XygloView.ViewPosition.Left:
+                            searchBox.Min.X -= m_context.m_fontManager.getCharWidth(m_context.m_project.getSelectedBufferView().getViewSize()) + m_context.m_project.getSelectedBufferView().getBufferShowWidth() / 2;
+                            searchBox.Max.X -= m_context.m_fontManager.getCharWidth(m_context.m_project.getSelectedBufferView().getViewSize()) + m_context.m_project.getSelectedBufferView().getBufferShowWidth() / 2;
+                            break;
+
+                        case XygloView.ViewPosition.Right:
+                            searchBox.Min.X += m_context.m_fontManager.getCharWidth(m_context.m_project.getSelectedBufferView().getViewSize()) + m_context.m_project.getSelectedBufferView().getBufferShowWidth() / 2;
+                            searchBox.Max.X += m_context.m_fontManager.getCharWidth(m_context.m_project.getSelectedBufferView().getViewSize()) + m_context.m_project.getSelectedBufferView().getBufferShowWidth() / 2;
+                            break;
+
+                        default:
+                            // somethign went wrong
+                            //
+                            throw new XygloException("detectMove", "unrecognised view position");
+                    }
+                }
+
+                iterations--;
+
             }
 
             // Now set the active buffer if we need to - if not give a warning
@@ -1535,7 +1635,7 @@ namespace Xyglo.Brazil.Xna
             else
             {
                 //setTemporaryMessage("No BufferView.", 2.0, gameTime);
-                OnTemporaryMessage(new TextEventArgs("No BufferView.", 2.0, gameTime));
+                OnTemporaryMessage(new TextEventArgs("Didn't find a BufferView there.", 2.0, gameTime));
             }
         }
 
@@ -1806,7 +1906,7 @@ namespace Xyglo.Brazil.Xna
         public void textScreenPageDown(int textScreenLength)
         {
             if (m_textScreenPositionY + m_context.m_project.getSelectedBufferView().getBufferShowLength() < textScreenLength)
-                m_textScreenPositionY += m_context.m_project.getSelectedBufferView().getBufferShowLength();
+                m_textScreenPositionY += DrawingHelper.getTextScreenLength();  //m_context.m_project.getSelectedBufferView().getBufferShowLength();
         }
 
         /// <summary>
@@ -1815,7 +1915,7 @@ namespace Xyglo.Brazil.Xna
         public void textScreenPageUp()
         {
             if (m_textScreenPositionY > 0)
-                m_textScreenPositionY = m_textScreenPositionY - Math.Min(m_context.m_project.getSelectedBufferView().getBufferShowLength(), m_textScreenPositionY);
+                m_textScreenPositionY = m_textScreenPositionY - Math.Min(DrawingHelper.getTextScreenLength() /* m_context.m_project.getSelectedBufferView().getBufferShowLength() */ , m_textScreenPositionY);
         }
 
 

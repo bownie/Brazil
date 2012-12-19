@@ -26,6 +26,12 @@ namespace Xyglo.Brazil.Xna
     [DataContract(Name = "Friendlier", Namespace = "http://www.xyglo.com")]
     public abstract class XygloView //: DrawableComponent
     {
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        public XygloView()
+        {
+        }
 
         /// <summary>
         /// Define some window viewing sizes for different layouts of bufferview
@@ -121,13 +127,13 @@ namespace Xyglo.Brazil.Xna
         /// Length of visible buffer
         /// </summary>
         [DataMember]
-        protected int m_bufferShowLength = 20;
+        protected int m_bufferShowLength = getDefaultBufferShowLength();
 
         /// <summary>
         /// Number of characters to show in a BufferView line
         /// </summary>
         [DataMember]
-        protected int m_bufferShowWidth = 80;
+        protected int m_bufferShowWidth = getDefaultBufferShowWidth();
 
         /// <summary>
         /// Width spacing between views
@@ -145,7 +151,7 @@ namespace Xyglo.Brazil.Xna
         /// Viewing size of the BufferViews
         /// </summary>
         [DataMember]
-        protected ViewSize m_viewSize = ViewSize.Medium;
+        protected ViewSize m_viewSize = getDefaultViewSize();
 
         /// <summary>
         /// How many characters across we are showing the FileBuffer view from
@@ -177,6 +183,33 @@ namespace Xyglo.Brazil.Xna
         public int getBufferShowLength()
         {
             return m_bufferShowLength;
+        }
+
+        /// <summary>
+        /// Default setting for height
+        /// </summary>
+        /// <returns></returns>
+        static public int getDefaultBufferShowLength()
+        {
+            return 20;
+        }
+
+        /// <summary>
+        /// Default setting for width
+        /// </summary>
+        /// <returns></returns>
+        static public int getDefaultBufferShowWidth()
+        {
+            return 80;
+        }
+
+        /// <summary>
+        /// Default view size
+        /// </summary>
+        /// <returns></returns>
+        static public ViewSize getDefaultViewSize()
+        {
+            return ViewSize.Medium;
         }
 
         /// <summary>
@@ -237,7 +270,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="position"></param>
         /// <param name="factor"></param>
         /// <returns></returns>
-        public abstract BoundingBox calculateRelativePositionBoundingBox(ViewPosition position, int factor = 1);
+        public abstract BoundingBox calculateRelativePositionBoundingBox(ViewPosition position, int width, int height, int factor = 1);
 
         /// <summary>
         /// Get the view size
@@ -246,6 +279,43 @@ namespace Xyglo.Brazil.Xna
         public ViewSize getViewSize()
         {
             return m_viewSize;
+        }
+
+        /// <summary>
+        /// Description of view size
+        /// </summary>
+        /// <returns></returns>
+        public string getViewSizeDescription()
+        {
+            switch (m_viewSize)
+            {
+                case ViewSize.Tiny:
+                    return "Tiny";
+
+                case ViewSize.Small:
+                    return "Small";
+
+                case ViewSize.Micro:
+                    return "Micro";
+
+                case ViewSize.Medium:
+                    return "Medium";
+
+                case ViewSize.Large:
+                    return "Large";
+
+                case ViewSize.Huge:
+                    return "Huge";
+
+                case ViewSize.Enormous:
+                    return "Enormous";
+
+                case ViewSize.VeryLarge:
+                    return "Very Large";
+
+                default:
+                    return "Default";
+            }
         }
 
         /// <summary>
@@ -368,10 +438,17 @@ namespace Xyglo.Brazil.Xna
             }
         }
 
-        protected float m_minAlpha = 0.05f; 
+        [NonSerialized]
         protected double m_startFlashTime = 0.0f;  // seconds
+
+        [NonSerialized]
         protected double m_endFlashTime = 0.0f; // seconds
-        protected double m_flashInterval = 0.1f; // seconds
+
+        [DataMember]
+        protected float m_minAlpha = 0.05f;
+
+        [DataMember]
+        protected double m_flashInterval = 0.1f;
 
         /// <summary>
         /// Provoke the background to flash for a period

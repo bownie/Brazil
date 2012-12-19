@@ -87,17 +87,20 @@ namespace Xyglo.Brazil.Xna
     /// </summary>
     public class NewBufferViewEventArgs : System.EventArgs
     {
-        public NewBufferViewEventArgs(string filename, ScreenPosition sp)
+        public NewBufferViewEventArgs(string filename, ScreenPosition sp, BufferView.ViewPosition position)
         {
             m_filename = filename;
             m_screenPosition = sp;
+            m_viewPosition = position;
         }
 
         public string getFileName() { return m_filename; }
         public ScreenPosition getScreenPosition() { return m_screenPosition; }
+        public BufferView.ViewPosition getViewPosition() { return m_viewPosition; }
 
         protected string m_filename;
         protected ScreenPosition m_screenPosition;
+        protected BufferView.ViewPosition m_viewPosition;
     }
 
     /// <summary>
@@ -118,6 +121,34 @@ namespace Xyglo.Brazil.Xna
         protected bool m_forceExit = false;
     }
 
+    public enum XygloCommand
+    {
+        Build,
+        AlternateBuild
+    }
+
+    /// <summary>
+    /// Callback event used to activate internal commands
+    /// </summary>
+    public class CommandEventArgs : System.EventArgs
+    {
+        public CommandEventArgs(GameTime gameTime, XygloCommand command, string arguments = "")
+        {
+            m_gameTime = gameTime;
+            m_command = command;
+            m_arguments = arguments;
+        }
+
+        public XygloCommand getCommand() { return m_command; }
+        public string getArguments() { return m_arguments; }
+        public GameTime getGameTime() { return m_gameTime; }
+
+        protected XygloCommand m_command;
+        protected string m_arguments;
+        protected GameTime m_gameTime;
+    }
+
+
     // Declare some delegates
     //
     public delegate void PositionChangeEventHandler(object sender, PositionEventArgs e);
@@ -126,5 +157,5 @@ namespace Xyglo.Brazil.Xna
     public delegate void EyeChangeEventHandler(object sender, PositionEventArgs eye, PositionEventArgs target);
     public delegate void NewBufferViewEventHandler(object sender, NewBufferViewEventArgs e);
     public delegate void CleanExitEventHandler(object sender, CleanExitEventArgs e);
-
+    public delegate void CommandEventHandler(object sender, CommandEventArgs e);
 }

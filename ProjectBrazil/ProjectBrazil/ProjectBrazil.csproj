@@ -108,6 +108,7 @@
     <Compile Include="Xyglo.Brazil.Xna\BufferView.cs" />
     <Compile Include="Xyglo.Brazil.Xna\ColourScheme.cs" />
     <Compile Include="Xyglo.Brazil.Xna\EyePerturber.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\FileSystemHelper.cs" />
     <Compile Include="Xyglo.Brazil.Xna\FrameCounter.cs" />
     <Compile Include="Xyglo.Brazil.Xna\Model.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloCoin.cs" />

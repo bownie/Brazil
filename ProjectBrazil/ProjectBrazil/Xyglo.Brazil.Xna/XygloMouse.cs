@@ -239,7 +239,7 @@ namespace Xyglo.Brazil.Xna
                         //
                         Pair<BufferView, ScreenPosition> bS = getBufferViewIntersection();
 
-                        if (bS.First == m_context.m_project.getSelectedBufferView() && bS.Second.X != -1 && bS.Second.Y != -1)
+                        if (bS.First == m_context.m_project.getSelectedBufferView() && bS.Second.X != -1 && bS.Second.Y != -1 && bS.Second.Y < m_context.m_project.getSelectedBufferView().getFileBuffer().getLineCount())
                         {
                             ScreenPosition sP = bS.Second;
                             string line = m_context.m_project.getSelectedBufferView().getFileBuffer().getLine(bS.Second.Y);
@@ -478,7 +478,7 @@ namespace Xyglo.Brazil.Xna
 
                     // scan components that could match
                     //
-                    foreach (Component component in m_context.m_componentList)
+                    foreach (Component component in m_context.m_componentList.Where(item => item.getStateActions().Count != 0).ToList())
                     {
                         string name = component.getStateActions().First().getState().m_name;
                         if (!m_brazilContext.m_state.equals(component.getStateActions().First().getState().m_name) || (!component.isDestroyed() && !component.isHiding()))
@@ -539,7 +539,7 @@ namespace Xyglo.Brazil.Xna
 
                     // scan components that could match
                     //
-                    foreach (Component component in m_context.m_componentList)
+                    foreach (Component component in m_context.m_componentList.Where(item => item.getStateActions().Count != 0).ToList())
                     {
                         string name = component.getStateActions().First().getState().m_name;
                         if (!m_brazilContext.m_state.equals(component.getStateActions().First().getState().m_name))
@@ -841,7 +841,7 @@ namespace Xyglo.Brazil.Xna
                                 //BufferView newBv = addNewFileBuffer(rL[0]);
                                 ScreenPosition sp = new ScreenPosition(fpEntry.Second.Second, fpEntry.Second.First);
                                 //setHighlightAndCenter(newBv, sp);
-                                OnNewBufferViewEvent(new NewBufferViewEventArgs(rL[0], sp));
+                                OnNewBufferViewEvent(new NewBufferViewEventArgs(rL[0], sp, XygloView.ViewPosition.Right));
                                 break;
                            }
                         }

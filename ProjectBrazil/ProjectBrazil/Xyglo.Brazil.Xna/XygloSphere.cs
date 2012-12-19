@@ -192,7 +192,7 @@ namespace Xyglo.Brazil.Xna
             }
         }
 
-        public override void drawPreview(GraphicsDevice device, BoundingBox fullBoundingBox, BoundingBox previewBoundingBox)
+        public override void drawPreview(GraphicsDevice device, BoundingBox fullBoundingBox, BoundingBox previewBoundingBox, Texture2D texture)
         {
         }
 

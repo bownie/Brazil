@@ -98,12 +98,20 @@ namespace Xyglo.Friendlier
             connect("TextEditing", new KeyAction(Keys.M, KeyboardModifier.Alt), "ManageProject");
             connect("ManageProject", Keys.Escape, "Default");
 
+            // Connect up configuration
+            //
+            connectEditorKeys("Configuration");
+
             // Ensure the escape key works in various modes
             //
-            connect("Configuration", Keys.Escape, "Default");
             connect("Help", Keys.Escape, "Default");
             connect("Help", Keys.PageUp, "Default");
             connect("Help", Keys.PageDown, "Default");
+
+            connect("Information", Keys.Escape, "Default");
+            connect("Information", Keys.PageUp, "Default");
+            connect("Information", Keys.PageDown, "Default");
+
             connect("FileOpen", Keys.Escape, "Default");
             connect("DiffPicker", Keys.Escape, "Default");
 

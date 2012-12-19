@@ -436,6 +436,14 @@ namespace Xyglo.Brazil.Xna
                         newKey = Keys.OemCloseBrackets;
                         break;
 
+                    case Microsoft.Xna.Framework.Input.Keys.OemSemicolon:
+                        newKey = Keys.OemSemicolon;
+                        break;
+
+                    case Microsoft.Xna.Framework.Input.Keys.OemQuotes:
+                        newKey = Keys.OemQuotes;
+                        break;
+
                     default:
                         newKey = Keys.None;
                         break;

@@ -221,7 +221,7 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="device"></param>
         /// <param name="boundingBox"></param>
-        public override void drawPreview(GraphicsDevice device, BoundingBox fullBoundingBox, BoundingBox previewBoundingBox)
+        public override void drawPreview(GraphicsDevice device, BoundingBox fullBoundingBox, BoundingBox previewBoundingBox, Texture2D texture)
         {
             //double factor = (double)((previewBoundingBox.Max - previewBoundingBox.Min).Length()) / (double)((fullBoundingBox.Max - fullBoundingBox.Min).Length());
             float xFactor = (previewBoundingBox.Max.X - previewBoundingBox.Min.X) / (fullBoundingBox.Max.X - fullBoundingBox.Min.X);
@@ -255,17 +255,25 @@ namespace Xyglo.Brazil.Xna
             }
             else
             {
+
+                float xPos = previewBoundingBox.Min.X + (m_position.X - m_pickupOffset.X) * xFactor;
+                float yPos = previewBoundingBox.Min.Y + (m_position.Y * yFactor);
+
+                /*
                 m_spriteBatch.DrawString(
                     m_fontManager.getViewFont(m_fontSize),
                     m_text,
-                    new Vector2(previewBoundingBox.Min.X + (float)(m_position.X * xFactor) - m_pickupOffset.X,
-                                previewBoundingBox.Min.Y + (float)(m_position.Y * yFactor) - m_pickupOffset.Y),
+                    new Vector2(xPos, //previewBoundingBox.Min.X + (float)(m_position.X * xFactor) - m_pickupOffset.X,
+                                yPos), //previewBoundingBox.Min.Y + (float)(m_position.Y * yFactor) - m_pickupOffset.Y),
                     m_colour,
                     0,
                     Vector2.Zero,
                     Math.Max(m_fontManager.getTextScale() * xFactor, 0.1f),
                     0,
                     0);
+                 */
+                
+                m_spriteBatch.Draw(texture, new Rectangle((int)(fullBoundingBox.Min.X + xPos), (int)(fullBoundingBox.Min.Y + yPos), 10, 1), m_colour);
             }
             m_spriteBatch.End();
                 

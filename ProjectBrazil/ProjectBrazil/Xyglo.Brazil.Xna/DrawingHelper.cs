@@ -177,7 +177,7 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="gameTime"></param>
         /// <param name="List"></param>
-        public void drawXnaDrawableOverview(GraphicsDevice device, GameTime gameTime, List<XygloXnaDrawable> drawables)
+        public void drawXnaDrawableOverview(GraphicsDevice device, GameTime gameTime, List<XygloXnaDrawable> drawables, SpriteBatch spriteBatch)
         {
             // Get the bounding box of bounding boxes defined by project and also any drawables
             //
@@ -193,12 +193,41 @@ namespace Xyglo.Brazil.Xna
                 bb = getMetaBoundingBox(m_context.m_project.getBoundingBox(), (BoundingBox)bb);
             }
 
+            BoundingBox cBB = (BoundingBox)bb;
+                        
+            // Modify alpha according to the type of the line
+            //
+            float minX = cBB.Min.X;
+            float minY = cBB.Min.Y;
+            float maxX = cBB.Max.X;
+            float maxY = cBB.Max.Y;
+
+            float diffX = maxX - minX;
+            float diffY = maxY - minY;
+
+            Vector2 topLeft = Vector2.Zero;
+            Vector2 bottomRight = Vector2.Zero;
+
+            float previewX = m_previewBoundingBox.Max.X - m_previewBoundingBox.Min.X;
+            float previewY = m_previewBoundingBox.Max.Y - m_previewBoundingBox.Min.Y;
+
             // Now draw the previews - the drawable works out the scaling itself according to what
             // the size and shapes of the bounding boxen are.
             //
             foreach (XygloXnaDrawable drawable in drawables)
             {
-                drawable.drawPreview(device, (BoundingBox)bb, m_previewBoundingBox);
+                //drawable.drawPreview(device, (BoundingBox)bb, m_previewBoundingBox, m_context.m_flatTexture);
+                topLeft.X = m_previewBoundingBox.Min.X;
+                topLeft.Y = m_previewBoundingBox.Min.Y;
+                bottomRight.X = m_previewBoundingBox.Min.X;
+                bottomRight.Y = m_previewBoundingBox.Min.Y;
+
+                topLeft.X += ((drawable.getBoundingBox().Min.X - minX) / diffX) * previewX;
+                topLeft.Y += ((drawable.getBoundingBox().Min.Y - minY) / diffY) * previewY;
+
+                bottomRight.X += ((drawable.getBoundingBox().Max.X - minX) / diffX) * previewX;
+                bottomRight.Y += ((drawable.getBoundingBox().Max.Y - minY) / diffY) * previewY;
+                drawQuad(spriteBatch, topLeft, bottomRight, drawable.getColour());
             }
         }
 
@@ -239,8 +268,7 @@ namespace Xyglo.Brazil.Xna
 
                 bottomRight.X += ((bv.getBoundingBox().Max.X - minX) / diffX) * previewX;
                 bottomRight.Y += ((bv.getBoundingBox().Max.Y - minY) / diffY) * previewY;
-
-                drawQuad(spriteBatch, topLeft, bottomRight, Color.LightYellow, (bv == m_context.m_project.getSelectedBufferView()) ? 0.5f : 0.1f);
+                drawQuad(spriteBatch, topLeft, bottomRight, bv.getBackgroundColour(gameTime, true), (bv == m_context.m_project.getSelectedBufferView()) ? 0.5f : 0.2f);
             }
         }
 
@@ -418,9 +446,14 @@ namespace Xyglo.Brazil.Xna
                 longestRow = fixedWidth;
             }
 
+            // Used to be:
+            // m_context.m_project.getSelectedBufferView().getBufferShowLength()
+            //
+            int pageLength = DrawingHelper.getTextScreenLength();
+
             // Calculate endline
             //
-            int endLine = textScreenPositionY + Math.Min(infoRows.Length - textScreenPositionY, m_context.m_project.getSelectedBufferView().getBufferShowLength());
+            int endLine = textScreenPositionY + Math.Min(infoRows.Length - textScreenPositionY, pageLength);
 
             // Modify by height of the screen to centralise
             //
@@ -444,8 +477,8 @@ namespace Xyglo.Brazil.Xna
             //
             yPos = m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay) * 5;
 
-            double dPages = Math.Ceiling((float)textScreenLength / (float)m_context.m_project.getSelectedBufferView().getBufferShowLength());
-            double cPage = Math.Ceiling((float)(textScreenPositionY + 1) / ((float)m_context.m_project.getSelectedBufferView().getBufferShowLength()));
+            double dPages = Math.Ceiling((float)textScreenLength / (float)pageLength);
+            double cPage = Math.Ceiling((float)(textScreenPositionY + 1) / ((float)pageLength));
 
             if (dPages > 1)
             {
@@ -462,12 +495,18 @@ namespace Xyglo.Brazil.Xna
             return textScreenLength;
         }
 
+        // Define this as a static for use elsewhere
+        static public int getTextScreenLength()
+        {
+            return 15;
+        }
+
         /// <summary>
         /// Format a screen of information text - slightly different to a help screen as
         /// the text can be dynamic (i.e. times)
         /// </summary>
         /// <param name="text"></param>
-        public void drawInformationScreen(SpriteBatch spriteBatch, GameTime gameTime, GraphicsDeviceManager graphics, out int linesDisplayed)
+        public void drawInformationScreen(SpriteBatch spriteBatch, GameTime gameTime, GraphicsDeviceManager graphics, int textScreenPositionY, out int linesDisplayed)
         {
             // Set up the string
             //
@@ -499,6 +538,10 @@ namespace Xyglo.Brazil.Xna
             text += "BufferViews        : " + m_context.m_project.getBufferViews().Count + "\n";
             text += "\n"; // divider
 
+            text += "BufferView size    : " + m_context.m_project.getSelectedBufferView().getViewSizeDescription() + "\n";
+            text += "\n";
+
+
             // Some timings
             //
             TimeSpan nowDiff = (DateTime.Now - m_context.m_project.getCreationTime());
@@ -508,7 +551,7 @@ namespace Xyglo.Brazil.Xna
 
             // Draw screen of a fixed width
             //
-            linesDisplayed = drawTextScreen(spriteBatch, gameTime, graphics, text, 0, 75);
+            linesDisplayed = drawTextScreen(spriteBatch, gameTime, graphics, text, textScreenPositionY, 75);
 
             spriteBatch.End();
         }

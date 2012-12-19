@@ -12,6 +12,7 @@
 Friendlier
 ----------
 - Get back to fully working version
+  -  
 - Add features:
  
   - first letter file system navigation 

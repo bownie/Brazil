@@ -34,7 +34,7 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="device"></param>
         /// <param name="scale"></param>
-        public abstract void drawPreview(GraphicsDevice device, BoundingBox fullBoundingBox, BoundingBox previewBoundingBox);
+        public abstract void drawPreview(GraphicsDevice device, BoundingBox fullBoundingBox, BoundingBox previewBoundingBox, Texture2D texture);
 
         /// <summary>
         /// We need to define a bounding box for any component we're interested in

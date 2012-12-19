@@ -66,7 +66,7 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="device"></param>
         /// <param name="boundingBox"></param>
-        public override void drawPreview(GraphicsDevice device, BoundingBox fullBoundingBox, BoundingBox previewBoundingBox)
+        public override void drawPreview(GraphicsDevice device, BoundingBox fullBoundingBox, BoundingBox previewBoundingBox, Texture2D texture)
         {
         }
 

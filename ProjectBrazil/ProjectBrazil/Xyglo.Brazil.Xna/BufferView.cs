@@ -28,6 +28,8 @@ namespace Xyglo.Brazil.Xna
     [DataContract(Name = "Friendlier", Namespace = "http://www.xyglo.com")]
     public class BufferView : XygloView
     {
+        [XmlElement(ElementName = "BufferView", Type = typeof(XygloView))]
+
         /// <summary>
         /// This store the place in a WrappedEndoFBuffer call that the old log file
         /// becomes the new log file.
@@ -181,7 +183,7 @@ namespace Xyglo.Brazil.Xna
         /// Constructor with just FontManager
         /// </summary>
         /// <param name="fontManager"></param>
-        public BufferView(FontManager fontManager)
+        public BufferView(FontManager fontManager):base()
         {
             if (m_searchText == null)
             {
@@ -196,7 +198,7 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="rootBV"></param>
         /// <param name="position"></param>
-        public BufferView(FontManager fontManager, BufferView rootBV, Vector3 position, bool readOnly = false)
+        public BufferView(FontManager fontManager, BufferView rootBV, Vector3 position, bool readOnly = false):base()
         {
             m_fileBuffer = rootBV.m_fileBuffer;
             m_bufferShowStartY = rootBV.m_bufferShowStartY;
@@ -216,7 +218,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="position"></param>
         /// <param name="bufferShowStartY"></param>
         /// <param name="bufferShowLength"></param>
-        public BufferView(FontManager fontManager, FileBuffer buffer, Vector3 position, int bufferShowStartY, int bufferShowLength, int fileIndex, bool readOnly = false)
+        public BufferView(FontManager fontManager, FileBuffer buffer, Vector3 position, int bufferShowStartY, int bufferShowLength, int fileIndex, bool readOnly = false):base()
         {
             m_position = position;
             m_fileBuffer = buffer;
@@ -233,7 +235,7 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="rootBV"></param>
         /// <param name="position"></param>
-        public BufferView(FontManager fontManager, BufferView rootBV, ViewPosition position)
+        public BufferView(FontManager fontManager, BufferView rootBV, ViewPosition position):base()
         {
             m_fileBuffer = rootBV.m_fileBuffer;
             m_bufferShowStartY = rootBV.m_bufferShowStartY;
@@ -2505,10 +2507,29 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Get the bounding box for this BufferVIew but include the spacing around it
+        /// </summary>
+        /// <returns></returns>
+        public BoundingBox getSpacedBoundingBox()
+        {
+            Vector3 topLeft = getTopLeft();
+            Vector3 bottomRight = getBottomRight();
+
+            topLeft.X -= m_viewWidthSpacing * m_fontManager.getCharWidth(getDefaultViewSize());
+            topLeft.Y -= m_viewHeightSpacing * m_fontManager.getCharHeight(getDefaultViewSize());
+
+            bottomRight.X += m_viewWidthSpacing * m_fontManager.getCharWidth(getDefaultViewSize());
+            bottomRight.Y += m_viewHeightSpacing * m_fontManager.getCharHeight(getDefaultViewSize());
+
+            return new BoundingBox(topLeft, bottomRight);
+        }
+
+
+        /// <summary>
         /// Background colour
         /// </summary>
         /// <returns></returns>
-        public Color getBackgroundColour(GameTime gameTime)
+        public Color getBackgroundColour(GameTime gameTime, bool preview = false)
         {
             double nowTime = gameTime.TotalGameTime.TotalSeconds;
             //Logger.logMsg("START TIME = " + m_startFlashTime);
@@ -2519,7 +2540,7 @@ namespace Xyglo.Brazil.Xna
             }
             else
             {
-                return m_backgroundColour * m_minAlpha;
+                return m_backgroundColour * ( preview ? 0.5f : m_minAlpha );
             }
         }
 
@@ -2582,13 +2603,20 @@ namespace Xyglo.Brazil.Xna
         /// <param name="position"></param>
         /// <param name="factor"></param>
         /// <returns></returns>
-        public override BoundingBox calculateRelativePositionBoundingBox(ViewPosition position, int factor = 1)
+        public override BoundingBox calculateRelativePositionBoundingBox(ViewPosition position, int widthChars = -1, int heightChars = -1, int factor = 1)
         {
+            // If these are unset then use the size of this BufferView as default
+            if (widthChars == -1)
+                widthChars = m_bufferShowWidth;
+
+            if (heightChars == -1)
+                heightChars = m_bufferShowLength;
+
             BoundingBox bb = new BoundingBox();
             bb.Min = calculateRelativePositionVector(position, factor);
             bb.Max = bb.Min;
-            bb.Max.X += getWidth();
-            bb.Max.Y += getHeight();
+            bb.Max.X += m_fontManager.getCharWidth(m_viewSize) * widthChars + m_viewWidthSpacing;
+            bb.Max.Y += m_fontManager.getLineSpacing(m_viewSize) * heightChars + m_viewHeightSpacing;
             return bb;
         }
 
