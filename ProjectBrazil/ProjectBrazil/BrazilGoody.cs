@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-
+using System.Runtime.Serialization;
 
 namespace Xyglo.Brazil
 {
@@ -19,6 +19,8 @@ namespace Xyglo.Brazil
     /// A prize that can be consumed by our Interloper.  A goody has position, a birth time, a worth and 
     /// can potentially automatically reset after being eaten.
     /// </summary>
+    [DataContract(Namespace = "http://www.xyglo.com")]
+    [KnownType(typeof(BrazilGoody))]
     public class BrazilGoody : Component3D
     {
         public BrazilGoody(BrazilGoodyType type, int worth, BrazilVector3 position, BrazilVector3 size, DateTime birthTime)

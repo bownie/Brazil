@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace Xyglo.Brazil
 {
     /// <summary>
     /// A head up display for our game world
     /// </summary>
+    [DataContract(Namespace = "http://www.xyglo.com")]
     public class BrazilHud : Component3D
     {
         /// <summary>

@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace Xyglo.Brazil
 {
     /// <summary>
     /// Vector2 is based on XNA's Vector2
     /// </summary>
+    [DataContract(Namespace = "http://www.xyglo.com")]
     public class BrazilVector2
     {
         /// <summary>

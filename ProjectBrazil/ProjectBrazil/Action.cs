@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace Xyglo.Brazil
 {
@@ -40,6 +41,7 @@ namespace Xyglo.Brazil
     /// devices.
     /// 
     /// </summary>
+    [DataContract(Namespace = "http://www.xyglo.com")]
     public abstract class Action
     {
         public string m_name { get; set; }
@@ -58,6 +60,8 @@ namespace Xyglo.Brazil
     /// <summary>
     /// KeyAction
     /// </summary>
+    [DataContract(Namespace = "http://www.xyglo.com")]
+    [KnownType(typeof(KeyAction))]
     public class KeyAction : Action
     {
         /// <summary>
@@ -248,6 +252,8 @@ namespace Xyglo.Brazil
     /// <summary>
     /// MouseAction
     /// </summary>
+    [DataContract(Namespace = "http://www.xyglo.com")]
+    [KnownType(typeof(MouseAction))]
     public class MouseAction : Action
     {
         /// <summary>

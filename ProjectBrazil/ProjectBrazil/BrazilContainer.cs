@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace Xyglo.Brazil
 {
@@ -12,6 +13,7 @@ namespace Xyglo.Brazil
     /// as components - some components will need to be modified (full screen ones for example)
     /// and everything needs to be scaled to fit into the provided BoundingBox.
     /// </summary>
+    [DataContract(Name = "BrazilContainer", Namespace = "http://www.xyglo.com")]
     public class BrazilContainer : Component
     {
         /// <summary>
@@ -77,6 +79,7 @@ namespace Xyglo.Brazil
         /// <summary>
         /// Our app
         /// </summary>
+        [DataMember]
         protected BrazilApp m_app;
     }
 }

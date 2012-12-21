@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace Xyglo.Brazil
 {
     /// <summary>
     /// A BoundingBox
     /// </summary>
+    [DataContract(Namespace = "http://www.xyglo.com")]
     public class BrazilBoundingBox
     {
         /// <summary>
@@ -68,6 +70,10 @@ namespace Xyglo.Brazil
                 return m_endPos;
             }
         }
+
+        public float getWidth() { return m_endPos.X - m_startPos.X; }
+        public float getHeight() { return m_endPos.Y - m_startPos.Y; }
+        public float getDepth() { return m_endPos.Z - m_startPos.Y; }
 
         /// <summary>
         /// Start position for bounding box

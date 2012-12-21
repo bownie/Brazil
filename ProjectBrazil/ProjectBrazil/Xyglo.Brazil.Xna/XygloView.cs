@@ -14,6 +14,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Runtime.Serialization;
 using System.Xml;
+using System.Xml.Schema;
 using System.Xml.Serialization;
 
 namespace Xyglo.Brazil.Xna
@@ -23,8 +24,10 @@ namespace Xyglo.Brazil.Xna
     /// At the XygloView level we want to start building up the XygloXnaDrawable abstraction
     /// - for a later date.
     /// </summary>
-    [DataContract(Name = "Friendlier", Namespace = "http://www.xyglo.com")]
-    public abstract class XygloView //: DrawableComponent
+    [DataContract(Name = "XygloView", Namespace = "http://www.xyglo.com")]
+    //[KnownType(typeof(BufferView))]
+    //[XmlInclude(typeof(BufferView))]
+    public abstract class XygloView
     {
         /// <summary>
         /// Default constructor
@@ -33,138 +36,7 @@ namespace Xyglo.Brazil.Xna
         {
         }
 
-        /// <summary>
-        /// Define some window viewing sizes for different layouts of bufferview
-        /// </summary>
-        public enum ViewSize
-        {
-            Micro,
-            Tiny,
-            Small,
-            Medium,
-            Large,
-            VeryLarge,
-            Huge,
-            Enormous
-        };
-
-
-        /// <summary>
-        /// ViewPosition is used to help determine positions of other BufferViews
-        /// </summary>
-        public enum ViewPosition
-        {
-            Above,
-            Below,
-            Left,
-            Right
-        };
-
-        /// <summary>
-        /// Which Quadrant of four BufferViews are we viewing from the current one - cycling
-        /// through these possibilities makes it nine total screens we can view
-        /// </summary>
-        public enum ViewQuadrant
-        {
-            TopRight,
-            BottomRight,
-            BottomLeft,
-            TopLeft
-        }
-
-        /// <summary>
-        /// Which direction we're cycling through quadrant views
-        /// </summary>
-        public enum ViewCycleDirection
-        {
-            Clockwise,
-            Anticlockwise
-        }
-
-
-        /// <summary>
-        /// Greyed out colour
-        /// </summary>
-        protected Color m_greyedColour = new Color(30, 30, 30, 50);
-
-        /// <summary>
-        /// Default text colour
-        /// </summary>
-        [DataMember]
-        protected Color m_textColour = Color.White;
-
-        /// <summary>
-        /// Default cursor colour
-        /// </summary>
-        [DataMember]
-        protected Color m_cursorColour = Color.Yellow;
-
-        /// <summary>
-        /// Current cursor coordinates in this BufferView
-        /// </summary>
-        [DataMember]
-        protected ScreenPosition m_cursorPosition = new ScreenPosition(0, 0);
-
-        /// <summary>
-        /// Default highlight colour
-        /// </summary>
-        [DataMember]
-        protected Color m_highlightColour = Color.PaleVioletRed;
-
-        /// <summary>
-        /// 3d position of the BufferView
-        /// </summary>
-        [DataMember]
-        protected Vector3 m_position;
-
-        /// <summary>
-        /// Font manager reference passed in to provide font sizes for rendering
-        /// </summary>
-        [NonSerialized]
-        protected FontManager m_fontManager = null;
-
-        /// <summary>
-        /// Length of visible buffer
-        /// </summary>
-        [DataMember]
-        protected int m_bufferShowLength = getDefaultBufferShowLength();
-
-        /// <summary>
-        /// Number of characters to show in a BufferView line
-        /// </summary>
-        [DataMember]
-        protected int m_bufferShowWidth = getDefaultBufferShowWidth();
-
-        /// <summary>
-        /// Width spacing between views
-        /// </summary>
-        [DataMember]
-        protected int m_viewWidthSpacing = 15;
-
-        /// <summary>
-        /// Height spacing between views
-        /// </summary>
-        [DataMember]
-        protected int m_viewHeightSpacing = 10;
-
-        /// <summary>
-        /// Viewing size of the BufferViews
-        /// </summary>
-        [DataMember]
-        protected ViewSize m_viewSize = getDefaultViewSize();
-
-        /// <summary>
-        /// How many characters across we are showing the FileBuffer view from
-        /// </summary>
-        [DataMember]
-        protected int m_bufferShowStartX = 0;
-
-        /// <summary>
-        /// How many lines we are stepped into the underlying FileBuffer
-        /// </summary>
-        [DataMember]
-        protected int m_bufferShowStartY = 0;
-
+ 
         // ----------------------------------------- METHODS ------------------------------------------------------
         //
         /// <summary>
@@ -270,7 +142,26 @@ namespace Xyglo.Brazil.Xna
         /// <param name="position"></param>
         /// <param name="factor"></param>
         /// <returns></returns>
-        public abstract BoundingBox calculateRelativePositionBoundingBox(ViewPosition position, int width, int height, int factor = 1);
+        public abstract BoundingBox calculateRelativePositionBoundingBox(ViewPosition position, int width = -1, int height = -1, int factor = 1);
+
+        /// <summary>
+        /// Force a BoundingBox definition
+        /// </summary>
+        /// <returns></returns>
+        public abstract BoundingBox getBoundingBox();
+
+        /// <summary>
+        /// Get the view to tell us what it thinks a character width is
+        /// </summary>
+        /// <returns></returns>
+        public abstract float getViewCharWidth();
+
+        /// <summary>
+        /// Get the view to tell us what it thinks character height is
+        /// </summary>
+        /// <returns></returns>
+        public abstract float getViewCharHeight();
+        
 
         /// <summary>
         /// Get the view size
@@ -279,6 +170,35 @@ namespace Xyglo.Brazil.Xna
         public ViewSize getViewSize()
         {
             return m_viewSize;
+        }
+
+
+        /// <summary>
+        /// Background colour
+        /// </summary>
+        /// <returns></returns>
+        public Color getBackgroundColour(GameTime gameTime, bool preview = false)
+        {
+            double nowTime = gameTime.TotalGameTime.TotalSeconds;
+            //Logger.logMsg("START TIME = " + m_startFlashTime);
+            if (nowTime > m_startFlashTime && nowTime < m_endFlashTime)
+            {
+                float alphaFlash = m_minAlpha + 0.8f * (float)((nowTime - m_startFlashTime) / (m_endFlashTime - m_startFlashTime));
+                return ColourScheme.getFlashColour() * alphaFlash;
+            }
+            else
+            {
+                return m_backgroundColour * (preview ? 0.5f : m_minAlpha);
+            }
+        }
+
+        /// <summary>
+        /// Set the background colour
+        /// </summary>
+        /// <param name="colour"></param>
+        public void setBackgroundColour(Color colour)
+        {
+            m_backgroundColour = colour;
         }
 
         /// <summary>
@@ -438,18 +358,6 @@ namespace Xyglo.Brazil.Xna
             }
         }
 
-        [NonSerialized]
-        protected double m_startFlashTime = 0.0f;  // seconds
-
-        [NonSerialized]
-        protected double m_endFlashTime = 0.0f; // seconds
-
-        [DataMember]
-        protected float m_minAlpha = 0.05f;
-
-        [DataMember]
-        protected double m_flashInterval = 0.1f;
-
         /// <summary>
         /// Provoke the background to flash for a period
         /// </summary>
@@ -460,6 +368,169 @@ namespace Xyglo.Brazil.Xna
             m_endFlashTime = m_startFlashTime + m_flashInterval;
             //Logger.logMsg("START GAME TIME = " + m_startFlashTime);
         }
+
+        public Vector3 getPosition() { return m_position; }
+
+        /// <summary>
+        /// Define some window viewing sizes for different layouts of bufferview
+        /// </summary>
+        public enum ViewSize
+        {
+            Micro,
+            Tiny,
+            Small,
+            Medium,
+            Large,
+            VeryLarge,
+            Huge,
+            Enormous
+        };
+
+
+        /// <summary>
+        /// ViewPosition is used to help determine positions of other BufferViews
+        /// </summary>
+        public enum ViewPosition
+        {
+            Above,
+            Below,
+            Left,
+            Right
+        };
+
+        /// <summary>
+        /// Which Quadrant of four BufferViews are we viewing from the current one - cycling
+        /// through these possibilities makes it nine total screens we can view
+        /// </summary>
+        public enum ViewQuadrant
+        {
+            TopRight,
+            BottomRight,
+            BottomLeft,
+            TopLeft
+        }
+
+        /// <summary>
+        /// Which direction we're cycling through quadrant views
+        /// </summary>
+        public enum ViewCycleDirection
+        {
+            Clockwise,
+            Anticlockwise
+        }
+
+        /// <summary>
+        /// Greyed out colour
+        /// </summary>
+        protected Color m_greyedColour = new Color(30, 30, 30, 50);
+
+        /// <summary>
+        /// Default text colour
+        /// </summary>
+        [DataMember]
+        protected Color m_textColour = Color.White;
+
+        /// <summary>
+        /// Default cursor colour
+        /// </summary>
+        [DataMember]
+        protected Color m_cursorColour = Color.Yellow;
+
+        /// <summary>
+        /// Current cursor coordinates in this BufferView
+        /// </summary>
+        [DataMember]
+        protected ScreenPosition m_cursorPosition = new ScreenPosition(0, 0);
+
+        /// <summary>
+        /// Default highlight colour
+        /// </summary>
+        [DataMember]
+        protected Color m_highlightColour = Color.PaleVioletRed;
+
+        /// <summary>
+        /// 3d position of the BufferView
+        /// </summary>
+        [DataMember]
+        protected Vector3 m_position;
+
+        /// <summary>
+        /// Font manager reference passed in to provide font sizes for rendering
+        /// </summary>
+        [NonSerialized]
+        protected FontManager m_fontManager = null;
+
+        /// <summary>
+        /// Length of visible buffer
+        /// </summary>
+        [DataMember]
+        protected int m_bufferShowLength = getDefaultBufferShowLength();
+
+        /// <summary>
+        /// Number of characters to show in a BufferView line
+        /// </summary>
+        [DataMember]
+        protected int m_bufferShowWidth = getDefaultBufferShowWidth();
+
+        /// <summary>
+        /// Width spacing between views
+        /// </summary>
+        [DataMember]
+        protected int m_viewWidthSpacing = 15;
+
+        /// <summary>
+        /// Height spacing between views
+        /// </summary>
+        [DataMember]
+        protected int m_viewHeightSpacing = 10;
+
+        /// <summary>
+        /// Viewing size of the BufferViews
+        /// </summary>
+        [DataMember]
+        protected ViewSize m_viewSize = getDefaultViewSize();
+
+        /// <summary>
+        /// How many characters across we are showing the FileBuffer view from
+        /// </summary>
+        [DataMember]
+        protected int m_bufferShowStartX = 0;
+
+        /// <summary>
+        /// How many lines we are stepped into the underlying FileBuffer
+        /// </summary>
+        [DataMember]
+        protected int m_bufferShowStartY = 0;
+
+        /// <summary>
+        /// When our background box starts flashing
+        /// </summary>
+        [NonSerialized]
+        protected double m_startFlashTime = 0.0f;  // seconds
+
+        /// <summary>
+        /// When our background box stops flashing
+        /// </summary>
+        [NonSerialized]
+        protected double m_endFlashTime = 0.0f; // seconds
+
+        /// <summary>
+        /// The minimum alpha we want our background box to exhibit
+        /// </summary>
+        [DataMember]
+        protected float m_minAlpha = 0.05f;
+
+        /// <summary>
+        /// Interval for flashing the background colour when resizing
+        /// </summary>
+        [DataMember]
+        protected double m_flashInterval = 0.1f;
+
+        /// <summary>
+        /// Background colour for this bufferview
+        /// </summary>
+        [DataMember]
+        protected Color m_backgroundColour = new Color(180, 180, 180); //Color.DeepSkyBlue;
 
     }
 }

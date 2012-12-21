@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace Xyglo.Brazil
 {
+    [DataContract(Name = "Target", Namespace = "http://www.xyglo.com")]
     public class Target
     {
         public Target()
@@ -59,6 +61,7 @@ namespace Xyglo.Brazil
         /// <summary>
         /// The name of our Target
         /// </summary>
+        [DataMember]
         public string m_name { get; set; }
     }
 }

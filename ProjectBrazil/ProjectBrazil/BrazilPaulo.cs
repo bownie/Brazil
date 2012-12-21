@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xyglo.Brazil;
+using System.Runtime.Serialization;
 
 namespace Xyglo.Brazil
 {
@@ -9,6 +10,8 @@ namespace Xyglo.Brazil
     /// This is the top level class for our Paulo game.  It inherits a BrazilApp object which
     /// inherits the XNA Game implementation.
     /// </summary>
+    [DataContract(Namespace = "http://www.xyglo.com")]
+    [KnownType(typeof(BrazilApp))]
     public class BrazilPaulo : BrazilApp
     {
         /// <summary>

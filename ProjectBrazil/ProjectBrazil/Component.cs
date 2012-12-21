@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace Xyglo.Brazil
 {
@@ -17,6 +18,7 @@ namespace Xyglo.Brazil
     /// is managed by the Core in terms of update and drawing.  A Component has
     /// to exist within a State of the application.  
     /// </summary>
+    [DataContract(Name = "Component", Namespace = "http://www.xyglo.com")]
     public abstract class Component
     {
         /// <summary>
@@ -198,58 +200,69 @@ namespace Xyglo.Brazil
         /// <summary>
         /// Affected by gravity?
         /// </summary>
+        [DataMember]
         protected bool m_gravityAffected = false;
 
         /// <summary>
         /// Mass of this object
         /// </summary>
+        [DataMember]
         protected double m_mass = 0;
 
         /// <summary>
         /// Hardness of this object
         /// </summary>
+        [DataMember]
         protected double m_hardness = 0;
         
         /// <summary>
         /// Default behaviour is none - but could be a goody or a baddy
         /// </summary>
+        [DataMember]
         protected Behaviour m_behaviour = Behaviour.None;
 
         /// <summary>
         /// List of sub-components
         /// </summary>
+        [DataMember]
         List<Component> m_components = new List<Component>();
 
         /// <summary>
         /// A Component can be made available in zero or many States - a HashSet will ensure we
         /// don't get duplicates in this list.
         /// </summary>
+        [DataMember]
         HashSet<State> m_stateList = new HashSet<State>();
 
         /// <summary>
         /// A Component can also be made available in a combination of State and Action - this is
         /// a finer grained context
         /// </summary>
+        [DataMember]
         HashSet<StateAction> m_stateActionList = new HashSet<StateAction>();
 
         /// <summary>
         /// Name for this component just in case we want to track it easily for some insane reason
         /// </summary>
+        [DataMember]
         protected string m_name;
 
         /// <summary>
         /// Is this Component destroyed in GameLand?  If so don't regenerate it
         /// </summary>
+        [DataMember]
         protected bool m_isDestroyed = false;
 
         /// <summary>
-        /// Is this Compont hiding?
+        /// Is this Component hiding?
         /// </summary>
+        [DataMember]
         protected bool m_isHiding = false;
 
         /// <summary>
         /// Any BrazilComponent can be in a Container
         /// </summary>
+        [DataMember]
         protected BrazilContainer m_container = null;
     }
 }

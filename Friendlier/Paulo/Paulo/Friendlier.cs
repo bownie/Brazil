@@ -42,12 +42,21 @@ namespace Xyglo.Friendlier
             //
             FontManager fontManager = new FontManager();
 
-            Project project;
+            Project project = null;
             string projectFile = Project.getUserDataPath() + "default_project.xml";
 
             if (File.Exists(projectFile))
             {
-                project = Project.dataContractDeserialise(fontManager, projectFile);
+                try
+                {
+                    project = Project.dataContractDeserialise(fontManager, projectFile);
+                }
+                catch (Exception /*e*/)
+                {
+                    //m_viewSpace.sendMessage("Project file has become corrupted.  " + e.Message, 5);
+                    project = new Project(fontManager, "New Project", projectFile);
+                    project.setInitialMessage("Project file has become corrupted.  Please remove " + projectFile);
+                }
             }
             else
             {
@@ -73,6 +82,7 @@ namespace Xyglo.Friendlier
             connect("PositionScreenOpen", new KeyAction(Keys.Right), "Default");
             connect("PositionScreenOpen", new KeyAction(Keys.Up), "Default");
             connect("PositionScreenOpen", new KeyAction(Keys.Down), "Default");
+            connect("PositionScreenOpen", new KeyAction(Keys.Escape), "Default");
 
             // File save connection
             //
@@ -87,6 +97,7 @@ namespace Xyglo.Friendlier
             connect("PositionScreenNew", new KeyAction(Keys.Right), "Default");
             connect("PositionScreenNew", new KeyAction(Keys.Up), "Default");
             connect("PositionScreenNew", new KeyAction(Keys.Down), "Default");
+            connect("PositionScreenNew", new KeyAction(Keys.Escape), "Default");
 
             // Connect up the information screen and escape to get out of it
             //

@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace Xyglo.Brazil
 {
     /// <summary>
     /// A nice Text Banner
     /// </summary>
+    [DataContract(Namespace = "http://www.xyglo.com")]
+    [KnownType(typeof(BrazilBannerText))]
     public class BrazilBannerText : Component3D
     {
         /// <summary>
@@ -126,31 +129,37 @@ namespace Xyglo.Brazil
         /// Brazil position on screen - has to be calculated at the drawing end to measure font 
         /// sizes and screen sizes so we store and pass this on.
         /// </summary>
+        [DataMember]
         protected BrazilPosition m_brazilPosition = BrazilPosition.None;
 
         /// <summary>
         /// Relative component for relative position
         /// </summary>
+        [NonSerialized]
         protected Component3D m_relComponent = null;
 
         /// <summary>
         /// Relative position
         /// </summary>
+        [DataMember]
         protected BrazilRelativePosition m_relPosition = BrazilRelativePosition.None;
 
         /// <summary>
         /// Spacing between relative components
         /// </summary>
+        [DataMember]
         protected float m_spacing = 0.0f;
 
         /// <summary>
         /// The font size
         /// </summary>
+        [DataMember]
         protected double m_size;
 
         /// <summary>
         /// The text
         /// </summary>
+        [DataMember]
         protected string m_text;
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace Xyglo.Brazil
 {
@@ -9,6 +10,8 @@ namespace Xyglo.Brazil
     /// A place which signifies the end of the screen or level and can be used to indicate
     /// a transition should take place.
     /// </summary>
+    [DataContract(Namespace = "http://www.xyglo.com")]
+    [KnownType(typeof(BrazilFinishBlock))]
     public class BrazilFinishBlock : Component3D
     {
         /// <summary>
@@ -58,26 +61,31 @@ namespace Xyglo.Brazil
         /// <summary>
         /// The size of this goddamn FlyingBlock
         /// </summary>
+        [DataMember]
         protected BrazilVector3 m_dimensions = new BrazilVector3();
 
         /// <summary>
         /// State to which we will transition when we hit this
         /// </summary>
+        [DataMember]
         protected State m_transitionState;
 
         /// <summary>
         /// Angle of our flying/floating block
         /// </summary>
+        [DataMember]
         protected double m_pitch = 0.0f;
 
         /// <summary>
         /// How often does this block oscillate?
         /// </summary>
+        [DataMember]
         protected float m_oscillationFrequency = 0.0f;
 
         /// <summary>
         /// What path does this block oscillate upon?
         /// </summary>
+        [DataMember]
         protected BrazilRay m_oscillationPath = null;
     }
 }

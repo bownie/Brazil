@@ -23,7 +23,7 @@ namespace Xyglo.Brazil.Xna
     /// <summary>
     /// XygloXNA is defined by a XNA Game class - the core of the XNA world.
     /// </summary>
-    public class XygloXNA : Game, IBrazilApp
+    public class XygloXNA : Game //, IBrazilApp
     {
         /////////////////////////////// CONSTRUCTORS ////////////////////////////
         /// <summary>
@@ -51,7 +51,7 @@ namespace Xyglo.Brazil.Xna
             // Link signals up to the handlers
             //
             m_mouse.ChangePositionEvent += new PositionChangeEventHandler(handleFlyToPosition);
-            m_mouse.BufferViewChangeEvent += new BufferViewChangeEventHandler(handleBufferViewChange);
+            m_mouse.XygloViewChangeEvent += new XygloViewChangeEventHandler(handleViewChange);
             m_mouse.EyeChangeEvent += new EyeChangeEventHandler(handleEyeChange);
             m_mouse.NewBufferViewEvent += new NewBufferViewEventHandler(handleNewBufferView);
             m_mouse.TemporaryMessageEvent += new TemporaryMessageEventHandler(handleTemporaryMessage);
@@ -65,7 +65,7 @@ namespace Xyglo.Brazil.Xna
             //
             m_keyboardHandler = new XygloKeyboardHandler(m_context, m_brazilContext, m_graphics, m_keyboard);
             m_keyboardHandler.TemporaryMessageEvent += new TemporaryMessageEventHandler(handleTemporaryMessage);
-            m_keyboardHandler.BufferViewChangeEvent += new BufferViewChangeEventHandler(handleBufferViewChange);
+            m_keyboardHandler.XygloViewChangeEvent += new XygloViewChangeEventHandler(handleViewChange);
             m_keyboardHandler.ChangePositionEvent += new PositionChangeEventHandler(handleFlyToPosition);
             m_keyboardHandler.CleanExitEvent += new CleanExitEventHandler(handleCleanExit);
             m_keyboardHandler.CommandEvent += new CommandEventHandler(handleCommand);
@@ -188,15 +188,6 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
-        /// Get the FileBuffer id of the active view
-        /// </summary>
-        /// <returns></returns>
-        protected int getActiveBufferIndex()
-        {
-            return m_context.m_project.getFileBuffers().IndexOf(m_context.m_project.getSelectedBufferView().getFileBuffer());
-        }
-
-        /// <summary>
         /// Get the current application State
         /// </summary>
         /// <returns></returns>
@@ -242,10 +233,6 @@ namespace Xyglo.Brazil.Xna
             //
             m_context.m_project.buildInitialConfiguration();
 
-            // Setup the sprite font
-            //
-            setSpriteFont();
-
             // Load all the files - if we have nothing in this project then create a BufferView
             // and a FileBuffer.
             //
@@ -275,7 +262,7 @@ namespace Xyglo.Brazil.Xna
 
             // Get the BufferView id we've selected and set the BufferView
             //
-            //m_activeBufferView = m_context.m_project.getSelectedBufferView();
+            //m_activeBufferView = m_context.m_project.getSelectedView();
 
             // Ensure that we are in the correct position to view this buffer so there's no initial movement
             //
@@ -294,7 +281,7 @@ namespace Xyglo.Brazil.Xna
                 m_context.m_project.setOpenDirectory(@"C:\");  // set Default
             }
 
-            m_context.m_fileSystemView = new FileSystemView(m_context.m_project.getOpenDirectory(), new Vector3(-800.0f, 0f, 0f), m_context.m_project, m_context.m_fontManager);
+            m_context.m_fileSystemView = new FileSystemView(m_context, m_brazilContext, m_context.m_project.getOpenDirectory(), new Vector3(-800.0f, 0f, 0f), m_context.m_project, m_context.m_fontManager);
 
             // Tree builder and model builder
             //
@@ -317,43 +304,6 @@ namespace Xyglo.Brazil.Xna
                 {
                     fb.forceRefetchFile(sourceObject.m_context.m_project.getSyntaxManager());
                 }
-            }
-        }
-
-        /// <summary>
-        /// Set the current main display SpriteFont to something in keeping with the resolution and reset some important variables.
-        /// </summary>
-        protected void setSpriteFont()
-        {
-            // Font loading - set our text size a bit fluffily at the moment
-            //
-            if (m_context.m_graphics.GraphicsDevice.Viewport.Width < 960)
-            {
-                m_context.m_fontManager.setFontState(FontManager.FontType.Small);
-                Logger.logMsg("XygloXNA:setSpriteFont() - using Small Window font");
-            }
-            else if (m_context.m_graphics.GraphicsDevice.Viewport.Width < 1024)
-            {
-                m_context.m_fontManager.setFontState(FontManager.FontType.Medium);
-                Logger.logMsg("XygloXNA:setSpriteFont() - using Window font");
-            }
-            else
-            {
-                Logger.logMsg("XygloXNA:setSpriteFont() - using Full font");
-                m_context.m_fontManager.setFontState(FontManager.FontType.Large);
-            }
-
-            // to handle tabs for the moment convert them to single spaces
-            //
-            Logger.logMsg("XygloXNA:setSpriteFont() - you must get these three variables correct for each position to avoid nasty looking fonts:");
-            Logger.logMsg("XygloXNA:setSpriteFont() - zoom level = " + m_context.m_zoomLevel);
-            Logger.logMsg("XygloXNA:setSpriteFont() - recalculating relative positions");
-
-            // Now recalculate positions
-            //
-            foreach (BufferView bv in m_context.m_project.getBufferViews())
-            {
-                bv.calculateMyRelativePosition();
             }
         }
 
@@ -475,6 +425,11 @@ namespace Xyglo.Brazil.Xna
             // Initialise the DrawingHelper with our context
             //
             m_context.m_drawingHelper = new DrawingHelper(m_context);
+
+            // Setup the sprite font
+            //
+            if (m_context.m_project != null)
+                m_context.m_drawingHelper.setSpriteFont();
         }
 
         /// <summary>
@@ -605,7 +560,7 @@ namespace Xyglo.Brazil.Xna
 
             // Set up the Sprite font according to new size
             //
-            setSpriteFont();
+            m_context.m_drawingHelper.setSpriteFont();
 
             // Save these values
             //
@@ -667,26 +622,26 @@ namespace Xyglo.Brazil.Xna
         /// sets an additional parameter.
         /// </summary>
         /// <param name="view"></param>
-        protected void setActiveBuffer(XygloView view)
-        {
+        //protected void setActiveBuffer(XygloView view)
+        //{
             // All the maths is done in the Buffer View
             //
-            Vector3 eyePos = view.getEyePosition(m_context.m_zoomLevel);
-            flyToPosition(eyePos);
-        }
+            //Vector3 eyePos = view.getEyePosition(m_context.m_zoomLevel);
+          //  flyToPosition(eyePos);
+        //}
 
         /// <summary>
         /// Set which BufferView is the active one with a cursor in it
         /// </summary>
         /// <param name="view"></param>
-        protected void setActiveBuffer(BufferView item = null)
+        protected void setActiveBuffer(XygloView item = null)
         {
             try
             {
                 // Either set the BufferView 
                 if (item != null)
                 {
-                    m_context.m_project.setSelectedBufferView(item);
+                    m_context.m_project.setSelectedView(item);
                 }
                 else if (m_context.m_project.getBufferViews().Count == 0) // Or if we have none then create one
                 {
@@ -709,7 +664,7 @@ namespace Xyglo.Brazil.Xna
                 return;
             }
 
-            Logger.logMsg("XygloXNA:setActiveBuffer() - active buffer view is " + m_context.m_project.getSelectedBufferViewId());
+            Logger.logMsg("XygloXNA:setActiveBuffer() - active buffer view is " + m_context.m_project.getSelectedViewId());
 
             // Set the font manager up with a zoom level
             //
@@ -724,13 +679,13 @@ namespace Xyglo.Brazil.Xna
 
             // All the maths is done in the Buffer View
             //
-            Vector3 eyePos = m_context.m_project.getSelectedBufferView().getEyePosition(m_context.m_zoomLevel);
+            Vector3 eyePos = m_context.m_project.getSelectedView().getEyePosition(m_context.m_zoomLevel);
 
             flyToPosition(eyePos);
 
             // Set title to include current filename
             // (this is not thread safe - we need to synchronise)
-            //this.Window.Title = "Friendlier v" + VersionInformation.getProductVersion() + " - " + m_context.m_project.getSelectedBufferView().getFileBuffer().getShortFileName();
+            //this.Window.Title = "Friendlier v" + VersionInformation.getProductVersion() + " - " + m_context.m_project.getSelectedView().getFileBuffer().getShortFileName();
         }
 
         /// <summary>
@@ -1025,8 +980,8 @@ namespace Xyglo.Brazil.Xna
             //
             if (m_keyboardHandler.getFilesToWrite() != null && m_keyboardHandler.getFilesToWrite().Count > 0)
             {
-                m_context.m_project.setSelectedBufferView(m_keyboardHandler.getFilesToWrite()[0]);
-                m_eye = m_context.m_project.getSelectedBufferView().getEyePosition();
+                m_context.m_project.setSelectedViewByFileBuffer(m_keyboardHandler.getFilesToWrite()[0]);
+                m_eye = m_context.m_project.getSelectedView().getEyePosition();
                 m_keyboardHandler.selectSaveFile(gameTime);
             }
 
@@ -1881,8 +1836,13 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="message"></param>
         /// <param name="gameTime"></param>
-        protected void setTemporaryMessage(string message, double seconds, GameTime gameTime)
+        public void setTemporaryMessage(string message, double seconds, GameTime gameTime = null)
         {
+            // Recover this if not set
+            if (gameTime == null)
+                gameTime = m_context.m_gameTime;
+
+
             m_temporaryMessage = message;
 
             if (seconds == 0)
@@ -1893,8 +1853,8 @@ namespace Xyglo.Brazil.Xna
             // Store the start and end time for this message - start time is used for
             // scrolling.
             //
-            m_temporaryMessageStartTime = gameTime.TotalGameTime.TotalSeconds;
-            m_temporaryMessageEndTime = m_temporaryMessageStartTime + seconds;
+            m_temporaryMessageStartTime = (gameTime != null ? gameTime.TotalGameTime.TotalSeconds : 0);
+            m_temporaryMessageEndTime = (gameTime != null ? m_temporaryMessageStartTime : 0 ) + seconds;
         }
 
 
@@ -1918,7 +1878,7 @@ namespace Xyglo.Brazil.Xna
             // Always assign a new bufferview to the right if we have one - else default position
             //
             Vector3 newPos = Vector3.Zero;
-            if (m_context.m_project.getSelectedBufferView() != null)
+            if (m_context.m_project.getSelectedView() != null)
             {
                 newPos = getFreeBufferViewPosition(position); // use the m_newPosition for the direction
             }
@@ -1967,8 +1927,8 @@ namespace Xyglo.Brazil.Xna
 
             // Initial new pos is here from active BufferView
             //
-            //Vector3 newPos = m_context.m_project.getSelectedBufferView().calculateRelativePositionVector(position);
-            BoundingBox bb = m_context.m_project.getSelectedBufferView().calculateRelativePositionBoundingBox(position, XygloView.getDefaultBufferShowWidth(), XygloView.getDefaultBufferShowLength());
+            //Vector3 newPos = m_context.m_project.getSelectedView().calculateRelativePositionVector(position);
+            BoundingBox bb = m_context.m_project.getSelectedView().calculateRelativePositionBoundingBox(position, XygloView.getDefaultBufferShowWidth(), XygloView.getDefaultBufferShowLength());
 
             do
             {
@@ -2058,6 +2018,17 @@ namespace Xyglo.Brazil.Xna
                     doBuildCommand(e.getGameTime(), e.getArguments());
                     break;
 
+                case XygloCommand.XygloClient:
+                    if (e.getArguments() == "Paulo")
+                    {
+                        invokeBrazil(e.getGameTime());
+                    }
+                    else
+                    {
+                        throw new XygloException("handleCommand", "Unknown XygloClient");
+                    }
+                    break;
+
                 default:
                     throw new XygloException("handleCommand", "Unrecognised command event");
             }
@@ -2088,9 +2059,9 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        protected void handleBufferViewChange(object sender, BufferViewEventArgs e)
+        protected void handleViewChange(object sender, XygloViewEventArgs e)
         {
-            setActiveBuffer(e.getBufferView());
+            setActiveBuffer(e.getView());
 
             // If not "set active only" then also set position
             //
@@ -2373,7 +2344,7 @@ namespace Xyglo.Brazil.Xna
         /// Draw the Xyglo Components
         /// </summary>
         /// <param name="gameTime"></param>
-        protected void drawXyglo(GameTime gameTime, BrazilApp app = null)
+        protected void drawXyglo(GameTime gameTime, BrazilView view = null)
         {
             // Create/draw the components - note that we have two components called the same in different
             // areas of the framework - we should disambiguate to make sure this distinction between
@@ -2385,10 +2356,10 @@ namespace Xyglo.Brazil.Xna
             //
             List<Component> componentList = null;
             State state = null;
-            if (app != null)
+            if (view != null)
             {
-                componentList = app.getComponents();
-                state = app.getState();
+                componentList = view.getContainer().getApp().getComponents();
+                state = view.getContainer().getApp().getState();
             }
             else
             {
@@ -2422,7 +2393,28 @@ namespace Xyglo.Brazil.Xna
                         // Found a FlyingBlock - initialise it and add it to the dictionary
                         //
                         BrazilFlyingBlock fb = (Xyglo.Brazil.BrazilFlyingBlock)component;
-                        XygloFlyingBlock drawBlock = new XygloFlyingBlock(XygloConvert.getColour(fb.getColour()), m_context.m_lineEffect, fb.getPosition(), fb.getSize());
+
+                        // Allow for container view
+                        Vector3 position = XygloConvert.getVector3(fb.getPosition());
+                        Vector3 size = XygloConvert.getVector3(fb.getSize());
+                        float multiplier = 1.0f;
+
+                        // If we're running in a container then move the position of the item and
+                        // scale by the relative size of the worlds.
+                        //
+                        if (view != null && view.getContainer().getApp().getWorldBounds() != null)
+                        {
+                            // Translate
+                            position += view.getPosition();
+
+                            // Scale
+                            double xMult = view.getContainer().getApp().getWorldBounds().getWidth() / view.getWidth();
+                            double yMult = view.getContainer().getApp().getWorldBounds().getHeight() / view.getHeight();
+                            multiplier = Math.Min((float)xMult, (float)yMult);
+                            size *= multiplier;
+                        }
+
+                        XygloFlyingBlock drawBlock = new XygloFlyingBlock(XygloConvert.getColour(fb.getColour()), m_context.m_lineEffect, position, size);
                         drawBlock.setVelocity(XygloConvert.getVector3(fb.getVelocity()));
 
                         // Naming is useful for tracking these blocks
@@ -2470,13 +2462,26 @@ namespace Xyglo.Brazil.Xna
                     }
                     else if (component.GetType() == typeof(Xyglo.Brazil.BrazilBannerText))
                     {
+                        // A BrazilBanner we have to draw according to app mode - if we're
+                        // hosting a container then draw the banner within the container else
+                        // we use the whole screen.
+                        //
                         BrazilBannerText bt = (Xyglo.Brazil.BrazilBannerText)component;
 
                         // The helper method does all the hard work in getting this position
                         //
-                        Vector3 position = XygloConvert.getTextPosition(bt, m_context.m_fontManager, m_context.m_graphics.GraphicsDevice.Viewport.Width, m_context.m_graphics.GraphicsDevice.Viewport.Height);
-                        XygloBannerText bannerText = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(bt.getColour()), position, bt.getSize(), bt.getText());
-                        bannerText.draw(m_context.m_graphics.GraphicsDevice);
+                        if (view == null)
+                        {
+                            Vector3 position = XygloConvert.getTextPosition(bt, m_context.m_fontManager, m_context.m_graphics.GraphicsDevice.Viewport.Width, m_context.m_graphics.GraphicsDevice.Viewport.Height);
+                            XygloBannerText bannerText = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(bt.getColour()), position, bt.getSize(), bt.getText());
+                            bannerText.draw(m_context.m_graphics.GraphicsDevice);
+                        }
+                        else
+                        {
+                            Vector3 position = view.getPosition() + XygloConvert.getTextPosition(bt, m_context.m_fontManager, m_context.m_graphics.GraphicsDevice.Viewport.Width, m_context.m_graphics.GraphicsDevice.Viewport.Height);
+                            XygloBannerText bannerText = new XygloBannerText(m_context.m_spriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(bt.getColour()), position, bt.getSize(), bt.getText());
+                            bannerText.draw(m_context.m_graphics.GraphicsDevice);
+                        }
                     }
                     else if (component.GetType() == typeof(Xyglo.Brazil.BrazilHud))
                     {
@@ -2486,11 +2491,24 @@ namespace Xyglo.Brazil.Xna
                         if (m_frameCounter.getFrameRate() > 0)
                         {
                             string fpsText = "FPS = " + m_frameCounter.getFrameRate();
+
+                            m_context.m_overlaySpriteBatch.Begin();
                             XygloBannerText bannerText = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(bh.getColour()), position, bh.getSize(), fpsText);
                             bannerText.draw(m_context.m_graphics.GraphicsDevice);
+                            m_context.m_overlaySpriteBatch.End();
                         }
 
-                        if (m_interloper != null)
+                        if (m_context.m_project != null)
+                        {
+                            string eyePosition = "[EyePosition] X " + m_eye.X + ",Y " + m_eye.Y + ",Z " + m_eye.Z;
+                            position.Y += m_context.m_fontManager.getOverlayFont().LineSpacing;
+
+                            m_context.m_overlaySpriteBatch.Begin();
+                            XygloBannerText bannerText = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(bh.getColour()), position, bh.getSize(), eyePosition);
+                            bannerText.draw(m_context.m_graphics.GraphicsDevice);
+                            m_context.m_overlaySpriteBatch.End();
+                        }
+                        else if (m_interloper != null)
                         {
                             // Interloper position
                             //
@@ -2547,7 +2565,7 @@ namespace Xyglo.Brazil.Xna
 
                         // Line effect or Basic effect here?
                         //
-                        XygloMenu menu = new XygloMenu(m_context.m_fontManager, m_context.m_spriteBatch, Color.DarkGray, m_context.m_lineEffect, m_mouse.getLastClickWorldPosition(), m_mouse.geLastClickCursorOffset(), m_context.m_project.getSelectedBufferView().getViewSize());
+                        XygloMenu menu = new XygloMenu(m_context.m_fontManager, m_context.m_spriteBatch, Color.DarkGray, m_context.m_lineEffect, m_mouse.getLastClickWorldPosition(), m_mouse.geLastClickCursorOffset(), m_context.m_project.getSelectedView().getViewSize());
 
                         foreach (BrazilMenuOption item in bMenu.getMenuOptions().Keys)
                         {
@@ -2560,11 +2578,17 @@ namespace Xyglo.Brazil.Xna
                         menu.draw(m_context.m_graphics.GraphicsDevice);
                         m_context.m_drawableComponents[component] = menu;
                     }
+                    
+                    /*
+                     * 
+                     * We no longer support BrazilContainer as a component
+                     */
+                        /*
                     else if (component.GetType() == typeof(Xyglo.Brazil.BrazilContainer))
                     {
                         BrazilContainer container = (BrazilContainer)component;
                         drawXyglo(gameTime, container.getApp());
-                    }
+                    }*/
                 }
                 else
                 {
@@ -2631,6 +2655,8 @@ namespace Xyglo.Brazil.Xna
             List<XygloXnaDrawable> overviewList = m_context.m_drawableComponents.Values.ToList();
             overviewList.AddRange(m_context.m_temporaryDrawables.Values.ToList());
 
+            // Draw previews of temporary objects and the like
+            //
             m_context.m_overlaySpriteBatch.Begin();
             m_context.m_drawingHelper.drawXnaDrawableOverview(m_context.m_graphics.GraphicsDevice, gameTime, overviewList, m_context.m_overlaySpriteBatch);
             m_context.m_overlaySpriteBatch.End();
@@ -2668,7 +2694,14 @@ namespace Xyglo.Brazil.Xna
                 //
                 if (m_flipFlop)
                 {
-                    setTemporaryMessage(VersionInformation.getProductName() + " " + VersionInformation.getProductVersion(), 3, gameTime);
+                    if (m_context.m_project.getInitialMessage() != "")
+                    {
+                        setTemporaryMessage(m_context.m_project.getInitialMessage(), 5);
+                    }
+                    else
+                    {
+                        setTemporaryMessage(VersionInformation.getProductName() + " " + VersionInformation.getProductVersion(), 3, gameTime);
+                    }
                     m_flipFlop = false;
                 }
             }
@@ -2751,21 +2784,22 @@ namespace Xyglo.Brazil.Xna
                 m_context.m_drawingHelper.drawHighlight(gameTime, m_context.m_spriteBatch);
             }
 
-            m_context.m_spriteBatch.End();
-
-            // Draw our generic views
+            // Draw any Brazil views
             //
-            foreach (XygloView view in m_context.m_project.getGenericViews())
+            foreach (BrazilView view in m_context.m_project.getBrazilViews())
             {
-                view.draw(m_context.m_project, m_brazilContext.m_state, gameTime, m_context.m_spriteBatch, m_context.m_basicEffect);
+                drawXyglo(gameTime, view);
+                //view.draw(m_context.m_project, m_brazilContext.m_state, gameTime, m_context.m_spriteBatch, m_context.m_basicEffect);
             }
+
+            m_context.m_spriteBatch.End();
 
             // If we're choosing a file then
             //
             if (m_brazilContext.m_state.equals("FileSaveAs") || m_brazilContext.m_state.equals("FileOpen") || m_brazilContext.m_state.equals("PositionScreenOpen") || m_brazilContext.m_state.equals("PositionScreenNew") || m_brazilContext.m_state.equals("PositionScreenCopy"))
             {
-                drawDirectoryChooser(gameTime);
-
+                m_context.m_fileSystemView.drawDirectoryChooser(gameTime, m_keyboardHandler, m_temporaryMessage, m_temporaryMessageEndTime);
+                //drawDirectoryChooser(gameTime);
             }
             else if (m_brazilContext.m_state.equals("Help"))
             {
@@ -2792,10 +2826,9 @@ namespace Xyglo.Brazil.Xna
                 m_context.m_drawingHelper.drawOverlay(m_context.m_overlaySpriteBatch, gameTime, m_context.m_graphics, m_brazilContext.m_state, m_keyboardHandler.getGotoLine(), m_keyboard.isShiftDown(), m_keyboard.isCtrlDown(), m_keyboard.isAltDown(),
                                             m_eye, m_temporaryMessage, m_temporaryMessageStartTime, m_temporaryMessageEndTime);
 
-                // Draw map of BufferViews - want to get rid of this way of doing things and
-                // move it to the XnaDrawableOverview way.
+                // Draw map preview of all Views.
                 //
-                m_context.m_drawingHelper.drawBufferViewMap(gameTime, m_context.m_overlaySpriteBatch);
+                m_context.m_drawingHelper.drawViewMap(gameTime, m_context.m_overlaySpriteBatch);
                 m_context.m_overlaySpriteBatch.End();
 
                 // Draw any differ overlay
@@ -2950,6 +2983,7 @@ namespace Xyglo.Brazil.Xna
             //m_pannerSpriteBatch.End();
         }
 
+        /*
         /// <summary>
         /// This is a list of directories and files based on the current position of the FileSystemView
         /// </summary>
@@ -2960,6 +2994,9 @@ namespace Xyglo.Brazil.Xna
             //
             if (m_eye != m_newEyePosition)
                 return;
+
+            // Could be null
+            BufferView bv = m_context.m_project.getSelectedBufferView();
 
             // Draw header
             //
@@ -2997,7 +3034,7 @@ namespace Xyglo.Brazil.Xna
 
             // Draw header line
             //
-            m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), line, new Vector2((int)startPosition.X, (int)(startPosition.Y - m_context.m_project.getSelectedBufferView().getLineSpacing() * 3)), Color.White, 0, lineOrigin, 1.0f, 0, 0);
+            m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), line, new Vector2((int)startPosition.X, (int)(startPosition.Y - bv.getLineSpacing() * 3)), Color.White, 0, lineOrigin, 1.0f, 0, 0);
 
             // If we're using this method to position a new window only then don't show the directory chooser part..
             //
@@ -3047,7 +3084,7 @@ namespace Xyglo.Brazil.Xna
                         }
                         else
                         {
-                            yPosition += m_context.m_fontManager.getOverlayFont().LineSpacing /* * 1.5f */;
+                            yPosition += m_context.m_fontManager.getOverlayFont().LineSpacing;
                             line = "...";
                         }
 
@@ -3060,7 +3097,7 @@ namespace Xyglo.Brazil.Xna
                              1.0f,
                              0, 0);
 
-                        yPosition += m_context.m_fontManager.getOverlayFont().LineSpacing /* * 1.5f */;
+                        yPosition += m_context.m_fontManager.getOverlayFont().LineSpacing;
                     }
 
                     lineNumber++;
@@ -3145,7 +3182,7 @@ namespace Xyglo.Brazil.Xna
                                                  1.0f,
                                                  0, 0);
 
-                        yPosition += m_context.m_fontManager.getOverlayFont().LineSpacing/* * 1.5f */;
+                        yPosition += m_context.m_fontManager.getOverlayFont().LineSpacing;
                     }
                     lineNumber++;
                 }
@@ -3170,8 +3207,8 @@ namespace Xyglo.Brazil.Xna
             //
             m_context.m_overlaySpriteBatch.End();
         }
-
-
+        */
+        /*
         /// <summary>
         /// Render some scrolling text to a texture.  This takes the current m_temporaryMessage and renders
         /// to a texture according to how much time has passed since the message was created.
@@ -3227,7 +3264,7 @@ namespace Xyglo.Brazil.Xna
             //
             m_context.m_graphics.GraphicsDevice.SetRenderTarget(null);
             m_context.m_textScrollTexture = (Texture2D)m_context.m_textScroller;
-        }
+        }*/
 
         /// <summary>
         /// Draw a scroll bar for a BufferView
@@ -3236,6 +3273,9 @@ namespace Xyglo.Brazil.Xna
         /// <param name="file"></param>
         protected void drawScrollbar(BufferView view)
         {
+            if (view == null)
+                return;
+
             Vector3 sbPos = view.getPosition();
             float height = view.getBufferShowLength() * m_context.m_fontManager.getLineSpacing(view.getViewSize());
 
@@ -3850,12 +3890,12 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
-        /// Start a Game within Friendlier
+        /// Go Brazil within Friendlier
         /// </summary>
         /// <param name="gameTime"></param>
-        protected void startGame(GameTime gameTime)
+        protected void invokeBrazil(GameTime gameTime)
         {
-            Logger.logMsg("Starting a Game");
+            Logger.logMsg("Invoking BrazilApp inside Friendlier");
 
             // Note that this uses the local BrazilPaulo which is a copy of the top-level Paulo
             // as we must avoid circular dependencies.  BrazilPaulo is of app type 'Hosted' so it
@@ -3871,16 +3911,27 @@ namespace Xyglo.Brazil.Xna
             // the context in which the app itself will be shown and not the state context for the app to
             // run in.  The app container has its own state held internally.
             //
-            addComponent("TextEditing", container);
+            //addComponent("TextEditing", container);
 
-            // Initialise with default state
+            // Initialise the app with a default state
             //
             app.initialise(State.Test("PlayingGame"));
+
+            // Now insert the app, inside the container into a BrazilView 
+            //
+            Vector3 position = m_context.m_project.getSelectedView().calculateRelativePositionVector(XygloView.ViewPosition.Below);
+            BrazilView brazilView = new BrazilView(container, position);
+
+            // Insert it into the project
+            //
+            int id = m_context.m_project.addBrazilView(brazilView);
+            m_context.m_project.setSelectedViewId(id);
+            setActiveBuffer();
         }
 
         // The following methods are used to satisfy the IBrazilApp interface
         //
-
+        /*
         /// <summary>
         /// Get a state
         /// </summary>
@@ -3931,7 +3982,7 @@ namespace Xyglo.Brazil.Xna
             {
                 throw new Exception("Unrecognized state " + state.m_name);
             }
-        }
+        }*/
 
         ///////////////// MEMBER VARIABLES //////////////////
         /// <summary>

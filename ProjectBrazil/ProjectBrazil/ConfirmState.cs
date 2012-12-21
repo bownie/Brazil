@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace Xyglo.Brazil
 {
     /// <summary>
     /// A BrazilApp application Confirmation State
     /// </summary>
+    [DataContract(Name = "ConfirmState", Namespace = "http://www.xyglo.com")]
     public class ConfirmState
     {
         public ConfirmState()
@@ -62,6 +64,7 @@ namespace Xyglo.Brazil
         /// <summary>
         /// The name of our Target
         /// </summary>
+        [DataMember]
         protected string m_name { get; set; }
     }
 }

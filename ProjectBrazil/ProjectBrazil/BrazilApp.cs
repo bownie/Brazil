@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace Xyglo.Brazil
 {
@@ -21,6 +22,7 @@ namespace Xyglo.Brazil
     /// Note that this namespace is uncontaminated by Xyglo.Brazil.Xna as it should stay that way.
     /// 
     /// </summary>
+    [DataContract(Namespace = "http://www.xyglo.com")]
     public abstract class BrazilApp : IWorld, IBrazilApp
     {
         /// <summary>
@@ -367,13 +369,16 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
+        /// Get the world limits
+        /// </summary>
+        /// <returns></returns>
+        public BrazilBoundingBox getWorldBounds() { return m_world.getBounds(); }
+
+        /// <summary>
         /// Set the bounds of our world
         /// </summary>
         /// <param name="bb"></param>
-        public void setWorldBounds(BrazilBoundingBox bb)
-        {
-            m_world.setBounds(bb);
-        }
+        public void setWorldBounds(BrazilBoundingBox bb) { m_world.setBounds(bb); }
 
         /// <summary>
         /// Add a State to this App
@@ -560,43 +565,51 @@ namespace Xyglo.Brazil
         /// see for this moment in our space.   It will be rebuilt on each 'level' according to how
         /// the application/game is structued.
         /// </summary>
+        [DataMember]
         protected ViewSpace m_viewSpace = new ViewSpace();
 
         /// <summary>
         /// A BrazilWorld object that defines size, shape, colour gravity etc at a World level.  This
         /// can be changed but will most likely stay constant over rebuilds of the ViewSpace.
         /// </summary>
+        [DataMember]
         protected BrazilWorld m_world = new BrazilWorld();
 
         /// <summary>
         /// Action map object - created at construction
         /// </summary>
+        [DataMember]
         protected ActionMap m_actionMap = new ActionMap();
 
         /// <summary>
         /// List of States our application can be in
         /// </summary>
+        [DataMember]
         protected List<State> m_states = new List<State>();
 
         /// <summary>
         /// List of Targets our states we can send events to 
         /// </summary>
+        [DataMember]
         protected List<Target> m_targets = new List<Target>();
 
         /// <summary>
         /// List of ConfirmStates
         /// </summary>
+        [DataMember]
         protected List<ConfirmState> m_confirmStates = new List<ConfirmState>();
 
         /// <summary>
         /// List of Components that our app holds - these could be Drawable components or anything.  We keep this 
         /// List private so we have to use accessors
         /// </summary>
+        [DataMember]
         private List<Component> m_componentList = new List<Component>();
 
         /// <summary>
         /// What mode is this app running in?
         /// </summary>
+        [DataMember]
         protected BrazilAppMode m_mode = BrazilAppMode.App;
     }
 }

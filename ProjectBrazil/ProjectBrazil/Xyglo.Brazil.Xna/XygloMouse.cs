@@ -66,10 +66,14 @@ namespace Xyglo.Brazil.Xna
             //
             List<MouseAction> mouseActionList = getAllMouseActions();
 
+            // Maybe we need a BufferView
+            //
+            BufferView bv = null;
+
             // Ignore an empty project for the moment
             //
-            //if (m_context.m_project == null)
-                //return;
+            if (m_context.m_project != null)
+                bv = m_context.m_project.getSelectedBufferView();
 
             // If our main XNA window is inactive then ignore mouse clicks
             //
@@ -134,7 +138,7 @@ namespace Xyglo.Brazil.Xna
                     m_lastClickVector = pickRay.Direction;
                     m_lastClickTime = gameTime.TotalGameTime;
 
-                    m_lastClickEyePosition = eye;// m_project.getSelectedBufferView().getEyePosition(m_zoomLevel);
+                    m_lastClickEyePosition = eye;// m_project.getSelectedView().getEyePosition(m_zoomLevel);
 
                     Logger.logMsg("Friender::checkMouse() - mouse clicked");
 
@@ -168,25 +172,29 @@ namespace Xyglo.Brazil.Xna
                             // http://blogs.msdn.com/b/shawnhar/archive/2008/04/15/stalls-part-two-beware-of-setdata.aspx
                             //
                             //
+                            //if (bv.GetType() != typeof(BufferView))
+                            //{
+                                //BufferView bv = (BufferView)m_context.m_project.getSelectedView();
 
-                            if (position != null && m_context.m_project.getSelectedBufferView().gotHighlight())
-                            {
-                                Vector3 foundPosition = (Vector3)position;
+                                if (position != null && bv.gotHighlight())
+                                {
+                                    Vector3 foundPosition = (Vector3)position;
 
-                                string text = m_context.m_project.getSelectedBufferView().getHighlightText(m_context.m_project);
-                                XygloText highlightText = new XygloText(m_context.m_fontManager, m_context.m_spriteBatch, m_context.m_project.getSelectedBufferView().getTextColour(), m_context.m_lineEffect, foundPosition, m_context.m_project.getSelectedBufferView().getViewSize(), text, m_context.m_project.getSelectedBufferView().getHighlightStart().X);
-                                highlightText.setPickupOffset(m_context.m_project.getSelectedBufferView().getHighlightOffset(foundPosition));
-                                highlightText.setVelocity(new Vector3(1, 0, 0));
+                                    string text = bv.getHighlightText(m_context.m_project);
+                                    XygloText highlightText = new XygloText(m_context.m_fontManager, m_context.m_spriteBatch, bv.getTextColour(), m_context.m_lineEffect, foundPosition, bv.getViewSize(), text, bv.getHighlightStart().X);
+                                    highlightText.setPickupOffset(foundPosition - bv.getHighlightStartPosition());
+                                    highlightText.setVelocity(new Vector3(1, 0, 0));
 
-                                BrazilTemporary temp = new BrazilTemporary(BrazilTemporaryType.CopyText);
-                                // Set drop dead as five seconds into the future
-                                temp.setDropDead(gameTime.TotalGameTime.TotalSeconds + 5);
-                                m_context.m_temporaryDrawables[temp] = highlightText;
+                                    BrazilTemporary temp = new BrazilTemporary(BrazilTemporaryType.CopyText);
+                                    // Set drop dead as five seconds into the future
+                                    temp.setDropDead(gameTime.TotalGameTime.TotalSeconds + 5);
+                                    m_context.m_temporaryDrawables[temp] = highlightText;
 
-                                // Store the source bufferview
-                                //
-                                m_context.m_sourceBufferView = m_context.m_project.getSelectedBufferView();
-                            }
+                                    // Store the source bufferview
+                                    //
+                                    m_context.m_sourceBufferView = bv;
+                                }
+                            //}
                         }
                         else
                         {
@@ -239,10 +247,10 @@ namespace Xyglo.Brazil.Xna
                         //
                         Pair<BufferView, ScreenPosition> bS = getBufferViewIntersection();
 
-                        if (bS.First == m_context.m_project.getSelectedBufferView() && bS.Second.X != -1 && bS.Second.Y != -1 && bS.Second.Y < m_context.m_project.getSelectedBufferView().getFileBuffer().getLineCount())
+                        if (bS.First == m_context.m_project.getSelectedView() && bS.Second.X != -1 && bS.Second.Y != -1 && bS.Second.Y < bv.getFileBuffer().getLineCount())
                         {
                             ScreenPosition sP = bS.Second;
-                            string line = m_context.m_project.getSelectedBufferView().getFileBuffer().getLine(bS.Second.Y);
+                            string line = bv.getFileBuffer().getLine(bS.Second.Y);
                             int maxX = Math.Max(m_context.m_project.screenToFile(line, line.Length - 1), 0);
                             if (sP.X > maxX)
                             {
@@ -262,23 +270,23 @@ namespace Xyglo.Brazil.Xna
                             // do this check then the hold after the double click cuts the newly 
                             // highlighted 'word' in half at this new point within it.
                             //
-                            if (sP.Y != m_context.m_project.getSelectedBufferView().getHighlightStart().Y ||
-                                sP.Y != m_context.m_project.getSelectedBufferView().getHighlightEnd().Y ||
-                                sP.X < m_context.m_project.getSelectedBufferView().getHighlightStart().X ||
-                                sP.X > m_context.m_project.getSelectedBufferView().getHighlightEnd().X)
+                            if (sP.Y != bv.getHighlightStart().Y ||
+                                sP.Y != bv.getHighlightEnd().Y ||
+                                sP.X < bv.getHighlightStart().X ||
+                                sP.X > bv.getHighlightEnd().X)
                             {
                                 // Store cursor position
                                 //
-                                ScreenPosition cP = m_context.m_project.getSelectedBufferView().getCursorPosition();
+                                ScreenPosition cP = bv.getCursorPosition();
 
                                 // Move cursor to the new position and ensure that line is tab safe with the conversion
                                 //
                                 //Logger.logMsg("SET CURSOR POSTITION X = " + sP.X + ",Y = " + sP.Y);
-                                m_context.m_project.getSelectedBufferView().setCursorPosition(sP);
+                                bv.setCursorPosition(sP);
 
                                 // Sweep out a selection to the cursor
                                 //
-                                m_context.m_project.getSelectedBufferView().extendHighlight(cP);
+                                bv.extendHighlight(cP);
                             }
                         }
 
@@ -398,7 +406,7 @@ namespace Xyglo.Brazil.Xna
                         // At this point test to see which bufferview centre we're nearest and if we're near a
                         // different one then switch to that.
                         //
-                        BufferView newView = m_context.m_project.testNearBufferView(eye);
+                        XygloView newView = m_context.m_project.testNearBufferView(eye);
 
                         if (newView != null)
                         {
@@ -407,7 +415,7 @@ namespace Xyglo.Brazil.Xna
 
                             // Calling this constructor sets active buffer only
                             //
-                            OnBufferViewChange(new BufferViewEventArgs(newView));
+                            OnViewChange(new XygloViewEventArgs(newView));
                         }
                         else
                         {
@@ -442,14 +450,14 @@ namespace Xyglo.Brazil.Xna
                         {
                             for (int i = 0; i < -linesDown; i++)
                             {
-                                m_context.m_project.getSelectedBufferView().moveCursorDown(false, keyboard.isShiftDown());
+                                bv.moveCursorDown(false, keyboard.isShiftDown());
                             }
                         }
                         else
                         {
                             for (int i = 0; i < linesDown; i++)
                             {
-                                m_context.m_project.getSelectedBufferView().moveCursorUp(m_context.m_project, false, keyboard.isShiftDown());
+                                bv.moveCursorUp(m_context.m_project, false, keyboard.isShiftDown());
                             }
                         }
                     }
@@ -494,7 +502,7 @@ namespace Xyglo.Brazil.Xna
                             //
                             Pair<BufferView, ScreenPosition> bS = getBufferViewIntersection();
 
-                            if (bS.First == m_context.m_project.getSelectedBufferView() && (bS.Second.X != -1 || bS.Second.Y != -1))
+                            if (bS.First == m_context.m_project.getSelectedView() && (bS.Second.X != -1 || bS.Second.Y != -1))
                             {
                                 ScreenPosition sP = bS.Second;
                                 // Remove the indents for these purposes
@@ -506,10 +514,10 @@ namespace Xyglo.Brazil.Xna
                                 // do this check then the hold after the double click cuts the newly 
                                 // highlighted 'word' in half at this new point within it.
                                 //
-                                //if (sP.Y != m_project.getSelectedBufferView().getHighlightStart().Y ||
-                                //sP.Y != m_project.getSelectedBufferView().getHighlightEnd().Y ||
-                                //sP.X < m_project.getSelectedBufferView().getHighlightStart().X ||
-                                //sP.X > m_project.getSelectedBufferView().getHighlightEnd().X)
+                                //if (sP.Y != m_project.getSelectedView().getHighlightStart().Y ||
+                                //sP.Y != m_project.getSelectedView().getHighlightEnd().Y ||
+                                //sP.X < m_project.getSelectedView().getHighlightStart().X ||
+                                //sP.X > m_project.getSelectedView().getHighlightEnd().X)
                                 //{
                                 m_lastClickWorldPosition = bS.First.getPosition();
                                 m_lastClickCursorOffsetPosition = new Vector2(sP.X, sP.Y);
@@ -609,10 +617,13 @@ namespace Xyglo.Brazil.Xna
             //
             Pair <BufferView, ScreenPosition> bS = getBufferViewIntersection();
 
-            if (bS.First == m_context.m_project.getSelectedBufferView() && bS.Second.X != -1 && bS.Second.Y != -1 && bS.Second.Y < m_context.m_project.getSelectedBufferView().getFileBuffer().getLineCount())
+            // Could be null
+            BufferView bv = m_context.m_project.getSelectedBufferView();
+
+            if (bS.First == m_context.m_project.getSelectedView() && bS.Second.X != -1 && bS.Second.Y != -1 && bS.Second.Y < bv.getFileBuffer().getLineCount())
             {
                 ScreenPosition sP = bS.Second;
-                string line = m_context.m_project.getSelectedBufferView().getFileBuffer().getLine(bS.Second.Y);
+                string line = bv.getFileBuffer().getLine(bS.Second.Y);
                 int maxX = Math.Max(m_context.m_project.screenToFile(line, line.Length - 1), 0);
                 if (sP.X > maxX)
                 {
@@ -683,17 +694,14 @@ namespace Xyglo.Brazil.Xna
 
             // Check for validity of bv and position here
             //
-            if (bv == null || fp.Y < 0 || fp.Y > bv.getFileBuffer().getLineCount() || fp.X < 0 || fp.X >= bv.getFileBuffer().getLine(fp.Y).Length) // do nothing
+            if (bv == null) // do nothing
                 return;
 
             if (bv.isTailing())
-            {
                 handleTailingDoubleClick(bv, fp, screenRelativePosition);
-            }
             else
-            {
-                handleStandardDoubleClick(bv, fp, screenRelativePosition);
-            }
+                if (fp.Y >= 0 || fp.Y < bv.getFileBuffer().getLineCount() || fp.X >= 0 || fp.X < bv.getFileBuffer().getLine(fp.Y).Length)
+                    handleStandardDoubleClick(bv, fp, screenRelativePosition);
         }
 
         /// <summary>
@@ -757,7 +765,7 @@ namespace Xyglo.Brazil.Xna
                         {
                             Logger.logMsg("XygloXNA::handleTailingDoubleClick() - trying to active BufferView and zap to line");
                             //setHighlightAndCenter(bv, sp);
-                            OnBufferViewChange(new BufferViewEventArgs(bv, sp));
+                            OnViewChange(new XygloViewEventArgs(bv, sp));
                         }
                         catch (Exception)
                         {
@@ -782,7 +790,7 @@ namespace Xyglo.Brazil.Xna
                         // Activate and centre
                         //
                         //setHighlightAndCenter(newBV, sp);
-                        OnBufferViewChange(new BufferViewEventArgs(newBV, sp));
+                        OnViewChange(new XygloViewEventArgs(newBV, sp));
 
                         return;
                     }
@@ -866,7 +874,7 @@ namespace Xyglo.Brazil.Xna
         {
             // We need to identify a valid line
             //
-            if (fp.Y >= bv.getFileBuffer().getLineCount())
+            if (fp.Y >= bv.getFileBuffer().getLineCount() || fp.X < 0 || fp.X >= bv.getFileBuffer().getLine(fp.Y).Length)
                 return;
 
             // All we need to do here is find the line, see if we're clicking in a word and
@@ -957,7 +965,7 @@ namespace Xyglo.Brazil.Xna
                     {
                         //setActiveBuffer(bv);
                         //bv.mouseCursorTo(m_shiftDown, sp);
-                        OnBufferViewChange(new BufferViewEventArgs(bv, sp, shiftDown));
+                        OnViewChange(new XygloViewEventArgs(bv, sp, shiftDown));
                     }
                 }
             }
@@ -992,6 +1000,9 @@ namespace Xyglo.Brazil.Xna
         protected void handleDiffPick(GameTime gameTime)
         {
             Pair<BufferView, Pair<ScreenPosition, ScreenPosition>> testFind = m_context.m_project.testRayIntersection(getPickRay());
+
+            // Could be null
+            BufferView bv = m_context.m_project.getSelectedBufferView();
 
             Logger.logMsg("XygloXNA::handleDiffPick() - got diff pick request");
 
@@ -1091,7 +1102,7 @@ namespace Xyglo.Brazil.Xna
                         // to check that this is valid and correct when it is expanded into the 'real' diff
                         // position.
                         //
-                        m_diffPosition = m_differ.originalLhsFileToDiffPosition(m_context.m_project.getSelectedBufferView().getBufferShowStartY());
+                        m_diffPosition = m_differ.originalLhsFileToDiffPosition(bv.getBufferShowStartY());
 
                         // Now we want to fly to the mid position between the two views - we have to assume they are
                         // next to each other for this to make sense.  Only do this if it's configured as such.
@@ -1151,12 +1162,17 @@ namespace Xyglo.Brazil.Xna
         /// <param name="v"></param>
         public void drawCursor(GameTime gameTime, SpriteBatch spriteBatch)
         {
+            BufferView bv = m_context.m_project.getSelectedBufferView();
+
+            if (bv == null)
+                return;
+
             // Don't draw the cursor if we're not the active window or if we're confirming 
             // something on the screen.
             //
             // No cursor for tailing BufferViews
             //
-            if (!m_context.m_project.getSelectedBufferView().isTailing())
+            if (!bv.isTailing())
             {
                 double dTS = gameTime.TotalGameTime.TotalSeconds;
                 int blinkRate = 4;
@@ -1170,26 +1186,26 @@ namespace Xyglo.Brazil.Xna
 
                 // Blinks rate
                 //
-                Vector3 v1 = m_context.m_project.getSelectedBufferView().getCursorCoordinates();
-                v1.Y += m_context.m_project.getSelectedBufferView().getLineSpacing();
+                Vector3 v1 = bv.getCursorCoordinates();
+                v1.Y += bv.getLineSpacing();
 
-                Vector3 v2 = m_context.m_project.getSelectedBufferView().getCursorCoordinates();
+                Vector3 v2 = bv.getCursorCoordinates();
                 v2.X += 1;
 
-                m_context.m_drawingHelper.renderQuad(v1, v2, m_context.m_project.getSelectedBufferView().getHighlightColor(), spriteBatch);
+                m_context.m_drawingHelper.renderQuad(v1, v2, bv.getHighlightColor(), spriteBatch);
             }
             // Draw any temporary highlight
             //
             if (m_clickHighlight.First != null &&
-                ((BufferView)m_clickHighlight.First) == m_context.m_project.getSelectedBufferView())
+                ((BufferView)m_clickHighlight.First) == m_context.m_project.getSelectedView())
             {
                 Highlight h = (Highlight)m_clickHighlight.Second;
-                Vector3 h1 = m_context.m_project.getSelectedBufferView().getSpaceCoordinates(h.m_startHighlight.asScreenPosition());
-                Vector3 h2 = m_context.m_project.getSelectedBufferView().getSpaceCoordinates(h.m_endHighlight.asScreenPosition());
+                Vector3 h1 = bv.getSpaceCoordinates(h.m_startHighlight.asScreenPosition());
+                Vector3 h2 = bv.getSpaceCoordinates(h.m_endHighlight.asScreenPosition());
 
                 // Add some height here so we can see the highlight
                 //
-                h2.Y += m_context.m_fontManager.getLineSpacing(m_context.m_project.getSelectedBufferView().getViewSize());
+                h2.Y += m_context.m_fontManager.getLineSpacing(bv.getViewSize());
 
                 m_context.m_drawingHelper.renderQuad(h1, h2, h.getColour(), spriteBatch);
             }

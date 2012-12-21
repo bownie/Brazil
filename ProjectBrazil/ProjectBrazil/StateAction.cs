@@ -2,14 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace Xyglo.Brazil
 {
     /// <summary>
     /// A StateAction is a combination of a State with an Action (or Actions in a List<>)
-    /// and is used as the key to our ActionMap dictionary.  
-    /// 
+    /// and is used as the key to our ActionMap dictionary.  StateActions are used to 
+    /// indicate which Target a model should progress to.
     /// </summary>
+    [DataContract(Namespace = "http://www.xyglo.com")]
     public class StateAction// : IComparable
     {
         /// <summary>
@@ -198,6 +200,7 @@ namespace Xyglo.Brazil
         /// <summary>
         /// The State
         /// </summary>
+        [DataMember]
         protected State m_state;
 
         /// <summary>
@@ -205,6 +208,7 @@ namespace Xyglo.Brazil
         /// be Keys or Mouse actions and can have edge conditions associated
         /// with them.
         /// </summary>
+        [DataMember]
         protected List<Action> m_actionList = new List<Action>();
     }
 }

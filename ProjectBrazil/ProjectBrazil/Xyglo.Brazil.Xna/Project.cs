@@ -24,7 +24,7 @@ namespace Xyglo.Brazil.Xna
     /// two could be (but don't have to be) related.   We also expose some interfaces for doing
     /// things to FileBuffers and BufferViews.
     /// </summary>
-    [DataContract(Name = "Friendlier", Namespace = "http://www.xyglo.com")]
+    [DataContract(Namespace = "http://www.xyglo.com")]
     public class Project
     {
 
@@ -38,221 +38,6 @@ namespace Xyglo.Brazil.Xna
             Coloured,
             Fun
         }
-
-        //////////// MEMBER VARIABLES ///////////////
-
-        /// <summary>
-        /// The name of our project
-        /// </summary>
-        [DataMember]
-        public string m_projectName
-        { get; set; }
-
-        /// <summary>
-        /// Project file location
-        /// </summary>
-        [DataMember]
-        public string m_projectFile
-        { get; set; }
-
-        /// <summary>
-        /// List of the FileBuffers attached to this project
-        /// </summary>
-        [DataMember]
-        protected List<FileBuffer> m_fileBuffers = new List<FileBuffer>();
-
-        /// <summary>
-        /// List of the BufferViews attached to this project
-        /// </summary>
-        [DataMember]
-        protected List<BufferView> m_bufferViews = new List<BufferView>();
-
-        /// <summary>
-        /// List of generic views - for the moment we only push DiffViews on to them and
-        /// we cannot serialise this list as it's an abstract class.
-        /// </summary>
-        [NonSerialized]
-        protected List<XygloView> m_views = new List<XygloView>();
-
-        /// <summary>
-        /// The LHS BufferView of a diff
-        /// </summary>
-        [DataMember]
-        protected int m_leftDiffBufferViewIndex = -1;
-
-        /// <summary>
-        /// The RHS BufferView of a diff
-        /// </summary>
-        [DataMember]
-        protected int m_rightDiffBufferViewIndex = -1;
-
-        /// <summary>
-        /// Length of the visible BufferView for this project
-        /// </summary>
-        [DataMember]
-        protected int m_bufferViewLength = 20;
-
-        /// <summary>
-        /// Which BufferView is currently selected in the project - to be superceded
-        /// </summary>
-        [DataMember]
-        protected int m_selectedViewId = 0;
-
-        /// <summary>
-        /// The generic view id which will supercede the m_selectedViewId eventually
-        /// </summary>
-        [DataMember]
-        protected int m_selectedXygloViewId = 0;
-
-        /// <summary>
-        /// When this project was initially created - when we persist this it should
-        /// only ever take the initial value here.
-        /// </summary>
-        [DataMember]
-        protected DateTime m_creationTime = DateTime.Now;
-
-        /// <summary>
-        /// When this project is reconstructed this value will be updated
-        /// </summary>
-        [DataMember]
-        public DateTime m_lastAccessTime;
-
-        /// <summary>
-        /// Last time this project was persisted
-        /// </summary>
-        [DataMember]
-        protected DateTime m_lastWriteTime;
-
-        /// <summary>
-        /// How long has this project been active for (total in-app time)
-        /// </summary>
-        [DataMember]
-        public TimeSpan m_activeTime
-        { get; set; }
-
-        /// <summary>
-        /// Our local configuration
-        /// </summary>
-        [DataMember]
-        protected List<Configuration> m_configuration;
-
-        /// <summary>
-        /// Store where we last opened a file from
-        /// </summary>
-        [DataMember]
-        protected string m_openDirectory = @"C:\";
-
-        /// <summary>
-        /// Store where we last saved a file to
-        /// </summary>
-        [DataMember]
-        protected string m_saveDirectory;
-
-        /// <summary>
-        /// Is this software licenced?
-        /// </summary>
-        [IgnoreDataMember]
-        protected bool m_licenced = false;
-
-        /// <summary>
-        /// Eye position to be persistently stored
-        /// </summary>
-        [DataMember]
-        protected Vector3 m_eyeSavePosition = new Vector3();
-
-        /// <summary>
-        /// Target eye position to be persistently stored
-        /// </summary>
-        [DataMember]
-        protected Vector3 m_targetSavePosition = new Vector3();
-
-        /// <summary>
-        /// Buffer view colour index
-        /// </summary>
-        [DataMember]
-        protected int m_bvColourIndex = 0;
-
-        /// <summary>
-        /// List of buffer view colours that we cycle through
-        /// </summary>
-        [DataMember]
-        protected Color[] m_bvColours = { Color.DeepSkyBlue, Color.IndianRed, Color.OrangeRed, Color.GreenYellow, Color.HotPink, Color.LavenderBlush };
-
-        /// <summary>
-        /// Viewing mode of the project
-        /// </summary>
-        [DataMember]
-        protected ViewMode m_viewMode = ViewMode.Formal;
-
-        /// <summary>
-        /// Is the project full screen?
-        /// </summary>
-        [DataMember]
-        protected bool m_fullScreen = false;
-
-        /// <summary>
-        /// Window size
-        /// </summary>
-        [DataMember]
-        protected Vector2 m_windowSize;
-
-        /// <summary>
-        /// Window position
-        /// </summary>
-        [DataMember]
-        protected Vector2 m_windowPosition;
-
-        /// <summary>
-        /// Font manager passed in and set from Friendlier
-        /// </summary>
-        [NonSerialized]
-        protected FontManager m_fontManager;
-
-        /// <summary>
-        /// When this is instantiated it makes a language specific syntax handler to
-        /// provide syntax highlighting, suggestions for autocompletes and also indent
-        /// levels.
-        /// </summary>
-        [NonSerialized]
-        protected SyntaxManager m_syntaxManager;
-
-        /// <summary>
-        /// Tab spaces defined in the project
-        /// </summary>
-        [NonSerialized]
-        protected string m_tab;
-
-        /// <summary>
-        /// The last line in the Standard Output log from the previous run
-        /// </summary>
-        [DataMember]
-        protected int m_stdOutLastLine;
-
-        /// <summary>
-        /// The last line in the Standard Error log from the previous run
-        /// </summary>
-        [DataMember]
-        protected int m_stdErrLastLine;
-
-        /// <summary>
-        /// An external file that defines the project - could be a project file or a build/Makefile
-        /// that provides information about the whole project.
-        /// </summary>
-        [DataMember]
-        protected string m_externalProjectDefinitionFile = "";
-
-        /// <summary>
-        /// Define a base directory for our project - searching for files will occur from this 
-        /// directory.
-        /// </summary>
-        [DataMember]
-        protected string m_externalProjectBaseDirectory = "";
-
-        /// <summary>
-        /// History of all searches for this project
-        /// </summary>
-        [DataMember]
-        protected List<string> m_searchHistory = new List<string>();
 
         ////////// CONSTRUCTORS ///////////
 
@@ -603,12 +388,23 @@ namespace Xyglo.Brazil.Xna
             }
         }
 
+        /// <summary>
+        /// Potentially return a BufferView reference
+        /// </summary>
+        /// <returns></returns>
+        public BufferView getSelectedBufferView()
+        {
+            if (m_views[m_selectedViewId].GetType() == typeof(BufferView))
+                return (BufferView)m_views[m_selectedViewId];
+            else
+                return null;
+        }
 
         /// <summary>
         /// Return the selected BufferView id
         /// </summary>
         /// <returns></returns>
-        public int getSelectedBufferViewId()
+        public int getSelectedViewId()
         {
             return m_selectedViewId;
         }
@@ -617,28 +413,37 @@ namespace Xyglo.Brazil.Xna
         /// Set selected buffer view index
         /// </summary>
         /// <param name="index"></param>
-        public void setSelectedBufferViewId(int index)
+        public void setSelectedViewId(int index)
         {
             m_selectedViewId = index;
         }
 
         /// <summary>
-        /// Return the list of Views - these are called generic for the moment until m_bufferViews are
+        /// Return the list of Views - these are called generic for the moment until m_views are
         /// integrated with them.
         /// </summary>
         /// <returns></returns>
-        public List<XygloView> getGenericViews()
+        public List<XygloView> getViews()
         {
             return m_views;
         }
 
         /// <summary>
-        /// Return the list of BufferViews
+        /// Return the list of BufferViews - nice casting
         /// </summary>
         /// <returns></returns>
         public List<BufferView> getBufferViews()
         {
-            return m_bufferViews;
+            return m_views.Where(item => item.GetType() == typeof(BufferView)).Cast<BufferView>().ToList();
+        }
+
+        /// <summary>
+        /// Return list of BrazilViews
+        /// </summary>
+        /// <returns></returns>
+        public List<BrazilView> getBrazilViews()
+        {
+            return m_views.Where(item => item.GetType() == typeof(BrazilView)).Cast<BrazilView>().ToList();
         }
 
         /// <summary>
@@ -675,7 +480,7 @@ namespace Xyglo.Brazil.Xna
         /// <returns></returns>
         public BufferView getBufferView(string filename)
         {
-            List<BufferView> bvL = m_bufferViews.Where(item => item.getFileBuffer().getFilepath().ToUpper() == filename.ToUpper()).ToList();
+            List<BufferView> bvL = getBufferViews().Where(item => item.getFileBuffer().getFilepath().ToUpper() == filename.ToUpper()).ToList();
 
             if (bvL.Count() > 0)
             {
@@ -717,7 +522,7 @@ namespace Xyglo.Brazil.Xna
         public void clear()
         {
             m_fileBuffers.Clear();
-            m_bufferViews.Clear();
+            m_views.Clear();
         }
 
         /// <summary>
@@ -736,9 +541,9 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="view"></param>
         /// <returns></returns>
-        public bool removeBufferView(BufferView view)
+        public bool removeView(XygloView view)
         {
-            return m_bufferViews.Remove(view);
+            return m_views.Remove(view);
         }
 
         /// <summary>
@@ -769,15 +574,16 @@ namespace Xyglo.Brazil.Xna
         /// <returns></returns>
         public int findNonActiveBufferView(FileBuffer fileBuffer)
         {
-            if (m_bufferViews[m_selectedViewId].getFileBuffer() == fileBuffer)
+            if (m_views[m_selectedViewId].GetType() == typeof(BufferView) &&
+                ((BufferView)(m_views[m_selectedViewId])).getFileBuffer() == fileBuffer)
             {
                 int returnId = -1;
 
-                for (int i = 0; i < m_bufferViews.Count; i++)
+                for (int i = 0; i < m_views.Count; i++)
                 {
                     if (i != m_selectedViewId)
                     {
-                        if (m_bufferViews[i].getFileBuffer() != fileBuffer)
+                        if (getBufferViews()[i].getFileBuffer() != fileBuffer)
                         {
                             returnId = i;
                         }
@@ -825,12 +631,12 @@ namespace Xyglo.Brazil.Xna
 
             // Create a removal list
             //
-            List<BufferView> removeList = m_bufferViews.Where(item => item.getFileBuffer().getFilepath().Replace(@"\\", @"\").ToUpper() == fb.getFilepath().Replace(@"\\", @"\").ToUpper()).ToList();
+            List<BufferView> removeList = getBufferViews().Where(item => item.getFileBuffer().getFilepath().Replace(@"\\", @"\").ToUpper() == fb.getFilepath().Replace(@"\\", @"\").ToUpper()).ToList();
 
             // Can we find an active BufferView which isn't involved in this FileBuffer removal?  If not
             // we can't remove anything yet.
             //
-            List<BufferView> remainingList = m_bufferViews.Except(removeList).ToList();
+            List<BufferView> remainingList = getBufferViews().Except(removeList).ToList();
 
             if (remainingList.Count == 0)
             {
@@ -840,11 +646,11 @@ namespace Xyglo.Brazil.Xna
 
             // Save this as we need to reassign the m_selectedViewId after deletion
             //
-            BufferView activeBufferView = m_bufferViews[m_selectedViewId];
+            BufferView activeBufferView = getBufferViews()[m_selectedViewId];
 
             // If a currently active view is visible then we need to find a new BufferView
             //
-            if (m_bufferViews.Contains(activeBufferView))
+            if (m_views.Contains(activeBufferView))
             {
                 // At this point we know we have another BufferView remaining and that
                 // this list is safe.
@@ -852,16 +658,16 @@ namespace Xyglo.Brazil.Xna
                 activeBufferView = remainingList[0];
             };
 
-            // Remove our list from the m_bufferViews
+            // Remove our list from the m_views
             //
             foreach (BufferView bv in removeList)
             {
-                m_bufferViews.Remove(bv);
+                m_views.Remove(bv);
             }
 
             // Now we need to update the m_selectedViewId
             //
-            m_selectedViewId = m_bufferViews.IndexOf(activeBufferView);
+            m_selectedViewId = m_views.IndexOf(activeBufferView);
 
             // Now remove the FileBuffer
             //
@@ -878,11 +684,11 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
-        /// Add a pre-existing View to the collection
+        /// Add a pre-existing BrazilView to the collection
         /// </summary>
         /// <param name="view"></param>
         /// <returns></returns>
-        public int addGenericView(XygloView view)
+        public int addBrazilView(BrazilView view)
         {
             m_views.Add(view);
             return m_views.IndexOf(view);
@@ -895,8 +701,8 @@ namespace Xyglo.Brazil.Xna
         /// <returns></returns>
         public int addBufferView(BufferView bv)
         {
-            m_bufferViews.Add(bv);
-            return m_bufferViews.IndexOf(bv);
+            m_views.Add(bv);
+            return m_views.IndexOf(bv);
         }
 
         /// <summary>
@@ -910,7 +716,7 @@ namespace Xyglo.Brazil.Xna
             m_fileBuffers.Add(newFB);
 
             BufferView newBV = new BufferView(fontManager, newFB, Vector3.Zero, 0, m_bufferViewLength, fileIndex);
-            m_bufferViews.Add(newBV);
+            m_views.Add(newBV);
 
             return newBV;
         }
@@ -956,7 +762,7 @@ namespace Xyglo.Brazil.Xna
             int index = m_fileBuffers.IndexOf(newFB);
 
             BufferView newBV = new BufferView(fontManager, rootbv, position);
-            m_bufferViews.Add(newBV);
+            m_views.Add(newBV);
 
             return newBV;
         }
@@ -973,30 +779,29 @@ namespace Xyglo.Brazil.Xna
 
             // Deserialize the data and read it from the instance.
             //
-            Project deserializedProject;
-            try
-            {
+            Project deserializedProject = null;
+            //try
+            //{
                 using (FileStream fs = new FileStream(fileName, FileMode.Open))
                 {
                     XmlDictionaryReader reader =
                         XmlDictionaryReader.CreateTextReader(fs, new XmlDictionaryReaderQuotas());
-                    DataContractSerializer ser = new DataContractSerializer(typeof(Project));
-
+                    DataContractSerializer ser = new DataContractSerializer(typeof(Project), getKnownTypes());
 
                     deserializedProject = (Project)ser.ReadObject(reader, true);
                     deserializedProject.setFontManager(fontManager);
                 }
-            }
-            catch (Exception e)
-            {
-                Logger.logMsg("Project::dataContractDeserialise() - caught an issue " + e.Message);
+            //}
+            //catch (Exception e)
+            //{
+                //Logger.logMsg("Project::dataContractDeserialise() - failed to deserialise " + e.Message);
 
                 // Use an empty project and clear up the existing project file
                 //
-                deserializedProject = new Project(fontManager);
-                BufferView bv = new BufferView();
-                deserializedProject.addBufferView(bv);
-            }
+                //deserializedProject = new Project(fontManager);
+                //BufferView bv = new BufferView();
+                //deserializedProject.addBufferView(bv);
+            //}
 
             return deserializedProject;
         }
@@ -1017,10 +822,40 @@ namespace Xyglo.Brazil.Xna
             {
                 using (FileStream writer = new FileStream(m_projectFile, FileMode.Create))
                 {
-                    System.Runtime.Serialization.DataContractSerializer x = new System.Runtime.Serialization.DataContractSerializer(this.GetType());
+                    System.Runtime.Serialization.DataContractSerializer x = new System.Runtime.Serialization.DataContractSerializer(this.GetType(), Project.getKnownTypes());
                     x.WriteObject(writer, this);
                 }
             }
+        }
+
+        /// <summary>
+        /// Define KnownTypes for DataContract serialisation - we have to declare these when
+        /// we use derived classes.  So only put derived serialised classes in the list below.
+        /// </summary>
+        /// <returns></returns>
+        static protected List<Type> getKnownTypes()
+        {
+            List<Type> knownTypes = new List<Type>();
+            knownTypes.Add(typeof(BufferView));
+            knownTypes.Add(typeof(BrazilView));
+            knownTypes.Add(typeof(BrazilPaulo));
+            knownTypes.Add(typeof(BrazilApp));
+            knownTypes.Add(typeof(KeyAction));
+            knownTypes.Add(typeof(MouseAction));
+
+            knownTypes.Add(typeof(BrazilBannerText));
+            knownTypes.Add(typeof(BrazilContainer));
+            knownTypes.Add(typeof(BrazilFinishBlock));
+            knownTypes.Add(typeof(BrazilFlyingBlock));
+            knownTypes.Add(typeof(BrazilGoody));
+            knownTypes.Add(typeof(BrazilHud));
+            knownTypes.Add(typeof(BrazilInterloper));
+            knownTypes.Add(typeof(BrazilMenu));
+            knownTypes.Add(typeof(Component));
+            knownTypes.Add(typeof(Component3D));
+            knownTypes.Add(typeof(DrawableComponent));
+
+            return knownTypes;
         }
 
         /// <summary>
@@ -1122,7 +957,7 @@ namespace Xyglo.Brazil.Xna
 
             // Only load files by active FileBuffers
             //
-            foreach (BufferView bv in m_bufferViews)
+            foreach (BufferView bv in getBufferViews())
             {
                 // Check for existence
                 if (!File.Exists(bv.getFileBuffer().getFilepath()))
@@ -1154,17 +989,17 @@ namespace Xyglo.Brazil.Xna
             // Remove the BufferViews and any associated FileBuffers from the storage classes - only does this if
             // we have more than one bufferview as we always need to have at least one active.
             //
-            if (removeList.Count < m_bufferViews.Count())
+            if (removeList.Count < m_views.Count())
             {
                 foreach (BufferView bv in removeList)
                 {
-                    m_bufferViews.Remove(bv);
+                    m_views.Remove(bv);
 
                     // Ensure that the activeBufferIndex is valid
                     //
-                    if (m_selectedViewId < 0 || m_selectedViewId >= m_bufferViews.Count())
+                    if (m_selectedViewId < 0 || m_selectedViewId >= m_views.Count())
                     {
-                        m_selectedViewId = Math.Max(0, m_bufferViews.Count() - 1);
+                        m_selectedViewId = Math.Max(0, m_views.Count() - 1);
                     }
 
                     if (m_fileBuffers.Contains(bv.getFileBuffer()))
@@ -1189,7 +1024,7 @@ namespace Xyglo.Brazil.Xna
         /// <returns></returns>
         public BufferView getStdOutView()
         {
-            foreach (BufferView bv in m_bufferViews)
+            foreach (BufferView bv in getBufferViews())
             {
                 if (bv.getFileBuffer().getFilepath() == getConfigurationValue("BUILDSTDOUTLOG"))
                 {
@@ -1207,7 +1042,7 @@ namespace Xyglo.Brazil.Xna
         /// <returns></returns>
         public BufferView getStdErrView()
         {
-            foreach (BufferView bv in m_bufferViews)
+            foreach (BufferView bv in getBufferViews())
             {
                 if (bv.getFileBuffer().getFilepath() == getConfigurationValue("BUILDSTDERRLOG"))
                 {
@@ -1229,8 +1064,15 @@ namespace Xyglo.Brazil.Xna
 
             // Fix our BufferViews
             //
-            foreach (BufferView bv in m_bufferViews)
+            foreach (XygloView view in m_views)
             {
+                if (view.GetType() != typeof(BufferView))
+                    continue;
+
+                // Get the BufferView
+                //
+                BufferView bv = (BufferView)view;
+
                 if (bv.getFileBuffer() == null)
                 {
                     if (bv.getFileBufferIndex() < m_fileBuffers.Count)
@@ -1252,12 +1094,12 @@ namespace Xyglo.Brazil.Xna
             //
             foreach (BufferView bv in removeList)
             {
-                m_bufferViews.Remove(bv);
+                m_views.Remove(bv);
             }
 
             // Ensure that the current BufferView is valid
             //
-            if (m_selectedViewId < 0 || m_selectedViewId >= m_bufferViews.Count)
+            if (m_selectedViewId < 0 || m_selectedViewId >= m_views.Count)
             {
                 m_selectedViewId = 0;
             }
@@ -1317,6 +1159,7 @@ namespace Xyglo.Brazil.Xna
             return dir;
         }
 
+        /*
         /// <summary>
         /// Set the selected view in the project by a view reference
         /// </summary>
@@ -1324,7 +1167,7 @@ namespace Xyglo.Brazil.Xna
         public void setSelectedView(BufferView view)
         {
             int i = 0;
-            foreach (BufferView bv in m_bufferViews)
+            foreach (BufferView bv in m_views)
             {
                 if (view == bv)
                 {
@@ -1333,17 +1176,17 @@ namespace Xyglo.Brazil.Xna
                 }
                 ++i;
             }
-        }
+        }*/
 
         /// <summary>
         /// Simple accessor for selected BufferView
         /// </summary>
         /// <returns></returns>
-        public BufferView getSelectedBufferView()
+        public XygloView getSelectedView()
         {
-            if (m_selectedViewId < m_bufferViews.Count())
+            if (m_selectedViewId < m_views.Count())
             {
-                return m_bufferViews[m_selectedViewId];
+                return m_views[m_selectedViewId];
             }
             else
             {
@@ -1355,24 +1198,18 @@ namespace Xyglo.Brazil.Xna
         /// Set index from BufferView
         /// </summary>
         /// <param name="view"></param>
-        public void setSelectedBufferView(BufferView view)
-        {
-            m_selectedViewId = m_bufferViews.IndexOf(view);
-        }
-
-        /// <summary>
-        /// Set a View selection - differs to BufferView selection for the moment
-        /// </summary>
-        /// <param name="view"></param>
         public void setSelectedView(XygloView view)
         {
-            if (view == null)
+            //m_selectedViewId = m_views.IndexOf(view);
+            int i = 0;
+            foreach (XygloView bv in m_views)
             {
-                m_selectedXygloViewId = -1;
-            }
-            else
-            {
-                m_selectedXygloViewId = m_views.IndexOf(view);
+                if (view == bv)
+                {
+                    m_selectedViewId = i;
+                    break;
+                }
+                ++i;
             }
         }
 
@@ -1381,13 +1218,13 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="fb"></param>
         /// <returns></returns>
-        public BufferView setSelectedBufferView(FileBuffer fb)
+        public BufferView setSelectedViewByFileBuffer(FileBuffer fb)
         {
-            foreach (BufferView bv in m_bufferViews)
+            foreach (BufferView bv in m_views)
             {
                 if (bv.getFileBuffer() == fb)
                 {
-                    m_selectedViewId = m_bufferViews.IndexOf(bv);
+                    m_selectedViewId = m_views.IndexOf(bv);
                     return bv;
                 }
             }
@@ -1424,7 +1261,7 @@ namespace Xyglo.Brazil.Xna
 
             if (fb != null)
             {
-                foreach (BufferView bv in m_bufferViews)
+                foreach (BufferView bv in m_views)
                 {
                     FileBuffer bvFB = bv.getFileBuffer();
                     if (bvFB.getFilepath() == fb.getFilepath())
@@ -1537,7 +1374,7 @@ namespace Xyglo.Brazil.Xna
             Color bgColour = Color.DeepSkyBlue;
             bgColour.A = 190;
 
-            foreach (BufferView bv in m_bufferViews)
+            foreach (BufferView bv in m_views)
             {
                 if (state == false)
                 {
@@ -1970,10 +1807,10 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="eyePosition"></param>
         /// <returns></returns>
-        public BufferView testNearBufferView(Vector3 eyePosition)
+        public XygloView testNearBufferView(Vector3 eyePosition)
         {
             Vector3 testPosition;
-            foreach (BufferView bv in m_bufferViews)
+            foreach (XygloView bv in m_views)
             {
                 // Get the eye position from the BufferView but ignore the Z component
                 //
@@ -2001,11 +1838,11 @@ namespace Xyglo.Brazil.Xna
         {
             BoundingBox rB = new BoundingBox();
 
-            if (m_bufferViews.Count > 0)
+            if (m_views.Count > 0)
             {
-                rB = m_bufferViews.First().getBoundingBox();
+                rB = m_views.First().getBoundingBox();
 
-                foreach (BufferView bv in m_bufferViews)
+                foreach (XygloView bv in m_views)
                 {
                     if (bv.getBoundingBox().Min.X < rB.Min.X)
                     {
@@ -2185,7 +2022,7 @@ namespace Xyglo.Brazil.Xna
             //
             float? hyp = null;
 
-            foreach (BufferView bv in m_bufferViews)
+            foreach (XygloView bv in m_views)
             {
                 float? testBB = bv.getBoundingBox().Intersects(ray);
 
@@ -2200,9 +2037,9 @@ namespace Xyglo.Brazil.Xna
                 // the value of this float is the scalar value of the ray from the original
                 // position.
                 //
-                if (hyp != null)
+                if (hyp != null && bv.GetType() == typeof(BufferView))
                 {
-                    rBV = bv;
+                    rBV = (BufferView)bv;
                     break;
                 }
             }
@@ -2648,7 +2485,7 @@ namespace Xyglo.Brazil.Xna
         /// <returns></returns>
         public bool checkBufferViewOverlaps(BoundingBox bb)
         {
-            foreach (BufferView bv in m_bufferViews)
+            foreach (BufferView bv in m_views)
             {
                 if (bv.getBoundingBox().Intersects(bb))
                 {
@@ -2663,108 +2500,254 @@ namespace Xyglo.Brazil.Xna
         /// Set the LHS of a diff
         /// </summary>
         /// <param name="view"></param>
-        public void setLHSDiff(BufferView view)
-        {
-            m_leftDiffBufferViewIndex = m_bufferViews.IndexOf(view);
-        }
+        public void setLHSDiff(BufferView view) { m_leftDiffBufferViewIndex = m_views.IndexOf(view); }
 
         /// <summary>
         /// Set the RHS of a diff
         /// </summary>
         /// <param name="view"></param>
-        public void setRHSDiff(BufferView view)
-        {
-            m_rightDiffBufferViewIndex = m_bufferViews.IndexOf(view);
-        }
+        public void setRHSDiff(BufferView view) { m_rightDiffBufferViewIndex = m_views.IndexOf(view); }
 
         /// <summary>
         /// RHS diff
         /// </summary>
         /// <returns></returns>
-        public int getRHSDiff()
-        {
-            return m_rightDiffBufferViewIndex;
-        }
+        public int getRHSDiff() { return m_rightDiffBufferViewIndex; }
 
         /// <summary>
         /// LHS diff
         /// </summary>
         /// <returns></returns>
-        public int getLHSDiff()
-        {
-            return m_leftDiffBufferViewIndex;
-        }
+        public int getLHSDiff() { return m_leftDiffBufferViewIndex; }
 
         /// <summary>
         /// Set RHS by index
         /// </summary>
         /// <param name="index"></param>
-        public void setRHSDiff(int index)
-        {
-            m_rightDiffBufferViewIndex = index;
-        }
+        public void setRHSDiff(int index) { m_rightDiffBufferViewIndex = index; }
 
         /// <summary>
         /// Set LHS by index
         /// </summary>
         /// <param name="index"></param>
-        public void setLHSDiff(int index)
-        {
-            m_leftDiffBufferViewIndex = index;
-        }
-    }
+        public void setLHSDiff(int index) { m_leftDiffBufferViewIndex = index; }
 
-    /// <summary>
-    /// http://www.extensionmethod.net/Details.aspx?ID=152
-    /// </summary>
-    public static class LinqExtensions
-    {
-        /*
-        public static IEnumerable<IEnumerable<T>> Transpose<T>(this IEnumerable<IEnumerable<T>> values)
-        {
-            if (values.Count() == 0)
-                return values;
-            if (values.First().Count() == 0)
-                return Transpose(values.Skip(1));
+        public void setInitialMessage(string text) { m_initialMessage = text; }
+        public string getInitialMessage() { return m_initialMessage; }
 
-            var x = values.First().First();
-            var xs = values.First().Skip(1);
-            var xss = values.Skip(1);
-         * 
-            return
-                new[] {new[] {x}
-        .Concat(xss.Select(ht => ht.First()))}
-                .Concat(new[] { xs }
-                .Concat(xss.Select(ht => ht.Skip(1)))
-                .Transpose());
-        }*/
+        //////////// MEMBER VARIABLES ///////////////
 
         /// <summary>
-        /// http://stackoverflow.com/questions/2070356/find-common-prefix-of-strings
-        /// 
-        /// Use:
-        /// 
-        /// string[] xs = new[] { "h:/a/b/c", "h:/a/b/d", "h:/a/b/e", "h:/a/c" };
-        /// string x = string.Join("\\", xs.Select(s => s.Split('\\').AsEnumerable()).Transpose().TakeWhile(s => s.All(d => d == s.First())).Select(s => s.First())); 
-        /// 
+        /// The name of our project
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="source"></param>
-        /// <returns></returns>
-        public static IEnumerable<IEnumerable<T>> Transpose<T>(this IEnumerable<IEnumerable<T>> source)
-        {
-            var enumerators = source.Select(e => e.GetEnumerator()).ToArray();
-            try
-            {
-                while (enumerators.All(e => e.MoveNext()))
-                {
-                    yield return enumerators.Select(e => e.Current).ToArray();
-                }
-            }
-            finally
-            {
-                Array.ForEach(enumerators, e => e.Dispose());
-            }
-        }
+        [DataMember]
+        public string m_projectName
+        { get; set; }
+
+        /// <summary>
+        /// Project file location
+        /// </summary>
+        [DataMember]
+        public string m_projectFile
+        { get; set; }
+
+        /// <summary>
+        /// List of the FileBuffers attached to this project
+        /// </summary>
+        [DataMember]
+        protected List<FileBuffer> m_fileBuffers = new List<FileBuffer>();
+
+        /// <summary>
+        /// List of the BufferViews and other XygloView derived items attached to this project
+        /// </summary>
+        [DataMember]
+        protected List<XygloView> m_views = new List<XygloView>();
+
+        /// <summary>
+        /// The LHS BufferView of a diff
+        /// </summary>
+        [DataMember]
+        protected int m_leftDiffBufferViewIndex = -1;
+
+        /// <summary>
+        /// The RHS BufferView of a diff
+        /// </summary>
+        [DataMember]
+        protected int m_rightDiffBufferViewIndex = -1;
+
+        /// <summary>
+        /// Length of the visible BufferView for this project
+        /// </summary>
+        [DataMember]
+        protected int m_bufferViewLength = 20;
+
+        /// <summary>
+        /// Which BufferView is currently selected in the project - to be superceded
+        /// </summary>
+        [DataMember]
+        protected int m_selectedViewId = 0;
+
+        /// <summary>
+        /// The generic view id which will supercede the m_selectedViewId eventually
+        /// </summary>
+        [DataMember]
+        protected int m_selectedXygloViewId = 0;
+
+        /// <summary>
+        /// When this project was initially created - when we persist this it should
+        /// only ever take the initial value here.
+        /// </summary>
+        [DataMember]
+        protected DateTime m_creationTime = DateTime.Now;
+
+        /// <summary>
+        /// When this project is reconstructed this value will be updated
+        /// </summary>
+        [DataMember]
+        public DateTime m_lastAccessTime;
+
+        /// <summary>
+        /// Last time this project was persisted
+        /// </summary>
+        [DataMember]
+        protected DateTime m_lastWriteTime;
+
+        /// <summary>
+        /// How long has this project been active for (total in-app time)
+        /// </summary>
+        [DataMember]
+        public TimeSpan m_activeTime
+        { get; set; }
+
+        /// <summary>
+        /// Our local configuration
+        /// </summary>
+        [DataMember]
+        protected List<Configuration> m_configuration;
+
+        /// <summary>
+        /// Store where we last opened a file from
+        /// </summary>
+        [DataMember]
+        protected string m_openDirectory = @"C:\";
+
+        /// <summary>
+        /// Store where we last saved a file to
+        /// </summary>
+        [DataMember]
+        protected string m_saveDirectory;
+
+        /// <summary>
+        /// Is this software licenced?
+        /// </summary>
+        [IgnoreDataMember]
+        protected bool m_licenced = false;
+
+        /// <summary>
+        /// Eye position to be persistently stored
+        /// </summary>
+        [DataMember]
+        protected Vector3 m_eyeSavePosition = new Vector3();
+
+        /// <summary>
+        /// Target eye position to be persistently stored
+        /// </summary>
+        [DataMember]
+        protected Vector3 m_targetSavePosition = new Vector3();
+
+        /// <summary>
+        /// Buffer view colour index
+        /// </summary>
+        [DataMember]
+        protected int m_bvColourIndex = 0;
+
+        /// <summary>
+        /// List of buffer view colours that we cycle through
+        /// </summary>
+        [DataMember]
+        protected Color[] m_bvColours = { Color.DeepSkyBlue, Color.IndianRed, Color.OrangeRed, Color.GreenYellow, Color.HotPink, Color.LavenderBlush };
+
+        /// <summary>
+        /// Viewing mode of the project
+        /// </summary>
+        [DataMember]
+        protected ViewMode m_viewMode = ViewMode.Formal;
+
+        /// <summary>
+        /// Is the project full screen?
+        /// </summary>
+        [DataMember]
+        protected bool m_fullScreen = false;
+
+        /// <summary>
+        /// Window size
+        /// </summary>
+        [DataMember]
+        protected Vector2 m_windowSize;
+
+        /// <summary>
+        /// Window position
+        /// </summary>
+        [DataMember]
+        protected Vector2 m_windowPosition;
+
+        /// <summary>
+        /// Font manager passed in and set from Friendlier
+        /// </summary>
+        [NonSerialized]
+        protected FontManager m_fontManager;
+
+        /// <summary>
+        /// When this is instantiated it makes a language specific syntax handler to
+        /// provide syntax highlighting, suggestions for autocompletes and also indent
+        /// levels.
+        /// </summary>
+        [NonSerialized]
+        protected SyntaxManager m_syntaxManager;
+
+        /// <summary>
+        /// Tab spaces defined in the project
+        /// </summary>
+        [NonSerialized]
+        protected string m_tab;
+
+        /// <summary>
+        /// The last line in the Standard Output log from the previous run
+        /// </summary>
+        [DataMember]
+        protected int m_stdOutLastLine;
+
+        /// <summary>
+        /// The last line in the Standard Error log from the previous run
+        /// </summary>
+        [DataMember]
+        protected int m_stdErrLastLine;
+
+        /// <summary>
+        /// An external file that defines the project - could be a project file or a build/Makefile
+        /// that provides information about the whole project.
+        /// </summary>
+        [DataMember]
+        protected string m_externalProjectDefinitionFile = "";
+
+        /// <summary>
+        /// Define a base directory for our project - searching for files will occur from this 
+        /// directory.
+        /// </summary>
+        [DataMember]
+        protected string m_externalProjectBaseDirectory = "";
+
+        /// <summary>
+        /// History of all searches for this project
+        /// </summary>
+        [DataMember]
+        protected List<string> m_searchHistory = new List<string>();
+
+        // When we first show a Project we may want a temporary message
+        //
+        [DataMember]
+        protected string m_initialMessage = "";
+
     }
+
 }

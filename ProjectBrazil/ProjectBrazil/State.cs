@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace Xyglo.Brazil
 {
     /// <summary>
-    /// The State of a BrazilApp application
+    /// A State in a BrazilApp application
     /// </summary>
+    [DataContract(Name = "State", Namespace = "http://www.xyglo.com")]
     public class State : IComparable //, IComparer<State>
     {
         public State()
@@ -83,6 +85,7 @@ namespace Xyglo.Brazil
         /// <summary>
         /// The name of our Target
         /// </summary>
+        [DataMember]
         public string m_name { get; set; }
     }
 }

@@ -117,31 +117,15 @@ namespace Xyglo.Brazil.Xna
             float textScale = 1.0f;
 
             m_spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.DepthRead, RasterizerState.CullNone, m_effect);
-
-            if (m_text.Contains("\n"))
-            {
-                string[] splitText = m_text.Split('\n');
-                for (int i = 0; i < splitText.Count(); i++)
-                {
-                    m_spriteBatch.DrawString(
-                        m_fontManager.getViewFont(m_fontSize),
-                        splitText[i],
-                        new Vector2(m_position.X - m_pickupOffset.X - (i == 0 ? 0 : m_fontManager.getCharWidth(m_fontSize) * m_firstRowIndent),
-                        m_position.Y + (i * m_fontManager.getLineSpacing(m_fontSize)) - m_pickupOffset.Y ),
-                        m_colour,
-                        0,
-                        Vector2.Zero,
-                        m_fontManager.getTextScale() * (float)textScale,
-                        0,
-                        0);
-                }
-            }
-            else
+                
+            string[] splitText = m_text.Split('\n');
+            for (int i = 0; i < splitText.Count(); i++)
             {
                 m_spriteBatch.DrawString(
                     m_fontManager.getViewFont(m_fontSize),
-                    m_text,
-                    new Vector2(m_position.X - m_pickupOffset.X, m_position.Y - m_pickupOffset.Y),
+                    splitText[i],
+                    new Vector2(m_position.X - m_pickupOffset.X + (i == 0 ? m_fontManager.getCharWidth(m_fontSize) * m_firstRowIndent : 0),
+                    m_position.Y + (i * m_fontManager.getLineSpacing(m_fontSize)) - m_pickupOffset.Y ),
                     m_colour,
                     0,
                     Vector2.Zero,
@@ -173,7 +157,7 @@ namespace Xyglo.Brazil.Xna
                     //
                     if (first)
                     {
-                        bb.Min.X = m_position.X - m_pickupOffset.X - (i == 0 ? 0 : m_fontManager.getCharWidth(m_fontSize) * m_firstRowIndent);
+                        bb.Min.X = m_position.X - m_pickupOffset.X + (i == 0 ? m_fontManager.getCharWidth(m_fontSize) * m_firstRowIndent : 0);
                         bb.Min.Y = m_position.Y + (i * m_fontManager.getLineSpacing(m_fontSize)) - m_pickupOffset.Y;
 
                         bb.Max.X = bb.Min.X + m_fontManager.getCharWidth(m_fontSize) * splitText[i].Length;

@@ -56,27 +56,27 @@ namespace Xyglo.Brazil.Xna
     /// Returned from XygloMouse - you can set the BufferView and ScreenPosition on the BufferView
     /// and also if the highlight is being extended or not.
     /// </summary>
-    public class BufferViewEventArgs : System.EventArgs
+    public class XygloViewEventArgs : System.EventArgs
     {
-        public BufferViewEventArgs(BufferView bv)
+        public XygloViewEventArgs(XygloView view)
         {
-            m_bufferView = bv;
+            m_view = view;
             m_setActiveBufferOnly = true;
         }
 
-        public BufferViewEventArgs(BufferView bv, ScreenPosition sp, bool extendHighlight = false)
+        public XygloViewEventArgs(XygloView view, ScreenPosition sp, bool extendHighlight = false)
         {
-            m_bufferView = bv;
+            m_view = view;
             m_screenPosition = sp;
             m_extendHighlight = extendHighlight;
         }
 
-        public BufferView getBufferView() { return m_bufferView; }
+        public XygloView getView() { return m_view; }
         public ScreenPosition getScreenPosition() { return m_screenPosition; }
         public bool isExtendingHighlight() { return m_extendHighlight; }
         public bool setActiveOnly() { return m_setActiveBufferOnly; }
 
-        protected BufferView m_bufferView;
+        protected XygloView m_view;
         protected ScreenPosition m_screenPosition;
         protected bool m_extendHighlight = false;
         protected bool m_setActiveBufferOnly = false;
@@ -124,7 +124,8 @@ namespace Xyglo.Brazil.Xna
     public enum XygloCommand
     {
         Build,
-        AlternateBuild
+        AlternateBuild,
+        XygloClient
     }
 
     /// <summary>
@@ -153,7 +154,7 @@ namespace Xyglo.Brazil.Xna
     //
     public delegate void PositionChangeEventHandler(object sender, PositionEventArgs e);
     public delegate void TemporaryMessageEventHandler(object sender, TextEventArgs e);
-    public delegate void BufferViewChangeEventHandler(object sender, BufferViewEventArgs e);
+    public delegate void XygloViewChangeEventHandler(object sender, XygloViewEventArgs e);
     public delegate void EyeChangeEventHandler(object sender, PositionEventArgs eye, PositionEventArgs target);
     public delegate void NewBufferViewEventHandler(object sender, NewBufferViewEventArgs e);
     public delegate void CleanExitEventHandler(object sender, CleanExitEventArgs e);

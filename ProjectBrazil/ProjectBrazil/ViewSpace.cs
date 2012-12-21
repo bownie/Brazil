@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization;
 
 
 namespace Xyglo.Brazil
@@ -45,6 +46,7 @@ namespace Xyglo.Brazil
     /// can be realised (XygloXNA for example).
     /// 
     /// </summary>
+    [DataContract(Namespace = "http://www.xyglo.com")]
     public class ViewSpace : IDisposable
     {
         /// <summary>
@@ -122,6 +124,16 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
+        /// Reach through a send a message to the GUI
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="time"></param>
+        public void sendMessage(string message, double time)
+        {
+            m_xna.setTemporaryMessage(message, time);
+        }
+
+        /// <summary>
         /// Implement the Dispose method
         /// </summary>
         public void Dispose()
@@ -132,16 +144,19 @@ namespace Xyglo.Brazil
         /// <summary>
         /// An XNA handle to display stuff
         /// </summary>
+        [NonSerialized]
         protected XygloXNA m_xna = null;
 
         /// <summary>
         /// Object which has current focus
         /// </summary>
+        [NonSerialized]
         protected XygloObject m_focusObject = null;
 
         /// <summary>
         /// Window mode
         /// </summary>
+        [DataMember]
         protected ViewSpaceMode m_windowMode = ViewSpaceMode.Window;
 
         /// <summary>
@@ -150,6 +165,7 @@ namespace Xyglo.Brazil
         /// within say an XNA instance.  Then we are running this ViewSpace and World within another
         /// and want to store our own state locally here.
         /// </summary>
+        [DataMember]
         protected State m_localState;
     }
 }

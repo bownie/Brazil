@@ -14,7 +14,7 @@ namespace Xyglo.Brazil.Xna
 
         public event PositionChangeEventHandler ChangePositionEvent;
         public event TemporaryMessageEventHandler TemporaryMessageEvent;
-        public event BufferViewChangeEventHandler BufferViewChangeEvent;
+        public event XygloViewChangeEventHandler XygloViewChangeEvent;
         public event EyeChangeEventHandler EyeChangeEvent;
         public event NewBufferViewEventHandler NewBufferViewEvent;
         public event CleanExitEventHandler CleanExitEvent;
@@ -42,9 +42,9 @@ namespace Xyglo.Brazil.Xna
         /// Convenience function for emitting BufferViewChange event
         /// </summary>
         /// <param name="e"></param>
-        protected virtual void OnBufferViewChange(BufferViewEventArgs e)
+        protected virtual void OnViewChange(XygloViewEventArgs e)
         {
-            if (BufferViewChangeEvent != null) BufferViewChangeEvent(this, e);
+            if (XygloViewChangeEvent != null) XygloViewChangeEvent(this, e);
         }
 
         /// <summary>

@@ -2,10 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace Xyglo.Brazil
 {
 
+    /// <summary>
+    /// A BrazilWorld defines an environment for the Brazil Components to live.
+    /// </summary>
+    [DataContract(Namespace = "http://www.xyglo.com")]
     public class BrazilWorld
     {
         /// <summary>

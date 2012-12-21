@@ -15,10 +15,11 @@ Friendlier
   -  
 - Add features:
  
-  - first letter file system navigation 
-  - proper logo/app icon
-  - cut and paste effect - grab highlight and lurch across between files
-  - buildable, configurable context menus
+  - first letter file system navigation [DONE] 
+  - proper logo/app icon [DONE!]
+  - cut and paste effect - grab highlight and lurch across between files [HALF DONE] 
+  - buildable, configurable context menus [HALF DONE]
+  - Brazil within Friendlier
 
 
 XNA/Store

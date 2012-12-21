@@ -1,13 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-
+using System.Runtime.Serialization;
 
 namespace Xyglo.Brazil
 {
     /// <summary>
     /// The Interloper is our hero
     /// </summary>
+    [DataContract(Namespace = "http://www.xyglo.com")]
+    [KnownType(typeof(BrazilInterloper))]
     public class BrazilInterloper : Component3D
     {
         public BrazilInterloper(BrazilColour colour, BrazilVector3 position, BrazilVector3 size)

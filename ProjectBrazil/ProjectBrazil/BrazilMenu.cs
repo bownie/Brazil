@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace Xyglo.Brazil
 {
@@ -14,6 +15,7 @@ namespace Xyglo.Brazil
     /// <summary>
     /// A Menu option
     /// </summary>
+    [DataContract(Namespace = "http://www.xyglo.com")]
     public class BrazilMenuOption
     {
         public BrazilMenuOption(string name, KeyAction shortcut)
@@ -38,6 +40,8 @@ namespace Xyglo.Brazil
     /// that can be connected up to a Target (see the BrazilOption) and also be fired from a State and
     /// Action combination.
     /// </summary>
+    [DataContract(Namespace = "http://www.xyglo.com")]
+    [KnownType(typeof(BrazilMenu))]
     public class BrazilMenu : Component
     {
         public BrazilMenu(BrazilMenuType type, Action action, string title)

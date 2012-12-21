@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-
+using System.Runtime.Serialization;
 
 namespace Xyglo.Brazil
 {
     /// <summary>
     /// The Baddy is one of our villians
     /// </summary>
+    [DataContract(Namespace = "http://www.xyglo.com")]
     public class BrazilBaddy : Component3D
     {
         public BrazilBaddy(BrazilColour colour, BrazilVector3 position, BrazilVector3 size)

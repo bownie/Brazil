@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace Xyglo.Brazil
 {
     /// <summary>
     /// Ray based on XNA's Ray
     /// </summary>
+    [DataContract(Namespace = "http://www.xyglo.com")]
     public class BrazilRay
     {
         /// <summary>

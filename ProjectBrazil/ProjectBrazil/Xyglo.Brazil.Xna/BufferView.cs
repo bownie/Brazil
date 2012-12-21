@@ -25,10 +25,11 @@ namespace Xyglo.Brazil.Xna
     /// the information it needs in order to operate and also defines an interface for operations
     /// upon the FileBuffer.
     /// </summary>
-    [DataContract(Name = "Friendlier", Namespace = "http://www.xyglo.com")]
+    [DataContract(Namespace = "http://www.xyglo.com")]
+    [KnownType(typeof(BufferView))]
     public class BufferView : XygloView
     {
-        [XmlElement(ElementName = "BufferView", Type = typeof(XygloView))]
+        //[XmlElement(ElementName = "BufferView", Type = typeof(XygloView))]
 
         /// <summary>
         /// This store the place in a WrappedEndoFBuffer call that the old log file
@@ -142,12 +143,6 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         [DataMember]
         protected bool m_tailing = false;
-
-        /// <summary>
-        /// Background colour for this bufferview
-        /// </summary>
-        [DataMember]
-        protected Color m_backgroundColour = new Color(180, 180, 180); //Color.DeepSkyBlue;
 
         /// <summary>
         /// Store the search text per BufferView
@@ -367,11 +362,6 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
-        /// Get the position in 3D space
-        /// </summary>
-        public Vector3 getPosition() { return m_position; }
-
-        /// <summary>
         /// Get the start of the highlight
         /// </summary>
         /// <returns></returns>
@@ -449,13 +439,13 @@ namespace Xyglo.Brazil.Xna
         /// when lifting text from a document and ensuring that the text is aligned.
         /// </summary>
         /// <returns></returns>
-        public Vector3 getHighlightOffset(Vector3 mousePosition)
+        public Vector3 getHighlightStartPosition()
         {
             Vector3 rP = m_position;
-            rP.X += m_highlightStart.X * m_fontManager.getViewFont(m_viewSize).MeasureString("X").X;
+            rP.X += (m_highlightStart.X - m_bufferShowStartX) * m_fontManager.getViewFont(m_viewSize).MeasureString("X").X;
             rP.Y += (m_highlightStart.Y - m_bufferShowStartY) * m_fontManager.getViewFont(m_viewSize).LineSpacing;
 
-            return (mousePosition - rP);
+            return rP;
         }
 
         public void mouseCursorTo(bool shiftDown, ScreenPosition endPosition)
@@ -2501,7 +2491,7 @@ namespace Xyglo.Brazil.Xna
         /// Bounding box defined by getTopLeft() and getBottomRight() methods
         /// </summary>
         /// <returns></returns>
-        public BoundingBox getBoundingBox()
+        public override BoundingBox getBoundingBox()
         {
             return new BoundingBox(getTopLeft(), getBottomRight());
         }
@@ -2524,34 +2514,6 @@ namespace Xyglo.Brazil.Xna
             return new BoundingBox(topLeft, bottomRight);
         }
 
-
-        /// <summary>
-        /// Background colour
-        /// </summary>
-        /// <returns></returns>
-        public Color getBackgroundColour(GameTime gameTime, bool preview = false)
-        {
-            double nowTime = gameTime.TotalGameTime.TotalSeconds;
-            //Logger.logMsg("START TIME = " + m_startFlashTime);
-            if (nowTime > m_startFlashTime && nowTime < m_endFlashTime)
-            {
-                float alphaFlash = m_minAlpha + 0.8f * (float)((nowTime - m_startFlashTime) / (m_endFlashTime - m_startFlashTime));
-                return ColourScheme.getFlashColour() * alphaFlash;
-            }
-            else
-            {
-                return m_backgroundColour * ( preview ? 0.5f : m_minAlpha );
-            }
-        }
-
-        /// <summary>
-        /// Set the background colour
-        /// </summary>
-        /// <param name="colour"></param>
-        public void setBackgroundColour(Color colour)
-        {
-            m_backgroundColour = colour;
-        }
 
         /// <summary>
         /// BufferView width defined by font size
@@ -2618,6 +2580,16 @@ namespace Xyglo.Brazil.Xna
             bb.Max.X += m_fontManager.getCharWidth(m_viewSize) * widthChars + m_viewWidthSpacing;
             bb.Max.Y += m_fontManager.getLineSpacing(m_viewSize) * heightChars + m_viewHeightSpacing;
             return bb;
+        }
+
+        public override float getViewCharWidth()
+        {
+            return m_fontManager.getCharWidth(m_viewSize);
+        }
+
+        public override float getViewCharHeight()
+        {
+            return m_fontManager.getLineSpacing(m_viewSize);
         }
 
         /// <summary>

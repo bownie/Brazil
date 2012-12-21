@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace Xyglo.Brazil
 {
@@ -9,6 +10,7 @@ namespace Xyglo.Brazil
     /// An ActionMap keeps track of the States, Actions and Targets for our application.
     /// These three concepts link together to define our user interaction.
     /// </summary>
+    [DataContract(Name = "ActionMap", Namespace = "http://www.xyglo.com")]
     public class ActionMap
     {
         /// <summary>
@@ -162,6 +164,7 @@ namespace Xyglo.Brazil
         /// The ActionMap is basically a Dictionary for each State and Action which
         /// points to a Target - or not.
         /// </summary>
+        [DataMember]
         protected Dictionary<StateAction, Target> m_actionDictionary = new Dictionary<StateAction, Target>();
     }
 }
