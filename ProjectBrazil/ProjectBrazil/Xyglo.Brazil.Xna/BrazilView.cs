@@ -17,9 +17,9 @@ namespace Xyglo.Brazil.Xna
     [KnownType(typeof(BrazilView))]
     public class BrazilView : XygloView
     {
-        public BrazilView(BrazilContainer container, Vector3 Position)
+        public BrazilView(BrazilApp app, Vector3 Position)
         {
-            m_container = container;
+            m_app = app;
             m_position = Position;
 
             m_defaultMeasure.X = 20;
@@ -167,9 +167,9 @@ namespace Xyglo.Brazil.Xna
         /// Get the BrazilContainer which holds the BrazilApp
         /// </summary>
         /// <returns></returns>
-        public BrazilContainer getContainer()
+        public BrazilApp getApp()
         {
-            return m_container;
+            return m_app;
         }
 
 
@@ -177,7 +177,7 @@ namespace Xyglo.Brazil.Xna
         /// The BrazilContainer holds a BrazilApp
         /// </summary>
         [DataMember]
-        protected BrazilContainer m_container;
+        protected BrazilApp m_app;
 
     }
 }

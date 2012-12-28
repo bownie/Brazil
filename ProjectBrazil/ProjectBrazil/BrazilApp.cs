@@ -560,6 +560,8 @@ namespace Xyglo.Brazil
             return m_componentList;
         }
 
+        public BrazilWorld getWorld() { return m_world; }
+
         /// <summary>
         /// ViewSpace object - created at construction.   The Viewspace will define what we can
         /// see for this moment in our space.   It will be rebuilt on each 'level' according to how

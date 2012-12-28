@@ -66,6 +66,16 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Get a BrazilBoundingBox
+        /// </summary>
+        /// <param name="bb"></param>
+        /// <returns></returns>
+        static public BrazilBoundingBox getBrazilBoundingBox(BoundingBox bb)
+        {
+            return new BrazilBoundingBox(XygloConvert.getBrazilVector3(bb.Min), XygloConvert.getBrazilVector3(bb.Max));
+        }
+
+        /// <summary>
         /// Get a XNA Color for a BrazilColour
         /// </summary>
         /// <param name="brazilColour"></param>

@@ -1499,7 +1499,7 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         protected void closeActiveBuffer(GameTime gameTime)
         {
-            if (m_context.m_project.getBufferViews().Count > 1)
+            if (m_context.m_project.getViews().Count > 1)
             {
                 int index = m_context.m_project.getViews().IndexOf(m_context.m_project.getSelectedView());
                 m_context.m_project.removeView(m_context.m_project.getSelectedView());

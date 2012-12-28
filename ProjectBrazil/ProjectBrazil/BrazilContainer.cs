@@ -12,6 +12,9 @@ namespace Xyglo.Brazil
     /// to run as a sub-app.  The app itself holds its own state model and transitions as well
     /// as components - some components will need to be modified (full screen ones for example)
     /// and everything needs to be scaled to fit into the provided BoundingBox.
+    /// 
+    /// 
+    /// DEFUNCT - NOT NEEDED
     /// </summary>
     [DataContract(Name = "BrazilContainer", Namespace = "http://www.xyglo.com")]
     public class BrazilContainer : Component

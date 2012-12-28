@@ -60,6 +60,14 @@ namespace Xyglo.Brazil.Xna
             //
             m_keyboard = new XygloKeyboard(m_context, world.getKeyAutoRepeatHoldTime(), world.getKeyAutoRepeatInterval());
 
+            // FontManager
+            //
+            m_context.m_fontManager = new FontManager();
+
+            // Graphics helper
+            //
+            m_graphics = new XygloGraphics(m_context);
+
             // Keyboard handling class - performs interpretation of the key commands into
             // whatever we want to do.
             //
@@ -69,14 +77,6 @@ namespace Xyglo.Brazil.Xna
             m_keyboardHandler.ChangePositionEvent += new PositionChangeEventHandler(handleFlyToPosition);
             m_keyboardHandler.CleanExitEvent += new CleanExitEventHandler(handleCleanExit);
             m_keyboardHandler.CommandEvent += new CommandEventHandler(handleCommand);
-
-            // FontManager
-            //
-            m_context.m_fontManager = new FontManager();
-
-            // Graphics helper
-            //
-            m_graphics = new XygloGraphics(m_context);
 
             // Initialise
             //
@@ -2339,7 +2339,6 @@ namespace Xyglo.Brazil.Xna
             m_context.m_lineEffect.World = Matrix.CreateScale(1, -1, 1);
         }
 
-
         /// <summary>
         /// Draw the Xyglo Components
         /// </summary>
@@ -2358,8 +2357,8 @@ namespace Xyglo.Brazil.Xna
             State state = null;
             if (view != null)
             {
-                componentList = view.getContainer().getApp().getComponents();
-                state = view.getContainer().getApp().getState();
+                componentList = view.getApp().getComponents();
+                state = view.getApp().getState();
             }
             else
             {
@@ -2386,6 +2385,11 @@ namespace Xyglo.Brazil.Xna
                 //
                 if (!m_context.m_drawableComponents.ContainsKey(component))
                 {
+                    // Ignore all but 3D components at this stage
+                    //
+                    if (component.GetType() != typeof(Component3D))
+                        continue;
+
                     // If not then is it a drawable type? 
                     //
                     if (component.GetType() == typeof(Xyglo.Brazil.BrazilFlyingBlock))
@@ -2402,14 +2406,14 @@ namespace Xyglo.Brazil.Xna
                         // If we're running in a container then move the position of the item and
                         // scale by the relative size of the worlds.
                         //
-                        if (view != null && view.getContainer().getApp().getWorldBounds() != null)
+                        if (view != null && view.getApp().getWorldBounds() != null)
                         {
                             // Translate
                             position += view.getPosition();
 
                             // Scale
-                            double xMult = view.getContainer().getApp().getWorldBounds().getWidth() / view.getWidth();
-                            double yMult = view.getContainer().getApp().getWorldBounds().getHeight() / view.getHeight();
+                            double xMult = view.getApp().getWorldBounds().getWidth() / view.getWidth();
+                            double yMult = view.getApp().getWorldBounds().getHeight() / view.getHeight();
                             multiplier = Math.Min((float)xMult, (float)yMult);
                             size *= multiplier;
                         }
@@ -2473,8 +2477,10 @@ namespace Xyglo.Brazil.Xna
                         if (view == null)
                         {
                             Vector3 position = XygloConvert.getTextPosition(bt, m_context.m_fontManager, m_context.m_graphics.GraphicsDevice.Viewport.Width, m_context.m_graphics.GraphicsDevice.Viewport.Height);
+                            m_context.m_overlaySpriteBatch.Begin();
                             XygloBannerText bannerText = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(bt.getColour()), position, bt.getSize(), bt.getText());
                             bannerText.draw(m_context.m_graphics.GraphicsDevice);
+                            m_context.m_overlaySpriteBatch.End();
                         }
                         else
                         {
@@ -2514,6 +2520,7 @@ namespace Xyglo.Brazil.Xna
                             //
                             Vector3 ipPos = m_context.m_drawableComponents[m_interloper].getPosition();
                             string ipText = "Interloper Position X = " + ipPos.X + ", Y = " + ipPos.Y + ", Z = " + ipPos.Z;
+                            m_context.m_overlaySpriteBatch.Begin();
                             XygloBannerText ipBanner = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(BrazilColour.Blue), new Vector3(0, m_context.m_fontManager.getOverlayFont().LineSpacing, 0), 1.0f, ipText);
                             ipBanner.draw(m_context.m_graphics.GraphicsDevice);
 
@@ -2526,6 +2533,7 @@ namespace Xyglo.Brazil.Xna
                             string ipLives = "Lives = " + m_brazilContext.m_world.getLives();
                             XygloBannerText ipLivesText = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(BrazilColour.Green), new Vector3(0, m_context.m_fontManager.getOverlayFont().LineSpacing * 3, 0), 1.0f, ipLives);
                             ipLivesText.draw(m_context.m_graphics.GraphicsDevice);
+                            m_context.m_overlaySpriteBatch.End();
                         }
 
                     } else if (component.GetType() == typeof(Xyglo.Brazil.BrazilGoody))
@@ -2784,6 +2792,9 @@ namespace Xyglo.Brazil.Xna
                 m_context.m_drawingHelper.drawHighlight(gameTime, m_context.m_spriteBatch);
             }
 
+
+            m_context.m_spriteBatch.End();
+
             // Draw any Brazil views
             //
             foreach (BrazilView view in m_context.m_project.getBrazilViews())
@@ -2791,8 +2802,6 @@ namespace Xyglo.Brazil.Xna
                 drawXyglo(gameTime, view);
                 //view.draw(m_context.m_project, m_brazilContext.m_state, gameTime, m_context.m_spriteBatch, m_context.m_basicEffect);
             }
-
-            m_context.m_spriteBatch.End();
 
             // If we're choosing a file then
             //
@@ -3905,7 +3914,7 @@ namespace Xyglo.Brazil.Xna
 
             // Now initialise a container with the BrazilApp inside it
             //
-            BrazilContainer container = new BrazilContainer(app, new BrazilBoundingBox(new BrazilVector3(0, 0, 0), new BrazilVector3(600, 400, 10)));
+            //BrazilContainer container = new BrazilContainer(app, new BrazilBoundingBox(new BrazilVector3(0, 0, 0), new BrazilVector3(600, 400, 10)));
 
             // Now attach the container to this application at the right state for Friendlier - this is
             // the context in which the app itself will be shown and not the state context for the app to
@@ -3920,12 +3929,13 @@ namespace Xyglo.Brazil.Xna
             // Now insert the app, inside the container into a BrazilView 
             //
             Vector3 position = m_context.m_project.getSelectedView().calculateRelativePositionVector(XygloView.ViewPosition.Below);
-            BrazilView brazilView = new BrazilView(container, position);
+            BrazilView brazilView = new BrazilView(app, position);
 
             // Insert it into the project
             //
             int id = m_context.m_project.addBrazilView(brazilView);
             m_context.m_project.setSelectedViewId(id);
+            app.getWorld().setWorldScale(XygloConvert.getBrazilBoundingBox(brazilView.getBoundingBox()));
             setActiveBuffer();
         }
 

@@ -113,6 +113,24 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
+        /// Scale of the world
+        /// </summary>
+        /// <returns></returns>
+        public float getWorldScale() { return m_worldScale; }
+
+        /// <summary>
+        /// Set the world scaling factor according to the size of box we're going to view it in
+        /// </summary>
+        /// <param name="viewBox"></param>
+        public void setWorldScale(BrazilBoundingBox viewBox)
+        {
+            // Scale
+            double xMult = m_bounds.getWidth() / viewBox.getWidth();
+            double yMult = m_bounds.getHeight() / viewBox.getHeight();
+            m_worldScale = Math.Min((float)xMult, (float)yMult);
+        }
+
+        /// <summary>
         /// Bounding area for our world
         /// </summary>
         protected BrazilBoundingBox m_bounds;
@@ -137,5 +155,10 @@ namespace Xyglo.Brazil
         /// Time between auto-key repeats
         /// </summary>
         protected double m_repeatInterval = 0.05f;
+
+        /// <summary>
+        /// If we need to scale the world then we can use this handy actor
+        /// </summary>
+        protected float m_worldScale = 1.0f;
     }
 }
