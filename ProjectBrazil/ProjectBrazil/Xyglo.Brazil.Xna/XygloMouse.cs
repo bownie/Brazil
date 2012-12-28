@@ -336,8 +336,8 @@ namespace Xyglo.Brazil.Xna
                         }
 
                         //Logger.logMsg("XygloXNA::checkMouse() - mouse dragged: X = " + diffPosition.X + ", Y = " + diffPosition.Y);
-
                         //float multiplier = m_zoomLevel / m_zoomLevel;
+
                         Vector3 newEye = eye;
                         newEye.X = m_lastClickEyePosition.X - diffPosition.X; // *multiplier;
                         newEye.Y = m_lastClickEyePosition.Y + diffPosition.Y; // *multiplier;
@@ -356,7 +356,6 @@ namespace Xyglo.Brazil.Xna
                 }
                 else if (mouseAction.m_mouse == Mouse.LeftButtonRelease)
                 {
-
                     // Clear down any temporaries
                     //
                     if (m_clickInHighlight)
@@ -410,19 +409,12 @@ namespace Xyglo.Brazil.Xna
 
                         if (newView != null)
                         {
-                            //Logger.logMsg("XygloXNA::checkMouse() - switching to new buffer view");
-                            //setActiveBuffer(newView);
-
                             // Calling this constructor sets active buffer only
                             //
                             OnViewChange(new XygloViewEventArgs(newView));
                         }
                         else
                         {
-                            // Flyback to our existing view - replacing following code
-                            //
-                            //flyToPosition(m_lastClickEyePosition);
-
                             // Emit the event
                             //
                             OnChangePosition(new PositionEventArgs(m_lastClickEyePosition));
@@ -1152,7 +1144,6 @@ namespace Xyglo.Brazil.Xna
             Vector3 eyePos = eye;
             eyePos.Z = m_context.m_zoomLevel;
 
-            //flyToPosition(eyePos);
             OnChangePosition(new PositionEventArgs(eyePos));
         }
 

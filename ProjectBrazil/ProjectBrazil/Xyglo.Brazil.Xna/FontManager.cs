@@ -245,17 +245,17 @@ namespace Xyglo.Brazil.Xna
 
             if (!m_fullScreen)
             {
-                if (m_zoomLevel == 500.0f)
-                {
+                //if (m_zoomLevel == 500.0f)
+                //{
                     m_state = FontType.Medium;
                     Logger.logMsg("FontManager::setScreenState() - setting FontType.Window");
 
-                }
-                else
-                {
-                    m_state = FontType.Small;
-                    Logger.logMsg("FontManager::setScreenState() - setting FontType.Small");
-                }
+                //}
+                //else
+                //{
+                    //m_state = FontType.Small;
+                    //Logger.logMsg("FontManager::setScreenState() - setting FontType.Small");
+                //}
             }
         }
 

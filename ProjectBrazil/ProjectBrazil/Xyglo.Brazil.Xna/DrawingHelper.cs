@@ -363,7 +363,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="text"></param>
         public int drawTextScreen(SpriteBatch spriteBatch, GameTime gameTime, GraphicsDeviceManager graphics, string text, int textScreenPositionY, int fixedWidth = 0, int highlight = -1)
         {
-            Vector3 fp = m_context.m_project.getSelectedBufferView().getPosition();
+            Vector3 fp = m_context.m_project.getSelectedView().getPosition();
 
             // Always start from 0 for offsets
             //
@@ -469,8 +469,9 @@ namespace Xyglo.Brazil.Xna
             //
             string text = "";
 
-            BufferView bv = m_context.m_project.getSelectedBufferView();
-            if (bv == null)
+            XygloView view = m_context.m_project.getSelectedView();
+
+            if (view == null)
             {
                 linesDisplayed = 0;
                 return;
@@ -482,14 +483,31 @@ namespace Xyglo.Brazil.Xna
 
             drawCentredTextOverlay(spriteBatch, graphics, 3, "File Information", Color.AntiqueWhite);
 
-            string truncFileName = m_context.m_project.estimateFileStringTruncation("", bv.getFileBuffer().getFilepath(), 75);
+            if (view.GetType() == typeof(BufferView))
+            {
+                BufferView bv = (BufferView)view;
 
-            text += truncFileName + "\n\n";
-            text += "File status        : " + (bv.getFileBuffer().isWriteable() ? "Writeable " : "Read Only") + "\n";
-            text += "File lines         : " + bv.getFileBuffer().getLineCount() + "\n";
-            text += "File created       : " + bv.getFileBuffer().getCreationSystemTime().ToString() + "\n";
-            text += "File last modified : " + bv.getFileBuffer().getLastWriteSystemTime().ToString() + "\n";
-            text += "File last accessed : " + bv.getFileBuffer().getLastFetchSystemTime().ToString() + "\n";
+                string truncFileName = m_context.m_project.estimateFileStringTruncation("", bv.getFileBuffer().getFilepath(), 75);
+                text += truncFileName + "\n\n";
+                text += "View Type          : BufferView\n";
+                text += "File status        : " + (bv.getFileBuffer().isWriteable() ? "Writeable " : "Read Only") + "\n";
+                text += "File lines         : " + bv.getFileBuffer().getLineCount() + "\n";
+                text += "File created       : " + bv.getFileBuffer().getCreationSystemTime().ToString() + "\n";
+                text += "File last modified : " + bv.getFileBuffer().getLastWriteSystemTime().ToString() + "\n";
+                text += "File last accessed : " + bv.getFileBuffer().getLastFetchSystemTime().ToString() + "\n";
+            }
+            else if (view.GetType() == typeof(BrazilView))
+            {
+                BrazilView bv = (BrazilView)view;
+
+                text += "View Type          : BrazilView\n";
+                text += "App type           : " + bv.getApp().ToString() + "\n";
+                text += "Xyglo components   : " + bv.getApp().getComponents().Count + "\n";
+            }
+            else
+            {
+                text += "View Type          : XygloView (undifferentiated)";
+            }
 
             text += "\n"; // divider
             text += "Project name:      : " + m_context.m_project.m_projectName + "\n";

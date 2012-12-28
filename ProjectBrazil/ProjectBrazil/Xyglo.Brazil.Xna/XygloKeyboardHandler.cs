@@ -1809,7 +1809,7 @@ namespace Xyglo.Brazil.Xna
         public void updateSmartHelp()
         {
             BufferView bv = m_context.m_project.getSelectedBufferView();
-            if (bv == null)
+            if (bv == null || bv.getFileBuffer().getLineCount() == 0)
                 return;
 
             // Update the syntax highlighting
@@ -1854,7 +1854,7 @@ namespace Xyglo.Brazil.Xna
         public void processKey(GameTime gameTime, KeyAction keyAction)
         {
             // Skip for all non bufferviews
-            if (m_context.m_project.getSelectedBufferView() == null)
+            if (m_context.m_project == null || m_context.m_project.getSelectedBufferView() == null)
                 return;
 
             // Ok, let's see if we can translate a key
@@ -1893,17 +1893,24 @@ namespace Xyglo.Brazil.Xna
             }
             else if (m_brazilContext.m_state.equals("TextEditing"))
             {
-                // Do we need to do some deletion or replacing?
-                //
-                if (m_context.m_project.getSelectedBufferView().gotHighlight())
+                XygloView view = m_context.m_project.getSelectedView();
+
+                if (view.GetType() == typeof(BufferView))
                 {
-                    m_context.m_project.getSelectedBufferView().replaceCurrentSelection(m_context.m_project, key);
+                    BufferView bv = (BufferView)view;
+
+                    // Do we need to do some deletion or replacing?
+                    //
+                    if (bv.gotHighlight())
+                    {
+                        bv.replaceCurrentSelection(m_context.m_project, key);
+                    }
+                    else
+                    {
+                        bv.insertText(m_context.m_project, key);
+                    }
+                    updateSmartHelp();
                 }
-                else
-                {
-                    m_context.m_project.getSelectedBufferView().insertText(m_context.m_project, key);
-                }
-                updateSmartHelp();
             }
         }
 

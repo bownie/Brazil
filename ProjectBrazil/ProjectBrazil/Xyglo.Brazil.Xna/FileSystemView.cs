@@ -414,7 +414,7 @@ namespace Xyglo.Brazil.Xna
 
             // Draw header line
             //
-            m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), line, new Vector2((int)startPosition.X, (int)(startPosition.Y - bv.getLineSpacing() * 3)), Color.White, 0, lineOrigin, 1.0f, 0, 0);
+            m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), line, new Vector2((int)startPosition.X, (int)(startPosition.Y - (bv == null ? 0 : bv.getLineSpacing() * 3))), Color.White, 0, lineOrigin, 1.0f, 0, 0);
 
             // If we're using this method to position a new window only then don't show the directory chooser part..
             //

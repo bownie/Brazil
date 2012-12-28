@@ -9,9 +9,7 @@ using System.Runtime.Serialization;
 namespace Xyglo.Brazil.Xna
 {
     /// <summary>
-    /// A BrazilView is a XygloView implementation for a BrazilContainer.  This means
-    /// we can embed a BrazilApp within a BrazilApp and interact with other XygloView
-    /// types.
+    /// A BrazilView is a XygloView implementation for hosting a BrazilApp.
     /// </summary>
     [DataContract(Namespace = "http://www.xyglo.com")]
     [KnownType(typeof(BrazilView))]
@@ -22,16 +20,27 @@ namespace Xyglo.Brazil.Xna
             m_app = app;
             m_position = Position;
 
-            m_defaultMeasure.X = 20;
-            m_defaultMeasure.Y = 16;
+            if (m_defaultMeasure.X == 0)
+                m_defaultMeasure.X = 12;
+
+            if (m_defaultMeasure.Y == 0)
+                m_defaultMeasure.Y = 6;
+
+            // Apply app to all components
+            //
+            applyComponents();
         }
 
         /// <summary>
-        /// For this type of view we hardcode the 'character' size but still
-        /// use the aspect ratio set by bufferShowWidth/Length.
+        /// Apply app to components within app
         /// </summary>
-        [DataMember]
-        protected Vector2 m_defaultMeasure = new Vector2();
+        protected void applyComponents()
+        {
+            foreach (Component comp in m_app.getComponents())
+            {
+                comp.setApp(m_app);
+            }
+        }
 
         /// <summary>
         /// Position of the Eye over our view
@@ -133,6 +142,16 @@ namespace Xyglo.Brazil.Xna
             return base.Equals(obj);
         }
 
+
+        /// <summary>
+        /// Get the BrazilApp
+        /// </summary>
+        /// <returns></returns>
+        public BrazilApp getApp()
+        {
+            return m_app;
+        }
+
         /// <summary>
         /// BoundingBox for the BrazilView
         /// </summary>
@@ -164,17 +183,14 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
-        /// Get the BrazilContainer which holds the BrazilApp
+        /// For this type of view we hardcode the 'character' size but still
+        /// use the aspect ratio set by bufferShowWidth/Length.
         /// </summary>
-        /// <returns></returns>
-        public BrazilApp getApp()
-        {
-            return m_app;
-        }
-
+        [DataMember]
+        protected Vector2 m_defaultMeasure = new Vector2();
 
         /// <summary>
-        /// The BrazilContainer holds a BrazilApp
+        /// The BrazilApp defines an application that sits within this view
         /// </summary>
         [DataMember]
         protected BrazilApp m_app;

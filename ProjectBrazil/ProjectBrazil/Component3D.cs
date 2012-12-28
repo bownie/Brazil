@@ -133,26 +133,31 @@ namespace Xyglo.Brazil
         /// <summary>
         /// Position
         /// </summary>
+        [DataMember]
         protected BrazilVector3 m_position;
 
         /// <summary>
         /// Give a velocity vector
         /// </summary>
+        [DataMember]
         protected BrazilVector3 m_velocity;
 
         /// <summary>
         /// A rotation angle (per frame currently)
         /// </summary>
+        [DataMember]
         protected double m_rotation = 0.0f;
 
         /// <summary>
         /// An initial angle for this element (in one dimension only)
         /// </summary>
+        [DataMember]
         protected double m_initialAngle = 0.0f;
 
         /// <summary>
         /// A colour associated with our 3D component
         /// </summary>
+        [DataMember]
         protected BrazilColour m_colour;
     }
 }

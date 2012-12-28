@@ -181,20 +181,20 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
-        /// Set the container for this Component
+        /// Set an App container for this Component
         /// </summary>
         /// <param name="container"></param>
-        public void setContainer(BrazilContainer container)
+        public void setApp(BrazilApp app)
         {
-            m_container = container;
+            m_app = app;
         }
 
         /// <summary>
         /// Get the container for this Component
         /// </summary>
-        public BrazilContainer getContainer()
+        public BrazilApp getApp()
         {
-            return m_container;
+            return m_app;
         }
 
         /// <summary>
@@ -260,9 +260,9 @@ namespace Xyglo.Brazil
         protected bool m_isHiding = false;
 
         /// <summary>
-        /// Any BrazilComponent can be in a Container
+        /// Any BrazilComponent can be within a BrazilApp
         /// </summary>
         [DataMember]
-        protected BrazilContainer m_container = null;
+        protected BrazilApp m_app = null;
     }
 }

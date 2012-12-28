@@ -553,7 +553,163 @@ namespace Xyglo.Brazil.Xna
 
             return rL;
         }
-        
+
+        static public Vector3 getComponentRelativePosition(Component3D component, BrazilView bv)
+        {
+            // Default to actual position supplied
+            //
+            Vector3 position = XygloConvert.getVector3(component.getPosition());
+            float winWidth = bv.getWidth();
+            float winHeight = bv.getHeight();
+
+            // Now if we have a BrazilBannerText then we need to work out some values around it
+            //
+            if (component.GetType() == typeof(Xyglo.Brazil.BrazilBannerText))
+            {
+                BrazilBannerText bt = (Xyglo.Brazil.BrazilBannerText)component;
+                int textLength = bt.getText().Length;
+                float scale = (float)bt.getSize();
+
+                float charWidth = scale * bv.getViewCharWidth();
+                float lineSpacing = scale * bv.getViewCharHeight();
+
+                if (bt.getBrazilPosition() != BrazilPosition.None)
+                {
+                    switch (bt.getBrazilPosition())
+                    {
+                        case BrazilPosition.TopLeft:
+                            position.X += 0;
+                            position.Y += 0;
+                            break;
+
+                        case BrazilPosition.TopMiddle:
+                            position.X += winWidth / 2 - charWidth * textLength / 2;
+                            position.Y += 0;
+                            break;
+
+                        case BrazilPosition.TopRight:
+                            position.X = winWidth - charWidth * textLength;
+                            position.Y = 0;
+                            break;
+
+                        case BrazilPosition.TopThirdMiddle:
+                            position.X += winWidth / 2 - charWidth * textLength / 2;
+                            position.Y += winHeight / 3 - lineSpacing / 2;
+                            break;
+
+                        case BrazilPosition.MiddleLeft:
+                            position.X += 0;
+                            position.Y += winHeight / 2 - lineSpacing / 2;
+                            break;
+
+                        case BrazilPosition.Middle:
+                            position.X += winWidth / 2 - charWidth * textLength / 2;
+                            position.Y += winHeight / 2 - lineSpacing / 2;
+                            break;
+
+                        case BrazilPosition.MiddleRight:
+                            position.X += winWidth - charWidth * textLength;
+                            position.Y += winHeight / 2 - lineSpacing / 2;
+                            break;
+
+                        case BrazilPosition.BottomThirdMiddle:
+                            position.X += winWidth / 2 - charWidth * textLength / 2;
+                            position.Y += 2 * winHeight / 3 - lineSpacing / 2;
+                            break;
+
+                        case BrazilPosition.BottomLeft:
+                            position.X += 0;
+                            position.Y += winHeight - lineSpacing;
+                            break;
+
+                        case BrazilPosition.BottomMiddle:
+                            position.X += winWidth / 2 - charWidth * textLength / 2;
+                            position.Y += winHeight - lineSpacing;
+                            break;
+
+                        case BrazilPosition.BottomRight:
+                            position.X += winWidth - charWidth * textLength;
+                            position.Y += winHeight - lineSpacing;
+                            break;
+
+                        case BrazilPosition.None:
+                        default:
+                            // Do nothing
+                            break;
+                    }
+                }
+                else if (bt.getBrazilRelativeComponent() != null && bt.getBrazilRelativePosition() != BrazilRelativePosition.None)
+                {
+                    // Recursive call of this method
+                    //
+                    Vector3 relPosition = getComponentRelativePosition(bt.getBrazilRelativeComponent(), bv);
+
+                    if (bt.getBrazilRelativeComponent().GetType() == typeof(Xyglo.Brazil.BrazilBannerText))
+                    {
+                        BrazilBannerText relBT = (BrazilBannerText)bt.getBrazilRelativeComponent();
+                        int relTextLength = relBT.getText().Length;
+                        float relScale = (float)relBT.getSize();
+                        float relCharWidth = relScale * bv.getViewCharWidth();
+                        float relLineSpacing = relScale * bv.getViewCharHeight();
+
+                        // Same Z position
+                        //
+                        position.Z = relPosition.Z;
+
+                        switch (bt.getBrazilRelativePosition())
+                        {
+                            case BrazilRelativePosition.AboveLeft:
+                                position.X += relPosition.X;
+                                position.Y += relPosition.Y - lineSpacing;
+                                break;
+
+                            case BrazilRelativePosition.AboveCentred: // centred on the string from the relative component
+                                position.X += (relPosition.X + relCharWidth * relTextLength / 2) - (charWidth * textLength / 2);
+                                position.Y += relPosition.Y - lineSpacing;
+                                break;
+
+                            case BrazilRelativePosition.AboveRight:
+                                position.X += relPosition.X + relCharWidth * relTextLength - charWidth * textLength;
+                                position.Y += relPosition.Y - lineSpacing;
+                                break;
+
+                            case BrazilRelativePosition.LeftButt:
+                                position.X += relPosition.X - charWidth * textLength - bt.getBrazilRelativeSpacing(); // include spacing
+                                position.Y += relPosition.Y; // might need to adjust this
+                                break;
+
+                            case BrazilRelativePosition.RightButt:
+                                position.X += relPosition.X + relCharWidth * relTextLength + bt.getBrazilRelativeSpacing(); // include spacing
+                                position.Y += relPosition.Y; // again might need adjusting
+                                break;
+
+                            case BrazilRelativePosition.BeneathLeft:
+                                position.X += relPosition.X;
+                                position.Y += relPosition.Y + relLineSpacing;
+                                break;
+
+                            case BrazilRelativePosition.BeneathCentred:
+                                position.X += (relPosition.X + relCharWidth * relTextLength / 2) - (charWidth * textLength / 2);
+                                position.Y += relPosition.Y + relLineSpacing;
+                                break;
+
+                            case BrazilRelativePosition.BeneathRight:
+                                position.X += relPosition.X + relCharWidth * relTextLength - charWidth * textLength;
+                                position.Y += relPosition.Y + relLineSpacing;
+                                break;
+
+                            case BrazilRelativePosition.None:
+                            default:
+                                // Do nothing
+                                break;
+                        }
+                    }
+                }
+            }
+
+
+            return position;
+        }
 
         /// <summary>
         /// Helper function to work out the position of a BrazilPosition at a given screen, character size
@@ -588,13 +744,13 @@ namespace Xyglo.Brazil.Xna
                     switch (bt.getBrazilPosition())
                     {
                         case BrazilPosition.TopLeft:
-                            position.X = 0;
-                            position.Y = 0;
+                            position.X += 0;
+                            position.Y += 0;
                             break;
 
                         case BrazilPosition.TopMiddle:
-                            position.X = winWidth / 2 - charWidth * textLength / 2;
-                            position.Y = 0;
+                            position.X += winWidth / 2 - charWidth * textLength / 2;
+                            position.Y += 0;
                             break;
 
                         case BrazilPosition.TopRight:
@@ -603,43 +759,43 @@ namespace Xyglo.Brazil.Xna
                             break;
 
                         case BrazilPosition.TopThirdMiddle:
-                            position.X = winWidth / 2 - charWidth * textLength / 2;
-                            position.Y = winHeight / 3 - lineSpacing / 2;
+                            position.X += winWidth / 2 - charWidth * textLength / 2;
+                            position.Y += winHeight / 3 - lineSpacing / 2;
                             break;
 
                         case BrazilPosition.MiddleLeft:
-                            position.X = 0;
-                            position.Y = winHeight / 2 - lineSpacing / 2;
+                            position.X += 0;
+                            position.Y += winHeight / 2 - lineSpacing / 2;
                             break;
 
                         case BrazilPosition.Middle:
-                            position.X = winWidth / 2 - charWidth * textLength / 2;
-                            position.Y = winHeight / 2 - lineSpacing / 2;
+                            position.X += winWidth / 2 - charWidth * textLength / 2;
+                            position.Y += winHeight / 2 - lineSpacing / 2;
                             break;
 
                         case BrazilPosition.MiddleRight:
-                            position.X = winWidth - charWidth * textLength;
-                            position.Y = winHeight / 2 - lineSpacing / 2;
+                            position.X += winWidth - charWidth * textLength;
+                            position.Y += winHeight / 2 - lineSpacing / 2;
                             break;
 
                         case BrazilPosition.BottomThirdMiddle:
-                            position.X = winWidth / 2 - charWidth * textLength / 2;
-                            position.Y = 2 * winHeight / 3 - lineSpacing / 2;
+                            position.X += winWidth / 2 - charWidth * textLength / 2;
+                            position.Y += 2 * winHeight / 3 - lineSpacing / 2;
                             break;
 
                         case BrazilPosition.BottomLeft:
-                            position.X = 0;
-                            position.Y = winHeight - lineSpacing;
+                            position.X += 0;
+                            position.Y += winHeight - lineSpacing;
                             break;
 
                         case BrazilPosition.BottomMiddle:
-                            position.X = winWidth / 2 - charWidth * textLength / 2;
-                            position.Y = winHeight - lineSpacing;
+                            position.X += winWidth / 2 - charWidth * textLength / 2;
+                            position.Y += winHeight - lineSpacing;
                             break;
 
                         case BrazilPosition.BottomRight:
-                            position.X = winWidth - charWidth * textLength;
-                            position.Y = winHeight - lineSpacing;
+                            position.X += winWidth - charWidth * textLength;
+                            position.Y += winHeight - lineSpacing;
                             break;
 
                         case BrazilPosition.None:
@@ -669,43 +825,43 @@ namespace Xyglo.Brazil.Xna
                         switch (bt.getBrazilRelativePosition())
                         {
                             case BrazilRelativePosition.AboveLeft:
-                                position.X = relPosition.X;
-                                position.Y = relPosition.Y - lineSpacing;
+                                position.X += relPosition.X;
+                                position.Y += relPosition.Y - lineSpacing;
                                 break;
 
                             case BrazilRelativePosition.AboveCentred: // centred on the string from the relative component
-                                position.X = (relPosition.X + relCharWidth * relTextLength / 2) - (charWidth * textLength / 2);
-                                position.Y = relPosition.Y - lineSpacing;
+                                position.X += (relPosition.X + relCharWidth * relTextLength / 2) - (charWidth * textLength / 2);
+                                position.Y += relPosition.Y - lineSpacing;
                                 break;
 
                             case BrazilRelativePosition.AboveRight:
-                                position.X = relPosition.X + relCharWidth * relTextLength - charWidth * textLength;
-                                position.Y = relPosition.Y - lineSpacing;
+                                position.X += relPosition.X + relCharWidth * relTextLength - charWidth * textLength;
+                                position.Y += relPosition.Y - lineSpacing;
                                 break;
 
                             case BrazilRelativePosition.LeftButt:
-                                position.X = relPosition.X - charWidth * textLength - bt.getBrazilRelativeSpacing(); // include spacing
-                                position.Y = relPosition.Y; // might need to adjust this
+                                position.X += relPosition.X - charWidth * textLength - bt.getBrazilRelativeSpacing(); // include spacing
+                                position.Y += relPosition.Y; // might need to adjust this
                                 break;
 
                             case BrazilRelativePosition.RightButt:
-                                position.X = relPosition.X + relCharWidth * relTextLength + bt.getBrazilRelativeSpacing(); // include spacing
-                                position.Y = relPosition.Y; // again might need adjusting
+                                position.X += relPosition.X + relCharWidth * relTextLength + bt.getBrazilRelativeSpacing(); // include spacing
+                                position.Y += relPosition.Y; // again might need adjusting
                                 break;
 
                             case BrazilRelativePosition.BeneathLeft:
-                                position.X = relPosition.X;
-                                position.Y = relPosition.Y + relLineSpacing;
+                                position.X += relPosition.X;
+                                position.Y += relPosition.Y + relLineSpacing;
                                 break;
 
                             case BrazilRelativePosition.BeneathCentred:
-                                position.X = (relPosition.X + relCharWidth * relTextLength / 2) - (charWidth * textLength / 2);
-                                position.Y = relPosition.Y + relLineSpacing;
+                                position.X += (relPosition.X + relCharWidth * relTextLength / 2) - (charWidth * textLength / 2);
+                                position.Y += relPosition.Y + relLineSpacing;
                                 break;
 
                             case BrazilRelativePosition.BeneathRight:
-                                position.X = relPosition.X + relCharWidth * relTextLength - charWidth * textLength;
-                                position.Y = relPosition.Y + relLineSpacing;
+                                position.X += relPosition.X + relCharWidth * relTextLength - charWidth * textLength;
+                                position.Y += relPosition.Y + relLineSpacing;
                                 break;
 
                             case BrazilRelativePosition.None:

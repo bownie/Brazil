@@ -646,17 +646,24 @@ namespace Xyglo.Brazil.Xna
 
             // Save this as we need to reassign the m_selectedViewId after deletion
             //
-            BufferView activeBufferView = getBufferViews()[m_selectedViewId];
+            XygloView view = m_views[m_selectedViewId];
+            BufferView activeBufferView = null;
 
-            // If a currently active view is visible then we need to find a new BufferView
-            //
-            if (m_views.Contains(activeBufferView))
+            if (view.GetType() == typeof(BufferView))
             {
-                // At this point we know we have another BufferView remaining and that
-                // this list is safe.
+                activeBufferView = (BufferView)m_views[m_selectedViewId];
+
+                // If a currently active view is visible then we need to find a new BufferView
                 //
-                activeBufferView = remainingList[0];
-            };
+                if (m_views.Contains(activeBufferView))
+                {
+                    // At this point we know we have another BufferView remaining and that
+                    // this list is safe.
+                    //
+                    activeBufferView = remainingList[0];
+                };
+
+            }
 
             // Remove our list from the m_views
             //
@@ -667,7 +674,8 @@ namespace Xyglo.Brazil.Xna
 
             // Now we need to update the m_selectedViewId
             //
-            m_selectedViewId = m_views.IndexOf(activeBufferView);
+            if (activeBufferView != null)
+                m_selectedViewId = m_views.IndexOf(activeBufferView);
 
             // Now remove the FileBuffer
             //
@@ -844,7 +852,6 @@ namespace Xyglo.Brazil.Xna
             knownTypes.Add(typeof(MouseAction));
 
             knownTypes.Add(typeof(BrazilBannerText));
-            knownTypes.Add(typeof(BrazilContainer));
             knownTypes.Add(typeof(BrazilFinishBlock));
             knownTypes.Add(typeof(BrazilFlyingBlock));
             knownTypes.Add(typeof(BrazilGoody));

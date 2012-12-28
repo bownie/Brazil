@@ -70,7 +70,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BrazilColour.cs" />
-    <Compile Include="BrazilContainer.cs" />
     <Compile Include="BrazilFlyingBlock.cs" />
     <Compile Include="BrazilMenu.cs" />
     <Compile Include="BrazilPosition.cs" />

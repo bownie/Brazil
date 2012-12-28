@@ -147,11 +147,13 @@ namespace Xyglo.Brazil.Xna
         /// <summary>
         /// Use this to allow us to process highlighting in the background
         /// </summary>
+        [NonSerialized]
         protected Mutex m_highlightMutex = new Mutex();
 
         /// <summary>
         /// Protected our m_lines during read/write
         /// </summary>
+        [NonSerialized]
         protected Mutex m_lineMutex = new Mutex();
 
         //////////// CONSTRUCTORS ////////////

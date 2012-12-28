@@ -618,19 +618,6 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
-        /// This is the generic method for setting an active view - for the moment this
-        /// sets an additional parameter.
-        /// </summary>
-        /// <param name="view"></param>
-        //protected void setActiveBuffer(XygloView view)
-        //{
-            // All the maths is done in the Buffer View
-            //
-            //Vector3 eyePos = view.getEyePosition(m_context.m_zoomLevel);
-          //  flyToPosition(eyePos);
-        //}
-
-        /// <summary>
         /// Set which BufferView is the active one with a cursor in it
         /// </summary>
         /// <param name="view"></param>
@@ -643,15 +630,13 @@ namespace Xyglo.Brazil.Xna
                 {
                     m_context.m_project.setSelectedView(item);
                 }
-                else if (m_context.m_project.getBufferViews().Count == 0) // Or if we have none then create one
+                else if (m_context.m_project.getViews().Count == 0) // Or if we have none then create one
                 {
                     BufferView bv = new BufferView(m_context.m_fontManager);
-                    using (FileBuffer fb = new FileBuffer())
-                    {
-                        m_context.m_project.addBufferView(bv);
-                        m_context.m_project.addFileBuffer(fb);
-                        bv.setFileBuffer(fb);
-                    }
+                    FileBuffer fb = new FileBuffer();
+                    m_context.m_project.addBufferView(bv);
+                    m_context.m_project.addFileBuffer(fb);
+                    bv.setFileBuffer(fb);
                 }
 
                 // Unset the view selection
@@ -680,7 +665,6 @@ namespace Xyglo.Brazil.Xna
             // All the maths is done in the Buffer View
             //
             Vector3 eyePos = m_context.m_project.getSelectedView().getEyePosition(m_context.m_zoomLevel);
-
             flyToPosition(eyePos);
 
             // Set title to include current filename
@@ -2387,8 +2371,8 @@ namespace Xyglo.Brazil.Xna
                 {
                     // Ignore all but 3D components at this stage
                     //
-                    if (component.GetType() != typeof(Component3D))
-                        continue;
+                    //if (component.GetType() != typeof(Component3D))
+                        //continue;
 
                     // If not then is it a drawable type? 
                     //
@@ -2484,9 +2468,13 @@ namespace Xyglo.Brazil.Xna
                         }
                         else
                         {
-                            Vector3 position = view.getPosition() + XygloConvert.getTextPosition(bt, m_context.m_fontManager, m_context.m_graphics.GraphicsDevice.Viewport.Width, m_context.m_graphics.GraphicsDevice.Viewport.Height);
+                            //Vector3 position = view.getPosition() + XygloConvert.getTextPosition(bt, m_context.m_fontManager, m_context.m_graphics.GraphicsDevice.Viewport.Width, m_context.m_graphics.GraphicsDevice.Viewport.Height);
+                            Vector3 position = view.getPosition()  + XygloConvert.getComponentRelativePosition(bt, view);
+                            
+                            m_context.m_spriteBatch.Begin(SpriteSortMode.Texture, BlendState.Additive, SamplerState.PointClamp, DepthStencilState.DepthRead, RasterizerState.CullNone, m_context.m_basicEffect);
                             XygloBannerText bannerText = new XygloBannerText(m_context.m_spriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(bt.getColour()), position, bt.getSize(), bt.getText());
                             bannerText.draw(m_context.m_graphics.GraphicsDevice);
+                            m_context.m_spriteBatch.End();
                         }
                     }
                     else if (component.GetType() == typeof(Xyglo.Brazil.BrazilHud))
@@ -2586,17 +2574,6 @@ namespace Xyglo.Brazil.Xna
                         menu.draw(m_context.m_graphics.GraphicsDevice);
                         m_context.m_drawableComponents[component] = menu;
                     }
-                    
-                    /*
-                     * 
-                     * We no longer support BrazilContainer as a component
-                     */
-                        /*
-                    else if (component.GetType() == typeof(Xyglo.Brazil.BrazilContainer))
-                    {
-                        BrazilContainer container = (BrazilContainer)component;
-                        drawXyglo(gameTime, container.getApp());
-                    }*/
                 }
                 else
                 {
@@ -2606,22 +2583,8 @@ namespace Xyglo.Brazil.Xna
                     {
                         m_context.m_drawableComponents[component].draw(m_context.m_graphics.GraphicsDevice);
                     }
-                    /*
-                    else
-                    {
-                        //m_drawableComponents[component].setPosition(m_lastClickPosition);
-                        //if (component.GetType() == typeof(Xyglo.Brazil.BrazilMenu))
-                        //{
-                            //XygloMenu menu = (XygloMenu)m_drawableComponents[component];
-                            //menu.setPosition(m_lastClickWorldPosition);
-                            //menu.buildBuffers(m_graphics.GraphicsDevice);
-                        //}
-                    }*/
-                    
                 }
             }
-
-            //m_spriteBatch.End();
 
             // Now we can draw any temporary drawables:
             // List to remove
@@ -2792,9 +2755,8 @@ namespace Xyglo.Brazil.Xna
                 m_context.m_drawingHelper.drawHighlight(gameTime, m_context.m_spriteBatch);
             }
 
-
             m_context.m_spriteBatch.End();
-
+            
             // Draw any Brazil views
             //
             foreach (BrazilView view in m_context.m_project.getBrazilViews())
@@ -3912,10 +3874,6 @@ namespace Xyglo.Brazil.Xna
             //
             BrazilApp app = new BrazilPaulo(new BrazilVector3(0, 0.1f, 0));
 
-            // Now initialise a container with the BrazilApp inside it
-            //
-            //BrazilContainer container = new BrazilContainer(app, new BrazilBoundingBox(new BrazilVector3(0, 0, 0), new BrazilVector3(600, 400, 10)));
-
             // Now attach the container to this application at the right state for Friendlier - this is
             // the context in which the app itself will be shown and not the state context for the app to
             // run in.  The app container has its own state held internally.
@@ -3938,61 +3896,6 @@ namespace Xyglo.Brazil.Xna
             app.getWorld().setWorldScale(XygloConvert.getBrazilBoundingBox(brazilView.getBoundingBox()));
             setActiveBuffer();
         }
-
-        // The following methods are used to satisfy the IBrazilApp interface
-        //
-        /*
-        /// <summary>
-        /// Get a state
-        /// </summary>
-        /// <param name="stateName"></param>
-        /// <returns></returns>
-        public State getState(string stateName)
-        {
-            foreach (State state in m_brazilContext.m_states)
-            {
-                if (state.m_name == stateName)
-                {
-                    return state;
-                }
-            }
-
-            throw new Exception("BrazilApp: state not defined " + stateName);
-        }
-
-
-        /// <summary>
-        /// Add a Component with a given State - by state name
-        /// </summary>
-        /// <param name="component"></param>
-        public void addComponent(string stateName, Component component)
-        {
-            State state = getState(stateName);
-            addComponent(state, component);
-        }
-
-        /// <summary>
-        /// Add a Component with a given State
-        /// </summary>
-        /// <param name="component"></param>
-        public void addComponent(State state, Component component)
-        {
-            checkState(state);
-            component.addState(state);
-            m_context.m_componentList.Add(component);
-        }
-
-        /// <summary>
-        /// Check a State exists
-        /// </summary>
-        /// <param name="state"></param>
-        public void checkState(State state)
-        {
-            if (!m_brazilContext.m_states.Contains(state))
-            {
-                throw new Exception("Unrecognized state " + state.m_name);
-            }
-        }*/
 
         ///////////////// MEMBER VARIABLES //////////////////
         /// <summary>
