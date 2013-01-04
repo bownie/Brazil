@@ -51,13 +51,22 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Polygons in this item
+        /// </summary>
+        /// <returns></returns>
+        public override int getPolygonCount()
+        {
+            return 1;
+        }
+
+        /// <summary>
         /// Draw this FlyingBlock by setting and swriting the 
         /// </summary>
         /// <param name="device"></param>
         public override void draw(GraphicsDevice device)
         {
             //m_spriteBatch.Begin();
-            m_spriteBatch.DrawString(m_spriteFont, m_text, new Vector2(m_position.X, m_position.Y), m_colour, 0, new Vector2(0, 0), (float)m_size, SpriteEffects.None, 0);
+            m_spriteBatch.DrawString(m_spriteFont, m_text, new Vector2((int)m_position.X, (int)m_position.Y), m_colour, 0, new Vector2(0, 0), (float)m_size, SpriteEffects.None, 0);
             //m_spriteBatch.End();
         }
 

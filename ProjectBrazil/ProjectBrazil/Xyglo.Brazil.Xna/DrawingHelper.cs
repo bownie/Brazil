@@ -913,6 +913,29 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Return the polygon count for all components that are being drawn.  We need to
+        /// make sure that we don't count components that are in componentgroups twice here
+        /// so we need a mechanism of indicating this in the XygloXnaDrawable.
+        /// </summary>
+        /// <param name="components"></param>
+        /// <returns></returns>
+        public int polygonCount(List<Component> components)
+        {
+            int count = 0;
+            foreach (Component component in components)
+            {
+                if (m_context.m_drawableComponents.ContainsKey(component))
+                {
+                    // Don't count child drawables twice, only the parents
+                    //
+                    if (!m_context.m_drawableComponents[component].hasParent())
+                        count += m_context.m_drawableComponents[component].getPolygonCount();
+                }
+            }
+            return count;
+        }
+
+        /// <summary>
         /// Draw the HUD Overlay for the editor with information about the current file we're viewing
         /// and position in that file.
         /// </summary>
@@ -932,126 +955,140 @@ namespace Xyglo.Brazil.Xna
                 overlayColour = m_greyedColour;
             }
 
-            BufferView bv = m_context.m_project.getSelectedBufferView();
-            if (bv == null)
-                return;
-
-            // Set up some of these variables here
+            // Display according to type of view
             //
-            string positionString = bv.getCursorPosition().Y + "," + bv.getCursorPosition().X;
-            float positionStringXPos = graphics.GraphicsDevice.Viewport.Width - positionString.Length * m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) - (m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) * 14);
-            float filePercent = 0.0f;
+            XygloView view = m_context.m_project.getSelectedView();
 
-            // Filename is where we put the filename plus other assorted gubbins or we put a
-            // search string in there depending on the mode.
+            // BufferView
             //
-            string fileName = "";
+            if (view.GetType() == typeof(BufferView))
+            {
+                BufferView bv = (BufferView)view;
 
-            if (state.equals("FindText"))
-            {
-                // Draw the search string down there
-                fileName = "Search: " + bv.getSearchText();
-            }
-            else if (state.equals("GotoLine"))
-            {
-                fileName = "Goto line: " + gotoLine;
-            }
-            else
-            {
-                if (m_context.m_project.getSelectedView() != null && bv.getFileBuffer() != null)
+                // Set up some of these variables here
+                //
+                string positionString = bv.getCursorPosition().Y + "," + bv.getCursorPosition().X;
+                float positionStringXPos = graphics.GraphicsDevice.Viewport.Width - positionString.Length * m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) - (m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) * 14);
+                float filePercent = 0.0f;
+
+                // Filename is where we put the filename plus other assorted gubbins or we put a
+                // search string in there depending on the mode.
+                //
+                string fileName = "";
+
+                if (state.equals("FindText"))
                 {
-                    // Set the filename
-                    if (bv.getFileBuffer().getShortFileName() != "")
+                    // Draw the search string down there
+                    fileName = "Search: " + bv.getSearchText();
+                }
+                else if (state.equals("GotoLine"))
+                {
+                    fileName = "Goto line: " + gotoLine;
+                }
+                else
+                {
+                    if (m_context.m_project.getSelectedView() != null && bv.getFileBuffer() != null)
                     {
-                        fileName = "\"" + bv.getFileBuffer().getShortFileName() + "\"";
+                        // Set the filename
+                        if (bv.getFileBuffer().getShortFileName() != "")
+                        {
+                            fileName = "\"" + bv.getFileBuffer().getShortFileName() + "\"";
+                        }
+                        else
+                        {
+                            fileName = "<New Buffer>";
+                        }
+
+                        if (bv.getFileBuffer().isModified())
+                        {
+                            fileName += " [Modified]";
+                        }
+
+                        fileName += " " + bv.getFileBuffer().getLineCount() + " lines";
                     }
                     else
                     {
                         fileName = "<New Buffer>";
                     }
 
-                    if (bv.getFileBuffer().isModified())
-                    {
-                        fileName += " [Modified]";
-                    }
+                    // Add some other useful states to our status line
+                    //
+                    if (bv.isReadOnly())
+                        fileName += " [RDONLY]";
 
-                    fileName += " " + bv.getFileBuffer().getLineCount() + " lines";
-                }
-                else
-                {
-                    fileName = "<New Buffer>";
+                    if (bv.isTailing())
+                        fileName += " [TAIL]";
+
+                    if (shiftDown)
+                        fileName += " [SHFT]";
+
+                    if (ctrlDown)
+                        fileName += " [CTRL]";
+
+                    if (altDown)
+                        fileName += " [ALT]";
                 }
 
-                // Add some other useful states to our status line
+                // Convert lineHeight back to normal size by dividing by m_textSize modifier
                 //
-                if (bv.isReadOnly())
+                float yPos = graphics.GraphicsDevice.Viewport.Height - m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay);
+
+                string modeString = "none";
+                switch (state.m_name)
                 {
-                    fileName += " [RDONLY]";
+                    case "TextEditing":
+                        modeString = "edit";
+                        break;
+
+                    case "FileOpen":
+                        modeString = "browsing";
+                        break;
+
+                    case "FileSaveAs":
+                        modeString = "saving file";
+                        break;
+
+                    case "DiffPicker":
+                        modeString = "performing diff";
+                        break;
+
+                    default:
+                        modeString = "free";
+                        break;
                 }
 
-                if (bv.isTailing())
+                float modeStringXPos = graphics.GraphicsDevice.Viewport.Width - modeString.Length * m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) - (m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) * 8);
+
+                if (bv.getFileBuffer() != null && bv.getFileBuffer().getLineCount() > 0)
                 {
-                    fileName += " [TAIL]";
+                    filePercent = (float)(bv.getCursorPosition().Y) /
+                                  (float)(Math.Max(1, bv.getFileBuffer().getLineCount() - 1));
                 }
 
-                if (shiftDown)
-                {
-                    fileName += " [SHFT]";
-                }
+                string filePercentString = ((int)(filePercent * 100.0f)) + "%";
+                float filePercentStringXPos = graphics.GraphicsDevice.Viewport.Width - filePercentString.Length * m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) - (m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) * 3);
 
-                if (ctrlDown)
-                {
-                    fileName += " [CTRL]";
-                }
-
-                if (altDown)
-                {
-                    fileName += " [ALT]";
-                }
-
+                // hardcode the font size to 1.0f so that it looks nice
+                //
+                spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), fileName, new Vector2(0.0f, (int)yPos), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
+                spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), modeString, new Vector2((int)modeStringXPos, 0.0f), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
+                spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), positionString, new Vector2((int)positionStringXPos, (int)yPos), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
+                spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), filePercentString, new Vector2((int)filePercentStringXPos, (int)yPos), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
             }
-
-            //BufferView bv = m_context.m_project.getSelectedView();
-
-            // Convert lineHeight back to normal size by dividing by m_textSize modifier
-            //
-            float yPos = graphics.GraphicsDevice.Viewport.Height - m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay);
-
-            string modeString = "none";
-
-            switch (state.m_name)
+            else if (view.GetType() == typeof(BrazilView))
             {
-                case "TextEditing":
-                    modeString = "edit";
-                    break;
+                BrazilView bv = (BrazilView)view;
+                string brazilViewAppType = "Showing App Type: " + bv.getApp().ToString();
+                int yPos = (int)(graphics.GraphicsDevice.Viewport.Height - m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay));
+                spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), brazilViewAppType, new Vector2(0, yPos), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
 
-                case "FileOpen":
-                    modeString = "browsing";
-                    break;
-
-                case "FileSaveAs":
-                    modeString = "saving file";
-                    break;
-
-                case "DiffPicker":
-                    modeString = "performing diff";
-                    break;
-
-                default:
-                    modeString = "free";
-                    break;
+                // Get objects and polygons
+                //
+                string brazilViewInfo = "Components: " + bv.getApp().getComponents().Count() + ", Polygons: " + polygonCount(bv.getApp().getComponents());
+                int xPos = (int)(graphics.GraphicsDevice.Viewport.Width - brazilViewInfo.Length * m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) - (m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay)));
+                spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), brazilViewInfo, new Vector2(xPos, yPos), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
             }
 
-            float modeStringXPos = graphics.GraphicsDevice.Viewport.Width - modeString.Length * m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) - (m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) * 8);
-
-            if (bv.getFileBuffer() != null && bv.getFileBuffer().getLineCount() > 0)
-            {
-                filePercent = (float)(bv.getCursorPosition().Y) /
-                              (float)(Math.Max(1, bv.getFileBuffer().getLineCount() - 1));
-            }
-
-            string filePercentString = ((int)(filePercent * 100.0f)) + "%";
-            float filePercentStringXPos = graphics.GraphicsDevice.Viewport.Width - filePercentString.Length * m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) - (m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) * 3);
 
             // Debug eye position
             //
@@ -1061,13 +1098,6 @@ namespace Xyglo.Brazil.Xna
                 float xPos = graphics.GraphicsDevice.Viewport.Width - eyePosition.Length * m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay);
                 spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), eyePosition, new Vector2(0.0f, 0.0f), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
             }
-
-            // hardcode the font size to 1.0f so that it looks nice
-            //
-            spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), fileName, new Vector2(0.0f, (int)yPos), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
-            spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), modeString, new Vector2((int)modeStringXPos, 0.0f), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
-            spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), positionString, new Vector2((int)positionStringXPos, (int)yPos), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
-            spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), filePercentString, new Vector2((int)filePercentStringXPos, (int)yPos), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
 
             // Draw any temporary message
             //
@@ -1099,7 +1129,7 @@ namespace Xyglo.Brazil.Xna
             }
 
             // Could be null
-            BufferView bv = m_context.m_project.getSelectedBufferView();
+            XygloView bv = m_context.m_project.getSelectedView();
 
             // Now calculate the colour according to the time - fade in/fade out is currently linear
             //

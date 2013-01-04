@@ -18,7 +18,7 @@ namespace Xyglo.Brazil
     /// is managed by the Core in terms of update and drawing.  A Component has
     /// to exist within a State of the application.  
     /// </summary>
-    [DataContract(Name = "Component", Namespace = "http://www.xyglo.com")]
+    [DataContract(Namespace = "http://www.xyglo.com", IsReference = true)]
     public abstract class Component
     {
         /// <summary>
@@ -262,7 +262,7 @@ namespace Xyglo.Brazil
         /// <summary>
         /// Any BrazilComponent can be within a BrazilApp
         /// </summary>
-        [DataMember]
+        [NonSerialized]
         protected BrazilApp m_app = null;
     }
 }

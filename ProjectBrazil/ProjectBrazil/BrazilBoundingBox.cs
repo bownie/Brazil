@@ -78,11 +78,13 @@ namespace Xyglo.Brazil
         /// <summary>
         /// Start position for bounding box
         /// </summary>
+        [DataMember]
         protected BrazilVector3 m_startPos;
 
         /// <summary>
         /// End position for bounding box
         /// </summary>
+        [DataMember]
         protected BrazilVector3 m_endPos;
     }
 }

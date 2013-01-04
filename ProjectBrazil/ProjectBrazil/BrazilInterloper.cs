@@ -55,11 +55,13 @@ namespace Xyglo.Brazil
         /// <summary>
         /// Dimensions of this Interloper
         /// </summary>
+        [DataMember]
         protected BrazilVector3 m_dimensions;
 
         /// <summary>
         /// Interloper score
         /// </summary>
+        [DataMember]
         protected int m_score;
 
     }

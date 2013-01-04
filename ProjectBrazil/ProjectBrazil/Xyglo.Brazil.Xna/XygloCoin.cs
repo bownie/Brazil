@@ -13,47 +13,7 @@ namespace Xyglo.Brazil.Xna
     /// </summary>
     public class XygloCoin : XygloXnaDrawableShape
     {
-        /// <summary>
-        /// Radius of coin
-        /// </summary>
-        float m_radius;
-
-        /// <summary>
-        /// Vertices in a circle
-        /// </summary>
-        protected int m_vertsInCircle = 50;
-
-        /// <summary>
-        /// Total number of vertices in coin
-        /// </summary>
-        protected int m_numVertices;
-
-        /// <summary>
-        /// Total number of indicies in coin
-        /// </summary>
-        protected int m_numIndices;
-
-        /// <summary>
-        /// Size of this block
-        /// </summary>
-        public Vector3 m_blockSize;
-
-        /// <summary>
-        /// Our texture
-        /// </summary>
-        public Texture2D m_shapeTexture;
-
-        /// <summary>
-        /// Alpha Blend text
-        /// </summary>
-        protected bool m_alphaBlendingTest = false;
-
-        /// <summary>
-        /// Number of circles in the coin
-        /// </summary>
-        protected int m_circlesInCoin = 2;
-
-        /// <summary>
+         /// <summary>
         /// Coin constructor
         /// </summary>
         /// <param name="colour"></param>
@@ -300,6 +260,60 @@ namespace Xyglo.Brazil.Xna
         {
             return new BoundingSphere(m_position, m_radius);
         }
+
+        /// <summary>
+        /// Polygons in this item - see this:
+        /// 
+        /// http://xboxforums.create.msdn.com/forums/p/23549/126997.aspx
+        /// </summary>
+        /// <returns></returns>
+        public override int getPolygonCount()
+        {
+            return m_indices.Count() / 3;
+        }
+
+        // ----- MEMBER VARIABLES -----
+        //
+
+        /// <summary>
+        /// Radius of coin
+        /// </summary>
+        float m_radius;
+
+        /// <summary>
+        /// Vertices in a circle
+        /// </summary>
+        protected int m_vertsInCircle = 50;
+
+        /// <summary>
+        /// Total number of vertices in coin
+        /// </summary>
+        protected int m_numVertices;
+
+        /// <summary>
+        /// Total number of indicies in coin
+        /// </summary>
+        protected int m_numIndices;
+
+        /// <summary>
+        /// Size of this block
+        /// </summary>
+        public Vector3 m_blockSize;
+
+        /// <summary>
+        /// Our texture
+        /// </summary>
+        public Texture2D m_shapeTexture;
+
+        /// <summary>
+        /// Alpha Blend text
+        /// </summary>
+        protected bool m_alphaBlendingTest = false;
+
+        /// <summary>
+        /// Number of circles in the coin
+        /// </summary>
+        protected int m_circlesInCoin = 2;
 
     }
 }

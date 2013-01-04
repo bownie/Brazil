@@ -36,6 +36,7 @@ namespace Xyglo.Brazil
         /// <summary>
         /// Dimensions of this Interloper
         /// </summary>
+        [DataMember]
         protected BrazilVector3 m_dimensions;
 
     }

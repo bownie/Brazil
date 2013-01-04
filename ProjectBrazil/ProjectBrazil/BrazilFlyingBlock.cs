@@ -9,7 +9,7 @@ namespace Xyglo.Brazil
     /// <summary>
     /// A Flying Block - of course
     /// </summary>
-    [DataContract(Namespace = "http://www.xyglo.com")]
+    [DataContract(Namespace = "http://www.xyglo.com", IsReference = true)]
     [KnownType(typeof(BrazilFlyingBlock))]
     public class BrazilFlyingBlock : Component3D
     {
@@ -59,21 +59,25 @@ namespace Xyglo.Brazil
         /// <summary>
         /// The size of this goddamn FlyingBlock
         /// </summary>
+        [DataMember]
         protected BrazilVector3 m_dimensions = new BrazilVector3();
 
         /// <summary>
         /// Angle of our flying/floating block
         /// </summary>
+        [DataMember]
         protected double m_pitch = 0.0f;
 
         /// <summary>
         /// How often does this block oscillate?
         /// </summary>
+        [DataMember]
         protected float m_oscillationFrequency = 0.0f;
 
         /// <summary>
         /// What path does this block oscillate upon?
         /// </summary>
+        [DataMember]
         protected BrazilRay m_oscillationPath = null;
     }
 }

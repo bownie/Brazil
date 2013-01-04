@@ -194,6 +194,5 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         [DataMember]
         protected BrazilApp m_app;
-
     }
 }

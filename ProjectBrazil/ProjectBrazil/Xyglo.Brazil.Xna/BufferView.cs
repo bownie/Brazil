@@ -29,138 +29,6 @@ namespace Xyglo.Brazil.Xna
     [KnownType(typeof(BufferView))]
     public class BufferView : XygloView
     {
-        //[XmlElement(ElementName = "BufferView", Type = typeof(XygloView))]
-
-        /// <summary>
-        /// This store the place in a WrappedEndoFBuffer call that the old log file
-        /// becomes the new log file.
-        /// </summary>
-        protected int m_logRunTerminator = -1;
-
-        /// <summary>
-        /// Map of FileBuffer line to Wrapped line position - we use this to work backwards from mouse clicks
-        /// </summary>
-        protected Dictionary<int, int> m_wrappedMap = null;
-
-        /// <summary>
-        /// Adjustment to our m_wrappedMap to use when calculating file position
-        /// </summary>
-        protected int m_wrapAdjustment = 0;
-
-        /// <summary>
-        /// Which quadrant are we viewing
-        /// </summary>
-        protected ViewQuadrant m_viewQuadrant;
-
-        /// <summary>
-        /// Which direction are we cycling
-        /// </summary>
-        protected ViewCycleDirection m_cycleDirection;
-
-        /// <summary>
-        /// A little struct used to hold relative positions of BufferViews
-        /// </summary>
-        public struct BufferViewPosition
-        {
-            public BufferView rootBV { get; set; }
-            public ViewPosition position { get; set; }
-        }
-
-        /// <summary>
-        /// The FileBuffer associated with this BufferView
-        /// </summary>
-        [NonSerialized]
-        protected FileBuffer m_fileBuffer;
-
-        /// <summary>
-        /// Index of the FileBuffer associated with this BufferView so we can reconstruct the link
-        /// </summary>
-        [DataMember]
-        protected int m_fileBufferIndex = 0;
-
-        /// <summary>
-        /// The BufferView remembers its own highlight positions
-        /// </summary>
-        [DataMember]
-        protected ScreenPosition m_highlightStart;
-
-        /// <summary>
-        /// Store the BufferViewPosition relative to another
-        /// </summary>
-        [DataMember]
-        protected BufferViewPosition m_bufferViewPosition;
-
-        /// <summary>
-        /// The BufferView remembers its own highlight positions
-        /// </summary>
-        [DataMember]
-        protected ScreenPosition m_highlightEnd;
-
-        /// <summary>
-        /// Where we set the highlight to when there isn't one
-        /// </summary>
-        [XmlIgnore]
-        static public ScreenPosition NoHighlightPosition = new ScreenPosition(-1, -1);
-
-        /// <summary>
-        /// Store the cursor coordinates locally
-        /// </summary>
-        [DataMember]
-        protected Vector3 m_cursorCoordinates = new Vector3();
-
-        /// <summary>
-        /// The position in the buffer at which this view is locked
-        /// </summary>
-        [DataMember]
-        protected int m_viewLockPosition = 0;
-
-        /// <summary>
-        /// Is this view locked such that when we edit other views this one stays at the same relative position
-        /// </summary>
-        [DataMember]
-        protected bool m_viewLocked = false;
-
-        /// <summary>
-        /// Tailing colour
-        /// </summary>
-        [DataMember]
-        protected Color m_tailColour = Color.LightBlue;
-
-        /// <summary>
-        /// Read only colour
-        /// </summary>
-        [DataMember]
-        protected Color m_readOnlyColour = Color.LightYellow;
-
-        /// <summary>
-        /// Is this a non-editable BufferView?
-        /// </summary>
-        [DataMember]
-        protected bool m_readOnly = false;
-
-        /// <summary>
-        /// Are we tailing this File?
-        /// </summary>
-        [DataMember]
-        protected bool m_tailing = false;
-
-        /// <summary>
-        /// Store the search text per BufferView
-        /// </summary>
-        [DataMember]
-        protected string m_searchText = "";
-
-        /// <summary>
-        /// Has the search text changed?  We need to know this 
-        /// </summary>
-        [NonSerialized]
-        protected bool m_searchTextModified = false;
-
-        /// <summary>
-        /// Store where the last search started from
-        /// </summary>
-        protected ScreenPosition m_searchStartPoint;
-
         /////// CONSTRUCTORS /////////
 
         /// <summary>
@@ -2640,6 +2508,137 @@ namespace Xyglo.Brazil.Xna
 
             return rP;
         }
+
+
+        /// <summary>
+        /// This store the place in a WrappedEndoFBuffer call that the old log file
+        /// becomes the new log file.
+        /// </summary>
+        protected int m_logRunTerminator = -1;
+
+        /// <summary>
+        /// Map of FileBuffer line to Wrapped line position - we use this to work backwards from mouse clicks
+        /// </summary>
+        protected Dictionary<int, int> m_wrappedMap = null;
+
+        /// <summary>
+        /// Adjustment to our m_wrappedMap to use when calculating file position
+        /// </summary>
+        protected int m_wrapAdjustment = 0;
+
+        /// <summary>
+        /// Which quadrant are we viewing
+        /// </summary>
+        protected ViewQuadrant m_viewQuadrant;
+
+        /// <summary>
+        /// Which direction are we cycling
+        /// </summary>
+        protected ViewCycleDirection m_cycleDirection;
+
+        /// <summary>
+        /// A little struct used to hold relative positions of BufferViews
+        /// </summary>
+        public struct BufferViewPosition
+        {
+            public BufferView rootBV { get; set; }
+            public ViewPosition position { get; set; }
+        }
+
+        /// <summary>
+        /// The FileBuffer associated with this BufferView
+        /// </summary>
+        [NonSerialized]
+        protected FileBuffer m_fileBuffer;
+
+        /// <summary>
+        /// Index of the FileBuffer associated with this BufferView so we can reconstruct the link
+        /// </summary>
+        [DataMember]
+        protected int m_fileBufferIndex = 0;
+
+        /// <summary>
+        /// The BufferView remembers its own highlight positions
+        /// </summary>
+        [DataMember]
+        protected ScreenPosition m_highlightStart;
+
+        /// <summary>
+        /// Store the BufferViewPosition relative to another
+        /// </summary>
+        [DataMember]
+        protected BufferViewPosition m_bufferViewPosition;
+
+        /// <summary>
+        /// The BufferView remembers its own highlight positions
+        /// </summary>
+        [DataMember]
+        protected ScreenPosition m_highlightEnd;
+
+        /// <summary>
+        /// Where we set the highlight to when there isn't one
+        /// </summary>
+        [XmlIgnore]
+        static public ScreenPosition NoHighlightPosition = new ScreenPosition(-1, -1);
+
+        /// <summary>
+        /// Store the cursor coordinates locally
+        /// </summary>
+        [DataMember]
+        protected Vector3 m_cursorCoordinates = new Vector3();
+
+        /// <summary>
+        /// The position in the buffer at which this view is locked
+        /// </summary>
+        [DataMember]
+        protected int m_viewLockPosition = 0;
+
+        /// <summary>
+        /// Is this view locked such that when we edit other views this one stays at the same relative position
+        /// </summary>
+        [DataMember]
+        protected bool m_viewLocked = false;
+
+        /// <summary>
+        /// Tailing colour
+        /// </summary>
+        [DataMember]
+        protected Color m_tailColour = Color.LightBlue;
+
+        /// <summary>
+        /// Read only colour
+        /// </summary>
+        [DataMember]
+        protected Color m_readOnlyColour = Color.LightYellow;
+
+        /// <summary>
+        /// Is this a non-editable BufferView?
+        /// </summary>
+        [DataMember]
+        protected bool m_readOnly = false;
+
+        /// <summary>
+        /// Are we tailing this File?
+        /// </summary>
+        [DataMember]
+        protected bool m_tailing = false;
+
+        /// <summary>
+        /// Store the search text per BufferView
+        /// </summary>
+        [DataMember]
+        protected string m_searchText = "";
+
+        /// <summary>
+        /// Has the search text changed?  We need to know this 
+        /// </summary>
+        [NonSerialized]
+        protected bool m_searchTextModified = false;
+
+        /// <summary>
+        /// Store where the last search started from
+        /// </summary>
+        protected ScreenPosition m_searchStartPoint;
 
     }
 }

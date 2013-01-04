@@ -33,6 +33,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="newComponent"></param>
         public void addComponent(XygloXnaDrawable newComponent)
         {
+            newComponent.setParent(this);
             m_componentList.Add(newComponent);
         }
 
@@ -43,6 +44,10 @@ namespace Xyglo.Brazil.Xna
         /// <param name="relativePosition"></param>
         public void addComponentRelative(XygloXnaDrawable newComponent, Vector3 relativePosition)
         {
+            // Set the parent
+            //
+            newComponent.setParent(this);
+
             // Set position relative to this group and store the component
             newComponent.m_position = m_position + relativePosition;
             m_componentList.Add(newComponent);
@@ -266,6 +271,22 @@ namespace Xyglo.Brazil.Xna
             m_groupCentrePosition.X += x;
 
             m_position = XygloConvert.roundVector(m_position);
+        }
+
+        /// <summary>
+        /// Polygons in this item - see this:
+        /// 
+        /// http://xboxforums.create.msdn.com/forums/p/23549/126997.aspx
+        /// </summary>
+        /// <returns></returns>
+        public override int getPolygonCount()
+        {
+            int count = 0;
+
+            foreach (XygloXnaDrawable component in m_componentList)
+                count += component.getPolygonCount();
+
+            return count;
         }
 
         /// <summary>

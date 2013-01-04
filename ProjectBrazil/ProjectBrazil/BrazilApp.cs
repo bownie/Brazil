@@ -40,12 +40,10 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
-        /// Run this app
+        /// Run this app and send along the mode we're operating in.  This can be 
+        /// overridden in derived classes to allow the behaviour to be specified.
         /// </summary>
-        public void run()
-        {
-            m_viewSpace.run();
-        }
+        public virtual void run() { m_viewSpace.run(m_mode); }
 
         /// <summary>
         /// Initialise abstract
@@ -363,10 +361,7 @@ namespace Xyglo.Brazil
         /// Set gravity in our World
         /// </summary>
         /// <param name="gravity"></param>
-        public void setGravity(BrazilVector3 gravity)
-        {
-            m_world.setGravity(gravity);
-        }
+        public void setGravity(BrazilVector3 gravity) { m_world.setGravity(gravity); }
 
         /// <summary>
         /// Get the world limits
@@ -480,19 +475,13 @@ namespace Xyglo.Brazil
         /// Get the list of States to satisfy our interface
         /// </summary>
         /// <returns></returns>
-        public List<State> getStates()
-        {
-            return m_states;
-        }
+        public List<State> getStates() { return m_states; }
 
         /// <summary>
         /// Get the list of Targets to satisfy our IWorld interface
         /// </summary>
         /// <returns></returns>
-        public List<Target> getTargets()
-        {
-            return m_targets;
-        }
+        public List<Target> getTargets() { return m_targets; }
 
         /// <summary>
         /// Check a State exists
@@ -537,29 +526,24 @@ namespace Xyglo.Brazil
         /// <summary>
         /// Push any world changes through to XNA
         /// </summary>
-        public void pushWorldChanges()
-        {
-            m_viewSpace.pushWorld();
-        }
+        public void pushWorldChanges() { m_viewSpace.pushWorld(); }
 
         /// <summary>
         /// Get the application mode
         /// </summary>
         /// <returns></returns>
-        public BrazilAppMode getMode()
-        {
-            return m_mode;
-        }
+        public BrazilAppMode getMode() { return m_mode; }
 
         /// <summary>
         /// Get the list of Components
         /// </summary>
         /// <returns></returns>
-        public List<Component> getComponents()
-        {
-            return m_componentList;
-        }
+        public List<Component> getComponents() { return m_componentList; }
 
+        /// <summary>
+        /// Get the world we're operating in
+        /// </summary>
+        /// <returns></returns>
         public BrazilWorld getWorld() { return m_world; }
 
         /// <summary>

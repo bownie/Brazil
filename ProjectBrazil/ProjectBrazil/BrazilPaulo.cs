@@ -203,5 +203,15 @@ namespace Xyglo.Brazil
                 addComponent("PlayingGame", newGoody);
             }
         }
+
+        /*
+        /// <summary>
+        /// Override the default run statement and do something event handling in here
+        /// </summary>
+        public override void run()
+        {
+            // Might want a m_mode check here?
+            //
+        }*/
     }
 }

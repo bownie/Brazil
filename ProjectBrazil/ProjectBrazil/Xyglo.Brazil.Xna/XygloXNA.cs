@@ -1335,9 +1335,63 @@ namespace Xyglo.Brazil.Xna
                 m_eye = XygloConvert.getVector3(m_eyePerturber.getPerturbedPosition(gameTime.TotalGameTime.TotalSeconds));
             }*/
 
-            // Process components for MOVEMENT or creation depending on key context
+            // Update the components on the main component list (in case we have any)
             //
-            foreach (Component component in m_context.m_componentList)
+            updateComponents(m_context.m_componentList);
+
+            if (m_context.m_project != null)
+            {
+                List<BrazilView> brazilViews = m_context.m_project.getViews().Where(item => item.GetType() == typeof(BrazilView)).Cast<BrazilView>().ToList();
+
+                foreach (BrazilView view in brazilViews)
+                {
+                    updateComponents(view.getApp().getComponents());
+                }
+            }
+
+            // Check for any drawables which need removing and get rid of them
+            //
+            Dictionary<Component, XygloXnaDrawable> destroyDict = m_context.m_drawableComponents.Where(item => item.Value.shouldBeDestroyed() == true).ToDictionary(p => p.Key, p => p.Value);
+            foreach (Component destroyKey in destroyDict.Keys)
+            {
+                XygloXnaDrawable drawable = m_context.m_drawableComponents[destroyKey];
+                m_context.m_drawableComponents.Remove(destroyKey);
+                drawable = null;
+                
+                // Now set the Component to be destroyed so it's not recreated by the next event loop
+                //
+                destroyKey.setDestroyed(true);
+            }
+
+            // Check for world boundary escape
+            //
+            if (m_interloper != null && !XygloConvert.getBoundingBox(m_brazilContext.m_world.getBounds()).Intersects(m_context.m_drawableComponents[m_interloper].getBoundingBox()))
+            {
+                Logger.logMsg("Interloper has left the world");
+                m_brazilContext.m_world.setLives(m_brazilContext.m_world.getLives() - 1);
+
+                if (m_brazilContext.m_world.getLives() < 0)
+                {
+                    setState("GameOver");
+                }
+                else
+                {
+                    // We've got one less life - this effectively restarts the level from scratch
+                    m_interloper = null;
+                    m_context.m_drawableComponents.Clear();
+                }
+            }
+
+            base.Update(gameTime);
+        }
+
+        /// <summary>
+        /// Process components for MOVEMENT or creation depending on key context
+        /// </summary>
+        /// <param name="components"></param>
+        protected void updateComponents(List<Component> components)
+        {
+            foreach (Component component in components)
             {
                 // Has this component already been added to the drawableComponent dictionary?
                 //
@@ -1386,10 +1440,10 @@ namespace Xyglo.Brazil.Xna
                         //
                         computeCollisions();
                         //{
-                            // Move any update any buffers
-                            //
-                            //m_drawableComponents[component].move(XygloConvert.getVector3(il.getVelocity()));
-                            m_context.m_drawableComponents[component].moveDefault();
+                        // Move any update any buffers
+                        //
+                        //m_drawableComponents[component].move(XygloConvert.getVector3(il.getVelocity()));
+                        m_context.m_drawableComponents[component].moveDefault();
                         //}
 
                         // Apply any rotation if we have one
@@ -1436,45 +1490,10 @@ namespace Xyglo.Brazil.Xna
 
                     //else if (component.GetType() == typeof(Xyglo.Brazil.BrazilMenu))
                     //{
-                        //BrazilMenu menu = (BrazilMenu)component;
+                    //BrazilMenu menu = (BrazilMenu)component;
                     //}
                 }
             }
-
-            // Check for any drawables which need removing and get rid of them
-            //
-            Dictionary<Component, XygloXnaDrawable> destroyDict = m_context.m_drawableComponents.Where(item => item.Value.shouldBeDestroyed() == true).ToDictionary(p => p.Key, p => p.Value);
-            foreach (Component destroyKey in destroyDict.Keys)
-            {
-                XygloXnaDrawable drawable = m_context.m_drawableComponents[destroyKey];
-                m_context.m_drawableComponents.Remove(destroyKey);
-                drawable = null;
-                
-                // Now set the Component to be destroyed so it's not recreated by the next event loop
-                //
-                destroyKey.setDestroyed(true);
-            }
-
-            // Check for world boundary escape
-            //
-            if (m_interloper != null && !XygloConvert.getBoundingBox(m_brazilContext.m_world.getBounds()).Intersects(m_context.m_drawableComponents[m_interloper].getBoundingBox()))
-            {
-                Logger.logMsg("Interloper has left the world");
-                m_brazilContext.m_world.setLives(m_brazilContext.m_world.getLives() - 1);
-
-                if (m_brazilContext.m_world.getLives() < 0)
-                {
-                    setState("GameOver");
-                }
-                else
-                {
-                    // We've got one less life - this effectively restarts the level from scratch
-                    m_interloper = null;
-                    m_context.m_drawableComponents.Clear();
-                }
-            }
-
-            base.Update(gameTime);
         }
 
         /// <summary>
@@ -2482,46 +2501,49 @@ namespace Xyglo.Brazil.Xna
                         BrazilHud bh = (Xyglo.Brazil.BrazilHud)component;
                         Vector3 position = XygloConvert.getVector3(bh.getPosition());
 
-                        if (m_frameCounter.getFrameRate() > 0)
+                        if (bh.getApp() == null)
                         {
-                            string fpsText = "FPS = " + m_frameCounter.getFrameRate();
+                            if (m_frameCounter.getFrameRate() > 0)
+                            {
+                                string fpsText = "FPS = " + m_frameCounter.getFrameRate();
 
-                            m_context.m_overlaySpriteBatch.Begin();
-                            XygloBannerText bannerText = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(bh.getColour()), position, bh.getSize(), fpsText);
-                            bannerText.draw(m_context.m_graphics.GraphicsDevice);
-                            m_context.m_overlaySpriteBatch.End();
-                        }
+                                m_context.m_overlaySpriteBatch.Begin();
+                                XygloBannerText bannerText = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(bh.getColour()), position, bh.getSize(), fpsText);
+                                bannerText.draw(m_context.m_graphics.GraphicsDevice);
+                                m_context.m_overlaySpriteBatch.End();
+                            }
 
-                        if (m_context.m_project != null)
-                        {
-                            string eyePosition = "[EyePosition] X " + m_eye.X + ",Y " + m_eye.Y + ",Z " + m_eye.Z;
-                            position.Y += m_context.m_fontManager.getOverlayFont().LineSpacing;
+                            if (m_context.m_project != null)
+                            {
+                                string eyePosition = "[EyePosition] X " + m_eye.X + ",Y " + m_eye.Y + ",Z " + m_eye.Z;
+                                position.Y += m_context.m_fontManager.getOverlayFont().LineSpacing;
 
-                            m_context.m_overlaySpriteBatch.Begin();
-                            XygloBannerText bannerText = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(bh.getColour()), position, bh.getSize(), eyePosition);
-                            bannerText.draw(m_context.m_graphics.GraphicsDevice);
-                            m_context.m_overlaySpriteBatch.End();
-                        }
-                        else if (m_interloper != null)
-                        {
-                            // Interloper position
-                            //
-                            Vector3 ipPos = m_context.m_drawableComponents[m_interloper].getPosition();
-                            string ipText = "Interloper Position X = " + ipPos.X + ", Y = " + ipPos.Y + ", Z = " + ipPos.Z;
-                            m_context.m_overlaySpriteBatch.Begin();
-                            XygloBannerText ipBanner = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(BrazilColour.Blue), new Vector3(0, m_context.m_fontManager.getOverlayFont().LineSpacing, 0), 1.0f, ipText);
-                            ipBanner.draw(m_context.m_graphics.GraphicsDevice);
+                                m_context.m_overlaySpriteBatch.Begin();
+                                XygloBannerText bannerText = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(bh.getColour()), position, bh.getSize(), eyePosition);
+                                bannerText.draw(m_context.m_graphics.GraphicsDevice);
+                                m_context.m_overlaySpriteBatch.End();
+                            }
+                            else if (m_interloper != null)
+                            {
+                                // Interloper position
+                                //
+                                Vector3 ipPos = m_context.m_drawableComponents[m_interloper].getPosition();
+                                string ipText = "Interloper Position X = " + ipPos.X + ", Y = " + ipPos.Y + ", Z = " + ipPos.Z;
+                                m_context.m_overlaySpriteBatch.Begin();
+                                XygloBannerText ipBanner = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(BrazilColour.Blue), new Vector3(0, m_context.m_fontManager.getOverlayFont().LineSpacing, 0), 1.0f, ipText);
+                                ipBanner.draw(m_context.m_graphics.GraphicsDevice);
 
-                            // Interloper score
-                            //
-                            string ipScore = "Score = " + m_interloper.getScore();
-                            XygloBannerText ipScoreText = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(BrazilColour.Green), new Vector3(0, m_context.m_fontManager.getOverlayFont().LineSpacing * 2, 0), 1.0f, ipScore);
-                            ipScoreText.draw(m_context.m_graphics.GraphicsDevice);
+                                // Interloper score
+                                //
+                                string ipScore = "Score = " + m_interloper.getScore();
+                                XygloBannerText ipScoreText = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(BrazilColour.Green), new Vector3(0, m_context.m_fontManager.getOverlayFont().LineSpacing * 2, 0), 1.0f, ipScore);
+                                ipScoreText.draw(m_context.m_graphics.GraphicsDevice);
 
-                            string ipLives = "Lives = " + m_brazilContext.m_world.getLives();
-                            XygloBannerText ipLivesText = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(BrazilColour.Green), new Vector3(0, m_context.m_fontManager.getOverlayFont().LineSpacing * 3, 0), 1.0f, ipLives);
-                            ipLivesText.draw(m_context.m_graphics.GraphicsDevice);
-                            m_context.m_overlaySpriteBatch.End();
+                                string ipLives = "Lives = " + m_brazilContext.m_world.getLives();
+                                XygloBannerText ipLivesText = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(BrazilColour.Green), new Vector3(0, m_context.m_fontManager.getOverlayFont().LineSpacing * 3, 0), 1.0f, ipLives);
+                                ipLivesText.draw(m_context.m_graphics.GraphicsDevice);
+                                m_context.m_overlaySpriteBatch.End();
+                            }
                         }
 
                     } else if (component.GetType() == typeof(Xyglo.Brazil.BrazilGoody))
@@ -2770,7 +2792,6 @@ namespace Xyglo.Brazil.Xna
             if (m_brazilContext.m_state.equals("FileSaveAs") || m_brazilContext.m_state.equals("FileOpen") || m_brazilContext.m_state.equals("PositionScreenOpen") || m_brazilContext.m_state.equals("PositionScreenNew") || m_brazilContext.m_state.equals("PositionScreenCopy"))
             {
                 m_context.m_fileSystemView.drawDirectoryChooser(gameTime, m_keyboardHandler, m_temporaryMessage, m_temporaryMessageEndTime);
-                //drawDirectoryChooser(gameTime);
             }
             else if (m_brazilContext.m_state.equals("Help"))
             {
@@ -2954,231 +2975,6 @@ namespace Xyglo.Brazil.Xna
             //m_pannerSpriteBatch.End();
         }
 
-        /*
-        /// <summary>
-        /// This is a list of directories and files based on the current position of the FileSystemView
-        /// </summary>
-        /// <param name="gameTime"></param>
-        protected void drawDirectoryChooser(GameTime gameTime)
-        {
-            // We only draw this if we've finished moving
-            //
-            if (m_eye != m_newEyePosition)
-                return;
-
-            // Could be null
-            BufferView bv = m_context.m_project.getSelectedBufferView();
-
-            // Draw header
-            //
-            string line;
-            Vector2 lineOrigin = new Vector2();
-            float yPosition = 0.0f;
-
-            // We are showing this in the OverlayFont
-            //
-            Vector3 startPosition = new Vector3((float)m_context.m_fontManager.getOverlayFont().MeasureString("X").X * 20,
-                                                (float)m_context.m_fontManager.getOverlayFont().LineSpacing * 8,
-                                                0.0f);
-
-
-            if (m_brazilContext.m_state.equals("FileOpen"))
-            {
-                line = "Open file...";
-            }
-            else if (m_brazilContext.m_state.equals("FileSaveAs"))
-            {
-                line = "Save as...";
-            }
-            else if (m_brazilContext.m_state.equals("PositionScreenNew") || m_brazilContext.m_state.equals("PositionScreenOpen") || m_brazilContext.m_state.equals("PositionScreenCopy"))
-            {
-                line = "Choose a position...";
-            }
-            else
-            {
-                line = "Unknown State...";
-            }
-
-            // Overlay batch
-            //
-            m_context.m_overlaySpriteBatch.Begin();
-
-            // Draw header line
-            //
-            m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), line, new Vector2((int)startPosition.X, (int)(startPosition.Y - bv.getLineSpacing() * 3)), Color.White, 0, lineOrigin, 1.0f, 0, 0);
-
-            // If we're using this method to position a new window only then don't show the directory chooser part..
-            //
-            if (m_brazilContext.m_state.equals("PositionScreenNew") || m_brazilContext.m_state.equals("PositionScreenCopy"))
-            {
-                m_context.m_overlaySpriteBatch.End();
-                return;
-            }
-
-            Color dirColour = Color.White;
-
-            startPosition.X += 50.0f;
-
-            int lineNumber = 0;
-            int dropStep = 6;
-
-            // Page handling in the GUI
-            //
-            float showPage = 6.0f; // rows before stepping down
-            int showOffset = (int)(((float)m_context.m_fileSystemView.getHighlightIndex()) / showPage);
-
-            // This works out where the list that we're showing should end
-            //
-            int endShowing = (m_context.m_fileSystemView.getHighlightIndex() < dropStep ? dropStep : m_context.m_fileSystemView.getHighlightIndex()) + (int)showPage;
-
-
-            // Draw the drives
-            //
-            if (m_context.m_fileSystemView.atDriveLevel())
-            {
-                DriveInfo[] driveInfo = m_context.m_fileSystemView.getDrives();
-                //lineNumber = 0;
-
-                foreach (DriveInfo d in driveInfo)
-                {
-                    if (!d.IsReady)
-                    {
-                        continue;
-                    }
-
-                    if (lineNumber > m_context.m_fileSystemView.getHighlightIndex() - dropStep
-                        && lineNumber <= endShowing)
-                    {
-                        if (lineNumber < endShowing)
-                        {
-                            line = "[" + d.Name + "] " + d.VolumeLabel;
-                        }
-                        else
-                        {
-                            yPosition += m_context.m_fontManager.getOverlayFont().LineSpacing;
-                            line = "...";
-                        }
-
-                        m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(),
-                             line,
-                             new Vector2((int)startPosition.X, (int)(startPosition.Y + yPosition)),
-                             (lineNumber == m_context.m_fileSystemView.getHighlightIndex() ? ColourScheme.getHighlightColour() : (lineNumber == endShowing ? Color.White : dirColour)),
-                             0,
-                             lineOrigin,
-                             1.0f,
-                             0, 0);
-
-                        yPosition += m_context.m_fontManager.getOverlayFont().LineSpacing;
-                    }
-
-                    lineNumber++;
-                }
-            }
-            else // This is where we draw Directories and Files
-            {
-                if (!Directory.Exists(m_context.m_fileSystemView.getPath()))
-                {
-                    m_context.m_fileSystemView.setDirectory(@"C:\");
-                }
-
-
-                // For drives and directories we highlight item 1  - not zero
-                //
-                lineNumber = 1;
-                FileInfo[] fileInfo = m_context.m_fileSystemView.getDirectoryInfo().GetFiles();
-                DirectoryInfo[] dirInfo = m_context.m_fileSystemView.getDirectoryInfo().GetDirectories();
-
-#if DIRECTORY_CHOOSER_DEBUG
-                Logger.logMsg("showPage = " + showPage);
-                Logger.logMsg("showOffset = " + showOffset);
-                Logger.logMsg("m_directoryHighlight = " + m_directoryHighlight);
-#endif
-
-                line = m_context.m_fileSystemView.getPath() + m_keyboardHandler.getSaveFileName();
-                m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), line, new Vector2((int)startPosition.X, (int)startPosition.Y), (m_context.m_fileSystemView.getHighlightIndex() == 0 ? ColourScheme.getHighlightColour() : dirColour), 0, lineOrigin, 1.0f, 0, 0);
-
-                yPosition += m_context.m_fontManager.getOverlayFont().LineSpacing * 3.0f;
-
-                foreach (DirectoryInfo d in dirInfo)
-                {
-                    if (lineNumber > m_context.m_fileSystemView.getHighlightIndex() - dropStep
-                        && lineNumber <= endShowing)
-                    {
-                        if (lineNumber < endShowing)
-                        {
-                            line = "[" + d.Name + "]";
-                        }
-                        else
-                        {
-                            yPosition += m_context.m_fontManager.getOverlayFont().LineSpacing;
-                            line = "...";
-                        }
-
-                        m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(),
-                             line,
-                             new Vector2(startPosition.X, startPosition.Y + yPosition),
-                             (lineNumber == m_context.m_fileSystemView.getHighlightIndex() ? ColourScheme.getHighlightColour() : (lineNumber == endShowing ? Color.White : dirColour)),
-                             0,
-                             lineOrigin,
-                             1.0f,
-                             0, 0);
-
-                        yPosition += m_context.m_fontManager.getOverlayFont().LineSpacing;
-                    }
-
-                    lineNumber++;
-                }
-
-                foreach (FileInfo f in fileInfo)
-                {
-                    if (lineNumber > m_context.m_fileSystemView.getHighlightIndex() - dropStep
-                        && lineNumber <= endShowing)
-                    {
-                        if (lineNumber < endShowing)
-                        {
-                            line = f.Name;
-                        }
-                        else
-                        {
-                            yPosition += m_context.m_fontManager.getDefaultLineSpacing();
-                            line = "...";
-                        }
-
-                        m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(),
-                                                 line,
-                                                 new Vector2((int)startPosition.X, (int)(startPosition.Y + yPosition)),
-                                                 (lineNumber == m_context.m_fileSystemView.getHighlightIndex() ? ColourScheme.getHighlightColour() : (lineNumber == endShowing ? Color.White : ColourScheme.getItemColour())),
-                                                 0,
-                                                 lineOrigin,
-                                                 1.0f,
-                                                 0, 0);
-
-                        yPosition += m_context.m_fontManager.getOverlayFont().LineSpacing;
-                    }
-                    lineNumber++;
-                }
-            }
-
-            if (m_temporaryMessageEndTime > gameTime.TotalGameTime.TotalSeconds && m_temporaryMessage != "")
-            {
-                // Add any temporary message on to the end of the message
-                //
-                m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(),
-                                         m_temporaryMessage,
-                                         new Vector2((int)startPosition.X, (int)(startPosition.Y - 30.0f)),
-                                         Color.LightGoldenrodYellow,
-                                         0,
-                                         lineOrigin,
-                                         1.0f,
-                                         0,
-                                         0);
-            }
-
-            // Close the SpriteBatch
-            //
-            m_context.m_overlaySpriteBatch.End();
-        }
-        */
         /*
         /// <summary>
         /// Render some scrolling text to a texture.  This takes the current m_temporaryMessage and renders
@@ -3791,9 +3587,7 @@ namespace Xyglo.Brazil.Xna
                 // Always set to the last added BufferView
                 //
                 if (newView != null)
-                {
                     setActiveBuffer(newView);
-                }
 
                 // Build an intelligible temporary message after we've done this work
                 //
@@ -3804,42 +3598,30 @@ namespace Xyglo.Brazil.Xna
                     message = filesAdded.Count + " file";
 
                     if (filesAdded.Count > 1)
-                    {
                         message += "s";
-                    }
 
                     message += " added ";
 
                     foreach (string fi in filesAdded)
-                    {
                         message += " " + fi;
-                    }
                 }
 
                 if (dirsAdded.Count > 0)
                 {
                     if (message != "")
-                    {
                         message += ", ";
-                    }
 
                     message += dirsAdded.Count + " ";
 
                     if (dirsAdded.Count == 1)
-                    {
                         message += "directory";
-                    }
                     else
-                    {
                         message += "directories";
-                    }
 
                     message += " added";
 
                     foreach (string di in dirsAdded)
-                    {
                         message += " " + di;
-                    }
                 }
 
                 // Set the temporary message if we've generated one
@@ -3866,7 +3648,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="gameTime"></param>
         protected void invokeBrazil(GameTime gameTime)
         {
-            Logger.logMsg("Invoking BrazilApp inside Friendlier");
+            setTemporaryMessage("Launching BrazilApp...", 2, gameTime);
 
             // Note that this uses the local BrazilPaulo which is a copy of the top-level Paulo
             // as we must avoid circular dependencies.  BrazilPaulo is of app type 'Hosted' so it

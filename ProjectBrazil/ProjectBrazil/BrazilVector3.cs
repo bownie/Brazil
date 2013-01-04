@@ -35,8 +35,22 @@ namespace Xyglo.Brazil
             Z = z1;
         }
 
+        /// <summary>
+        /// X value
+        /// </summary>
+        [DataMember]
         public float X;
+
+        /// <summary>
+        /// Y value
+        /// </summary>
+        [DataMember]
         public float Y;
+
+        /// <summary>
+        /// Z value
+        /// </summary>
+        [DataMember]
         public float Z;
 
         public static BrazilVector3 Zero { get { return ZeroVector3; } }

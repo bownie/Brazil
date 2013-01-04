@@ -8,6 +8,7 @@ namespace Xyglo.Brazil
     /// <summary>
     /// The type of our Goody
     /// </summary>
+    /// 
     public enum BrazilGoodyType
     {
         Coin,
@@ -49,28 +50,33 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
-        /// When is this Goody born?
+        /// When was this Goody born?
         /// </summary>
+        [DataMember]
         public DateTime m_birthTime { get; set; } 
 
         /// <summary>
         /// Dimensions of this Goody
         /// </summary>
+        [DataMember]
         protected BrazilVector3 m_dimensions;
 
         /// <summary>
         /// Does this BrazilGoody reset after being eaten?
         /// </summary>
+        [DataMember] 
         public bool m_reset { get; set; }
 
         /// <summary>
         /// How many points is this Goody worth?
         /// </summary>
+        [DataMember]
         public int m_worth { get; set; }
 
         /// <summary>
         /// Type of our Goody determines shape and colouration
         /// </summary>
+        [DataMember]
         public BrazilGoodyType m_type { get; set; }
     }
 }

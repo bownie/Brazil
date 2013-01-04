@@ -1471,7 +1471,6 @@ namespace Xyglo.Brazil.Xna
                     //m_state = State.Test("GotoLine");
                 //}
 
-
             }
             else if (m_keyboard.isWindowsDown()) // Windows keys
             {
@@ -1493,6 +1492,32 @@ namespace Xyglo.Brazil.Xna
             return rC;
         }
 
+        /// <summary>
+        /// Clear all drawables from a view - one component at a time
+        /// </summary>
+        /// <param name="view"></param>
+        protected void clearDrawables(BrazilView view)
+        {
+            List<Component> removeList = new List<Component>();
+
+            foreach(Component component in view.getApp().getComponents())
+            {
+                if (m_context.m_drawableComponents.ContainsKey(component))
+                {
+                    if (!m_context.m_drawableComponents[component].hasParent())
+                        removeList.Add(component);
+                }
+            }
+
+            // Free and remove component from dictionary
+            //
+            foreach (Component component in removeList)
+            {
+                m_context.m_drawableComponents[component] = null;
+                m_context.m_drawableComponents.Remove(component);
+            }
+        }
+
 
         /// <summary>
         /// Close the active buffer view
@@ -1501,7 +1526,18 @@ namespace Xyglo.Brazil.Xna
         {
             if (m_context.m_project.getViews().Count > 1)
             {
+                string message = "Removed BufferView.";
                 int index = m_context.m_project.getViews().IndexOf(m_context.m_project.getSelectedView());
+
+                if (m_context.m_project.getViews()[index].GetType() == typeof(BrazilView))
+                {
+                    message = "Removed BrazilView.";
+
+                    // Need to clear down all the drawables associated with this component
+                    //
+                    clearDrawables((BrazilView)m_context.m_project.getViews()[index]);
+                }
+
                 m_context.m_project.removeView(m_context.m_project.getSelectedView());
 
                 // Ensure that the index is not greater than number of views left
@@ -1512,14 +1548,12 @@ namespace Xyglo.Brazil.Xna
                 m_context.m_project.setSelectedViewId(index);
                 //setActiveBuffer(index);
                 OnViewChange(new XygloViewEventArgs(m_context.m_project.getViews()[index]));
-
-                //setTemporaryMessage("Removed BufferView.", 2, gameTime);
-                OnTemporaryMessage(new TextEventArgs("Removed BufferView.", 2, gameTime));
+                OnTemporaryMessage(new TextEventArgs(message, 2, gameTime));
             }
             else
             {
                 //setTemporaryMessage("Can't remove the last BufferView.", 2, gameTime);
-                OnTemporaryMessage(new TextEventArgs("Can't remove the last BufferView.", 2, gameTime));
+                OnTemporaryMessage(new TextEventArgs("Can't remove the last View.", 2, gameTime));
             }
         }
 

@@ -49,6 +49,12 @@ namespace Xyglo.Brazil.Xna
         public abstract void buildBuffers(GraphicsDevice device);
 
         /// <summary>
+        /// Return some information on polygons being drawn by this item
+        /// </summary>
+        /// <returns></returns>
+        public abstract int getPolygonCount();
+
+        /// <summary>
         /// Set the position
         /// </summary>
         /// <param name="position"></param>
@@ -247,6 +253,27 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Set a parent ComponentGroup
+        /// </summary>
+        /// <param name="group"></param>
+        public void setParent(XygloComponentGroup group)
+        {
+            m_group = group;
+        }
+
+        /// <summary>
+        /// Get a parent ComponentGroup
+        /// </summary>
+        /// <returns></returns>
+        public XygloComponentGroup getParent() { return m_group;  }
+
+        /// <summary>
+        /// Test for parent
+        /// </summary>
+        /// <returns></returns>
+        public bool hasParent() { return m_group != null; }
+
+        /// <summary>
         /// Position of this block
         /// </summary>
         public Vector3 m_position;
@@ -280,5 +307,11 @@ namespace Xyglo.Brazil.Xna
         /// Set this from collision code if we want to remove this item at a safe point in time
         /// </summary>
         protected bool m_pleaseDestroy = false;
+
+        /// <summary>
+        /// A parent ComponentGroup
+        /// </summary>
+        protected XygloComponentGroup m_group = null;
+
     }
 }

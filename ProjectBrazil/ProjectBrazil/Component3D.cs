@@ -9,7 +9,7 @@ namespace Xyglo.Brazil
     /// <summary>
     /// A 3D Drawable Component
     /// </summary>
-    [DataContract(Namespace = "http://www.xyglo.com")]
+    [DataContract(Namespace = "http://www.xyglo.com", IsReference = true)]
     [KnownType(typeof(Component3D))]
     public abstract class Component3D : DrawableComponent
     {

@@ -1,6 +1,26 @@
 ﻿Brazil Framework and Paulo
 --------------------------
 
+BUGS
+----
+
+
+- m_interloper needs nulling when the last BrazilView is closed
+- Font sizes for Overview fonts seem blurred for some reason in other than size 14 for high resolution (small screen)
+
+
+Promotion TODO
+--------------
+
+- Logo/Splashscreens
+- Videos and examples
+- Expand documentation
+- Define roadmap (First Friendlier plus Brazil for XNA target with auto compilation).
+
+
+Game side
+---------
+
 - Add Baddies
 - Add Prizes [DONE]
 - Scoring Mechanism [DONE]
@@ -11,15 +31,21 @@
 
 Friendlier
 ----------
-- Get back to fully working version
+- Get back to fully working version [DONE]
   -  
 - Add features:
  
   - first letter file system navigation [DONE] 
   - proper logo/app icon [DONE!]
-  - cut and paste effect - grab highlight and lurch across between files [HALF DONE] 
-  - buildable, configurable context menus [HALF DONE]
-  - Brazil within Friendlier
+  - cut and paste effect - grab highlight and lurch across between files [HALF DONE/NEED DROPS] 
+  - buildable, configurable context menus [HALF DONE/MAY REMOVE]
+  - Brazil within Friendlier [ALMOST DONE]
+  - Focus for the BrazilViews/BufferViews and processing of updates
+  - Changing Interloper (XygloXNA) between views to send events to
+  - BrazilApp/BrazilPauloApp and Java plus other support?
+  - Define mechanism for accessing API between App and HostedApp and SharedApp etc?
+  - Animated cursor?  Finally adding model support?
+  - One button compile and run or automatic parsing and run? C# REPL integration?
 
 
 XNA/Store

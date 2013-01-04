@@ -97,21 +97,25 @@ namespace Xyglo.Brazil
         /// <summary>
         /// Dictionary of Options/Target (string)
         /// </summary>
+        [DataMember]
         protected Dictionary<BrazilMenuOption, string> m_menuOptions = new Dictionary<BrazilMenuOption, string>();
 
         /// <summary>
         /// Type of this menu
         /// </summary>
+        [DataMember]
         protected BrazilMenuType m_type;
 
         /// <summary>
         /// Action that will activate this menu
         /// </summary>
+        [DataMember]
         protected Action m_action;
 
         /// <summary>
         /// Title of this menu
         /// </summary>
+        [DataMember]
         protected string m_title;
     }
 }

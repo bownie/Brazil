@@ -133,32 +133,39 @@ namespace Xyglo.Brazil
         /// <summary>
         /// Bounding area for our world
         /// </summary>
+        [DataMember]
         protected BrazilBoundingBox m_bounds;
 
         /// <summary>
         /// Which way does gravity point?  This is our gravtiation acceleration
         /// in directional units per time unit.
         /// </summary>
+        [DataMember]
         protected BrazilVector3 m_gravity;
 
         /// <summary>
         /// How many lives do people have in this world?
         /// </summary>
+        [DataMember]
         protected int m_lives = 3;
 
         /// <summary>
         /// Key repeat start time in seconds (defaults to zero for games)
         /// </summary>
+        [DataMember]
         protected double m_repeatHoldTime = 0.0f;
 
         /// <summary>
         /// Time between auto-key repeats
         /// </summary>
+        [DataMember]
         protected double m_repeatInterval = 0.05f;
 
         /// <summary>
         /// If we need to scale the world then we can use this handy actor
         /// </summary>
+        /// 
+        [DataMember]
         protected float m_worldScale = 1.0f;
     }
 }

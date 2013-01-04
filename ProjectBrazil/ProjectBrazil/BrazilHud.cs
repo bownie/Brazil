@@ -55,11 +55,13 @@ namespace Xyglo.Brazil
         /// <summary>
         /// The font size
         /// </summary>
+        [DataMember]
         protected double m_size;
 
         /// <summary>
         /// The text
         /// </summary>
+        [DataMember]
         protected string m_text;
     }
 }

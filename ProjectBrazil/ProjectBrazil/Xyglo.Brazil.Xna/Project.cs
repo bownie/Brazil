@@ -792,8 +792,13 @@ namespace Xyglo.Brazil.Xna
             //{
                 using (FileStream fs = new FileStream(fileName, FileMode.Open))
                 {
+                    // Have to create a ReaderQuota with a non-standard MaxDepth to be able to parse our model
+                    // 
+                    XmlDictionaryReaderQuotas quotas = new XmlDictionaryReaderQuotas();
+                    quotas.MaxDepth = 255;
+
                     XmlDictionaryReader reader =
-                        XmlDictionaryReader.CreateTextReader(fs, new XmlDictionaryReaderQuotas());
+                        XmlDictionaryReader.CreateTextReader(fs, quotas);
                     DataContractSerializer ser = new DataContractSerializer(typeof(Project), getKnownTypes());
 
                     deserializedProject = (Project)ser.ReadObject(reader, true);
@@ -1069,32 +1074,43 @@ namespace Xyglo.Brazil.Xna
         {
             List<BufferView> removeList = new List<BufferView>();
 
-            // Fix our BufferViews
+            // Fix all of our views
             //
             foreach (XygloView view in m_views)
             {
-                if (view.GetType() != typeof(BufferView))
-                    continue;
-
-                // Get the BufferView
-                //
-                BufferView bv = (BufferView)view;
-
-                if (bv.getFileBuffer() == null)
+                if (view.GetType() == typeof(BufferView))
                 {
-                    if (bv.getFileBufferIndex() < m_fileBuffers.Count)
+                    // Get the BufferView
+                    //
+                    BufferView bv = (BufferView)view;
+
+                    if (bv.getFileBuffer() == null)
                     {
-                        bv.setFileBuffer(m_fileBuffers[bv.getFileBufferIndex()]);
+                        if (bv.getFileBufferIndex() < m_fileBuffers.Count)
+                        {
+                            bv.setFileBuffer(m_fileBuffers[bv.getFileBufferIndex()]);
+                        }
+                        else
+                        {
+                            Logger.logMsg(
+                                "Project::connectFloatingWorld() - got out of scope FileBuffer reference - removing BufferView");
+                            removeList.Add(bv);
+                        }
                     }
-                    else
+
+                    bv.setFontManager(m_fontManager);
+                }
+                else if (view.GetType() == typeof(BrazilView))
+                {
+                    BrazilView bv = (BrazilView)view;
+
+                    // Connect up all the components to their parent app
+                    //
+                    foreach (Component component in bv.getApp().getComponents())
                     {
-                        Logger.logMsg(
-                            "Project::connectFloatingWorld() - got out of scope FileBuffer reference - removing BufferView");
-                        removeList.Add(bv);
+                        component.setApp(bv.getApp());
                     }
                 }
-
-                bv.setFontManager(m_fontManager);
             }
 
             // Remove the BufferViews which are no longer valid

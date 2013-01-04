@@ -37,5 +37,16 @@ namespace Xyglo.Brazil.Xna
         public override void drawPreview(GraphicsDevice device, BoundingBox fullBoundingBox, BoundingBox previewBoundingBox, Texture2D texture)
         {
         }
+
+        /// <summary>
+        /// Polygons in this item - see this:
+        /// 
+        /// http://xboxforums.create.msdn.com/forums/p/23549/126997.aspx
+        /// </summary>
+        /// <returns></returns>
+        public override int getPolygonCount()
+        {
+            return m_indices.Count() / 3;
+        }
     }
 }

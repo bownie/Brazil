@@ -84,11 +84,34 @@ namespace Xyglo.Brazil
             m_xna = new XygloXNA(actionMap, componentList, world, states, targets);
         }
 
-       // Run the main loop
+        // Run the main loop
         //
-        public void run()
+        public void run(BrazilAppMode mode = BrazilAppMode.App)
         {
-            m_xna.Run();
+            // If we have XNA directly attached to this ViewSpace then we kick off the main loop.
+            //
+            if (m_xna != null && mode == BrazilAppMode.App)
+            {
+                m_xna.Run();
+            }
+            else
+            {
+                /*
+                // If we're not then we have to work according to the hosting mode
+                //
+                if (mode == BrazilAppMode.Hosted)
+                {
+                    // do something
+                }
+                else if (mode == BrazilAppMode.Shared)
+                {
+                    // do something
+                }
+                else
+                {*/
+                    throw new XygloException("BrazilApp::run", "Unsupported app mode for a run");
+                //}
+            }
         }
 
         /// <summary>
