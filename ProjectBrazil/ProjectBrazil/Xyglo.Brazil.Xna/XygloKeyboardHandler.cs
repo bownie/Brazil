@@ -1538,6 +1538,8 @@ namespace Xyglo.Brazil.Xna
                     clearDrawables((BrazilView)m_context.m_project.getViews()[index]);
                 }
 
+                // Remove view
+                //
                 m_context.m_project.removeView(m_context.m_project.getSelectedView());
 
                 // Ensure that the index is not greater than number of views left

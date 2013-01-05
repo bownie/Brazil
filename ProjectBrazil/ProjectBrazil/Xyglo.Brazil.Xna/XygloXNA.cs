@@ -667,9 +667,50 @@ namespace Xyglo.Brazil.Xna
             Vector3 eyePos = m_context.m_project.getSelectedView().getEyePosition(m_context.m_zoomLevel);
             flyToPosition(eyePos);
 
+            // Ensure that the m_interloper variable is valid
+            // Ensure that the m_interloper is valid
+            //
+            validateInterloper();
+
             // Set title to include current filename
             // (this is not thread safe - we need to synchronise)
             //this.Window.Title = "Friendlier v" + VersionInformation.getProductVersion() + " - " + m_context.m_project.getSelectedView().getFileBuffer().getShortFileName();
+        }
+
+        /// <summary>
+        /// Ensure that the m_interloper object is valid in the new context.
+        /// </summary>
+        protected void validateInterloper()
+        {
+            // Ensure we have a project
+            //
+            if (m_context.m_project == null) return;
+
+            if (m_context.m_project.getSelectedView().GetType() == typeof(BrazilView))
+            {
+                BrazilView bv = (BrazilView)m_context.m_project.getSelectedView();
+                List<BrazilInterloper> bI = bv.getApp().getComponents().Where(item => item.GetType() == typeof(BrazilInterloper)).Cast<BrazilInterloper>().ToList();
+                
+                // Now we need to check if there is a key for this interloper already - if so we can
+                // set m_interloper.
+                //
+                if (bI.Count() > 0 && m_context.m_drawableComponents.ContainsKey(bI[0]))
+                {
+                    m_interloper = bI[0];
+
+                    if (bI.Count() > 1)
+                    {
+                        Logger.logMsg("validateInterloper:: got more than one interloper from an App");
+                    }
+
+                    return;
+                }
+            }
+
+            // Otherwise invalidate the m_interloper
+            //
+            m_interloper = null;
+
         }
 
         /// <summary>
