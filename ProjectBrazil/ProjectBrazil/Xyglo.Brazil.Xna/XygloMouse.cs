@@ -70,14 +70,14 @@ namespace Xyglo.Brazil.Xna
             //
             BufferView bv = null;
 
+            // If our main XNA window is inactive then ignore mouse clicks
+            //
+            if (game.IsActive == false || m_context.m_project == null) return;
+
             // Ignore an empty project for the moment
             //
             if (m_context.m_project != null)
                 bv = m_context.m_project.getSelectedBufferView();
-
-            // If our main XNA window is inactive then ignore mouse clicks
-            //
-            if (game.IsActive == false) return;
 
             // If we are flying somewhere then ignore mouse clicks
             //

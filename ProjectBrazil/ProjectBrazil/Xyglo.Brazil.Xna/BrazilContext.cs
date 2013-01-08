@@ -39,5 +39,11 @@ namespace Xyglo.Brazil.Xna
         /// ActionMap is a Project Brazil reference gets passed from the constructor
         /// </summary>
         public ActionMap m_actionMap = null;
+
+        /// <summary>
+        /// Interloper object in our game - usually the thing we are affecting with
+        /// our input.
+        /// </summary>
+        public BrazilInterloper m_interloper = null;
     }
 }

@@ -274,6 +274,18 @@ namespace Xyglo.Brazil.Xna
         public bool hasParent() { return m_group != null; }
 
         /// <summary>
+        /// This is the hashcode of an object used to represent this object in the PhysicsHandler
+        /// </summary>
+        /// <param name="hashCode"></param>
+        public void setPhysicsHash(int hashCode) { m_physicsHash = hashCode; }
+
+        /// <summary>
+        /// The hashcode of an object used to represent this object in the PhysicsHandler
+        /// </summary>
+        /// <returns></returns>
+        public int getPhysicsHash() { return m_physicsHash; }
+
+        /// <summary>
         /// Position of this block
         /// </summary>
         public Vector3 m_position;
@@ -312,6 +324,11 @@ namespace Xyglo.Brazil.Xna
         /// A parent ComponentGroup
         /// </summary>
         protected XygloComponentGroup m_group = null;
+
+        /// <summary>
+        /// A hashcode we use to identify a physical model
+        /// </summary>
+        protected int m_physicsHash = 0;
 
     }
 }

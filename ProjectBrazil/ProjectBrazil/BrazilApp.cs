@@ -523,6 +523,7 @@ namespace Xyglo.Brazil
             m_viewSpace.setState(initialState);
         }
 
+
         /// <summary>
         /// Push any world changes through to XNA
         /// </summary>

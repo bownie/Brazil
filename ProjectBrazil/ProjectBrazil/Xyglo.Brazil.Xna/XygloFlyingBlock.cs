@@ -267,6 +267,8 @@ namespace Xyglo.Brazil.Xna
             return BoundingBox.CreateFromPoints(vertices); //(m_position - m_blockSize / 2, m_position + m_blockSize / 2);
         }
 
+        public Vector3 getSize() { return m_blockSize; }
+
         /// <summary>
         /// Size of this block
         /// </summary>
