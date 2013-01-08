@@ -98,6 +98,7 @@
     <Compile Include="BrazilPaulo.cs" />
     <Compile Include="Xyglo.Brazil.Xna.Physics\Conversion.cs" />
     <Compile Include="IBrazilApp.cs" />
+    <Compile Include="Xyglo.Brazil.Xna.Physics\DebugDrawer.cs" />
     <Compile Include="Xyglo.Brazil.Xna.Physics\PhysicsHandler.cs" />
     <Compile Include="Xyglo.Brazil.Xna.Physics\Scene.cs" />
     <Compile Include="Target.cs" />

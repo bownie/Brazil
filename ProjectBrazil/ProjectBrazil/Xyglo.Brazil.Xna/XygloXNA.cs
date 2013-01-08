@@ -2357,6 +2357,8 @@ namespace Xyglo.Brazil.Xna
                         m_context.m_drawableComponents[component].draw(m_context.m_graphics.GraphicsDevice);
                     }
                 }
+
+                m_physicsHandler.drawDebug();
             }
 
             // Now we can draw any temporary drawables:

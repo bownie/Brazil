@@ -10,6 +10,7 @@ using Jitter.Dynamics;
 using Jitter.LinearMath;
 using Jitter.Collision;
 using Jitter.Collision.Shapes;
+using Jitter.Dynamics.Constraints;
 
 namespace Xyglo.Brazil.Xna.Physics
 {
@@ -31,6 +32,19 @@ namespace Xyglo.Brazil.Xna.Physics
             //
             CollisionSystem collision = new CollisionSystemPersistentSAP();
             World = new World(collision); World.AllowDeactivation = true;
+
+            // Setup the random colours
+            //
+            Random rr = new Random();
+            rndColors = new Color[20];
+
+            for (int i = 0; i < 20; i++)
+            {
+                rndColors[i] = new Color((float)rr.NextDouble(), (float)rr.NextDouble(), (float)rr.NextDouble());
+            }
+
+            DebugDrawer = new DebugDrawer(context);
+            //this.Components.Add(DebugDrawer);
         }
 
         public void update(GameTime gameTime)
@@ -52,7 +66,7 @@ namespace Xyglo.Brazil.Xna.Physics
                 {
                     Vector3 position = Conversion.ToXNAVector(body.Position);
                     Vector3 oldPosition = drawableList[0].getPosition();
-                    drawableList[0].setPosition(Conversion.ToXNAVector(body.Position));
+                    //drawableList[0].setPosition(Conversion.ToXNAVector(body.Position));
                 }
 
                 //body.Update();
@@ -88,6 +102,28 @@ namespace Xyglo.Brazil.Xna.Physics
                 drawable.setPhysicsHash(body.GetHashCode());
 
                 World.AddBody(body);
+            }
+        }
+
+        public DebugDrawer DebugDrawer { private set; get; }
+        Color[] rndColors;
+
+
+        /// <summary>
+        /// Draw physics items in debug positions
+        /// </summary>
+        public void drawDebug()
+        {
+            int cc = 0;
+
+            foreach (Constraint constr in World.Constraints)
+                constr.DebugDraw(DebugDrawer);
+
+            foreach (RigidBody body in World.RigidBodies)
+            {
+                DebugDrawer.Color = rndColors[cc % rndColors.Length];
+                body.DebugDraw(DebugDrawer);
+                cc++;
             }
         }
 
