@@ -100,6 +100,17 @@
     <Compile Include="IBrazilApp.cs" />
     <Compile Include="Xyglo.Brazil.Xna.Physics\DebugDrawer.cs" />
     <Compile Include="Xyglo.Brazil.Xna.Physics\PhysicsHandler.cs" />
+    <Compile Include="Xyglo.Brazil.Xna.Physics\Primitives3D\BoxPrimitive.cs" />
+    <Compile Include="Xyglo.Brazil.Xna.Physics\Primitives3D\CapsulePrimitive.cs" />
+    <Compile Include="Xyglo.Brazil.Xna.Physics\Primitives3D\ConePrimitive.cs" />
+    <Compile Include="Xyglo.Brazil.Xna.Physics\Primitives3D\ConvexHullPrimitive.cs" />
+    <Compile Include="Xyglo.Brazil.Xna.Physics\Primitives3D\CylinderPrimitive.cs" />
+    <Compile Include="Xyglo.Brazil.Xna.Physics\Primitives3D\DrawManager.cs" />
+    <Compile Include="Xyglo.Brazil.Xna.Physics\Primitives3D\GeometricPrimitive.cs" />
+    <Compile Include="Xyglo.Brazil.Xna.Physics\Primitives3D\SpherePrimitive.cs" />
+    <Compile Include="Xyglo.Brazil.Xna.Physics\Primitives3D\TerrainPrimitive.cs" />
+    <Compile Include="Xyglo.Brazil.Xna.Physics\Primitives3D\VertexPositionNormal.cs" />
+    <Compile Include="Xyglo.Brazil.Xna.Physics\QuadDrawer.cs" />
     <Compile Include="Xyglo.Brazil.Xna.Physics\Scene.cs" />
     <Compile Include="Target.cs" />
     <Compile Include="Core.cs" />
@@ -183,6 +194,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Friendlier.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Primitives3D\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -188,8 +188,10 @@ namespace Xyglo.Brazil.Xna
                 m_brazilContext.m_state = State.Test("DemoExpired");
             }
 
-            m_physicsHandler = new PhysicsHandler(m_context);
+            m_physicsHandler = new PhysicsHandler(this, m_context);
+            m_physicsHandler.addGround(this);
         }
+
 
         /// <summary>
         /// Get the current application State
@@ -318,6 +320,8 @@ namespace Xyglo.Brazil.Xna
         {
             base.Initialize();
             initializeWorld();
+
+            m_physicsHandler.initialise();
         }
 
         /// <summary>
@@ -387,6 +391,7 @@ namespace Xyglo.Brazil.Xna
             m_context.m_basicEffect.VertexColorEnabled = true;
             m_context.m_basicEffect.World = Matrix.Identity;
             m_context.m_basicEffect.DiffuseColor = Vector3.One;
+            //m_context.m_basicEffect.EnableDefaultLighting();
 
             // Create and initialize our effect
             //
@@ -395,6 +400,16 @@ namespace Xyglo.Brazil.Xna
             m_context.m_lineEffect.TextureEnabled = false;
             m_context.m_lineEffect.DiffuseColor = Vector3.One;
             m_context.m_lineEffect.World = Matrix.Identity;
+            //m_context.m_lineEffect.EnableDefaultLighting();
+
+
+            Texture2D texture = Content.Load<Texture2D>("checker");
+            m_context.m_physicsEffect = new BasicEffect(m_context.m_graphics.GraphicsDevice);
+            m_context.m_physicsEffect.TextureEnabled = true;
+            m_context.m_physicsEffect.EnableDefaultLighting();
+            m_context.m_physicsEffect.PreferPerPixelLighting = true;
+            m_context.m_physicsEffect.Texture = texture;
+            m_context.m_physicsEffect.SpecularColor = new Vector3(0.1f, 0.1f, 0.1f);
 
             // Create the overlay SpriteBatch
             //
@@ -2188,7 +2203,7 @@ namespace Xyglo.Brazil.Xna
                         //
                         m_context.m_drawableComponents[component] = drawBlock;
 
-                        m_physicsHandler.addDrawable(drawBlock);
+                        //m_physicsHandler.addDrawable(drawBlock);
                         
                     } else if (component.GetType() == typeof(Xyglo.Brazil.BrazilInterloper))
                     {
@@ -2216,6 +2231,8 @@ namespace Xyglo.Brazil.Xna
 
                         group.setVelocity(XygloConvert.getVector3(il.getVelocity()));
                         m_context.m_drawableComponents[component] = group;
+
+                        //m_physicsHandler.addDrawable(group);
 #endif
                     }
                     else if (component.GetType() == typeof(Xyglo.Brazil.BrazilBannerText))
@@ -2314,6 +2331,8 @@ namespace Xyglo.Brazil.Xna
                             // And store in drawable component array
                             //
                             m_context.m_drawableComponents[component] = coin;
+
+                            //m_physicsHandler.addDrawable(coin);
                         }
                         else
                         {

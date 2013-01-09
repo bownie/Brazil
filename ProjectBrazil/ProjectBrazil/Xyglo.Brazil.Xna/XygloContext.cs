@@ -33,6 +33,11 @@ namespace Xyglo.Brazil.Xna
         public BasicEffect m_lineEffect;
 
         /// <summary>
+        /// Physics Effect for test purposes
+        /// </summary>
+        public BasicEffect m_physicsEffect;
+
+        /// <summary>
         /// XNA graphics device context
         /// </summary>
         public GraphicsDeviceManager m_graphics;

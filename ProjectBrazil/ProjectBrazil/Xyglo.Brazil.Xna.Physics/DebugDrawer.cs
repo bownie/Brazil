@@ -11,24 +11,23 @@ namespace Xyglo.Brazil.Xna.Physics
     /// <summary>
     /// Draw axis aligned bounding boxes, points and lines.
     /// </summary>
-    public class DebugDrawer : /* DrawableGameComponent, */ Jitter.IDebugDrawer
+    public class DebugDrawer : DrawableGameComponent, Jitter.IDebugDrawer
     {
         BasicEffect basicEffect;
         XygloContext m_context;
 
-        public DebugDrawer(XygloContext context)
-            //: base(game)
+        public DebugDrawer(Game game, XygloContext context)
+            : base(game)
         {
             m_context = context;
         }
 
-        /*
         public override void Initialize()
         {
             base.Initialize();
             basicEffect = new BasicEffect(this.GraphicsDevice);
             basicEffect.VertexColorEnabled = true;
-        }*/
+        }
 
         public void DrawLine(JVector p0, JVector p1, Color color)
         {
@@ -131,13 +130,10 @@ namespace Xyglo.Brazil.Xna.Physics
         {
             //XygloXNA demo = Game as XygloXNA;
 
+            //basicEffect.View = m_context.m_viewMatrix;
+            //basicEffect.Projection = m_context.m_projection;
 
-            basicEffect.View = m_context.m_viewMatrix;
-            basicEffect.Projection = m_context.m_projection;
-
-  
-
-            foreach (EffectPass pass in basicEffect.CurrentTechnique.Passes)
+            foreach (EffectPass pass in m_context.m_lineEffect.CurrentTechnique.Passes)
             {
                 pass.Apply();
 
@@ -153,7 +149,7 @@ namespace Xyglo.Brazil.Xna.Physics
             lineIndex = 0;
             triangleIndex = 0;
  
-            //base.Draw(gameTime);
+            base.Draw(gameTime);
         }
 
 
