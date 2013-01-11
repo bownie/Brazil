@@ -96,6 +96,7 @@
     <Compile Include="BrazilGoody.cs" />
     <Compile Include="BrazilFinishBlock.cs" />
     <Compile Include="BrazilPaulo.cs" />
+    <Compile Include="BrazilTestBlock.cs" />
     <Compile Include="Xyglo.Brazil.Xna.Physics\Conversion.cs" />
     <Compile Include="IBrazilApp.cs" />
     <Compile Include="Xyglo.Brazil.Xna.Physics\DebugDrawer.cs" />
@@ -145,6 +146,7 @@
     <Compile Include="Xyglo.Brazil.Xna\XygloMenu.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloMouse.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloText.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\XygloTexturedBlock.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloXnaDrawableShape.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloBannerText.cs" />
     <Compile Include="Xyglo.Brazil.Xna\CppSyntaxManager.cs" />
@@ -191,6 +193,7 @@
     <Compile Include="Xyglo.Brazil.Xna\XygloObject.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloXNA.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloView.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\XygloXnaTextureShape.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Friendlier.ico" />

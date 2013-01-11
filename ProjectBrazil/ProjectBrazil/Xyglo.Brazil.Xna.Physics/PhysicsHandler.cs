@@ -235,15 +235,19 @@ namespace Xyglo.Brazil.Xna.Physics
         {
             m_ground = new RigidBody(new BoxShape(new JVector(200, 20, 200)));
             m_ground.Position = new JVector(0, -10, 0);
-            //m_ground.Tag = BodyTag.DontDrawMe;
+            m_ground.Tag = BodyTag.DontDrawMe;
             m_ground.Tag = 
             m_ground.IsStatic = true;
-            //m_ground.EnableDebugDraw = true;
+            m_ground.EnableDebugDraw = true;
             World.AddBody(m_ground);
             //ground.Restitution = 1.0f;
             m_ground.Material.KineticFriction = 0.0f;
 
-            m_quadDrawer = new QuadDrawer(game, m_context, 100);
+            m_quadDrawer = new QuadDrawer(game, m_context, 1000);
+
+            // This does do something...
+            //
+            m_quadDrawer.setPosition(new Vector3(0, -300, 0));
             game.Components.Add(m_quadDrawer);
 
             addTestContent();

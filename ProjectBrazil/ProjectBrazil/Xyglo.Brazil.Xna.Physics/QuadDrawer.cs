@@ -21,13 +21,15 @@ namespace Xyglo.Brazil.Xna.Physics
 */
     public class QuadDrawer : DrawableGameComponent
     {
-        private Texture2D texture;
+        //private Texture2D texture;
         //private BasicEffect effect;
 
         private float size = 100.0f;
 
-        private VertexPositionNormalTexture[] vertices;
-        private short[] indices;
+        protected Vector3 m_position = Vector3.Zero;
+
+        private VertexPositionNormalTexture[] vertices = null;
+        private short[] indices = null;
 
         protected XygloContext m_context;
 
@@ -46,8 +48,11 @@ namespace Xyglo.Brazil.Xna.Physics
 
         private void BuildVertices()
         {
-            vertices = new VertexPositionNormalTexture[4];
-            indices = new short[6];
+            if (vertices == null)
+                vertices = new VertexPositionNormalTexture[4];
+
+            if (indices == null)
+                indices = new short[6];
 
             vertices[0].Position = Vector3.Forward + Vector3.Left;
             vertices[0].TextureCoordinate = new Vector2(0.0f, 1.0f);
@@ -61,12 +66,22 @@ namespace Xyglo.Brazil.Xna.Physics
             for (int i = 0; i < vertices.Length; i++)
             {
                 vertices[i].Normal = Vector3.Up;
-                vertices[i].Position *= size;
+                vertices[i].Position = m_position + vertices[i].Position * size;
                 vertices[i].TextureCoordinate *= size;
             }
 
             indices[5] = 0; indices[4] = 1; indices[3] = 2;
             indices[2] = 2; indices[1] = 1; indices[0] = 3;
+        }
+
+        /// <summary>
+        /// Move and rebuild vertices
+        /// </summary>
+        /// <param name="position"></param>
+        public void setPosition(Vector3 position)
+        {
+            m_position = position;
+            BuildVertices();
         }
 
         protected override void LoadContent()
@@ -97,7 +112,7 @@ namespace Xyglo.Brazil.Xna.Physics
             //GraphicsDevice.SamplerStates[0] = SamplerState.AnisotropicWrap;
             //GraphicsDevice.DepthStencilState = DepthStencilState.Default;
 
-            m_context.m_graphics.GraphicsDevice.SamplerStates[0] = SamplerState.AnisotropicClamp;
+            m_context.m_graphics.GraphicsDevice.SamplerStates[0] = SamplerState.AnisotropicWrap; // or Clamp
             m_context.m_graphics.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
 
             //effect.View = m_context.m_viewMatrix;

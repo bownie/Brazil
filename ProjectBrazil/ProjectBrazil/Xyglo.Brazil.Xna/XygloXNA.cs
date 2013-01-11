@@ -357,6 +357,8 @@ namespace Xyglo.Brazil.Xna
             m_context.m_lineEffect.Projection = m_context.m_projection;
             m_context.m_lineEffect.World = Matrix.CreateScale(1, -1, 1);
 
+
+
             // Create a new SpriteBatch, which can be used to draw textures.
             //
             m_context.m_spriteBatch = new SpriteBatch(m_context.m_graphics.GraphicsDevice);
@@ -389,7 +391,7 @@ namespace Xyglo.Brazil.Xna
             m_context.m_basicEffect = new BasicEffect(m_context.m_graphics.GraphicsDevice);
             m_context.m_basicEffect.TextureEnabled = true;
             m_context.m_basicEffect.VertexColorEnabled = true;
-            m_context.m_basicEffect.World = Matrix.Identity;
+            m_context.m_basicEffect.World = Matrix.CreateScale(1, -1, 1);
             m_context.m_basicEffect.DiffuseColor = Vector3.One;
             //m_context.m_basicEffect.EnableDefaultLighting();
 
@@ -399,17 +401,28 @@ namespace Xyglo.Brazil.Xna
             m_context.m_lineEffect.VertexColorEnabled = true;
             m_context.m_lineEffect.TextureEnabled = false;
             m_context.m_lineEffect.DiffuseColor = Vector3.One;
-            m_context.m_lineEffect.World = Matrix.Identity;
+            m_context.m_lineEffect.World = Matrix.CreateScale(1, -1, 1);
             //m_context.m_lineEffect.EnableDefaultLighting();
 
 
-            Texture2D texture = Content.Load<Texture2D>("checker");
+            m_texture = Content.Load<Texture2D>("checker");
             m_context.m_physicsEffect = new BasicEffect(m_context.m_graphics.GraphicsDevice);
-            m_context.m_physicsEffect.TextureEnabled = true;
+            m_context.m_physicsEffect.VertexColorEnabled = false;
             m_context.m_physicsEffect.EnableDefaultLighting();
             m_context.m_physicsEffect.PreferPerPixelLighting = true;
-            m_context.m_physicsEffect.Texture = texture;
             m_context.m_physicsEffect.SpecularColor = new Vector3(0.1f, 0.1f, 0.1f);
+            m_context.m_physicsEffect.Texture = m_texture;
+            m_context.m_physicsEffect.TextureEnabled = true;
+            m_context.m_physicsEffect.World = Matrix.CreateScale(1, -1, 1);
+            
+
+            //texture = this.Game.Content.Load<Texture2D>("checker");
+            //effect = new BasicEffect(this.GraphicsDevice);
+            //effect.EnableDefaultLighting();
+            //effect.SpecularColor = new Vector3(0.1f, 0.1f, 0.1f);
+            //effect.World = Matrix.Identity;
+            //effect.TextureEnabled = true;
+            //effect.Texture = texture;
 
             // Create the overlay SpriteBatch
             //
@@ -450,6 +463,9 @@ namespace Xyglo.Brazil.Xna
             if (m_context.m_project != null)
                 m_context.m_drawingHelper.setSpriteFont();
         }
+
+
+        protected Texture2D m_texture = null;
 
         /// <summary>
         /// Specific FriendlierContent to load
@@ -1788,7 +1804,8 @@ namespace Xyglo.Brazil.Xna
                 case XygloCommand.XygloClient:
                     if (e.getArguments() == "Paulo")
                     {
-                        invokeBrazil(e.getGameTime());
+                        //invokeBrazil(e.getGameTime());
+                        launchComponent();
                     }
                     else
                     {
@@ -2104,6 +2121,8 @@ namespace Xyglo.Brazil.Xna
             m_context.m_lineEffect.View = m_context.m_viewMatrix;
             m_context.m_lineEffect.Projection = m_context.m_projection;
             m_context.m_lineEffect.World = Matrix.CreateScale(1, -1, 1);
+
+
         }
 
         /// <summary>
@@ -2366,6 +2385,15 @@ namespace Xyglo.Brazil.Xna
                         menu.draw(m_context.m_graphics.GraphicsDevice);
                         m_context.m_drawableComponents[component] = menu;
                     }
+                    else if (component.GetType() == typeof(BrazilTestBlock))
+                    {
+                        BrazilTestBlock bTB = (BrazilTestBlock)component;
+                        XygloTexturedBlock block = new XygloTexturedBlock(m_texture, XygloConvert.getColour(bTB.getColour()), m_context.m_physicsEffect, bTB.getPosition(), bTB.getSize());
+
+                        block.buildBuffers(m_context.m_graphics.GraphicsDevice);
+                        block.draw(m_context.m_graphics.GraphicsDevice);
+                        m_context.m_drawableComponents[component] = block;
+                    }
                 }
                 else
                 {
@@ -2387,6 +2415,10 @@ namespace Xyglo.Brazil.Xna
 
             foreach (BrazilTemporary temporary in m_context.m_temporaryDrawables.Keys)
             {
+                // Update world matrix on physics affect
+                //
+                //m_context.m_physicsEffect.World = ;
+
                 // Rebuild any buffers and draw
                 //
                 m_context.m_temporaryDrawables[temporary].buildBuffers(m_context.m_graphics.GraphicsDevice);
@@ -3449,6 +3481,19 @@ namespace Xyglo.Brazil.Xna
             m_context.m_project.setSelectedViewId(id);
             app.getWorld().setWorldScale(XygloConvert.getBrazilBoundingBox(brazilView.getBoundingBox()));
             setActiveBuffer();
+        }
+
+        /// <summary>
+        /// Launch an individual component - for the moment this is a test stub
+        /// </summary>
+        /// <param name="component"></param>
+        protected void launchComponent()
+        {
+            BrazilTestBlock block = new BrazilTestBlock(BrazilColour.Pink, new BrazilVector3(0, 0, 0), new BrazilVector3(20, 20, 20));
+            block.addState(m_brazilContext.m_state);
+
+
+            m_context.m_componentList.Add(block);
         }
 
         ///////////////// MEMBER VARIABLES //////////////////
