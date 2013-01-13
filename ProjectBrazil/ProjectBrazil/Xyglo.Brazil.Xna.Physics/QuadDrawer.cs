@@ -120,6 +120,7 @@ namespace Xyglo.Brazil.Xna.Physics
 
             m_context.m_physicsEffect.View = m_context.m_viewMatrix;
             m_context.m_physicsEffect.Projection = m_context.m_projection;
+            m_context.m_physicsEffect.World = Matrix.CreateScale(1, -1, 1);
 
             //foreach (EffectPass pass in effect.CurrentTechnique.Passes)
             foreach (EffectPass pass in m_context.m_physicsEffect.CurrentTechnique.Passes)

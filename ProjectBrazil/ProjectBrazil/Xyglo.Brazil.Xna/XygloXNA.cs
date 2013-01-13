@@ -2405,7 +2405,7 @@ namespace Xyglo.Brazil.Xna
                     }
                 }
 
-                m_physicsHandler.drawDebug();
+                //m_physicsHandler.drawDebug();
             }
 
             // Now we can draw any temporary drawables:

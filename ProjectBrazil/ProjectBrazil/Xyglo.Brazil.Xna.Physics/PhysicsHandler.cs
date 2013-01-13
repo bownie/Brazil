@@ -222,7 +222,7 @@ namespace Xyglo.Brazil.Xna.Physics
                 cc++;
             }
 
-            //foreach (Primitives3D.GeometricPrimitive prim in primitives) prim.Draw(m_context.m_physicsEffect);
+            foreach (Primitives3D.GeometricPrimitive prim in primitives) prim.Draw(m_context.m_physicsEffect);
 
             //GraphicsDevice.RasterizerState = cullMode;
         }
@@ -233,16 +233,29 @@ namespace Xyglo.Brazil.Xna.Physics
 
         public void addGround(Game game)
         {
+            // For the moment if we addBody then performance falls off
+            //
+
+            //ground = new RigidBody(new BoxShape(new JVector(200, 20, 200)));
+            //ground.Position = new JVector(0, -10, 0);
+            //ground.Tag = BodyTag.DontDrawMe;
+            //ground.IsStatic = true; Demo.World.AddBody(ground);
+            //ground.Material.KineticFriction = 0.0f;
+
             m_ground = new RigidBody(new BoxShape(new JVector(200, 20, 200)));
             m_ground.Position = new JVector(0, -10, 0);
             m_ground.Tag = BodyTag.DontDrawMe;
-            m_ground.Tag = 
+//            m_ground.Tag = 
             m_ground.IsStatic = true;
-            m_ground.EnableDebugDraw = true;
+
+            // This kills performance
+            //
+            //m_ground.EnableDebugDraw = true;
             World.AddBody(m_ground);
+
             //ground.Restitution = 1.0f;
             m_ground.Material.KineticFriction = 0.0f;
-
+            
             m_quadDrawer = new QuadDrawer(game, m_context, 1000);
 
             // This does do something...
@@ -251,6 +264,7 @@ namespace Xyglo.Brazil.Xna.Physics
             game.Components.Add(m_quadDrawer);
 
             addTestContent();
+             
         }
 
         public void addTestContent()
