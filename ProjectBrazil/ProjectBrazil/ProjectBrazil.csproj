@@ -97,6 +97,7 @@
     <Compile Include="BrazilFinishBlock.cs" />
     <Compile Include="BrazilPaulo.cs" />
     <Compile Include="BrazilTestBlock.cs" />
+    <Compile Include="IPhysicalObject.cs" />
     <Compile Include="Xyglo.Brazil.Xna.Physics\Conversion.cs" />
     <Compile Include="IBrazilApp.cs" />
     <Compile Include="Xyglo.Brazil.Xna.Physics\DebugDrawer.cs" />
@@ -198,9 +199,7 @@
   <ItemGroup>
     <Content Include="Friendlier.ico" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Primitives3D\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

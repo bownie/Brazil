@@ -55,6 +55,46 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Recalculates the normals.
+        /// Implementation adapted from http://devmaster.net/forums/topic/1065-calculating-normals-of-a-mesh/
+        /// </summary>
+        public void recalculateNormals()
+        {
+            Vector3[] newNormals = new Vector3[m_vertices.Length];
+
+            // _triangles is a list of vertex indices,
+            // with each triplet referencing the three vertices of the corresponding triangle
+            for (int i = 0; i < m_indices.Length; i = i + 3)
+            {
+                Vector3[] v = new Vector3[]
+            {
+                m_vertices[m_indices[i]].Position,
+                m_vertices[m_indices[i + 1]].Position,
+                m_vertices[m_indices[i + 2]].Position
+            };
+
+                Vector3 normal = Vector3.Cross(v[1] - v[0], v[2] - v[0]);
+
+                for (int j = 0; j < 3; ++j)
+                {
+                    Vector3 a = v[(j + 1) % 3] - v[j];
+                    Vector3 b = v[(j + 2) % 3] - v[j];
+                    float weight = (float)Math.Acos(Vector3.Dot(a, b) / (a.Length() * b.Length()));
+                    newNormals[m_indices[i + j]] += weight * normal;
+                }
+            }
+
+            int index = 0;
+            foreach (Vector3 normal in newNormals)
+            {
+                normal.Normalize();
+                m_vertices[index++].Normal = normal;
+            }
+
+            //normals = newNormals;
+        }
+
+        /// <summary>
         /// Build the shape and populate the Vertex and Index buffers
         /// </summary>
         /// <param name="device"></param>
@@ -90,7 +130,7 @@ namespace Xyglo.Brazil.Xna
             //
             //m_vertices[0] = new VertexPositionColorTexture(m_position, m_colour, new Vector2(0, 0));
             m_vertices[0].Position = m_position + Vector3.Transform(new Vector3(-m_blockSize.X / 2, m_blockSize.Y / 2, m_blockSize.Z / 2), worldMatrix);
-            m_vertices[0].Normal = Vector3.Down;
+            m_vertices[0].Normal = Vector3.Up;
 
             // front left bottom
             //m_vertices[1] = new VertexPositionColorTexture(m_position + new Vector3(0, -m_blockSize.Y, 0), m_colour, new Vector2(0, 1));
@@ -126,11 +166,6 @@ namespace Xyglo.Brazil.Xna
             //m_vertices[7] = new VertexPositionColorTexture(m_position + new Vector3(m_blockSize.X, -m_blockSize.Y, -m_blockSize.Z), m_colour, new Vector2(0, 0));
             m_vertices[7].Position = m_position + Vector3.Transform(new Vector3(m_blockSize.X / 2, -m_blockSize.Y / 2, -m_blockSize.Z / 2), worldMatrix);
             m_vertices[7].Normal = Vector3.Up;
-
-            // Now we need to describe 32 vertices
-            //
-            m_vertexBuffer = new VertexBuffer(device, typeof(VertexPositionNormalTexture), m_vertices.Count(), BufferUsage.None);
-            m_vertexBuffer.SetData(m_vertices);
 
             // Total number of indices - these don't change so only set them up once.
             // We're using 16 bit indices here (short) so that we don't hit any hardware limits
@@ -173,12 +208,12 @@ namespace Xyglo.Brazil.Xna
                 // Left side
                 //
                 m_indices[18] = 1;
-                m_indices[19] = 6;
-                m_indices[20] = 4;
+                m_indices[19] = 4;
+                m_indices[20] = 6;
 
-                m_indices[21] = 4;
-                m_indices[22] = 2;
-                m_indices[23] = 1;
+                m_indices[21] = 1;
+                m_indices[22] = 0;
+                m_indices[23] = 4;
 
                 // Top
                 //
@@ -186,9 +221,9 @@ namespace Xyglo.Brazil.Xna
                 m_indices[25] = 2;
                 m_indices[26] = 0;
 
-                m_indices[27] = 2;
-                m_indices[28] = 4;
-                m_indices[29] = 5;
+                m_indices[27] = 4;
+                m_indices[28] = 5;
+                m_indices[29] = 2;
 
                 // Bottom - might need to reverse these?
                 //
@@ -205,6 +240,16 @@ namespace Xyglo.Brazil.Xna
                 m_indexBuffer = new IndexBuffer(device, typeof(short), m_indices.Length, BufferUsage.WriteOnly);
                 m_indexBuffer.SetData(m_indices);
             }
+
+            // Now calculate normals accordingly and setup the vertex buffer
+            recalculateNormals();
+
+            // Now we need to describe 32 vertices
+            //
+            m_vertexBuffer = new VertexBuffer(device, typeof(VertexPositionNormalTexture), m_vertices.Count(), BufferUsage.None);
+            m_vertexBuffer.SetData(m_vertices);
+
+
         }
 
 
@@ -221,6 +266,9 @@ namespace Xyglo.Brazil.Xna
 
             RasterizerState rasterizerState = new RasterizerState();
             rasterizerState.CullMode = CullMode.None;
+
+            device.SamplerStates[0] = SamplerState.AnisotropicWrap; // or Clamp
+            device.DepthStencilState = DepthStencilState.Default;
            
             device.RasterizerState = rasterizerState;
 

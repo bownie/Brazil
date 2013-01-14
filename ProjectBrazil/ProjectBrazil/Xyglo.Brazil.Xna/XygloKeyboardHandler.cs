@@ -453,6 +453,11 @@ namespace Xyglo.Brazil.Xna
                 OnCommandEvent(new CommandEventArgs(gameTime, XygloCommand.XygloClient, "Paulo"));
                 consumed = true;
             }
+            else if (keyList.Contains(Keys.F9))
+            {
+                OnCommandEvent(new CommandEventArgs(gameTime, XygloCommand.XygloComponent, "Test"));
+                consumed = true;
+            }
             else if (keyList.Contains(Keys.F11)) // Toggle full screen
             {
                 if (m_context.m_project.isFullScreen())

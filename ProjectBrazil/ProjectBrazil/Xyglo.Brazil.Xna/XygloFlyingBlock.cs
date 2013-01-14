@@ -161,12 +161,12 @@ namespace Xyglo.Brazil.Xna
                 // Left side
                 //
                 m_indices[18] = 1;
-                m_indices[19] = 6;
-                m_indices[20] = 4;
+                m_indices[19] = 4;
+                m_indices[20] = 6;
 
-                m_indices[21] = 4;
-                m_indices[22] = 2;
-                m_indices[23] = 1;
+                m_indices[21] = 1;
+                m_indices[22] = 0;
+                m_indices[23] = 4;
 
                 // Top
                 //
@@ -174,9 +174,9 @@ namespace Xyglo.Brazil.Xna
                 m_indices[25] = 2;
                 m_indices[26] = 0;
 
-                m_indices[27] = 2;
-                m_indices[28] = 4;
-                m_indices[29] = 5;
+                m_indices[27] = 4;
+                m_indices[28] = 5;
+                m_indices[29] = 2;
 
                 // Bottom - might need to reverse these?
                 //

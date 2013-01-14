@@ -11,7 +11,7 @@ namespace Xyglo.Brazil
     /// </summary>
     [DataContract(Namespace = "http://www.xyglo.com", IsReference = true)]
     [KnownType(typeof(BrazilTestBlock))]
-    public class BrazilTestBlock : Component3D
+    public class BrazilTestBlock : Component3D, IPhysicalObject
     {
         /// <summary>
         /// FlyingBlock constructor
@@ -57,7 +57,7 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
-        /// The size of this goddamn FlyingBlock
+        /// The size of this block
         /// </summary>
         [DataMember]
         protected BrazilVector3 m_dimensions = new BrazilVector3();

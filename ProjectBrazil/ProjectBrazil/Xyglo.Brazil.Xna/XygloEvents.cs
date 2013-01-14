@@ -121,11 +121,15 @@ namespace Xyglo.Brazil.Xna
         protected bool m_forceExit = false;
     }
 
+    /// <summary>
+    /// A list of commands we can send to the engine
+    /// </summary>
     public enum XygloCommand
     {
-        Build,
-        AlternateBuild,
-        XygloClient
+        Build,          // perform a build
+        AlternateBuild, // perform alernate build
+        XygloClient,    // activate a client
+        XygloComponent  // activate a component
     }
 
     /// <summary>

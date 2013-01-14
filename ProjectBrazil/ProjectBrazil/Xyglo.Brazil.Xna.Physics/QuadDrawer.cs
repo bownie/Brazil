@@ -86,8 +86,6 @@ namespace Xyglo.Brazil.Xna.Physics
 
         protected override void LoadContent()
         {
-
-
 //            effect = new BasicEffect(this.GraphicsDevice);
             //effect.EnableDefaultLighting();
             //effect.SpecularColor = new Vector3(0.1f, 0.1f, 0.1f);

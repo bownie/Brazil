@@ -357,7 +357,9 @@ namespace Xyglo.Brazil.Xna
             m_context.m_lineEffect.Projection = m_context.m_projection;
             m_context.m_lineEffect.World = Matrix.CreateScale(1, -1, 1);
 
-
+            m_context.m_physicsEffect.View = m_context.m_viewMatrix;
+            m_context.m_physicsEffect.Projection = m_context.m_projection;
+            m_context.m_physicsEffect.World = Matrix.CreateScale(1, -1, 1);
 
             // Create a new SpriteBatch, which can be used to draw textures.
             //
@@ -405,13 +407,15 @@ namespace Xyglo.Brazil.Xna
             //m_context.m_lineEffect.EnableDefaultLighting();
 
 
-            m_texture = Content.Load<Texture2D>("checker");
+            //m_texture = Content.Load<Texture2D>("checker");
+            m_texture = Content.Load<Texture2D>("red");
             m_context.m_physicsEffect = new BasicEffect(m_context.m_graphics.GraphicsDevice);
             m_context.m_physicsEffect.VertexColorEnabled = false;
             m_context.m_physicsEffect.EnableDefaultLighting();
             m_context.m_physicsEffect.PreferPerPixelLighting = true;
             m_context.m_physicsEffect.SpecularColor = new Vector3(0.1f, 0.1f, 0.1f);
             m_context.m_physicsEffect.Texture = m_texture;
+            //m_context.m_physicsEffect.Texture = m_context.m_flatTexture;
             m_context.m_physicsEffect.TextureEnabled = true;
             m_context.m_physicsEffect.World = Matrix.CreateScale(1, -1, 1);
             
@@ -1813,6 +1817,17 @@ namespace Xyglo.Brazil.Xna
                     }
                     break;
 
+                case XygloCommand.XygloComponent:
+                    if (e.getArguments() == "Test")
+                    {
+                        launchComponent();
+                    }
+                    else
+                    {
+                        throw new XygloException("handleCommand", "Unknown XygloComponent");
+                    }
+                    break;
+
                 default:
                     throw new XygloException("handleCommand", "Unrecognised command event");
             }
@@ -2122,6 +2137,9 @@ namespace Xyglo.Brazil.Xna
             m_context.m_lineEffect.Projection = m_context.m_projection;
             m_context.m_lineEffect.World = Matrix.CreateScale(1, -1, 1);
 
+            m_context.m_physicsEffect.View = m_context.m_viewMatrix;
+            m_context.m_physicsEffect.Projection = m_context.m_projection;
+            m_context.m_physicsEffect.World = Matrix.CreateScale(1, -1, 1);
 
         }
 
@@ -2405,6 +2423,8 @@ namespace Xyglo.Brazil.Xna
                     }
                 }
 
+                // We don't want to use debugdraw
+                //
                 //m_physicsHandler.drawDebug();
             }
 
@@ -3489,7 +3509,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="component"></param>
         protected void launchComponent()
         {
-            BrazilTestBlock block = new BrazilTestBlock(BrazilColour.Pink, new BrazilVector3(0, 0, 0), new BrazilVector3(20, 20, 20));
+            BrazilTestBlock block = new BrazilTestBlock(BrazilColour.Pink, new BrazilVector3(0, 0, 0), new BrazilVector3(200, 200, 200));
             block.addState(m_brazilContext.m_state);
 
 
