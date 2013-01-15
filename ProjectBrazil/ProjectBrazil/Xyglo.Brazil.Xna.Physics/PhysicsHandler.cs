@@ -20,7 +20,7 @@ namespace Xyglo.Brazil.Xna.Physics
     /// <summary>
     /// The Xyglo wrapper to whatever physics implementation we are going
     /// to use.  Allows us to potentially change physics engines whenever
-    /// we want to.
+    /// we want to.   Currently we're using Jitter Physics:
     /// </summary>
     public class PhysicsHandler
     {
@@ -34,20 +34,9 @@ namespace Xyglo.Brazil.Xna.Physics
             // Set up collision and world for physics
             //
             CollisionSystem collision = new CollisionSystemPersistentSAP();
-            World = new World(collision); World.AllowDeactivation = true;
-
-            // Setup the random colours
-            //
-            Random rr = new Random();
-            rndColors = new Color[20];
-
-            for (int i = 0; i < 20; i++)
-            {
-                rndColors[i] = new Color((float)rr.NextDouble(), (float)rr.NextDouble(), (float)rr.NextDouble());
-            }
-
-            DebugDrawer = new DebugDrawer(game, context);
-            //this.Components.Add(DebugDrawer);
+            World = new World(collision);
+            World.AllowDeactivation = true;
+            World.Gravity = new JVector(0, 500, 0);
         }
 
         public void initialise()
@@ -127,11 +116,14 @@ namespace Xyglo.Brazil.Xna.Physics
 
                     AddShapeToDrawList(ts.Shape, ori, pos);
                 }
-
             }
-
         }
 
+
+        /// <summary>
+        /// Run the physics model for a given time
+        /// </summary>
+        /// <param name="gameTime"></param>
         public void update(GameTime gameTime)
         {
             // Physics model updating
@@ -147,67 +139,95 @@ namespace Xyglo.Brazil.Xna.Physics
             {
                 List<XygloXnaDrawable> drawableList = m_context.m_drawableComponents.Values.Where(item => item.getPhysicsHash() == body.GetHashCode()).ToList();
 
-                if (drawableList.Count() == 1)
+                
+                // We can get more than one object with the same hash code if we have a Collection of
+                // Drawables for example in a ComponentGroup.
+                //
+                foreach (XygloXnaDrawable drawable in drawableList)
                 {
+                    // Update position
+                    //
                     Vector3 position = Conversion.ToXNAVector(body.Position);
                     Vector3 oldPosition = drawableList[0].getPosition();
-                    //drawableList[0].setPosition(Conversion.ToXNAVector(body.Position));
+                    drawableList[0].setPosition(Conversion.ToXNAVector(body.Position));
+                    drawableList[0].setOrientation(Conversion.ToXNAMatrix(body.Orientation));
                 }
 
-                //body.Update();
+                body.Update();
             }
         }
 
-        public List<Scene> Scenes { private set; get; }
-        public World World { private set; get; }
-
-        public void addDrawable(XygloXnaDrawable drawable)
+        /// <summary>
+        /// Interpret a Drawable and add it to the 
+        /// </summary>
+        /// <param name="drawable"></param>
+        /// <param name="affectedByGravity"></param>
+        /// <param name="moveable"></param>
+        public void addDrawable(Component component, XygloXnaDrawable drawable)
         {
+            RigidBody body = null;
+
             if (drawable is XygloFlyingBlock)
             {
-                // add a flying block to our physical world
-                // 
-                //Logger.logMsg("ADDING FLYING BLOCK");
-
                 XygloFlyingBlock fb = (XygloFlyingBlock)drawable;
+                body = new RigidBody(new BoxShape(Conversion.ToJitterVector(fb.getSize())));             
+            }
+            else if (drawable is XygloTexturedBlock)
+            {
+                XygloTexturedBlock fb = (XygloTexturedBlock)drawable;
+                JVector size = Conversion.ToJitterVector(fb.getSize());
+                body = new RigidBody(new BoxShape(size));
+            }
+            else if (drawable is XygloSphere)
+            {
+                XygloSphere sphere = (XygloSphere)drawable;
+                body = new RigidBody(new SphereShape(sphere.getRadius()));
+            }
+            else if (drawable is XygloComponentGroup)
+            {
+                XygloComponentGroup group = (XygloComponentGroup)drawable;
+                foreach (XygloXnaDrawable subDrawable in group.getComponents())
+                    addDrawable(component, subDrawable);
+            }
 
-                JVector size = new JVector(1, 5, 2); // Conversion.ToJitterVector(fb.getSize());
-                RigidBody body = new RigidBody(new BoxShape(size));
-                body.Position = new JVector(0, 0, 0); // Conversion.ToJitterVector(fb.getPosition());
-                body.AffectedByGravity = false;
+            // If we've constructed a body then populate and add
+            //
+            if (body != null)
+            {
+                body.Position = Conversion.ToJitterVector(drawable.getPosition());
+                body.AffectedByGravity = component.isAffectedByGravity();
+                body.IsStatic = !component.isMoveable();
+                body.Mass = Math.Max(component.getMass(), 1000);
 
-                // set any velocity
+                // Set a velocity if we're not static
                 //
-                // Conversion.ToXNAVector
-                //
-                body.LinearVelocity = Conversion.ToJitterVector(fb.getVelocity());
-                body.EnableDebugDraw = true;
+                if (!body.IsStatic)
+                    body.LinearVelocity = Conversion.ToJitterVector(drawable.getVelocity());
                 
                 // Store this relationship in the calling drawable so we can link them back again
                 //
                 drawable.setPhysicsHash(body.GetHashCode());
 
                 World.AddBody(body);
+            }else
+            {
+                Logger.logMsg("Not constructed a physics objects from a XygloDrawable");
             }
         }
 
-        public DebugDrawer DebugDrawer { private set; get; }
-        Color[] rndColors;
-
-
         /// <summary>
-        /// Draw physics items in debug positions
+        /// Draw physics items in debug positions.  Not used.
         /// </summary>
-        public void drawDebug()
+        protected void drawDebug()
         {
             int cc = 0;
 
-            activeBodies = 0;
+            m_activeBodies = 0;
 
             // Draw all shapes
             foreach (RigidBody body in World.RigidBodies)
             {
-                if (body.IsActive) activeBodies++;
+                if (body.IsActive) m_activeBodies++;
                 if (body.Tag is int || body.IsParticle) continue;
                 AddBodyToDrawList(body);
             }
@@ -217,7 +237,7 @@ namespace Xyglo.Brazil.Xna.Physics
 
             foreach (RigidBody body in World.RigidBodies)
             {
-                DebugDrawer.Color = rndColors[cc % rndColors.Length];
+                DebugDrawer.Color = Color.White;
                 body.DebugDraw(DebugDrawer);
                 cc++;
             }
@@ -227,25 +247,15 @@ namespace Xyglo.Brazil.Xna.Physics
             //GraphicsDevice.RasterizerState = cullMode;
         }
 
-        private int activeBodies = 0;
-        protected RigidBody m_ground = null;
-        private QuadDrawer m_quadDrawer = null;
-
+        /// <summary>
+        /// Add ground to this world
+        /// </summary>
+        /// <param name="game"></param>
         public void addGround(Game game)
         {
-            // For the moment if we addBody then performance falls off
-            //
-
-            //ground = new RigidBody(new BoxShape(new JVector(200, 20, 200)));
-            //ground.Position = new JVector(0, -10, 0);
-            //ground.Tag = BodyTag.DontDrawMe;
-            //ground.IsStatic = true; Demo.World.AddBody(ground);
-            //ground.Material.KineticFriction = 0.0f;
-
             m_ground = new RigidBody(new BoxShape(new JVector(200, 20, 200)));
             m_ground.Position = new JVector(0, -10, 0);
             m_ground.Tag = BodyTag.DontDrawMe;
-//            m_ground.Tag = 
             m_ground.IsStatic = true;
 
             // This kills performance
@@ -264,9 +274,11 @@ namespace Xyglo.Brazil.Xna.Physics
             game.Components.Add(m_quadDrawer);
 
             addTestContent();
-             
         }
 
+        /// <summary>
+        /// Some test content from Jenga example
+        /// </summary>
         public void addTestContent()
         {
             for (int i = 0; i < 15; i++)
@@ -284,11 +296,44 @@ namespace Xyglo.Brazil.Xna.Physics
             }
         }
 
+        /// <summary>
+        /// This is the JitterPhysics World definition
+        /// </summary>
+        public World World { private set; get; }
 
+        /// <summary>
+        /// XygloContext is useful
+        /// </summary>
         protected XygloContext m_context;
 
+        /// <summary>
+        /// Probably don't need these
+        /// </summary>
         private Primitives3D.GeometricPrimitive[] primitives = new Primitives3D.GeometricPrimitive[5];
 
+        /// <summary>
+        /// Or these..
+        /// </summary>
         private enum Primitives { box, sphere, cylinder, cone, capsule }
+
+        /// <summary>
+        /// Or this..
+        /// </summary>
+        public DebugDrawer DebugDrawer { private set; get; }
+
+        /// <summary>
+        /// Or this..
+        /// </summary>
+        private int m_activeBodies = 0;
+
+        /// <summary>
+        /// Or this..
+        /// </summary>
+        protected RigidBody m_ground = null;
+
+        /// <summary>
+        /// Or indeed this..
+        /// </summary>
+        private QuadDrawer m_quadDrawer = null;
     }
 }

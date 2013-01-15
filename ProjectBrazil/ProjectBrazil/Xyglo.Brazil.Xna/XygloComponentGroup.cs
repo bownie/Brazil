@@ -290,6 +290,12 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// List of Components in this group
+        /// </summary>
+        /// <returns></returns>
+        public List<XygloXnaDrawable> getComponents() { return m_componentList; }
+
+        /// <summary>
         /// List of the XygloXnaDrawable components
         /// </summary>
         protected List<XygloXnaDrawable> m_componentList = new List<XygloXnaDrawable>();

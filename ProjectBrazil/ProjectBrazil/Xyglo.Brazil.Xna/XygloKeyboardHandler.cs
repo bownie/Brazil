@@ -411,6 +411,7 @@ namespace Xyglo.Brazil.Xna
                 }
                 consumed = true;
             }
+                /*
             else if (keyList.Contains(Keys.F9)) // Spin anticlockwise though BVs
             {
                 m_context.m_zoomLevel = 1000.0f;
@@ -422,7 +423,7 @@ namespace Xyglo.Brazil.Xna
                 m_context.m_zoomLevel = 1000.0f;
                 //setActiveBuffer(BufferView.ViewCycleDirection.Clockwise);
                 consumed = true;
-            }
+            }*/
             else if (keyList.Contains(Keys.F3))
             {
                 doSearch(gameTime);

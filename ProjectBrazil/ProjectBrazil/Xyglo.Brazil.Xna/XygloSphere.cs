@@ -20,36 +20,6 @@ namespace Xyglo.Brazil.Xna
     public class XygloSphere : XygloXnaDrawableShape
     {
         /// <summary>
-        /// Alpha Blend text
-        /// </summary>
-        protected bool m_alphaBlendingTest = false;
-
-        /// <summary>
-        /// Radius of sphere
-        /// </summary>
-        float m_radius;
-
-        /// <summary>
-        /// Vertices in a circle
-        /// </summary>
-        protected int m_vertsInCircle = 50;
-
-        /// <summary>
-        /// Circles in a sphere
-        /// </summary>
-        protected int m_circsInSphere = 50;
-
-        /// <summary>
-        /// Total number of vertices in sphere
-        /// </summary>
-        protected int m_numVertices;
-
-        /// <summary>
-        /// Total number of indicies in sphere
-        /// </summary>
-        protected int m_numIndices;
-
-        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="colour"></param>
@@ -220,5 +190,41 @@ namespace Xyglo.Brazil.Xna
         {
             return m_indices.Count() / 3;
         }
+
+        /// <summary>
+        /// Radius of sphere
+        /// </summary>
+        /// <returns></returns>
+        public float getRadius() { return m_radius; }
+
+        /// <summary>
+        /// Alpha Blend text
+        /// </summary>
+        protected bool m_alphaBlendingTest = false;
+
+        /// <summary>
+        /// Radius of sphere
+        /// </summary>
+        float m_radius;
+
+        /// <summary>
+        /// Vertices in a circle
+        /// </summary>
+        protected int m_vertsInCircle = 50;
+
+        /// <summary>
+        /// Circles in a sphere
+        /// </summary>
+        protected int m_circsInSphere = 50;
+
+        /// <summary>
+        /// Total number of vertices in sphere
+        /// </summary>
+        protected int m_numVertices;
+
+        /// <summary>
+        /// Total number of indicies in sphere
+        /// </summary>
+        protected int m_numIndices;
     }
 }

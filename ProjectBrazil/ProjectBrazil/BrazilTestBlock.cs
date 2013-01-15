@@ -18,11 +18,13 @@ namespace Xyglo.Brazil
         /// </summary>
         /// <param name="colour"></param>
         /// <param name="position"></param>
-        public BrazilTestBlock(BrazilColour colour, BrazilVector3 position, BrazilVector3 size)
+        public BrazilTestBlock(BrazilColour colour, BrazilVector3 position, BrazilVector3 size, bool affectedByGravity = true)
         {
             m_colour = colour;
             m_position = position;
             m_dimensions = size;
+            m_gravityAffected = affectedByGravity;
+            m_mass = 1000; // default mass
         }
 
         /// <summary>

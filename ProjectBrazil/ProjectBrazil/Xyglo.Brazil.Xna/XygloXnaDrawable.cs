@@ -286,6 +286,18 @@ namespace Xyglo.Brazil.Xna
         public int getPhysicsHash() { return m_physicsHash; }
 
         /// <summary>
+        /// Orientation of the Drawable
+        /// </summary>
+        /// <returns></returns>
+        public Matrix getOrientation() { return m_orientation; }
+
+        /// <summary>
+        /// Set Orientation of the Drawable
+        /// </summary>
+        /// <param name="orientation"></param>
+        public void setOrientation(Matrix orientation) { m_orientation = orientation; }
+
+        /// <summary>
         /// Position of this block
         /// </summary>
         public Vector3 m_position;
@@ -309,6 +321,11 @@ namespace Xyglo.Brazil.Xna
         /// Define a set of max velocities (-+) for our drawable
         /// </summary>
         protected Vector3 m_maxVelocity = new Vector3(3, 0, 0);
+
+        /// <summary>
+        /// Orientation of the component
+        /// </summary>
+        protected Matrix m_orientation = Matrix.Identity;
 
         /// <summary>
         /// Name for this component just in case we want to track it easily for some insane reason

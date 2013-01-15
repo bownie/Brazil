@@ -21,7 +21,7 @@ namespace Xyglo.Brazil
             // Is affected by gravity - set mass and hardness
             //
             m_gravityAffected = true;
-            m_mass = 10;
+            m_mass = 1000;
             m_hardness = 6f;
         }
 

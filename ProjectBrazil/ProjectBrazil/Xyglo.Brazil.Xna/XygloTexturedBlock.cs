@@ -36,12 +36,11 @@ namespace Xyglo.Brazil.Xna
         /// <param name="effect"></param>
         /// <param name="position"></param>
         /// <param name="size"></param>
-        public XygloTexturedBlock(Texture2D texture, Color colour, BasicEffect effect, BrazilVector3 position, BrazilVector3 size)
+        public XygloTexturedBlock(Color colour, BasicEffect effect, BrazilVector3 position, BrazilVector3 size)
         {
             // Store the effect
             m_effect = effect;
             m_colour = colour;
-            m_texture = texture;
 
             m_blockSize.X = size.X;
             m_blockSize.Y = size.Y;
@@ -124,7 +123,10 @@ namespace Xyglo.Brazil.Xna
                 m_vertices[7].TextureCoordinate = new Vector2(0, 0);
             }
 
-            Matrix worldMatrix = Matrix.CreateRotationZ((float)m_rotation);
+            // Ensure that the orientation matrix is used here - we might want to
+            // get rid of the m_rotation.
+            //
+            Matrix worldMatrix = Matrix.CreateRotationZ((float)m_rotation) * m_orientation;
 
             // front left top
             //
@@ -295,16 +297,6 @@ namespace Xyglo.Brazil.Xna
             return m_indices.Count() / 3;
         }
 
-        /*
-        /// <summary>
-        /// Return the VertexBuffer
-        /// </summary>
-        /// <returns></returns>
-        public VertexBuffer getVertexBuffer()
-        {
-            return m_vertexBuffer;
-        }*/
-
         /// <summary>
         /// Override the getBoundingBox call - examine vertex data and return a bounding box
         /// based on that.
@@ -335,19 +327,9 @@ namespace Xyglo.Brazil.Xna
         public Vector3 m_blockSize;
 
         /// <summary>
-        /// Our texture
-        /// </summary>
-        //public Texture2D m_shapeTexture;
-
-        /// <summary>
         /// Alpha Blend text
         /// </summary>
         protected bool m_alphaBlendingTest = false;
-
-        /// <summary>
-        /// Texture for this block
-        /// </summary>
-        protected Texture2D m_texture;
 
     }
 }

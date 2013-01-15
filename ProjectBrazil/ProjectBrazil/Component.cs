@@ -77,125 +77,96 @@ namespace Xyglo.Brazil
         /// Is this class affected by gravity?
         /// </summary>
         /// <returns></returns>
-        public bool isAffectedByGravity()
-        {
-            return m_gravityAffected;
-        }
+        public bool isAffectedByGravity() { return m_gravityAffected; }
+        public void setAffectedByGravity(bool gravity) { m_gravityAffected = gravity; }
+
+        /// <summary>
+        /// Can this Component be moved by other Components?
+        /// </summary>
+        /// <returns></returns>
+        public bool isMoveable() { return m_moveable; }
+
+        /// <summary>
+        /// Set whether this Component can by moved by other Component interactions.
+        /// </summary>
+        /// <param name="moveable"></param>
+        public void setMoveable(bool moveable) { m_moveable = moveable; } 
 
         /// <summary>
         /// Return the mass of this object
         /// </summary>
         /// <returns></returns>
-        public double getMass()
-        {
-            return m_mass;
-        }
+        public float getMass() { return m_mass; }
 
         /// <summary>
         /// Get the hardness of this object
         /// </summary>
         /// <returns></returns>
-        public double getHardness()
-        {
-            return m_hardness;
-        }
+        public float getHardness() { return m_hardness; }
 
         /// <summary>
         /// Set the hardness
         /// </summary>
         /// <param name="hardness"></param>
-        public void setHardness(double hardness)
-        {
-            m_hardness = hardness;
-        }
+        public void setHardness(float hardness) { m_hardness = hardness; }
 
         /// <summary>
         /// Has substance if it has some hardness
         /// </summary>
         /// <returns></returns>
-        public bool isCorporeal()
-        {
-            return (m_hardness > 0);
-        }
+        public bool isCorporeal() { return (m_hardness > 0); }
 
         /// <summary>
         /// Get the Component behaviour
         /// </summary>
         /// <returns></returns>
-        public Behaviour getBehaviour()
-        {
-            return m_behaviour;
-        }
+        public Behaviour getBehaviour() { return m_behaviour; }
 
         /// Get the name
         /// </summary>
         /// <returns></returns>
-        public string getName()
-        {
-            return m_name;
-        }
+        public string getName() { return m_name; }
 
         /// <summary>
         /// Set the name
         /// </summary>
         /// <param name="name"></param>
-        public void setName(string name)
-        {
-            m_name = name;
-        }
+        public void setName(string name) { m_name = name; }
 
         /// <summary>
         /// Has this Component been destroyed on the drawing side?  If so don't recreate it.
         /// </summary>
         /// <returns></returns>
-        public bool isDestroyed()
-        {
-            return m_isDestroyed;
-        }
+        public bool isDestroyed() { return m_isDestroyed; }
 
         /// <summary>
         /// Set this Component to destroyed so it's not recreated drawing side
         /// </summary>
         /// <param name="isDestroyed"></param>
-        public void setDestroyed(bool isDestroyed)
-        {
-            m_isDestroyed = isDestroyed;
-        }
+        public void setDestroyed(bool isDestroyed) { m_isDestroyed = isDestroyed; }
 
         /// <summary>
         /// Is this component hiding?
         /// </summary>
         /// <returns></returns>
-        public bool isHiding()
-        {
-            return m_isHiding;
-        }
+        public bool isHiding() { return m_isHiding; }
 
         /// <summary>
         /// Set this component to hiding/unhiding
         /// </summary>
         /// <param name="hiding"></param>
-        public void setHiding(bool hiding)
-        {
-            m_isHiding = hiding;
-        }
+        public void setHiding(bool hiding) { m_isHiding = hiding; }
 
         /// <summary>
         /// Set an App container for this Component
         /// </summary>
         /// <param name="container"></param>
-        public void setApp(BrazilApp app)
-        {
-            m_app = app;
-        }
+        public void setApp(BrazilApp app) { m_app = app; }
 
         /// <summary>
         /// Get the container for this Component
         /// </summary>
-        public BrazilApp getApp()
-        {
-            return m_app;
-        }
+        public BrazilApp getApp() { return m_app; }
 
         /// <summary>
         /// Affected by gravity?
@@ -207,13 +178,19 @@ namespace Xyglo.Brazil
         /// Mass of this object
         /// </summary>
         [DataMember]
-        protected double m_mass = 0;
+        protected float m_mass = 0;
 
         /// <summary>
         /// Hardness of this object
         /// </summary>
         [DataMember]
-        protected double m_hardness = 0;
+        protected float m_hardness = 0;
+
+        /// <summary>
+        /// Can this Component be affected by interactions with other Components?
+        /// </summary>
+        [DataMember]
+        protected bool m_moveable = true;
         
         /// <summary>
         /// Default behaviour is none - but could be a goody or a baddy

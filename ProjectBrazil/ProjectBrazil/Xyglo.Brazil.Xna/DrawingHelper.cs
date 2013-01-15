@@ -2032,10 +2032,17 @@ namespace Xyglo.Brazil.Xna
 
 
                         if (!m_context.m_drawableComponents[component].shouldBeDestroyed())
+                            m_context.m_drawableComponents[component].draw(m_context.m_graphics.GraphicsDevice);
+                    }
+                    else if (component.GetType() == typeof(BrazilTestBlock))
+                    {
+                        if (!m_context.m_drawableComponents[component].shouldBeDestroyed())
                         {
+                            m_context.m_drawableComponents[component].buildBuffers(m_context.m_graphics.GraphicsDevice);
                             m_context.m_drawableComponents[component].draw(m_context.m_graphics.GraphicsDevice);
                         }
                     }
+
 
                     //else if (component.GetType() == typeof(Xyglo.Brazil.BrazilMenu))
                     //{
