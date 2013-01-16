@@ -9,6 +9,7 @@
 using System;
 using System.Diagnostics;
 using System.Reflection;
+using System.Threading;
 
 namespace Xyglo.Brazil.Xna
 {
@@ -49,6 +50,11 @@ namespace Xyglo.Brazil.Xna
         public static string m_message = "";
 
         /// <summary>
+        /// Protected our m_lines during read/write
+        /// </summary>
+        public static Mutex m_mutex = new Mutex();
+
+        /// <summary>
         /// Sometimes we have performance issues with the time formatting so provide it as optional
         /// </summary>
         /// <param name="message"></param>
@@ -80,6 +86,10 @@ namespace Xyglo.Brazil.Xna
 
             if (m_toFile)
             {
+                // Wait for a lock
+                //
+                m_mutex.WaitOne();
+
                 if (m_logFileStream == null)
                 {
                     // Open log file in append mode
@@ -89,6 +99,10 @@ namespace Xyglo.Brazil.Xna
 
                 m_logFileStream.WriteLine(m_message);
                 m_logFileStream.Flush();
+
+                // Release mutex
+                //
+                m_mutex.ReleaseMutex();
             }
 
         }

@@ -7,9 +7,10 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Xyglo.Brazil.Xna
 {
-
     /// <summary>
-    /// Xyglo generic context
+    /// Xyglo generic context - store a collection of useful things that XygloXNA needs to use.
+    /// Ideally we'd break this up and let the right things look after their own stuff rather than
+    /// globbing it together here.
     /// </summary>
     public class XygloContext
     {

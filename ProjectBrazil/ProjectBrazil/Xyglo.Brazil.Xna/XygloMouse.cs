@@ -1147,62 +1147,7 @@ namespace Xyglo.Brazil.Xna
             OnChangePosition(new PositionEventArgs(eyePos));
         }
 
-        /// <summary>
-        /// Draw a cursor and make it blink in position on a FileBuffer
-        /// </summary>
-        /// <param name="v"></param>
-        public void drawCursor(GameTime gameTime, SpriteBatch spriteBatch)
-        {
-            BufferView bv = m_context.m_project.getSelectedBufferView();
-
-            if (bv == null)
-                return;
-
-            // Don't draw the cursor if we're not the active window or if we're confirming 
-            // something on the screen.
-            //
-            // No cursor for tailing BufferViews
-            //
-            if (!bv.isTailing())
-            {
-                double dTS = gameTime.TotalGameTime.TotalSeconds;
-                int blinkRate = 4;
-
-                // Test for when we're showing this
-                //
-                if (Convert.ToInt32(dTS * blinkRate) % 2 != 0)
-                {
-                    return;
-                }
-
-                // Blinks rate
-                //
-                Vector3 v1 = bv.getCursorCoordinates();
-                v1.Y += bv.getLineSpacing();
-
-                Vector3 v2 = bv.getCursorCoordinates();
-                v2.X += 1;
-
-                m_context.m_drawingHelper.renderQuad(v1, v2, bv.getHighlightColor(), spriteBatch);
-            }
-            // Draw any temporary highlight
-            //
-            if (m_clickHighlight.First != null &&
-                ((BufferView)m_clickHighlight.First) == m_context.m_project.getSelectedView())
-            {
-                Highlight h = (Highlight)m_clickHighlight.Second;
-                Vector3 h1 = bv.getSpaceCoordinates(h.m_startHighlight.asScreenPosition());
-                Vector3 h2 = bv.getSpaceCoordinates(h.m_endHighlight.asScreenPosition());
-
-                // Add some height here so we can see the highlight
-                //
-                h2.Y += m_context.m_fontManager.getLineSpacing(bv.getViewSize());
-
-                m_context.m_drawingHelper.renderQuad(h1, h2, h.getColour(), spriteBatch);
-            }
-        }
-
-        /// <summary>
+         /// <summary>
         /// Return this value for use in drawables
         /// </summary>
         /// <returns></returns>
@@ -1220,6 +1165,12 @@ namespace Xyglo.Brazil.Xna
         {
             return m_lastClickCursorOffsetPosition;
         }
+
+        /// <summary>
+        /// Return the click highlight information
+        /// </summary>
+        /// <returns></returns>
+        public Pair<BufferView, Highlight> getClickHighlight() { return m_clickHighlight; }
 
         /// <summary>
         /// Have we recently got a double click - next release clears it

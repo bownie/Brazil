@@ -272,6 +272,14 @@ For Later
 CODE METRICS
 ------------
 
+As of 16/01/2013 as part of Brazil Framework:
+
+40274 (11630 exec)
+
+12 days since last at 189 lines per day
+442 days since start at 91 lines per day
+
+
 As of 04/01/2013 as part of Brazil Framework:
 
 37996 (10871 exec)

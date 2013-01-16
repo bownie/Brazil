@@ -80,6 +80,19 @@ namespace Xyglo.Brazil.Xna
             m_keyboardHandler.CleanExitEvent += new CleanExitEventHandler(handleCleanExit);
             m_keyboardHandler.CommandEvent += new CommandEventHandler(handleCommand);
 
+            // Temporary Messages
+            //
+            m_tempMessage = new TemporaryMessage(m_context);
+            m_tempMessage.TemporaryMessageEvent += new TemporaryMessageEventHandler(handleTemporaryMessage);
+            
+            // The Eye position handler
+            //
+            m_eyeHandler = new EyeHandler(m_context, m_keyboardHandler);
+
+            // System Analyser for performance stats
+            //
+            m_systemAnalyser = new SystemAnalyser();
+
             // Initialise
             //
             initialise();
@@ -172,11 +185,6 @@ namespace Xyglo.Brazil.Xna
             //
             m_context.m_graphics.PreferMultiSampling = true;
 
-            // Set physical memory
-            //
-            Microsoft.VisualBasic.Devices.ComputerInfo ci = new Microsoft.VisualBasic.Devices.ComputerInfo();
-            m_physicalMemory = (float)(ci.TotalPhysicalMemory / (1024 * 1024));
-
             // Set windowed mode as default
             //
             m_graphics.windowedMode(this);
@@ -187,7 +195,6 @@ namespace Xyglo.Brazil.Xna
             {
                 m_brazilContext.m_state = State.Test("DemoExpired");
             }
-
 
             // Create our physics handler
             //
@@ -275,9 +282,9 @@ namespace Xyglo.Brazil.Xna
 
             // Ensure that we are in the correct position to view this buffer so there's no initial movement
             //
-            m_eye = m_context.m_project.getEyePosition();
-            m_target = m_context.m_project.getTargetPosition();
-            m_context.m_zoomLevel = m_eye.Z;
+            m_eyeHandler.setEyePosition(m_context.m_project.getEyePosition());
+            m_eyeHandler.setTargetPosition(m_context.m_project.getTargetPosition());
+            m_context.m_zoomLevel = m_eyeHandler.getEyePosition().Z;
 
             // Set the active buffer view
             //
@@ -336,7 +343,7 @@ namespace Xyglo.Brazil.Xna
             // 
             // http://www.toymaker.info/Games/XNA/html/xna_camera.html
             // 
-            m_context.m_viewMatrix = Matrix.CreateLookAt(m_eye, m_target, Vector3.Up);
+            m_context.m_viewMatrix = Matrix.CreateLookAt(m_eyeHandler.getEyePosition(), m_eyeHandler.getTargetPosition(), Vector3.Up);
             m_context.m_projection = Matrix.CreateTranslation(-0.5f, -0.5f, 0) * Matrix.CreatePerspectiveFieldOfView(m_context.m_fov, GraphicsDevice.Viewport.AspectRatio, 0.1f, 10000f);
 
             // Generate frustrum
@@ -481,19 +488,13 @@ namespace Xyglo.Brazil.Xna
         {
             m_context.m_splashScreen = Content.Load<Texture2D>("splash");
 
-            // Start up the worker thread for the performance counters
-            //
-            m_counterWorker = new PerformanceWorker();
-            m_counterWorkerThread = new Thread(m_counterWorker.startWorking);
-            m_counterWorkerThread.Start();
-
             m_smartHelpWorker = new SmartHelpWorker();
             m_smartHelpWorkerThread = new Thread(m_smartHelpWorker.startWorking);
             m_smartHelpWorkerThread.Start();
 
             // Loop until worker thread activates.
             //
-            while (!m_counterWorkerThread.IsAlive && !m_smartHelpWorkerThread.IsAlive) ;
+            while (!m_smartHelpWorkerThread.IsAlive) ;
             Thread.Sleep(1);
 
             // Start up the worker thread for Kinect integration
@@ -707,7 +708,7 @@ namespace Xyglo.Brazil.Xna
             // All the maths is done in the Buffer View
             //
             Vector3 eyePos = m_context.m_project.getSelectedView().getEyePosition(m_context.m_zoomLevel);
-            flyToPosition(eyePos);
+            m_eyeHandler.flyToPosition(eyePos);
 
             // Ensure that the m_brazilContext.m_interloper variable is valid
             // Ensure that the m_brazilContext.m_interloper is valid
@@ -825,14 +826,9 @@ namespace Xyglo.Brazil.Xna
                     m_kinectWorker = null;
                 }
 
-                if (m_counterWorker != null)
-                {
-                    // Clear the worker thread and exit
-                    //
-                    m_counterWorker.requestStop();
-                    m_counterWorkerThread.Join();
-                    m_counterWorker = null;
-                }
+                // Explicitly stop the analyser
+                //
+                m_systemAnalyser.stop();
 
                 // Join the smart help worker 
                 //
@@ -845,15 +841,13 @@ namespace Xyglo.Brazil.Xna
 
                 // Modify Z if we're in the file selector height of 600.0f
                 //
-                if (m_eye.Z == 600.0f)
-                {
-                    m_eye.Z = 500.0f;
-                }
+                if (m_eyeHandler.getEyePosition().Z == 600.0f)
+                    m_eyeHandler.setEyePosition(new Vector3(m_eyeHandler.getEyePosition().X, m_eyeHandler.getEyePosition().Y, 500.0f));
 
                 // Store the eye and target positions to the project before serialising it.
                 //
-                m_context.m_project.setEyePosition(m_eye);
-                m_context.m_project.setTargetPosition(m_target);
+                m_context.m_project.setEyePosition(m_eyeHandler.getEyePosition());
+                m_context.m_project.setTargetPosition(m_eyeHandler.getTargetPosition());
                 m_context.m_project.setOpenDirectory(m_context.m_fileSystemView.getPath());
 
                 // Do some file management to ensure we have some backup copies
@@ -904,7 +898,7 @@ namespace Xyglo.Brazil.Xna
 
                 // Depends where we are in the process here - check state
                 //
-                Vector3 newPosition = m_eye;
+                Vector3 newPosition = m_eyeHandler.getEyePosition(); ;
 
                 switch (m_brazilContext.m_state.m_name)
                 {
@@ -1023,23 +1017,20 @@ namespace Xyglo.Brazil.Xna
 
                 // Fly back to correct position
                 //
-                flyToPosition(newPosition);
+                m_eyeHandler.flyToPosition(newPosition);
             }
 
             // If we're viewing some information then only escape can get us out
             // of this mode.  Note that we also have to mind any animations so we
             // also want to ensure that m_changingEyePosition is not true.
             //
-            if ((m_brazilContext.m_state.equals("Information") || m_brazilContext.m_state.equals("Help") /* || m_state == State.ManageProject */ ) && m_changingEyePosition == false)
+            if ((m_brazilContext.m_state.equals("Information") || m_brazilContext.m_state.equals("Help") /* || m_state == State.ManageProject */ ) && m_eyeHandler.isChangingPosition() == false)
             {
                 if (keyList.Contains(Keys.PageDown))
-                {
-                    m_keyboardHandler.textScreenPageDown(m_textScreenLength);
-                }
+                    m_keyboardHandler.textScreenPageDown(m_context.m_drawingHelper.getLastDrawTextScreenLength());
                 else if (keyList.Contains(Keys.PageUp))
-                {
                     m_keyboardHandler.textScreenPageUp();
-                }
+
                 return true;
             }
 
@@ -1048,7 +1039,7 @@ namespace Xyglo.Brazil.Xna
             if (m_keyboardHandler.getFilesToWrite() != null && m_keyboardHandler.getFilesToWrite().Count > 0)
             {
                 m_context.m_project.setSelectedViewByFileBuffer(m_keyboardHandler.getFilesToWrite()[0]);
-                m_eye = m_context.m_project.getSelectedView().getEyePosition();
+                m_eyeHandler.setEyePosition(m_context.m_project.getSelectedView().getEyePosition());
                 m_keyboardHandler.selectSaveFile(gameTime);
             }
 
@@ -1191,7 +1182,7 @@ namespace Xyglo.Brazil.Xna
                 {
                     // Check and continue if consumed
                     //
-                    if (m_keyboardHandler.processActionKey(gameTime, this, m_eye, keyAction))
+                    if (m_keyboardHandler.processActionKey(gameTime, this, m_eyeHandler.getEyePosition(), keyAction))
                         continue;
 
                     // Check and continue if consumed
@@ -1390,11 +1381,11 @@ namespace Xyglo.Brazil.Xna
 
             // Check for any mouse actions here
             //
-            m_mouse.checkMouse(this, gameTime, m_keyboard, m_eye, m_target);
+            m_mouse.checkMouse(this, gameTime, m_keyboard, m_eyeHandler.getEyePosition(), m_eyeHandler.getTargetPosition());
 
             // Check for this change as necessary
             //
-            if (m_changingEyePosition)
+            if (m_eyeHandler.isChangingPosition())
             {
                 // Restore the original eye position before moving anywhere
                 //
@@ -1404,7 +1395,7 @@ namespace Xyglo.Brazil.Xna
                     //m_eyePerturber = null;
                 //}
 
-                changeEyePosition(gameTime);
+                m_eyeHandler.changeEyePosition(gameTime);
             }
                 /*
             else
@@ -1620,31 +1611,15 @@ namespace Xyglo.Brazil.Xna
 
         }
 
-
         /// <summary>
-        /// Set a temporary message until a given end time (seconds into the future)
+        ///  Set a temporary message until a given end time (seconds into the future)
         /// </summary>
         /// <param name="message"></param>
+        /// <param name="seconds"></param>
         /// <param name="gameTime"></param>
         public void setTemporaryMessage(string message, double seconds, GameTime gameTime = null)
         {
-            // Recover this if not set
-            if (gameTime == null)
-                gameTime = m_context.m_gameTime;
-
-
-            m_temporaryMessage = message;
-
-            if (seconds == 0)
-            {
-                seconds = 604800; // a week should be long enough to signal infinity
-            }
-
-            // Store the start and end time for this message - start time is used for
-            // scrolling.
-            //
-            m_temporaryMessageStartTime = (gameTime != null ? gameTime.TotalGameTime.TotalSeconds : 0);
-            m_temporaryMessageEndTime = (gameTime != null ? m_temporaryMessageStartTime : 0 ) + seconds;
+            m_tempMessage.setTemporaryMessage(message, seconds, gameTime);
         }
 
 
@@ -1842,7 +1817,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="e"></param>
         protected void handleFlyToPosition(object sender, PositionEventArgs e)
         {
-            flyToPosition(e.getPosition());
+            m_eyeHandler.flyToPosition(e.getPosition());
         }
 
         /// <summary>
@@ -1880,8 +1855,8 @@ namespace Xyglo.Brazil.Xna
         /// <param name="target"></param>
         protected void handleEyeChange(object sender, PositionEventArgs eye, PositionEventArgs target)
         {
-            m_eye = eye.getPosition();
-            m_target = target.getPosition();
+            m_eyeHandler.setEyePosition(eye.getPosition());
+            m_eyeHandler.setTargetPosition(target.getPosition());
         }
 
         /// <summary>
@@ -1893,158 +1868,6 @@ namespace Xyglo.Brazil.Xna
         {
             BufferView newBv = addNewFileBuffer(e.getViewPosition(), e.getFileName());
             setHighlightAndCenter(newBv, e.getScreenPosition());
-        }
-
-        /// <summary>
-        /// Move the eye to a new position - store the original one so we can tell how far along the path we've moved
-        /// </summary>
-        /// <param name="newPosition"></param>
-        protected void flyToPosition(Vector3 newPosition)
-        {
-            // If we're already changing eye position then change the new eye position only
-            //
-            if (m_changingEyePosition)
-            {
-                // Set new destination
-                //
-                m_newEyePosition = newPosition;
-
-                // Modify the vectors we need to aim to the new target
-                //
-                m_vFly = (m_newEyePosition - m_eye) / m_flySteps;
-
-                // Also set up the target modification vector (where the eye is looking)
-                //
-                Vector3 tempTarget = m_newEyePosition;
-                tempTarget.Z = 0.0f;
-                m_vFlyTarget = (tempTarget - m_target) / m_flySteps;
-            }
-            else
-            {
-                // If we're currently stationary then we start moving like this
-                //
-                m_originalEyePosition = m_eye;
-                m_newEyePosition = newPosition;
-                m_changingPositionLastGameTime = TimeSpan.Zero;
-                m_changingEyePosition = true;
-            }
-        }
-
-        /// <summary>
-        /// An eye perturber indeed
-        /// </summary>
-        protected EyePerturber m_eyePerturber = null;
-
-        /// <summary>
-        /// Transform current eye position to an intended eye position over time.  We use the orignal eye position to enable us
-        /// to accelerate and deccelerate.  We have to modify both the eye position and the target that the eye is looking at
-        /// by the same amount to keep our orientation constant.
-        /// </summary>
-        /// <param name="delta"></param>
-        protected void changeEyePosition(GameTime gameTime)
-        {
-            if (!m_changingEyePosition) return;
-
-            // Start of 
-            if (m_changingPositionLastGameTime == TimeSpan.Zero)
-            {
-                m_vFly = (m_newEyePosition - m_eye) / m_flySteps;
-
-                // Also set up the target modification vector (where the eye is looking)
-                //
-                Vector3 tempTarget = m_newEyePosition;
-                tempTarget.Z = 0.0f;
-                m_vFlyTarget = (tempTarget - m_target) / m_flySteps;
-
-                // Want to enforce a minimum vector size here
-                //
-                while (m_vFlyTarget.Length() != 0 && m_vFlyTarget.Length() < 10.0f)
-                {
-                    m_vFlyTarget *= 2;
-                }
-
-                m_changingPositionLastGameTime = gameTime.TotalGameTime;
-            }
-
-            // At this point we have the m_vFly and m_vFlyTarget vectors loaded
-            // with a fraction of the distance from source to target.  To begin
-            // with we need to start slowly and accelerate smoothly.  We use an
-            // acceleration (acc) which is based on the distance from source to 
-            // target.  This is used as a multiplier on the movement vector to
-            // provide the acceleration within bounds set by Max and Min.
-            //
-            float acc = 1.0f;
-            float percTrack = (m_eye - m_originalEyePosition).Length() / (m_newEyePosition - m_originalEyePosition).Length();
-
-            bool enableAcceleration = false;
-
-            if (enableAcceleration)
-            {
-                // Need a notion of distance for the next movement
-                //
-                if (m_eye != m_originalEyePosition)
-                {
-                    if (percTrack < 0.5)
-                    {
-                        acc = percTrack;
-                    }
-                    else
-                    {
-                        acc = 1.0f - percTrack;
-                    }
-
-                    // Set absolute limits on acceleration
-                    //
-                    acc = Math.Max(acc, 0.12f);
-                    acc = Math.Min(acc, 1.0f);
-                }
-            }
-
-            // Perform movement of the eye by the movement vector and acceleration
-            //
-            if (gameTime.TotalGameTime - m_changingPositionLastGameTime > m_movementPause)
-            {
-                m_eye += m_vFly * acc;
-
-                // modify target by the other vector (this is to keep our eye level constan
-                //
-                m_target.X += m_vFlyTarget.X * acc;
-                m_target.Y += m_vFlyTarget.Y * acc;
-
-                m_changingPositionLastGameTime = gameTime.TotalGameTime;
-            }
-
-            // Font scaling
-            //
-            m_keyboardHandler.doFontScaling(acc);
-
-            // Test arrival of the eye at destination position
-            //
-            m_testArrived.Center = m_newEyePosition;
-            m_testArrived.Radius = 5.0f;
-            m_testArrived.Contains(ref m_eye, out m_testResult);
-
-            if (m_testResult == ContainmentType.Contains)
-            {
-                m_eye = m_newEyePosition;
-                m_target.X = m_newEyePosition.X;
-                m_target.Y = m_newEyePosition.Y;
-                m_changingEyePosition = false;
-                m_keyboardHandler.setCurrentFontScale(1.0f);
-            }
-                /*
-            else
-            {
-                float distanceToTarget = (m_newEyePosition - m_eye).Length();
-                float distanceToTargetNext = (m_newEyePosition - m_eye + (m_vFly * acc)).Length();
-                // Check for overshoots
-                //
-                //if (((m_newEyePosition - m_eye + (m_vFly * acc)).Length() > (m_newEyePosition - m_eye).Length()))
-                if (distanceToTargetNext > distanceToTarget)
-                {
-                    Logger.logMsg("OVERSHOT");
-                }
-            }*/
         }
 
         /// <summary>
@@ -2115,7 +1938,7 @@ namespace Xyglo.Brazil.Xna
 
             // Duplicate of what we have in the Initialize()
             //
-            m_context.m_viewMatrix = Matrix.CreateLookAt(m_eye, m_target, Vector3.Up);
+            m_context.m_viewMatrix = Matrix.CreateLookAt(m_eyeHandler.getEyePosition(), m_eyeHandler.getTargetPosition(), Vector3.Up);
             m_context.m_projection = Matrix.CreateTranslation(-0.5f, -0.5f, 0) * Matrix.CreatePerspectiveFieldOfView(m_context.m_fov, GraphicsDevice.Viewport.AspectRatio, 0.1f, 10000f);
 
             // Generate frustrum
@@ -2286,7 +2109,7 @@ namespace Xyglo.Brazil.Xna
 
                     if (m_context.m_project != null)
                     {
-                        string eyePosition = "[EyePosition] X " + m_eye.X + ",Y " + m_eye.Y + ",Z " + m_eye.Z;
+                        string eyePosition = "[EyePosition] X " + m_eyeHandler.getEyePosition().X + ",Y " + m_eyeHandler.getEyePosition().Y + ",Z " + m_eyeHandler.getEyePosition().Z;
                         position.Y += m_context.m_fontManager.getOverlayFont().LineSpacing;
 
                         m_context.m_overlaySpriteBatch.Begin();
@@ -2498,196 +2321,31 @@ namespace Xyglo.Brazil.Xna
         /// <param name="gameTime"></param>
         protected void drawFriendlier(GameTime gameTime)
         {
-            // If we're not licenced then render this
+            // Send any welcome message or temporary message if there are licencing issues
             //
-            if (!m_context.m_project.getLicenced())
-            {
-                if (gameTime.TotalGameTime.TotalSeconds > m_nextLicenceMessage)
-                {
-                    if (m_flipFlop)
-                    {
-                        setTemporaryMessage("Friendlier demo period has expired.", 3, gameTime);
-                    }
-                    else
-                    {
-                        setTemporaryMessage("Please see www.xyglo.com for licencing details.", 3, gameTime);
-                    }
-
-                    m_flipFlop = !m_flipFlop;
-                    m_nextLicenceMessage = gameTime.TotalGameTime.TotalSeconds + 5;
-                }
-                //renderTextScroller();
-            }
-            else
-            {
-                // Set the welcome message once
-                //
-                if (m_flipFlop)
-                {
-                    if (m_context.m_project.getInitialMessage() != "")
-                    {
-                        setTemporaryMessage(m_context.m_project.getInitialMessage(), 5);
-                    }
-                    else
-                    {
-                        setTemporaryMessage(VersionInformation.getProductName() + " " + VersionInformation.getProductVersion(), 3, gameTime);
-                    }
-                    m_flipFlop = false;
-                }
-            }
+            m_tempMessage.sendWelcomeMessage(gameTime, m_context.m_project.getLicenced());
 
             // In the manage project mode we zoom off into the distance
             //
             if (m_brazilContext.m_state.equals("ManageProject"))
             {
-                m_context.m_drawingHelper.drawManageProject(m_context.m_overlaySpriteBatch, gameTime, m_keyboardHandler.getModelBuilder(), m_context.m_graphics, m_keyboardHandler.getConfigPosition(), out m_textScreenLength);
+                m_context.m_drawingHelper.drawManageProject(m_context.m_overlaySpriteBatch, gameTime, m_keyboardHandler.getModelBuilder(), m_context.m_graphics, m_keyboardHandler.getConfigPosition());
                 base.Draw(gameTime);
                 return;
             }
 
-            // Here we need to vary the parameters to the SpriteBatch - to the BasicEffect and also the font size.
-            // For large fonts we need to be able to downscale them effectively so that they will still look good
-            // at higher resolutions.
+            // Draw the FileBuffers
             //
-            m_context.m_spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.DepthRead, RasterizerState.CullNone, m_context.m_basicEffect);
+            m_context.m_drawingHelper.drawFileBuffers(gameTime, this.IsActive, m_keyboardHandler, m_mouse, m_buildStdOutView, m_buildStdErrView);
 
-            // Draw all the BufferViews for all remaining modes
-            //
-            for (int i = 0; i < m_context.m_project.getBufferViews().Count; i++)
-            {
-                if (m_keyboardHandler.getDiffer() != null && m_keyboardHandler.getDiffer().hasDiffs() &&
-                    (m_keyboardHandler.getDiffer().getSourceBufferViewLhs() == m_context.m_project.getBufferViews()[i] ||
-                        m_keyboardHandler.getDiffer().getSourceBufferViewRhs() == m_context.m_project.getBufferViews()[i]))
-                {
-                    m_context.m_drawingHelper.drawDiffBuffer(m_context.m_project.getBufferViews()[i], gameTime, m_keyboardHandler);
-                }
-                else
-                {
-                    // We have to invert the BoundingBox along the Y axis to ensure that
-                    // it matches with the frustrum we're culling against.
-                    //
-                    BoundingBox bb = m_context.m_project.getBufferViews()[i].getBoundingBox();
-                    bb.Min.Y = -bb.Min.Y;
-                    bb.Max.Y = -bb.Max.Y;
-
-                    // We only do frustrum culling for BufferViews for the moment
-                    // - intersects might be too grabby but Disjoint didn't appear 
-                    // to be grabby enough.
-                    //
-                    //if (m_context.m_frustrum.Intersects(bb))
-                    if (m_context.m_frustrum.Contains(bb) != ContainmentType.Disjoint)
-                    {
-                        m_context.m_drawingHelper.drawFileBuffer(m_context.m_spriteBatch, m_context.m_project.getBufferViews()[i], gameTime, m_brazilContext.m_state, m_buildStdOutView, m_buildStdErrView, m_context.m_zoomLevel, m_keyboardHandler.getCurrentFontScale());
-                    }
-
-                    // Draw a background square for all buffer views if they are coloured
-                    //
-                    //if (m_context.m_project.getViewMode() == Project.ViewMode.Coloured)
-                    //{
-                        m_context.m_drawingHelper.renderQuad(m_context.m_project.getBufferViews()[i].getTopLeft(), m_context.m_project.getBufferViews()[i].getBottomRight(), m_context.m_project.getBufferViews()[i].getBackgroundColour(gameTime), m_context.m_spriteBatch);
-                    //}
-                }
-            }
-
-            // We only draw the scrollbar on the active view in the right mode
-            //
-            if (m_brazilContext.m_state.equals("TextEditing"))
-            {
-                drawScrollbar(m_context.m_project.getSelectedBufferView());
-            }
-
-            // Cursor and cursor highlight
-            //
-            if (m_brazilContext.m_state.equals("TextEditing"))
-            {
-                // Stop and use a different spritebatch for the highlighting and cursor
-                //
-                m_context.m_spriteBatch.End();
-                m_context.m_spriteBatch.Begin(SpriteSortMode.Texture, BlendState.Additive, SamplerState.PointClamp, DepthStencilState.DepthRead, RasterizerState.CullNone, m_context.m_basicEffect);
-
-
-                if (this.IsActive && m_brazilContext.m_confirmState.equals("None") && m_brazilContext.m_state.notEquals("FindText") && m_brazilContext.m_state.notEquals("GotoLine"))
-                {
-                    m_mouse.drawCursor(gameTime, m_context.m_spriteBatch);
-                }
-                
-                m_context.m_drawingHelper.drawHighlight(gameTime, m_context.m_spriteBatch);
-            }
-
-            m_context.m_spriteBatch.End();
-            
             // Draw any Brazil views
             //
             foreach (BrazilView view in m_context.m_project.getBrazilViews())
-            {
                 drawXyglo(gameTime, view);
-                //view.draw(m_context.m_project, m_brazilContext.m_state, gameTime, m_context.m_spriteBatch, m_context.m_basicEffect);
-            }
 
-            // If we're choosing a file then
+            // Draw everything else - differs, panners, banners, system load, view map, config screens, help screens etc.
             //
-            if (m_brazilContext.m_state.equals("FileSaveAs") || m_brazilContext.m_state.equals("FileOpen") || m_brazilContext.m_state.equals("PositionScreenOpen") || m_brazilContext.m_state.equals("PositionScreenNew") || m_brazilContext.m_state.equals("PositionScreenCopy"))
-            {
-                m_context.m_fileSystemView.drawDirectoryChooser(gameTime, m_keyboardHandler, m_temporaryMessage, m_temporaryMessageEndTime);
-            }
-            else if (m_brazilContext.m_state.equals("Help"))
-            {
-                // Get the text screen length back from the drawing method
-                //
-                m_textScreenLength = m_context.m_drawingHelper.drawHelpScreen(m_context.m_overlaySpriteBatch, gameTime, m_context.m_graphics, m_keyboardHandler.getTextScreenPositionY());
-            }
-            else if (m_brazilContext.m_state.equals("Information"))
-            {
-                m_context.m_drawingHelper.drawInformationScreen(m_context.m_overlaySpriteBatch, gameTime, m_context.m_graphics, m_keyboardHandler.getTextScreenPositionY(), out m_textScreenLength);
-            }
-            else if (m_brazilContext.m_state.equals("Configuration"))
-            {
-                m_context.m_drawingHelper.drawConfigurationScreen(gameTime, m_keyboardHandler);
-            }
-            else
-            {
-                // http://forums.create.msdn.com/forums/p/61995/381650.aspx
-                //
-                m_context.m_overlaySpriteBatch.Begin();
-
-                // Draw the Overlay HUD
-                //
-                m_context.m_drawingHelper.drawOverlay(m_context.m_overlaySpriteBatch, gameTime, m_context.m_graphics, m_brazilContext.m_state, m_keyboardHandler.getGotoLine(), m_keyboard.isShiftDown(), m_keyboard.isCtrlDown(), m_keyboard.isAltDown(),
-                                            m_eye, m_temporaryMessage, m_temporaryMessageStartTime, m_temporaryMessageEndTime);
-
-                // Draw map preview of all Views.
-                //
-                m_context.m_drawingHelper.drawViewMap(gameTime, m_context.m_overlaySpriteBatch);
-                m_context.m_overlaySpriteBatch.End();
-
-                // Draw any differ overlay
-                //
-                m_context.m_pannerSpriteBatch.Begin(SpriteSortMode.Texture, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.DepthRead, RasterizerState.CullNone /*, m_pannerEffect */ );
-
-                // Draw the differ
-                //
-                m_context.m_drawingHelper.drawDiffer(gameTime, m_context.m_pannerSpriteBatch, m_brazilContext, m_keyboardHandler);
-
-                // Draw system load
-                //
-                drawSystemLoad(gameTime, m_context.m_pannerSpriteBatch);
-
-                m_context.m_pannerSpriteBatch.End();
-            }
-
-            // Draw the textures for generic views
-            //
-            //foreach (XygloView view in m_context.m_project.getGenericViews())
-            //{
-            //view.drawTextures(m_basicEffect);
-            //}
-
-            // Draw a welcome banner
-            //
-            if (m_context.m_drawingHelper.getBannerStartTime() != -1 && m_context.m_project.getViewMode() != Project.ViewMode.Formal)
-            {
-                m_context.m_drawingHelper.drawBanner(m_context.m_spriteBatch, gameTime, m_context.m_basicEffect, m_context.m_splashScreen);
-            }
+            m_context.m_drawingHelper.drawScreenFluff(gameTime, m_keyboardHandler, m_keyboard, m_tempMessage, m_eyeHandler, m_systemAnalyser);
 
             // Any Kinect information to share
             //
@@ -2695,6 +2353,9 @@ namespace Xyglo.Brazil.Xna
         }
 
 
+        /// <summary>
+        /// Do something with a Kinect controller if we have one
+        /// </summary>
         protected void drawKinectInformation()
         {
 #if GOT_KINECT
@@ -2718,271 +2379,6 @@ namespace Xyglo.Brazil.Xna
 
 
         /// <summary>
-        /// Draw the system CPU load and memory usage next to the FileBuffer
-        /// </summary>
-        /// <param name="gameTime"></param>
-        protected void drawSystemLoad(GameTime gameTime, SpriteBatch spriteBatch)
-        {
-            Vector2 startPosition = Vector2.Zero;
-            int linesHigh = 6;
-
-            // Bufferview
-            BufferView bv = m_context.m_project.getSelectedBufferView();
-
-            startPosition.X += m_context.m_graphics.GraphicsDevice.Viewport.Width - m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) * 3;
-            startPosition.Y += (m_context.m_graphics.GraphicsDevice.Viewport.Height / 2) - m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay) * linesHigh / 2;
-
-            float height = m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay) * linesHigh;
-            float width = m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) / 2;
-
-            // Only fetch some new samples when this timespan has elapsed
-            //
-            TimeSpan mySpan = gameTime.TotalGameTime;
-
-            if (mySpan - m_lastSystemFetch > m_systemFetchSpan)
-            {
-                if (m_counterWorker.m_cpuCounter != null && m_counterWorker.m_memCounter != null)
-                {
-                    CounterSample newCS = m_counterWorker.getCpuSample();
-                    CounterSample newMem = m_counterWorker.getMemorySample();
-
-                    // Calculate the percentages
-                    //
-                    m_systemLoad = CounterSample.Calculate(m_lastCPUSample, newCS);
-                    m_memoryAvailable = CounterSample.Calculate(m_lastMemSample, newMem);
-
-                    // Store the last samples
-                    //
-                    m_lastCPUSample = newCS;
-                    m_lastMemSample = newMem;
-                }
-
-                m_lastSystemFetch = mySpan;
-
-#if SYTEM_DEBUG
-                Logger.logMsg("XygloXNA::drawSystemLoad() - load is now " + m_systemLoad);
-                Logger.logMsg("XygloXNA::drawSystemLoad() - memory is now " + m_memoryAvailable);
-                Logger.logMsg("XygloXNA::drawSystemLoad() - physical memory available is " + m_physicalMemory);
-#endif
-            }
-
-            //m_pannerSpriteBatch.Begin(SpriteSortMode.Texture, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.DepthRead, RasterizerState.CullNone /*, m_pannerEffect */ );
-
-            // Draw background for CPU counter
-            //
-            Vector2 p1 = startPosition;
-            Vector2 p2 = startPosition;
-
-            p1.Y += height;
-            p1.X += 1;
-            m_context.m_drawingHelper.drawBox(spriteBatch, p1, p2, Color.DarkGray, 0.8f);
-
-            // Draw CPU load over the top
-            //
-            p1 = startPosition;
-            p2 = startPosition;
-
-            p1.Y += height;
-            p2.Y += height - (m_systemLoad * height / 100.0f);
-            p1.X += 1;
-
-            m_context.m_drawingHelper.drawBox(spriteBatch, p1, p2, Color.DarkGreen, 0.8f);
-
-            // Draw background for Memory counter
-            //
-            startPosition.X += m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) * 0.5f;
-            p1 = startPosition;
-            p2 = startPosition;
-
-            p1.Y += height;
-            p1.X += 1;
-
-            m_context.m_drawingHelper.drawBox(spriteBatch, p1, p2, Color.DarkGray, 0.8f);
-
-            // Draw Memory over the top
-            //
-            p1 = startPosition;
-            p2 = startPosition;
-
-            p1.Y += height;
-            p2.Y += height - (height * m_memoryAvailable / m_physicalMemory);
-            p1.X += 1;
-
-            m_context.m_drawingHelper.drawBox(spriteBatch, p1, p2, Color.DarkOrange, 0.8f);
-            //m_pannerSpriteBatch.End();
-        }
-
-        /*
-        /// <summary>
-        /// Render some scrolling text to a texture.  This takes the current m_temporaryMessage and renders
-        /// to a texture according to how much time has passed since the message was created.
-        /// </summary>
-        protected void renderTextScroller()
-        {
-            if (m_brazilContext.m_state.notEquals("TextEditing"))
-            {
-                return;
-            }
-            if (m_temporaryMessage == "")
-            {
-                return;
-            }
-
-            // Speed - higher is faster
-            //
-            float speed = 120.0f;
-
-            // Set the render target and clear the buffer
-            //
-            m_context.m_graphics.GraphicsDevice.SetRenderTarget(m_context.m_textScroller);
-            m_context.m_graphics.GraphicsDevice.Clear(Color.Black);
-
-            // Start with whole message showing and scroll it left
-            //
-            int newPosition = (int)((m_context.m_gameTime.TotalGameTime.TotalSeconds - m_temporaryMessageStartTime) * -speed);
-
-            if ((newPosition + (int)(m_temporaryMessage.Length * m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay))) < 0)
-            {
-                // Set the temporary message to start again and adjust position/time 
-                // by width of the textScroller.
-                //
-                m_temporaryMessageStartTime = m_context.m_gameTime.TotalGameTime.TotalSeconds + m_context.m_textScroller.Width / speed;
-            }
-
-            // xPosition holds the scrolling position of the text in the temporary message window
-            int xPosition = 0;
-            float delayScroll = 0.7f; // delay the scrolling by this amount so we can read it before it starts moving
-
-            if (m_context.m_gameTime.TotalGameTime.TotalSeconds - m_temporaryMessageStartTime > delayScroll)
-            {
-                xPosition = (int)((m_context.m_gameTime.TotalGameTime.TotalSeconds - delayScroll - m_temporaryMessageStartTime) * -120.0f);
-            }
-
-            // Draw to the render target
-            //
-            m_context.m_spriteBatch.Begin();
-            m_context.m_spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), m_temporaryMessage, new Vector2((int)xPosition, 0), Color.Pink, 0, new Vector2(0, 0), 1.0f, 0, 0);
-            m_context.m_spriteBatch.End();
-
-            // Now reset the render target to the back buffer
-            //
-            m_context.m_graphics.GraphicsDevice.SetRenderTarget(null);
-            m_context.m_textScrollTexture = (Texture2D)m_context.m_textScroller;
-        }*/
-
-        /// <summary>
-        /// Draw a scroll bar for a BufferView
-        /// </summary>
-        /// <param name="view"></param>
-        /// <param name="file"></param>
-        protected void drawScrollbar(BufferView view)
-        {
-            if (view == null)
-                return;
-
-            Vector3 sbPos = view.getPosition();
-            float height = view.getBufferShowLength() * m_context.m_fontManager.getLineSpacing(view.getViewSize());
-
-            Rectangle sbBackGround = new Rectangle(Convert.ToInt16(sbPos.X - m_context.m_fontManager.getTextScale() * 30.0f),
-                                                   Convert.ToInt16(sbPos.Y),
-                                                   1,
-                                                   Convert.ToInt16(height));
-
-            // Draw scroll bar
-            //
-            m_context.m_spriteBatch.Draw(m_context.m_flatTexture, sbBackGround, Color.DarkCyan);
-
-            // Draw viewing window
-            //
-            float start = view.getBufferShowStartY();
-
-            // Override this for the diff view
-            //
-            if (m_keyboardHandler.getDiffer() != null && m_brazilContext.m_state.equals("DiffPicker"))
-            {
-                start = m_keyboardHandler.getDiffPosition();
-            }
-
-            float length = 0;
-
-            // Get the line count
-            //
-            if (view.getFileBuffer() != null)
-            {
-                // Make this work for diff view as well as normal view
-                //
-                if (m_keyboardHandler.getDiffer() != null && m_brazilContext.m_state.equals("DiffPicker"))
-                {
-                    length = m_keyboardHandler.getDiffer().getMaxDiffLength();
-                }
-                else
-                {
-                    length = view.getFileBuffer().getLineCount();
-                }
-            }
-
-            // Check for length of FileBuffer in case it's empty
-            //
-            if (length > 0)
-            {
-                float scrollStart = start / length * height;
-                float scrollLength = height; // full height unless we have anything to scroll
-
-                if (length > view.getBufferShowLength())
-                {
-                    scrollLength = view.getBufferShowLength() / length * height;
-
-                    // Ensure that scroll bar highlight is no longer than scroll bar
-                    //
-                    //if (scrollStart + scrollLength > height)
-                    //{
-                    //scrollLength = height - scrollStart;
-                    //}
-                }
-
-                // Minimum scrollLength
-                //
-                if (scrollLength < 2)
-                {
-                    scrollLength = 2;
-                }
-
-                // Ensure that the highlight doens't jump over the end of the scrollbar
-                //
-                if (scrollStart + scrollLength > height)
-                {
-                    scrollStart = height - scrollLength;
-                }
-
-                Rectangle sb = new Rectangle(Convert.ToInt16(sbPos.X - m_context.m_fontManager.getTextScale() * 30.0f),
-                                             Convert.ToInt16(sbPos.Y + scrollStart),
-                                             1,
-                                             Convert.ToInt16(scrollLength));
-
-                // Draw scroll bar window position
-                //
-                m_context.m_spriteBatch.Draw(m_context.m_flatTexture, sb, Color.LightGoldenrodYellow);
-            }
-
-            // Draw a highlight overview
-            //
-            if (view.gotHighlight() && length > 0)
-            {
-                //float hS = view.getHighlightStart().Y;
-
-                float highlightStart = ((float)view.getHighlightStart().Y) / length * height;
-                float highlightEnd = ((float)view.getHighlightEnd().Y) / length * height;
-
-                Rectangle hl = new Rectangle(Convert.ToInt16(sbPos.X - m_context.m_fontManager.getTextScale() * 40.0f),
-                                             Convert.ToInt16(sbPos.Y + highlightStart),
-                                             1,
-                                             Convert.ToInt16(highlightEnd - highlightStart));
-
-                m_context.m_spriteBatch.Draw(m_context.m_flatTexture, hl, view.getHighlightColor());
-            }
-        }
-
-        /// <summary>
         /// This can be called from anywhere so let's ensure that we have a bit of locking
         /// around the checkExit code.
         /// </summary>
@@ -2994,7 +2390,7 @@ namespace Xyglo.Brazil.Xna
 
             // Stop the threads
             //
-            if (m_kinectWorker != null || m_counterWorker != null)
+            if (m_kinectWorker != null || m_systemAnalyser.isWorking())
             {
                 checkExit(m_context.m_gameTime, true);
             }
@@ -3535,39 +2931,9 @@ namespace Xyglo.Brazil.Xna
 
         ///////////////// MEMBER VARIABLES //////////////////
         /// <summary>
-        /// Eye/Camera location
+        /// Temporary Message handler
         /// </summary>
-        protected Vector3 m_eye = new Vector3(0f, 0f, 500f);  // 275 is good
-
-        /// <summary>
-        /// Camera target
-        /// </summary>
-        protected Vector3 m_target;
-
-        /// <summary>
-        /// We can use this to communicate something to the user about the last command
-        /// </summary>
-        protected string m_temporaryMessage = "";
-
-        /// <summary>
-        /// Start time for the temporary message
-        /// </summary>
-        protected double m_temporaryMessageStartTime;
-
-        /// <summary>
-        /// End time for the temporary message
-        /// </summary>
-        protected double m_temporaryMessageEndTime;
-
-        /// <summary>
-        /// Used when displaying licence messages
-        /// </summary>
-        private bool m_flipFlop = true;
-
-        /// <summary>
-        /// Something to do with licence messages
-        /// </summary>
-        private double m_nextLicenceMessage = 0.0f;
+        protected TemporaryMessage m_tempMessage;
 
         /// <summary>
         /// File system watcher
@@ -3575,101 +2941,15 @@ namespace Xyglo.Brazil.Xna
         protected List<FileSystemWatcher> m_watcherList = new List<FileSystemWatcher>();
 
         /// <summary>
-        /// Store the last performance counter for CPU
+        /// For system analysis we run PerformanceCounters in their own thread which
+        /// is wrapped by this class.
         /// </summary>
-        protected CounterSample m_lastCPUSample;
+        protected SystemAnalyser m_systemAnalyser;
 
         /// <summary>
-        /// Store the last performance counter for CPU
+        /// Handle all things to do with moving our eye position
         /// </summary>
-        protected CounterSample m_lastMemSample;
-
-        /// <summary>
-        /// Number of milliseconds between system status fetches
-        /// </summary>
-        protected TimeSpan m_systemFetchSpan = new TimeSpan(0, 0, 0, 1, 0);
-
-        /// <summary>
-        /// When we last fetched the system status
-        /// </summary>
-        protected TimeSpan m_lastSystemFetch = new TimeSpan(0, 0, 0, 0, 0);
-
-        /// <summary>
-        /// Percentage of system load
-        /// </summary>
-        protected float m_systemLoad = 0.0f;
-
-        /// <summary>
-        /// Percentage of system load
-        /// </summary>
-        protected float m_memoryAvailable = 0.0f;
-
-        /// <summary>
-        /// Physical Memory 
-        /// </summary>
-        protected float m_physicalMemory;
-
-        /// <summary>
-        /// The new destination for our Eye position
-        /// </summary>
-        protected Vector3 m_newEyePosition;
-
-        /// <summary>
-        /// Original eye position - we know where we came from
-        /// </summary>
-        protected Vector3 m_originalEyePosition;
-
-        /// <summary>
-        /// Eye acceleration vector
-        /// </summary>
-        protected Vector3 m_eyeAcc = Vector3.Zero;
-
-        /// <summary>
-        /// Eye velocity vector
-        /// </summary>
-        protected Vector3 m_eyeVely = Vector3.Zero;
-
-        /// <summary>
-        /// Are we changing eye position?
-        /// </summary>
-        protected bool m_changingEyePosition = false;
-
-        /// <summary>
-        /// Used when changing the eye position - movement timer
-        /// </summary>
-        protected TimeSpan m_changingPositionLastGameTime;
-
-        /// <summary>
-        /// Frame rate of animation when moving between eye positions
-        /// </summary>
-        protected TimeSpan m_movementPause = new TimeSpan(0, 0, 0, 0, 10);
-
-        /// <summary>
-        /// This is the vector we're flying in - used to increment position each frame when
-        /// moving between eye positions.
-        /// </summary>
-        protected Vector3 m_vFly;
-
-        /// <summary>
-        /// If our target position is not centred below our eye then we also have a vector here we need to
-        /// modify.
-        /// </summary>
-        protected Vector3 m_vFlyTarget;
-
-        /// <summary>
-        /// How many steps between eye start and eye end fly position
-        /// </summary>
-        protected int m_flySteps = 10;
-
-        /// <summary>
-        /// Worker thread for the PerformanceCounters
-        /// </summary>
-        protected PerformanceWorker m_counterWorker;
-
-        /// <summary>
-        /// The thread that is used for the counter
-        /// </summary>
-        protected Thread m_counterWorkerThread;
+        protected EyeHandler m_eyeHandler;
 
         /// <summary>
         /// SmartHelp worker thread
@@ -3705,21 +2985,6 @@ namespace Xyglo.Brazil.Xna
         /// Process for running builds
         /// </summary>
         protected Process m_buildProcess = null;
-
-        /// <summary>
-        /// Length of information screen - so we know if we can page up or down
-        /// </summary>
-        protected int m_textScreenLength = 0;
-
-        /// <summary>
-        /// Testing whether arrived in bounding sphere
-        /// </summary>
-        protected BoundingSphere m_testArrived = new BoundingSphere();
-
-        /// <summary>
-        /// Test result
-        /// </summary>
-        protected ContainmentType m_testResult;
 
         /// <summary>
         /// Store the last window size in case we're resizing
@@ -3761,10 +3026,14 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         protected XygloGraphics m_graphics;
 
-
         /// <summary>
         /// Physics handler
         /// </summary>
         protected PhysicsHandler m_physicsHandler = null;
+
+        /// <summary>
+        /// An eye perturber indeed
+        /// </summary>
+        protected EyePerturber m_eyePerturber = null;
     }
 }

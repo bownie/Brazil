@@ -121,6 +121,182 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Draw the system CPU load and memory usage next to the FileBuffer
+        /// </summary>
+        /// <param name="gameTime"></param>
+        protected void drawSystemLoad(GameTime gameTime, SpriteBatch spriteBatch, SystemAnalyser systemAnalyser)
+        {
+            Vector2 startPosition = Vector2.Zero;
+            int linesHigh = 6;
+
+            // Bufferview
+            BufferView bv = m_context.m_project.getSelectedBufferView();
+
+            startPosition.X += m_context.m_graphics.GraphicsDevice.Viewport.Width - m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) * 3;
+            startPosition.Y += (m_context.m_graphics.GraphicsDevice.Viewport.Height / 2) - m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay) * linesHigh / 2;
+
+            float height = m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay) * linesHigh;
+            float width = m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) / 2;
+
+            // Only fetch some new sample stats when a certain timespan has elapsed so
+            // we provide current time to the SystemAnalyser.
+            //
+            systemAnalyser.fetchStats(gameTime.TotalGameTime);
+
+            // Draw background for CPU counter
+            //
+            Vector2 p1 = startPosition;
+            Vector2 p2 = startPosition;
+
+            p1.Y += height;
+            p1.X += 1;
+            m_context.m_drawingHelper.drawBox(spriteBatch, p1, p2, Color.DarkGray, 0.8f);
+
+            // Draw CPU load over the top
+            //
+            p1 = startPosition;
+            p2 = startPosition;
+
+            p1.Y += height;
+            p2.Y += height - (systemAnalyser.getSystemLoad() * height / 100.0f);
+            p1.X += 1;
+
+            m_context.m_drawingHelper.drawBox(spriteBatch, p1, p2, Color.DarkGreen, 0.8f);
+
+            // Draw background for Memory counter
+            //
+            startPosition.X += m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) * 0.5f;
+            p1 = startPosition;
+            p2 = startPosition;
+
+            p1.Y += height;
+            p1.X += 1;
+
+            m_context.m_drawingHelper.drawBox(spriteBatch, p1, p2, Color.DarkGray, 0.8f);
+
+            // Draw Memory over the top
+            //
+            p1 = startPosition;
+            p2 = startPosition;
+
+            p1.Y += height;
+            p2.Y += height - (height * systemAnalyser.getAvailableMemory() / systemAnalyser.getPhysicalMemory());
+            p1.X += 1;
+
+            m_context.m_drawingHelper.drawBox(spriteBatch, p1, p2, Color.DarkOrange, 0.8f);
+            //m_pannerSpriteBatch.End();
+        }
+
+        /// <summary>
+        /// Draw a scroll bar for a BufferView
+        /// </summary>
+        /// <param name="view"></param>
+        /// <param name="file"></param>
+        protected void drawScrollbar(BufferView view, XygloKeyboardHandler keyboardHandler)
+        {
+            if (view == null)
+                return;
+
+            Vector3 sbPos = view.getPosition();
+            float height = view.getBufferShowLength() * m_context.m_fontManager.getLineSpacing(view.getViewSize());
+
+            Rectangle sbBackGround = new Rectangle(Convert.ToInt16(sbPos.X - m_context.m_fontManager.getTextScale() * 30.0f),
+                                                   Convert.ToInt16(sbPos.Y),
+                                                   1,
+                                                   Convert.ToInt16(height));
+
+            // Draw scroll bar
+            //
+            m_context.m_spriteBatch.Draw(m_context.m_flatTexture, sbBackGround, Color.DarkCyan);
+
+            // Draw viewing window
+            //
+            float start = view.getBufferShowStartY();
+
+            // Override this for the diff view
+            //
+            if (keyboardHandler.getDiffer() != null && m_brazilContext.m_state.equals("DiffPicker"))
+            {
+                start = keyboardHandler.getDiffPosition();
+            }
+
+            float length = 0;
+
+            // Get the line count
+            //
+            if (view.getFileBuffer() != null)
+            {
+                // Make this work for diff view as well as normal view
+                //
+                if (keyboardHandler.getDiffer() != null && m_brazilContext.m_state.equals("DiffPicker"))
+                    length = keyboardHandler.getDiffer().getMaxDiffLength();
+                else
+                    length = view.getFileBuffer().getLineCount();
+            }
+
+            // Check for length of FileBuffer in case it's empty
+            //
+            if (length > 0)
+            {
+                float scrollStart = start / length * height;
+                float scrollLength = height; // full height unless we have anything to scroll
+
+                if (length > view.getBufferShowLength())
+                {
+                    scrollLength = view.getBufferShowLength() / length * height;
+
+                    // Ensure that scroll bar highlight is no longer than scroll bar
+                    //
+                    //if (scrollStart + scrollLength > height)
+                    //{
+                    //scrollLength = height - scrollStart;
+                    //}
+                }
+
+                // Minimum scrollLength
+                //
+                if (scrollLength < 2)
+                {
+                    scrollLength = 2;
+                }
+
+                // Ensure that the highlight doens't jump over the end of the scrollbar
+                //
+                if (scrollStart + scrollLength > height)
+                {
+                    scrollStart = height - scrollLength;
+                }
+
+                Rectangle sb = new Rectangle(Convert.ToInt16(sbPos.X - m_context.m_fontManager.getTextScale() * 30.0f),
+                                             Convert.ToInt16(sbPos.Y + scrollStart),
+                                             1,
+                                             Convert.ToInt16(scrollLength));
+
+                // Draw scroll bar window position
+                //
+                m_context.m_spriteBatch.Draw(m_context.m_flatTexture, sb, Color.LightGoldenrodYellow);
+            }
+
+            // Draw a highlight overview
+            //
+            if (view.gotHighlight() && length > 0)
+            {
+                //float hS = view.getHighlightStart().Y;
+
+                float highlightStart = ((float)view.getHighlightStart().Y) / length * height;
+                float highlightEnd = ((float)view.getHighlightEnd().Y) / length * height;
+
+                Rectangle hl = new Rectangle(Convert.ToInt16(sbPos.X - m_context.m_fontManager.getTextScale() * 40.0f),
+                                             Convert.ToInt16(sbPos.Y + highlightStart),
+                                             1,
+                                             Convert.ToInt16(highlightEnd - highlightStart));
+
+                m_context.m_spriteBatch.Draw(m_context.m_flatTexture, hl, view.getHighlightColor());
+            }
+        }
+
+
+        /// <summary>
         /// Draw an overview of all currently live drawables
         /// </summary>
         /// <param name="gameTime"></param>
@@ -184,7 +360,7 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="gameTime"></param>
         /// <param name="spriteBatch"></param>
-        public void drawViewMap(GameTime gameTime, SpriteBatch spriteBatch)
+        protected void drawViewMap(GameTime gameTime, SpriteBatch spriteBatch)
         {
             BoundingBox bb = m_context.m_project.getBoundingBox();
 
@@ -305,7 +481,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="bottomRight"></param>
         /// <param name="quadColour"></param>
         /// <param name="spriteBatch"></param>
-        public void renderQuad(Vector3 topLeft, Vector3 bottomRight, Color quadColour, SpriteBatch spriteBatch)
+        protected void renderQuad(Vector3 topLeft, Vector3 bottomRight, Color quadColour, SpriteBatch spriteBatch)
         {
             m_bottomLeft.X = topLeft.X;
             m_bottomLeft.Y = bottomRight.Y;
@@ -326,7 +502,7 @@ namespace Xyglo.Brazil.Xna
         /// <summary>
         /// This draws a highlight area on the screen when we hold shift down
         /// </summary>
-        public void drawHighlight(GameTime gameTime, SpriteBatch spriteBatch)
+        protected void drawHighlight(GameTime gameTime, SpriteBatch spriteBatch)
         {
             if (m_context.m_project.getSelectedView().GetType() != typeof(BufferView))
                 return;
@@ -347,7 +523,7 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="spriteBatch"></param>
         /// <param name="gameTime"></param>
-        public int drawHelpScreen(SpriteBatch spriteBatch, GameTime gameTime, GraphicsDeviceManager graphics, int textScreenPositionY)
+        protected int drawHelpScreen(SpriteBatch spriteBatch, GameTime gameTime, GraphicsDeviceManager graphics, int textScreenPositionY)
         {
             spriteBatch.Begin();
             int screenLength = drawTextScreen(spriteBatch, gameTime, graphics, m_userHelp, textScreenPositionY);
@@ -464,7 +640,7 @@ namespace Xyglo.Brazil.Xna
         /// the text can be dynamic (i.e. times)
         /// </summary>
         /// <param name="text"></param>
-        public void drawInformationScreen(SpriteBatch spriteBatch, GameTime gameTime, GraphicsDeviceManager graphics, int textScreenPositionY, out int linesDisplayed)
+        protected void drawInformationScreen(SpriteBatch spriteBatch, GameTime gameTime, GraphicsDeviceManager graphics, int textScreenPositionY)
         {
             // Set up the string
             //
@@ -474,7 +650,7 @@ namespace Xyglo.Brazil.Xna
 
             if (view == null)
             {
-                linesDisplayed = 0;
+                m_textScreenLength = 0;
                 return;
             }
 
@@ -534,7 +710,7 @@ namespace Xyglo.Brazil.Xna
 
             // Draw screen of a fixed width
             //
-            linesDisplayed = drawTextScreen(spriteBatch, gameTime, graphics, text, textScreenPositionY, 75);
+            m_textScreenLength = drawTextScreen(spriteBatch, gameTime, graphics, text, textScreenPositionY, 75);
 
             spriteBatch.End();
         }
@@ -627,7 +803,7 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="view"></param>
         /// <param name="gameTime"></param>
-        public void drawFileBuffer(SpriteBatch spriteBatch, BufferView view, GameTime gameTime, State state, BufferView buildStdOutView, BufferView buildStdErrView, float zoomLevel, double textScale)
+        protected void drawFileBuffer(SpriteBatch spriteBatch, BufferView view, GameTime gameTime, State state, BufferView buildStdOutView, BufferView buildStdErrView, float zoomLevel, double textScale)
         {
             Color bufferColour = view.getTextColour();
 
@@ -940,7 +1116,7 @@ namespace Xyglo.Brazil.Xna
         /// Draw the HUD Overlay for the editor with information about the current file we're viewing
         /// and position in that file.
         /// </summary>
-        public void drawOverlay(SpriteBatch spriteBatch, GameTime gameTime, GraphicsDeviceManager graphics, State state, string gotoLine, bool shiftDown, bool ctrlDown, bool altDown, Vector3 eye,
+        protected void drawOverlay(SpriteBatch spriteBatch, GameTime gameTime, GraphicsDeviceManager graphics, State state, string gotoLine, bool shiftDown, bool ctrlDown, bool altDown, Vector3 eye,
                                    string temporaryMessage, double temporaryMessageStartTime, double temporaryMessageEndTime)
         {
 #if SCROLLING_TEXT
@@ -1116,6 +1292,64 @@ namespace Xyglo.Brazil.Xna
 #endif
 
         }
+
+        /*
+        /// <summary>
+        /// Render some scrolling text to a texture.  This takes the current m_temporaryMessage and renders
+        /// to a texture according to how much time has passed since the message was created.
+        /// </summary>
+        protected void renderTextScroller()
+        {
+            if (m_brazilContext.m_state.notEquals("TextEditing"))
+            {
+                return;
+            }
+            if (m_temporaryMessage == "")
+            {
+                return;
+            }
+
+            // Speed - higher is faster
+            //
+            float speed = 120.0f;
+
+            // Set the render target and clear the buffer
+            //
+            m_context.m_graphics.GraphicsDevice.SetRenderTarget(m_context.m_textScroller);
+            m_context.m_graphics.GraphicsDevice.Clear(Color.Black);
+
+            // Start with whole message showing and scroll it left
+            //
+            int newPosition = (int)((m_context.m_gameTime.TotalGameTime.TotalSeconds - m_temporaryMessageStartTime) * -speed);
+
+            if ((newPosition + (int)(m_temporaryMessage.Length * m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay))) < 0)
+            {
+                // Set the temporary message to start again and adjust position/time 
+                // by width of the textScroller.
+                //
+                m_temporaryMessageStartTime = m_context.m_gameTime.TotalGameTime.TotalSeconds + m_context.m_textScroller.Width / speed;
+            }
+
+            // xPosition holds the scrolling position of the text in the temporary message window
+            int xPosition = 0;
+            float delayScroll = 0.7f; // delay the scrolling by this amount so we can read it before it starts moving
+
+            if (m_context.m_gameTime.TotalGameTime.TotalSeconds - m_temporaryMessageStartTime > delayScroll)
+            {
+                xPosition = (int)((m_context.m_gameTime.TotalGameTime.TotalSeconds - delayScroll - m_temporaryMessageStartTime) * -120.0f);
+            }
+
+            // Draw to the render target
+            //
+            m_context.m_spriteBatch.Begin();
+            m_context.m_spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), m_temporaryMessage, new Vector2((int)xPosition, 0), Color.Pink, 0, new Vector2(0, 0), 1.0f, 0, 0);
+            m_context.m_spriteBatch.End();
+
+            // Now reset the render target to the back buffer
+            //
+            m_context.m_graphics.GraphicsDevice.SetRenderTarget(null);
+            m_context.m_textScrollTexture = (Texture2D)m_context.m_textScroller;
+        }*/
 
         /// <summary>
         /// Draw temporary message by fade in/fade out
@@ -1301,7 +1535,7 @@ namespace Xyglo.Brazil.Xna
         /// Draw a zooming banner
         /// </summary>
         /// <param name="gameTime"></param>
-        public void drawBanner(SpriteBatch spriteBatch, GameTime gameTime, Effect basicEffect, Texture2D splashScreen)
+        protected void drawBanner(SpriteBatch spriteBatch, GameTime gameTime, Effect basicEffect, Texture2D splashScreen)
         {
             // Don't do anything if we don't have anything to draw
             //
@@ -1399,7 +1633,7 @@ namespace Xyglo.Brazil.Xna
         /// <summary>
         /// Draw an overview of the project from a file perspective and allow modification
         /// </summary>
-        public void drawManageProject(SpriteBatch spriteBatch, GameTime gameTime, ModelBuilder modelBuilder, GraphicsDeviceManager graphics, int configPosition, out int linesDisplayed)
+        public void drawManageProject(SpriteBatch spriteBatch, GameTime gameTime, ModelBuilder modelBuilder, GraphicsDeviceManager graphics, int configPosition)
         {
             string text = "";
 
@@ -1439,7 +1673,7 @@ namespace Xyglo.Brazil.Xna
 
             // Draw the main text screen - using the m_configPosition as the place holder
             //
-            linesDisplayed = drawTextScreen(spriteBatch, gameTime, graphics, text, 0, 0, configPosition);
+            m_textScreenLength = drawTextScreen(spriteBatch, gameTime, graphics, text, 0, 0, configPosition);
 
             // Draw the project file name
             //
@@ -1462,7 +1696,7 @@ namespace Xyglo.Brazil.Xna
         /// we know what position in the diff we're currently looking at.
         /// </summary>
         /// <param name="v"></param>
-        public void drawDiffer(GameTime gameTime, SpriteBatch spriteBatch, BrazilContext brazilContext, XygloKeyboardHandler keyboardHandler)
+        protected void drawDiffer(GameTime gameTime, SpriteBatch spriteBatch, BrazilContext brazilContext, XygloKeyboardHandler keyboardHandler)
         {
             // Fetch local ref
             //
@@ -1536,12 +1770,212 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Draw information screens and other fluff like choosers and previews
+        /// </summary>
+        /// <param name="gameTime"></param>
+        /// <param name="keyboardHandler"></param>
+        /// <param name="keyboard"></param>
+        /// <param name="tempMessage"></param>
+        /// <param name="eyeHandler"></param>
+        /// <param name="systemAnalyser"></param>
+        public void drawScreenFluff(GameTime gameTime, XygloKeyboardHandler keyboardHandler, XygloKeyboard keyboard, TemporaryMessage tempMessage, EyeHandler eyeHandler, SystemAnalyser systemAnalyser)
+        {
+            // If we're choosing a file then
+            //
+            if (m_brazilContext.m_state.equals("FileSaveAs") || m_brazilContext.m_state.equals("FileOpen") || m_brazilContext.m_state.equals("PositionScreenOpen") || m_brazilContext.m_state.equals("PositionScreenNew") || m_brazilContext.m_state.equals("PositionScreenCopy"))
+            {
+                m_context.m_fileSystemView.drawDirectoryChooser(gameTime, keyboardHandler, tempMessage.getTemporaryMessage(), tempMessage.getTemporaryMessageEndTime());
+            }
+            else if (m_brazilContext.m_state.equals("Help"))
+            {
+                // Get the text screen length back from the drawing method
+                //
+                m_textScreenLength = drawHelpScreen(m_context.m_overlaySpriteBatch, gameTime, m_context.m_graphics, keyboardHandler.getTextScreenPositionY());
+            }
+            else if (m_brazilContext.m_state.equals("Information"))
+            {
+                drawInformationScreen(m_context.m_overlaySpriteBatch, gameTime, m_context.m_graphics, keyboardHandler.getTextScreenPositionY());
+            }
+            else if (m_brazilContext.m_state.equals("Configuration"))
+            {
+                drawConfigurationScreen(gameTime, keyboardHandler);
+            }
+            else
+            {
+                // http://forums.create.msdn.com/forums/p/61995/381650.aspx
+                //
+                m_context.m_overlaySpriteBatch.Begin();
+
+                // Draw the Overlay HUD
+                //
+                drawOverlay(m_context.m_overlaySpriteBatch, gameTime, m_context.m_graphics, m_brazilContext.m_state, keyboardHandler.getGotoLine(), keyboard.isShiftDown(), keyboard.isCtrlDown(), keyboard.isAltDown(),
+                                            eyeHandler.getEyePosition(), tempMessage.getTemporaryMessage(), tempMessage.getTemporaryMessageStartTime(), tempMessage.getTemporaryMessageEndTime());
+
+                // Draw map preview of all Views.
+                //
+                drawViewMap(gameTime, m_context.m_overlaySpriteBatch);
+                m_context.m_overlaySpriteBatch.End();
+
+                // Draw any differ overlay
+                //
+                m_context.m_pannerSpriteBatch.Begin(SpriteSortMode.Texture, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.DepthRead, RasterizerState.CullNone /*, m_pannerEffect */ );
+
+                // Draw the differ
+                //
+                drawDiffer(gameTime, m_context.m_pannerSpriteBatch, m_brazilContext, keyboardHandler);
+
+                // Draw system load
+                //
+                drawSystemLoad(gameTime, m_context.m_pannerSpriteBatch, systemAnalyser);
+
+                m_context.m_pannerSpriteBatch.End();
+            }
+
+            // Draw a welcome banner
+            //
+            if (getBannerStartTime() != -1 && m_context.m_project.getViewMode() != Project.ViewMode.Formal)
+                drawBanner(m_context.m_spriteBatch, gameTime, m_context.m_basicEffect, m_context.m_splashScreen);
+        }
+
+        /// <summary>
+        /// Draw the file buffers, highlight and cursor.
+        /// </summary>
+        /// <param name="gameTime"></param>
+        /// <param name="isActive"></param>
+        /// <param name="keyboardHandler"></param>
+        /// <param name="mouse"></param>
+        public void drawFileBuffers(GameTime gameTime, bool isActive, XygloKeyboardHandler keyboardHandler, XygloMouse mouse, BufferView buildStdOutView, BufferView buildStdErrView)
+        {
+            // Here we need to vary the parameters to the SpriteBatch - to the BasicEffect and also the font size.
+            // For large fonts we need to be able to downscale them effectively so that they will still look good
+            // at higher resolutions.
+            //
+            m_context.m_spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.DepthRead, RasterizerState.CullNone, m_context.m_basicEffect);
+
+            // Draw all the BufferViews for all remaining modes
+            //
+            for (int i = 0; i < m_context.m_project.getBufferViews().Count; i++)
+            {
+                if (keyboardHandler.getDiffer() != null && keyboardHandler.getDiffer().hasDiffs() &&
+                    (keyboardHandler.getDiffer().getSourceBufferViewLhs() == m_context.m_project.getBufferViews()[i] ||
+                        keyboardHandler.getDiffer().getSourceBufferViewRhs() == m_context.m_project.getBufferViews()[i]))
+                {
+                    drawDiffBuffer(m_context.m_project.getBufferViews()[i], gameTime, keyboardHandler);
+                }
+                else
+                {
+                    // We have to invert the BoundingBox along the Y axis to ensure that
+                    // it matches with the frustrum we're culling against.
+                    //
+                    BoundingBox bb = m_context.m_project.getBufferViews()[i].getBoundingBox();
+                    bb.Min.Y = -bb.Min.Y;
+                    bb.Max.Y = -bb.Max.Y;
+
+                    // We only do frustrum culling for BufferViews for the moment
+                    // - intersects might be too grabby but Disjoint didn't appear 
+                    // to be grabby enough.
+                    //
+                    //if (m_context.m_frustrum.Intersects(bb))
+                    if (m_context.m_frustrum.Contains(bb) != ContainmentType.Disjoint)
+                    {
+                        drawFileBuffer(m_context.m_spriteBatch, m_context.m_project.getBufferViews()[i], gameTime, m_brazilContext.m_state, buildStdOutView, buildStdErrView, m_context.m_zoomLevel, keyboardHandler.getCurrentFontScale());
+                    }
+
+                    // Draw a background square for all buffer views if they are coloured
+                    //
+                    //if (m_context.m_project.getViewMode() == Project.ViewMode.Coloured)
+                    //{
+                    renderQuad(m_context.m_project.getBufferViews()[i].getTopLeft(), m_context.m_project.getBufferViews()[i].getBottomRight(), m_context.m_project.getBufferViews()[i].getBackgroundColour(gameTime), m_context.m_spriteBatch);
+                    //}
+                }
+            }
+
+            // We only draw the scrollbar on the active view in the right mode
+            //
+            if (m_brazilContext.m_state.equals("TextEditing"))
+                drawScrollbar(m_context.m_project.getSelectedBufferView(), keyboardHandler);
+
+            // Cursor and cursor highlight
+            //
+            if (m_brazilContext.m_state.equals("TextEditing"))
+            {
+                // Stop and use a different spritebatch for the highlighting and cursor
+                //
+                m_context.m_spriteBatch.End();
+                m_context.m_spriteBatch.Begin(SpriteSortMode.Texture, BlendState.Additive, SamplerState.PointClamp, DepthStencilState.DepthRead, RasterizerState.CullNone, m_context.m_basicEffect);
+
+                if (isActive && m_brazilContext.m_confirmState.equals("None") && m_brazilContext.m_state.notEquals("FindText") && m_brazilContext.m_state.notEquals("GotoLine"))
+                    drawCursor(gameTime, m_context.m_spriteBatch, mouse);
+
+                drawHighlight(gameTime, m_context.m_spriteBatch);
+            }
+
+            m_context.m_spriteBatch.End();
+            
+        }
+
+        /// <summary>
+        /// Draw a cursor and make it blink in position on a FileBuffer
+        /// </summary>
+        /// <param name="v"></param>
+        protected void drawCursor(GameTime gameTime, SpriteBatch spriteBatch, XygloMouse mouse)
+        {
+            BufferView bv = m_context.m_project.getSelectedBufferView();
+
+            if (bv == null)
+                return;
+
+            // Don't draw the cursor if we're not the active window or if we're confirming 
+            // something on the screen.
+            //
+            // No cursor for tailing BufferViews
+            //
+            if (!bv.isTailing())
+            {
+                double dTS = gameTime.TotalGameTime.TotalSeconds;
+                int blinkRate = 4;
+
+                // Test for when we're showing this
+                //
+                if (Convert.ToInt32(dTS * blinkRate) % 2 != 0)
+                {
+                    return;
+                }
+
+                // Blinks rate
+                //
+                Vector3 v1 = bv.getCursorCoordinates();
+                v1.Y += bv.getLineSpacing();
+
+                Vector3 v2 = bv.getCursorCoordinates();
+                v2.X += 1;
+
+                m_context.m_drawingHelper.renderQuad(v1, v2, bv.getHighlightColor(), spriteBatch);
+            }
+            // Draw any temporary highlight
+            //
+            if (mouse.getClickHighlight().First != null &&
+                ((BufferView)mouse.getClickHighlight().First) == m_context.m_project.getSelectedView())
+            {
+                Highlight h = (Highlight)mouse.getClickHighlight().Second;
+                Vector3 h1 = bv.getSpaceCoordinates(h.m_startHighlight.asScreenPosition());
+                Vector3 h2 = bv.getSpaceCoordinates(h.m_endHighlight.asScreenPosition());
+
+                // Add some height here so we can see the highlight
+                //
+                h2.Y += m_context.m_fontManager.getLineSpacing(bv.getViewSize());
+
+                m_context.m_drawingHelper.renderQuad(h1, h2, h.getColour(), spriteBatch);
+            }
+        }
+
+        /// <summary>
         /// How to draw a diff'd BufferView on the screen - we key on m_diffPosition rather
         /// than using the cursor.  Always start from the translated lhs window position.
         /// </summary>
         /// <param name="view"></param>
         /// <param name="gameTime"></param>
-        public void drawDiffBuffer(BufferView view, GameTime gameTime, XygloKeyboardHandler keyboardHandler)
+        protected void drawDiffBuffer(BufferView view, GameTime gameTime, XygloKeyboardHandler keyboardHandler)
         {
             Differ differ = keyboardHandler.getDiffer();
 
@@ -1564,14 +1998,9 @@ namespace Xyglo.Brazil.Xna
             // to generate a meaningful side by side diff whilst we scroll through it.
             //
             if (view == differ.getSourceBufferViewLhs())
-            {
                 diffList = differ.getLhsDiff();
-            }
             else
-            {
                 diffList = differ.getRhsDiff();
-            }
-
 
             // Need to adjust the sourceLine by the number of padding lines in the diffList up to this
             // point - otherwise we lost alignment as we scroll through the document.
@@ -1599,9 +2028,7 @@ namespace Xyglo.Brazil.Xna
                             colour = differ.m_unchangedColour;
 
                             if (sourceLine < view.getFileBuffer().getLineCount())
-                            {
                                 line = view.getFileBuffer().getLine(sourceLine++);
-                            }
                             // print line
                             break;
 
@@ -1610,9 +2037,7 @@ namespace Xyglo.Brazil.Xna
                             colour = differ.m_deletedColour;
 
                             if (sourceLine < view.getFileBuffer().getLineCount())
-                            {
                                 line = view.getFileBuffer().getLine(sourceLine++);
-                            }
                             break;
 
                         case DiffResult.Inserted:
@@ -1620,9 +2045,7 @@ namespace Xyglo.Brazil.Xna
                             colour = differ.m_insertedColour;
 
                             if (sourceLine < view.getFileBuffer().getLineCount())
-                            {
                                 line = view.getFileBuffer().getLine(sourceLine++);
-                            }
                             break;
 
                         case DiffResult.Padding:
@@ -1673,7 +2096,7 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="gameTime"></param>
         /// <param name="text"></param>
-        public void drawConfigurationScreen(GameTime gameTime, XygloKeyboardHandler keyboardHandler)
+        protected void drawConfigurationScreen(GameTime gameTime, XygloKeyboardHandler keyboardHandler)
         {
             bool editConfigurationItem = keyboardHandler.getEditConfigurationItem();
             string editConfigurationItemValue = keyboardHandler.getEditConfigurationItemValue();
@@ -2053,6 +2476,12 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// This value is updated by drawing code to reflect changing sizing
+        /// </summary>
+        /// <returns></returns>
+        public int getLastDrawTextScreenLength() { return m_textScreenLength; }
+
+        /// <summary>
         /// BoundingBox for the BufferView preview
         /// </summary>
         protected BoundingBox m_previewBoundingBox;
@@ -2131,6 +2560,11 @@ namespace Xyglo.Brazil.Xna
         /// BrazilContext
         /// </summary>
         protected BrazilContext m_brazilContext;
+
+        /// <summary>
+        /// Length of information screen - so we know if we can page up or down
+        /// </summary>
+        protected int m_textScreenLength = 0;
     }
 
 }

@@ -127,10 +127,13 @@
     <Compile Include="Xyglo.Brazil.Xna\BrazilView.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BufferView.cs" />
     <Compile Include="Xyglo.Brazil.Xna\ColourScheme.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\EyeHandler.cs" />
     <Compile Include="Xyglo.Brazil.Xna\EyePerturber.cs" />
     <Compile Include="Xyglo.Brazil.Xna\FileSystemHelper.cs" />
     <Compile Include="Xyglo.Brazil.Xna\FrameCounter.cs" />
     <Compile Include="Xyglo.Brazil.Xna\Model.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\SystemAnalyser.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\TemporaryMessage.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloCoin.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloContext.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloEgg.cs" />

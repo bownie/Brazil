@@ -6,7 +6,7 @@ using System.Text;
 namespace Xyglo.Brazil.Xna
 {
     /// <summary>
-    /// Count some frames for me
+    /// Helper class to count some frames
     /// </summary>
     public class FrameCounter
     {
