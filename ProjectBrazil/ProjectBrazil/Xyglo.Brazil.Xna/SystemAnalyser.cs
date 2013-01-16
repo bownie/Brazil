@@ -75,6 +75,17 @@ namespace Xyglo.Brazil.Xna
             stop();
         }
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                // Dispose all managed objects
+                stop();
+            }
+
+            // Release unmanaged resources
+        }
+
         /// <summary>
         /// Stop everything and tidy up - link to dispose
         /// </summary>

@@ -91,7 +91,8 @@ namespace Xyglo.Brazil.Xna
 
             // System Analyser for performance stats
             //
-            m_systemAnalyser = new SystemAnalyser();
+            if (m_context.m_project != null)
+                m_systemAnalyser = new SystemAnalyser();
 
             // Initialise
             //
@@ -2390,10 +2391,8 @@ namespace Xyglo.Brazil.Xna
 
             // Stop the threads
             //
-            if (m_kinectWorker != null || m_systemAnalyser.isWorking())
-            {
+            if (m_kinectWorker != null || (m_systemAnalyser != null && m_systemAnalyser.isWorking()))
                 checkExit(m_context.m_gameTime, true);
-            }
         }
 
 
