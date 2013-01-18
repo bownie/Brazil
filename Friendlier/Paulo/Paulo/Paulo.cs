@@ -58,15 +58,12 @@ namespace Xyglo.Friendlier
 
             // Banner screen
             //
-            //BrazilBannerText menuScreen = new BrazilBannerText(BrazilColour.Blue, new BrazilVector3(360.0f, 240.0f, 0), 4.0, "Paulo");
             BrazilBannerText menuScreen = new BrazilBannerText(BrazilColour.Blue, BrazilPosition.Middle, 4.0, "Paulo");
             addComponent("Menu", menuScreen);
 
-            //BrazilBannerText byLine = new BrazilBannerText(BrazilColour.Yellow, new BrazilVector3(430.0f, 345.0f, 0), 1.0, "@xyglo");
             BrazilBannerText byLine = new BrazilBannerText(BrazilColour.Yellow, BrazilRelativePosition.BeneathCentred, menuScreen, 0, 1.0f, "@xyglo");
             addComponent("Menu", byLine);
 
-            //BrazilBannerText toPlay = new BrazilBannerText(BrazilColour.White, new BrazilVector3(380.0f, 500.0f, 0), 1.0, "Hit '1' to Play");
             BrazilBannerText toPlay = new BrazilBannerText(BrazilColour.White, BrazilPosition.BottomMiddle, 1.0f, "Hit '1' to Play");
             addComponent("Menu", toPlay);
         }
@@ -153,7 +150,9 @@ namespace Xyglo.Friendlier
             BrazilFlyingBlock block2 = new BrazilFlyingBlock(BrazilColour.Brown, new BrazilVector3(0, 0, 0), new BrazilVector3(100, 20, 20));
             //block2.setVelocity(new BrazilVector3(0.5f, 0, 0.1f));
             //m_componentList.Add(block2);
-            addComponent("PlayingGame", block2);
+            block2.setAffectedByGravity(false);
+            block2.setHardness(10);
+            //addComponent("PlayingGame", block2);
 
             BrazilFlyingBlock block3 = new BrazilFlyingBlock(BrazilColour.Orange, new BrazilVector3(0, 150, 0), new BrazilVector3(200, 50, 0));
             //block3.setRotation(0.01);
@@ -192,6 +191,8 @@ namespace Xyglo.Friendlier
             goody2.setRotation(0.01);
             addComponent("ComponentTest", goody2);
 
+            // Setup some coins
+            //
             for (int i = 0; i < 10; i++)
             {
                 BrazilVector3 position = new BrazilVector3(-100.0f + (i * 12.0f), 120, 0); 

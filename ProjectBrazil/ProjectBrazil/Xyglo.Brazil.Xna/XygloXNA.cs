@@ -89,11 +89,6 @@ namespace Xyglo.Brazil.Xna
             //
             m_eyeHandler = new EyeHandler(m_context, m_keyboardHandler);
 
-            // System Analyser for performance stats
-            //
-            if (m_context.m_project != null)
-                m_systemAnalyser = new SystemAnalyser();
-
             // Initialise
             //
             initialise();
@@ -107,6 +102,11 @@ namespace Xyglo.Brazil.Xna
         public void setProject(Project project)
         {
             m_context.m_project = project;
+
+            // System Analyser for performance stats
+            //
+            if (m_context.m_project != null)
+                m_systemAnalyser = new SystemAnalyser();
 
             // Reset windowed mode
             //
@@ -829,7 +829,8 @@ namespace Xyglo.Brazil.Xna
 
                 // Explicitly stop the analyser
                 //
-                m_systemAnalyser.stop();
+                if (m_systemAnalyser != null)
+                    m_systemAnalyser.stop();
 
                 // Join the smart help worker 
                 //
@@ -1284,8 +1285,11 @@ namespace Xyglo.Brazil.Xna
                         break;
 
                     case "MoveLeft":
+                        /*
                         Vector3 leftVector = new Vector3(-1, 0, 0);
                         // accelerate will accelerate in mid air or move
+
+
                         Pair<XygloXnaDrawable, Vector3> coll = checkCollisions(m_brazilContext.m_interloper);
 
                         // If there is an X component to the checkCollisions call then we're on an object
@@ -1299,13 +1303,14 @@ namespace Xyglo.Brazil.Xna
                         {
                             m_context.m_drawableComponents[m_brazilContext.m_interloper].accelerate(leftVector);
                         }
+                        */
 
                         break;
 
                     case "MoveRight":
-                        Vector3 rightVector = new Vector3(1, 0, 0);
                         // accelerate will accelerate in mid air or move
 
+                        /*
                         Pair<XygloXnaDrawable, Vector3> colr = checkCollisions(m_brazilContext.m_interloper);
 
                         // If there is an X component to the checkCollisions call then we're on an object
@@ -1319,12 +1324,15 @@ namespace Xyglo.Brazil.Xna
                         {
                             m_context.m_drawableComponents[m_brazilContext.m_interloper].accelerate(rightVector);
                         }
+                         */
                         break;
 
                         // Jump the interloper
                         //
                     case "Jump":
-                        m_context.m_drawableComponents[m_brazilContext.m_interloper].jump(new Vector3(0, -4, 0));
+                        //m_context.m_drawableComponents[m_brazilContext.m_interloper].jump(new Vector3(0, -4, 0));
+
+
                         break;
 
                     case "MoveForward":
@@ -2311,9 +2319,12 @@ namespace Xyglo.Brazil.Xna
 
             // Draw previews of temporary objects and the like
             //
-            m_context.m_overlaySpriteBatch.Begin();
-            m_context.m_drawingHelper.drawXnaDrawableOverview(m_context.m_graphics.GraphicsDevice, gameTime, overviewList, m_context.m_overlaySpriteBatch);
-            m_context.m_overlaySpriteBatch.End();
+            if (m_context.m_project != null)
+            {
+                m_context.m_overlaySpriteBatch.Begin();
+                m_context.m_drawingHelper.drawXnaDrawableOverview(m_context.m_graphics.GraphicsDevice, gameTime, overviewList, m_context.m_overlaySpriteBatch);
+                m_context.m_overlaySpriteBatch.End();
+            }
         }
 
         /// <summary>

@@ -126,6 +126,9 @@ namespace Xyglo.Brazil.Xna
         /// <param name="gameTime"></param>
         protected void drawSystemLoad(GameTime gameTime, SpriteBatch spriteBatch, SystemAnalyser systemAnalyser)
         {
+            if (systemAnalyser == null)
+                return;
+
             Vector2 startPosition = Vector2.Zero;
             int linesHigh = 6;
 
