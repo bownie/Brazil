@@ -119,6 +119,44 @@ namespace Xyglo.Brazil.Xna.Physics
             }
         }
 
+        /// <summary>
+        /// Accelerate a rigidbody by a certain vector
+        /// </summary>
+        /// <param name="drawable"></param>
+        /// <param name="acceleration"></param>
+        public void accelerate(XygloXnaDrawable drawable, Vector3 acceleration)
+        {
+            // First search in the 
+            List<RigidBody> bodyList = getRigidBodiesForDrawable(drawable);
+
+            foreach(RigidBody body in bodyList)
+                body.LinearVelocity += Conversion.ToJitterVector(acceleration);
+        }
+
+        /// <summary>
+        /// Get a RigidBody for an Xna drawable
+        /// </summary>
+        /// <param name="drawable"></param>
+        /// <returns></returns>
+        public List<RigidBody> getRigidBodiesForDrawable(XygloXnaDrawable drawable)
+        {
+            List<RigidBody> bodyList = World.RigidBodies.Where(item => item.GetHashCode() == drawable.getPhysicsHash()).ToList();
+
+            // If no match then check for ComponentGroup
+            //
+            if (bodyList.Count == 0)
+            {
+                if (drawable.GetType() == typeof(XygloComponentGroup))
+                {
+                    XygloComponentGroup group = (XygloComponentGroup)drawable;
+                    foreach (XygloXnaDrawable subDrawable in group.getComponents())
+                        bodyList.AddRange(World.RigidBodies.Where(item => item.GetHashCode() == subDrawable.getPhysicsHash()).ToList());
+                }
+            }
+
+            return bodyList;
+        }
+
 
         /// <summary>
         /// Run the physics model for a given time
@@ -133,12 +171,47 @@ namespace Xyglo.Brazil.Xna.Physics
             if (step > 1.0f / 100.0f) step = 1.0f / 100.0f;
             World.Step(step, multithread);
 
+            // Prescan for any component groups and add these to a temporary list for updating
+            //
+            List<XygloXnaDrawable> cgList = m_context.m_drawableComponents.Values.Where(item => item.GetType() == typeof(XygloComponentGroup)).ToList();
+            List<XygloXnaDrawable> addList = new List<XygloXnaDrawable>();
+            foreach (XygloComponentGroup xCG in cgList)
+                addList.AddRange(xCG.getComponents());
+
+            List<RigidBody> remainderList = new List<RigidBody>();
+            remainderList.AddRange(World.RigidBodies);
+
+            // Now perform any updates on composite component groups and maintain the remainder list
+            //
+            foreach (XygloXnaDrawable drawable in addList)
+            {
+                List<RigidBody> bodyList = World.RigidBodies.Where(item => item.GetHashCode() == drawable.getPhysicsHash()).ToList();
+
+                foreach (RigidBody body in bodyList)
+                {
+
+
+                    // Update position
+                    //
+                    Vector3 position = Conversion.ToXNAVector(body.Position);
+                    Vector3 oldPosition = drawable.getPosition();
+                    drawable.setPosition(Conversion.ToXNAVector(body.Position));
+                    drawable.setOrientation(Conversion.ToXNAMatrix(body.Orientation));
+
+                    // Remove from the remainder list
+                    //
+                    remainderList.Remove(body);
+                }
+            }
+
             // Update XNA model after physics has completed
             //
-            foreach (RigidBody body in World.RigidBodies)
+            foreach (RigidBody body in remainderList)
             {
+                //int hashCode = body.GetHashCode();
                 List<XygloXnaDrawable> drawableList = m_context.m_drawableComponents.Values.Where(item => item.getPhysicsHash() == body.GetHashCode()).ToList();
 
+//                List<XygloXnaDrawable> componentGroupDrawableList = m_context.m_drawableComponents.Values.Where(item => item.get
                 
                 // We can get more than one object with the same hash code if we have a Collection of
                 // Drawables for example in a ComponentGroup.
@@ -157,13 +230,48 @@ namespace Xyglo.Brazil.Xna.Physics
             }
         }
 
+
+        protected void buildComponentGroup(Component component, XygloComponentGroup group)
+        {
+
+            if (group.getComponentGroupType() == XygloComponentGroupType.Interloper)
+            {
+                XygloXnaDrawable headDrawable = group.getComponents().Where(item => item.GetType() == typeof(XygloSphere)).ToList()[0];
+                RigidBody head = addDrawable(component, headDrawable);
+
+                XygloXnaDrawable bodyDrawable = group.getComponents().Where(item => item.GetType() == typeof(XygloFlyingBlock)).ToList()[0];
+                RigidBody body = addDrawable(component, bodyDrawable);
+                
+                // connect head and torso
+                PointPointDistance headTorso = new PointPointDistance(head, body, head.Position, body.Position);
+                    //position + new JVector(0, 1.6f, 0), position + new JVector(0, 1.5f, 0));
+
+                headTorso.Softness = 0.00001f;
+                // Add the parts and connections
+                //
+                //World.AddBody(head);
+                //World.AddBody(body);
+                World.AddConstraint(headTorso);
+
+                //XygloComponentGroup group = (XygloComponentGroup)drawable;
+                //foreach (XygloXnaDrawable subDrawable in group.getComponents())
+                //{
+                    //addDrawable(component, subDrawable);
+                //}
+
+                // Special value for collection
+                //
+                group.setPhysicsHash(-1);
+            }
+        }
+
         /// <summary>
         /// Interpret a Drawable and add it to the 
         /// </summary>
         /// <param name="drawable"></param>
         /// <param name="affectedByGravity"></param>
         /// <param name="moveable"></param>
-        public void addDrawable(Component component, XygloXnaDrawable drawable)
+        public RigidBody addDrawable(Component component, XygloXnaDrawable drawable)
         {
             RigidBody body = null;
 
@@ -185,9 +293,7 @@ namespace Xyglo.Brazil.Xna.Physics
             }
             else if (drawable is XygloComponentGroup)
             {
-                XygloComponentGroup group = (XygloComponentGroup)drawable;
-                foreach (XygloXnaDrawable subDrawable in group.getComponents())
-                    addDrawable(component, subDrawable);
+                buildComponentGroup(component, (XygloComponentGroup)drawable);
             }
 
             // If we've constructed a body then populate and add
@@ -208,11 +314,22 @@ namespace Xyglo.Brazil.Xna.Physics
                 //
                 drawable.setPhysicsHash(body.GetHashCode());
 
+                body.EnableSpeculativeContacts = true;
+
+                // set restitution
+                body.Material.Restitution = component.getHardness();
+                //body.LinearVelocity = new JVector(0, 0, 0);  
+                body.Damping = RigidBody.DampingType.Angular;
+
                 World.AddBody(body);
+
+                return body;
             }else
             {
                 Logger.logMsg("Not constructed a physics objects from a XygloDrawable");
             }
+
+            return null;
         }
 
         /// <summary>

@@ -178,13 +178,13 @@ namespace Xyglo.Brazil
         /// Mass of this object
         /// </summary>
         [DataMember]
-        protected float m_mass = 0;
+        protected float m_mass = 1000;
 
         /// <summary>
-        /// Hardness of this object
+        /// Hardness of this object - default is dead
         /// </summary>
         [DataMember]
-        protected float m_hardness = 0;
+        protected float m_hardness = 0.0f;
 
         /// <summary>
         /// Can this Component be affected by interactions with other Components?

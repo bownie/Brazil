@@ -34,6 +34,14 @@ namespace Xyglo.Brazil.Xna
             m_position.Y = position.Y;
             m_position.Z = position.Z;
             m_radius = radius;
+
+            // Set total number of vertices
+            //
+            m_numVertices = m_vertsInCircle * m_circsInSphere;
+
+            // Total number of indices
+            //
+            m_numIndices = m_vertsInCircle * m_circsInSphere * 6;
         }
 
 
@@ -53,23 +61,11 @@ namespace Xyglo.Brazil.Xna
         /// <param name="device"></param>
         public override void buildBuffers(GraphicsDevice device)
         {
-            // Set total number of vertices
-            //
-            m_numVertices = m_vertsInCircle * m_circsInSphere; 
-
-            // Total number of indices
-            //
-            m_numIndices = m_vertsInCircle * m_circsInSphere * 6;
-
             if (m_vertices == null)
-            {
                 m_vertices = new VertexPositionColorTexture[m_numVertices];
-            }
 
             if (m_vertexBuffer == null)
-            {
                 m_vertexBuffer = new VertexBuffer(device, typeof(VertexPositionNormalTexture), m_vertices.Count(), BufferUsage.WriteOnly);
-            }
 
             createVertices();
             createIndices(device);
@@ -100,6 +96,10 @@ namespace Xyglo.Brazil.Xna
                     m_vertices[x + y * m_vertsInCircle].TextureCoordinate = Vector2.Zero;
                 }
             }
+
+            // Now send the vertices to the vertex buffer
+            //
+            m_vertexBuffer.SetData(m_vertices);
         }
 
         /// <summary>

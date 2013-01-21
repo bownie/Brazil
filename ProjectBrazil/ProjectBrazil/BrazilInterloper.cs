@@ -22,7 +22,7 @@ namespace Xyglo.Brazil
             //
             m_gravityAffected = true;
             m_mass = 1000;
-            m_hardness = 6f;
+            m_hardness = 0.3f;
         }
 
         /// <summary>

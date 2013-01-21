@@ -2166,6 +2166,7 @@ namespace Xyglo.Brazil.Xna
             m_context.m_overlaySpriteBatch.End();
         }
 
+  
         /// <summary>
         /// Check for collisions in m_context.m_drawableComponentss that have some form (hardness != 0).   Return true
         /// if we have a collision and we're also modifying the drawables to have correct velocity
@@ -2231,132 +2232,12 @@ namespace Xyglo.Brazil.Xna
                             collisionList.Add(testComp);
                         }
                     }
-                    else
-                    {
-                        // Now we have all the non ourself, non Interloper components
-                        //
-                        BoundingBox bb1 = realComp.getBoundingBox();
-                        BoundingBox bb2 = testComp.getBoundingBox();
-
-                        if (realComp.getBoundingBox().Intersects(testComp.getBoundingBox()))
-                        {
-                            // Work out the vectors and the rebound angle
-                            //
-                            //Logger.logMsg("computeCollisions - Got a collision");
-
-                            // Then testKey has mass and realKey doesn't - give testKey a bounce
-                            //
-                            Vector3 testVely = testComp.getVelocity();
-                            Vector3 realVely = realComp.getVelocity();
-
-                            // If they both have mass then do an elastic collision.
-                            //
-                            if (testKey.getMass() > 0 && realKey.getMass() > 0)
-                            {
-                                // Elastic collision undefined
-                                //
-                                //Logger.logMsg("computeCollisions- Elastic collision");
-                            }
-                            else
-                            {
-                                if (testKey.getHardness() > 0)
-                                {
-
-
-                                    Vector3 newVely = Vector3.Zero;
-                                    //newVely.Y = -realVely.Y * 0.6f;
-                                    newVely.Y = -realVely.Y * (float)(realKey.getHardness() / testKey.getHardness());
-                                    newVely.X = realVely.X * (float)(realKey.getHardness() / testKey.getHardness());
-
-                                    newVely = XygloConvert.roundVector(newVely, 1);
-
-                                    if (newVely.Length() < 0.5f)
-                                    {
-                                        newVely = Vector3.Zero;
-                                    }
-                                    realComp.setVelocity(newVely);
-
-
-                                    //realComp.accelerate(
-                                    collisionList.Add(realComp);
-
-                                    /*
-                                    //if (collisionList.Contains(testComp))
-                                    //{
-                                        // Get the point at which they collided
-                                        //
-                                        Vector3 collisionPoint = getCollisionPoint(testComp, realComp);
-
-                                        // Get the gravity vector, normalize and use to invert
-                                        //
-                                        Vector3 unitGravity = XygloConvert.getVector3(m_world.getGravity());
-                                        unitGravity.Normalize();
-
-                                        // Invert our velocity by multiplying each element by gravity
-                                        if (unitGravity.X > 0) testVely.X *= -unitGravity.X;
-                                        if (unitGravity.Y > 0) testVely.Y *= -unitGravity.Y;
-                                        if (unitGravity.Z > 0) testVely.Z *= -unitGravity.Z;
-
-                                        // Invert the velocity and modify by a factor
-                                        //
-                                        //testComp.setVelocity(testVely * (float)testKey.getHardness());
-
-                                        //testComp.se
-
-                                        // Move the testComp by the difference from the surface to the new position below the 
-                                        // surface.
-                                        //
-                                        
-                                        Vector3 depthDiff = realComp.getBoundingBox().Max;// - testComp.getPosition().Y;
-                                        depthDiff.X = 0;
-                                        depthDiff.Z = 0;
-                                        depthDiff.Y += testComp.getPosition().Y;
-                                        testComp.move(depthDiff);
-                                        
-
-                                        //try
-                                        //{
-                                            //BrazilFlyingBlock xfb = (BrazilFlyingBlock)testKey;
-
-                                            //if (testKey != null) //.GetType() == typeof(XygloFlyingBlock))
-                                            //{
-                                                //Logger.logMsg("Trying to do somethign weird");
-                                            //}
-                                        //}
-                                        //catch (Exception)
-                                        //{
-                                        //}
-
-                                        // Only reset the position if the X axis is unmoved
-                                        // otherwise we've arrived.
-                                        //
-                                        if (collisionPoint.X == testComp.getPosition().X)
-                                        {
-                                            Logger.logMsg("computeCollisions - moving position of interloper");
-
-                                            testComp.setPosition(collisionPoint);
-                                        }
-
-                                        collisionList.Add(testComp);
-                                    //}*/
-                                }
-                                /*
-                            else // realKey.getMass() > 0
-                            {
-                                if (!collisionList.Contains(realComp))
-                                {
-                                    realComp.setVelocity(-realVely);
-                                    collisionList.Add(realComp);
-                                }
-                            }*/
-                            }
-                        }
-                    }
                 }
             }
 
             return (collisionList.Count > 0);
         }
+
 
 
         /// <summary>
@@ -2378,63 +2259,21 @@ namespace Xyglo.Brazil.Xna
                         // Found a FlyingBlock - initialise it and add it to the dictionary
                         //
                         BrazilFlyingBlock fb = (Xyglo.Brazil.BrazilFlyingBlock)component;
-
-                        // Check and accelerate the drawable as needed
-                        //
-                        if (fb.isAffectedByGravity())
-                        {
-                            m_context.m_drawableComponents[component].accelerate(XygloConvert.getVector3(world.getGravity()));
-                        }
-
-                        // Move any update any buffers
-                        //
-                        //m_drawableComponents[component].move(XygloConvert.getVector3(fb.getVelocity()));
-                        m_context.m_drawableComponents[component].moveDefault();
-
-                        // Apply any rotation if we have one
-                        if (fb.getRotation() != 0)
-                        {
-                            m_context.m_drawableComponents[component].incrementRotation(fb.getRotation());
-                        }
-
                         m_context.m_drawableComponents[component].buildBuffers(m_context.m_graphics.GraphicsDevice);
                     }
                     else if (component.GetType() == typeof(Xyglo.Brazil.BrazilInterloper))
                     {
                         BrazilInterloper il = (Xyglo.Brazil.BrazilInterloper)component;
-
-                        // Accelerate this object if there is gravity
-                        //
-                        if (il.isAffectedByGravity())
-                        {
-                            m_context.m_drawableComponents[component].accelerate(XygloConvert.getVector3(world.getGravity()));
-                        }
+                        m_context.m_drawableComponents[component].buildBuffers(m_context.m_graphics.GraphicsDevice);
 
                         // Check for collisions and adjust the position and velocity accordingly before drawing this
                         //
                         computeCollisions();
 
-                        //{
-                        // Move any update any buffers
-                        //
-                        //m_drawableComponents[component].move(XygloConvert.getVector3(il.getVelocity()));
-                        m_context.m_drawableComponents[component].moveDefault();
-                        //}
-
-                        // Apply any rotation if we have one
-                        if (il.getRotation() != 0)
-                        {
-                            m_context.m_drawableComponents[component].incrementRotation(il.getRotation());  // this is initial rotation only
-                        }
-
-                        m_context.m_drawableComponents[component].buildBuffers(m_context.m_graphics.GraphicsDevice);
-
                         // Store our interloper object
                         //
                         if (m_brazilContext.m_interloper == null)
-                        {
                             m_brazilContext.m_interloper = il;
-                        }
                     }
                     else if (component.GetType() == typeof(Xyglo.Brazil.BrazilGoody))
                     {
@@ -2457,15 +2296,14 @@ namespace Xyglo.Brazil.Xna
                         }
 
 
-                        if (!m_context.m_drawableComponents[component].shouldBeDestroyed())
-                            m_context.m_drawableComponents[component].draw(m_context.m_graphics.GraphicsDevice);
+                        //if (!m_context.m_drawableComponents[component].shouldBeDestroyed())
+                            //m_context.m_drawableComponents[component].draw(m_context.m_graphics.GraphicsDevice);
                     }
                     else if (component.GetType() == typeof(BrazilTestBlock))
                     {
                         if (!m_context.m_drawableComponents[component].shouldBeDestroyed())
                         {
                             m_context.m_drawableComponents[component].buildBuffers(m_context.m_graphics.GraphicsDevice);
-                            m_context.m_drawableComponents[component].draw(m_context.m_graphics.GraphicsDevice);
                         }
                     }
 

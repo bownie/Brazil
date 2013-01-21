@@ -9,6 +9,16 @@ using Microsoft.Xna.Framework.Graphics;
 namespace Xyglo.Brazil.Xna
 {
     /// <summary>
+    /// A type that defines the look and behaviour.   We might want to generalise these types a little more
+    /// later on as at the moment we already have the Component type from the Brazil side.
+    /// </summary>
+    public enum XygloComponentGroupType
+    {
+        Interloper,
+        Fiend
+    };
+
+    /// <summary>
     /// A collection of XygloXnaDrawable objects.  These can have a collective position,
     /// size, spin and mass.  For the moment the order of the list means the render order
     /// also.  It is also a type of XygloXnaDrawable itself so it can be treated just like
@@ -21,8 +31,9 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="effect"></param>
         /// <param name="position"></param>
-        public XygloComponentGroup(BasicEffect effect, Vector3 position)
+        public XygloComponentGroup(XygloComponentGroupType type, BasicEffect effect, Vector3 position)
         {
+            m_type = type;
             m_effect = effect;
             m_position = position;
         }
@@ -66,9 +77,7 @@ namespace Xyglo.Brazil.Xna
         public override void buildBuffers(GraphicsDevice device)
         {
             foreach (XygloXnaDrawableShape component in m_componentList)
-            {
                 component.buildBuffers(device);
-            }
         }
 
         /// <summary>
@@ -290,6 +299,12 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Public accessor for this type
+        /// </summary>
+        /// <returns></returns>
+        public XygloComponentGroupType getComponentGroupType() { return m_type; }
+
+        /// <summary>
         /// List of Components in this group
         /// </summary>
         /// <returns></returns>
@@ -305,5 +320,10 @@ namespace Xyglo.Brazil.Xna
         /// sub-component was added.
         /// </summary>
         protected Vector3 m_groupCentrePosition = Vector3.Zero;
+
+        /// <summary>
+        /// Component group type
+        /// </summary>
+        protected XygloComponentGroupType m_type;
     }
 }

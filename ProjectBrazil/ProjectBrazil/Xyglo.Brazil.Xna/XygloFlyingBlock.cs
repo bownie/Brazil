@@ -72,7 +72,7 @@ namespace Xyglo.Brazil.Xna
                 m_vertices[7].TextureCoordinate = new Vector2(0, 0);
             }
 
-            Matrix worldMatrix = Matrix.CreateRotationZ((float)m_rotation);
+            Matrix worldMatrix = Matrix.CreateRotationZ((float)m_rotation) * m_orientation;
 
             // front left top
             //
@@ -117,7 +117,11 @@ namespace Xyglo.Brazil.Xna
 
             // Now we need to describe 32 vertices
             //
-            m_vertexBuffer = new VertexBuffer(device, typeof(VertexPositionColorTexture), m_vertices.Count(), BufferUsage.None);
+            if (m_vertexBuffer == null)
+                m_vertexBuffer = new VertexBuffer(device, typeof(VertexPositionColorTexture), m_vertices.Count(), BufferUsage.None);
+
+            // Always reset the data
+            //
             m_vertexBuffer.SetData(m_vertices);
 
             // Total number of indices - these don't change so only set them up once.

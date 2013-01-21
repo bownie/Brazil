@@ -24,7 +24,7 @@ namespace Xyglo.Brazil
             m_position = position;
             m_dimensions = size;
             m_gravityAffected = affectedByGravity;
-            m_mass = 1000; // default mass
+            //m_mass = 1000; // default mass
         }
 
         /// <summary>
@@ -58,6 +58,9 @@ namespace Xyglo.Brazil
             m_dimensions.Z = z;
         }
 
+        public bool isStatic() { return m_isStatic; }
+        public void setStatic(bool isStatic) { m_isStatic = isStatic; }
+
         /// <summary>
         /// The size of this block
         /// </summary>
@@ -81,5 +84,11 @@ namespace Xyglo.Brazil
         /// </summary>
         [DataMember]
         protected BrazilRay m_oscillationPath = null;
+
+        /// <summary>
+        /// Static member?
+        /// </summary>
+        [DataMember]
+        protected bool m_isStatic = false;
     }
 }

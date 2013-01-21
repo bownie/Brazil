@@ -248,10 +248,12 @@ namespace Xyglo.Brazil.Xna
 
             // Now we need to describe 32 vertices
             //
-            m_vertexBuffer = new VertexBuffer(device, typeof(VertexPositionNormalTexture), m_vertices.Count(), BufferUsage.None);
+            if (m_vertexBuffer == null)
+                m_vertexBuffer = new VertexBuffer(device, typeof(VertexPositionNormalTexture), m_vertices.Count(), BufferUsage.None);
+
+            // Always set the data
+            //
             m_vertexBuffer.SetData(m_vertices);
-
-
         }
 
 

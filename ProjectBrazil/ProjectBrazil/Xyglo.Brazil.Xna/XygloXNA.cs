@@ -1304,12 +1304,16 @@ namespace Xyglo.Brazil.Xna
                             m_context.m_drawableComponents[m_brazilContext.m_interloper].accelerate(leftVector);
                         }
                         */
+                        //RigidBody body = m_physicsHandler.getRigidBodyForDrawable(m_context.m_drawableComponents[m_brazilContext.m_interloper]);
+                        if (m_brazilContext.m_interloper != null)
+                            m_physicsHandler.accelerate(m_context.m_drawableComponents[m_brazilContext.m_interloper], new Vector3(-10, 0, 0));
 
                         break;
 
                     case "MoveRight":
                         // accelerate will accelerate in mid air or move
-
+                        if (m_brazilContext.m_interloper != null)
+                            m_physicsHandler.accelerate(m_context.m_drawableComponents[m_brazilContext.m_interloper], new Vector3(10, 0, 0));
                         /*
                         Pair<XygloXnaDrawable, Vector3> colr = checkCollisions(m_brazilContext.m_interloper);
 
@@ -1330,6 +1334,8 @@ namespace Xyglo.Brazil.Xna
                         // Jump the interloper
                         //
                     case "Jump":
+                        if (m_brazilContext.m_interloper != null)
+                            m_physicsHandler.accelerate(m_context.m_drawableComponents[m_brazilContext.m_interloper], new Vector3(0, -200, 0));
                         //m_context.m_drawableComponents[m_brazilContext.m_interloper].jump(new Vector3(0, -4, 0));
 
 
@@ -1418,6 +1424,11 @@ namespace Xyglo.Brazil.Xna
 
                 m_eye = XygloConvert.getVector3(m_eyePerturber.getPerturbedPosition(gameTime.TotalGameTime.TotalSeconds));
             }*/
+
+            // THIS SHOULD CHANGE TO JUST A BUILD BUFFERS as the MOVEMENT IS ALREADY HANDLED
+            //
+            //
+
 
             // Update the components on the main component list (in case we have any)
             //
@@ -2047,7 +2058,7 @@ namespace Xyglo.Brazil.Xna
                         XygloSphere drawSphere = new XygloSphere(XygloConvert.getColour(il.getColour()), m_lineEffect, il.getPosition(), 10.0f);
                         drawSphere.setRotation(il.getRotation());
 #else
-                XygloComponentGroup group = new XygloComponentGroup(m_context.m_lineEffect, Vector3.Zero);
+                XygloComponentGroup group = new XygloComponentGroup(XygloComponentGroupType.Interloper, m_context.m_lineEffect, Vector3.Zero);
                 XygloFlyingBlock drawBlock = new XygloFlyingBlock(XygloConvert.getColour(il.getColour()), m_context.m_lineEffect, il.getPosition(), il.getSize());
                 group.addComponent(drawBlock);
 

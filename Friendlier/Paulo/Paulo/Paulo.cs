@@ -41,20 +41,14 @@ namespace Xyglo.Friendlier
             //
             generateComponents();
 
-            // Set up an interloper - we give it a name to aid debugging
-            //
-            BrazilInterloper paulo = new BrazilInterloper(BrazilColour.White, new BrazilVector3(0, 0, 0), new BrazilVector3(10, 10, 10));
-            paulo.setName("Interloper");
-            addComponent("PlayingGame", paulo);
-
 
             // Big dummy interloper
             //
             // Set up an interloper - we give it a name to aid debugging
             //
-            BrazilInterloper paulo2 = new BrazilInterloper(BrazilColour.Yellow, new BrazilVector3(0, 0, 0), new BrazilVector3(100, 100, 100));
-            paulo.setName("Interloper2");
-            addComponent("ComponentTest", paulo2);
+            //BrazilInterloper paulo2 = new BrazilInterloper(BrazilColour.Yellow, new BrazilVector3(0, 0, 0), new BrazilVector3(100, 100, 100));
+            //paulo.setName("Interloper2");
+            //addComponent("ComponentTest", paulo2);
 
             // Banner screen
             //
@@ -133,27 +127,55 @@ namespace Xyglo.Friendlier
             connectKey("ComponentTest", Keys.Escape, "QuitToMenu");
         }
 
+        protected void testBlocks()
+        {
+            BrazilTestBlock testBlock1 = new BrazilTestBlock(BrazilColour.Pink, new BrazilVector3(-60, 0, 0), new BrazilVector3(40, 40, 40));
+            //testBlock1.setAffectedByGravity(false);
+            addComponent("PlayingGame", testBlock1);
+
+            BrazilTestBlock testBlock2 = new BrazilTestBlock(BrazilColour.Pink, new BrazilVector3(-120, 0, 0), new BrazilVector3(40, 40, 40));
+            //testBlock2.setAffectedByGravity(false);
+            testBlock2.setHardness(1.0f);
+            addComponent("PlayingGame", testBlock2);
+
+            BrazilFlyingBlock testFlyingBlock1 = new BrazilFlyingBlock(BrazilColour.White, new BrazilVector3(-200, 0, 0), new BrazilVector3(40, 40, 40));
+            testFlyingBlock1.setAffectedByGravity(true);
+            testFlyingBlock1.setHardness(1.0f);
+            addComponent("PlayingGame", testFlyingBlock1);
+
+            BrazilTestBlock testBlock3 = new BrazilTestBlock(BrazilColour.Pink, new BrazilVector3(-200, 0, 0), new BrazilVector3(40, 40, 40));
+            //testBlock2.setAffectedByGravity(false);
+            testBlock3.setHardness(1.0f);
+            addComponent("PlayingGame", testBlock3);
+        }
 
         /// <summary>
         /// Set up some test blocks
         /// </summary>
         protected void generateComponents()
         {
-            BrazilFlyingBlock block1 = new BrazilFlyingBlock(BrazilColour.Blue, new BrazilVector3(-10, -100, 0), new BrazilVector3(200.0f, 100.0f, 10.0f));
-            //block1.setVelocity(new BrazilVector3(-1, 0, 0));
-
-            // Push onto component list
+            // Set up an interloper - we give it a name to aid debugging
             //
-            //m_componentList.Add(block1);
+            BrazilInterloper paulo = new BrazilInterloper(BrazilColour.White, new BrazilVector3(0, 0, 0), new BrazilVector3(10, 10, 10));
+            paulo.setName("Interloper");
+            addComponent("PlayingGame", paulo);
+
+            BrazilFlyingBlock block1 = new BrazilFlyingBlock(BrazilColour.Blue, new BrazilVector3(0, 200, 0), new BrazilVector3(600.0f, 100.0f, 10.0f));
+            block1.setAffectedByGravity(false);
+            //block1.setHardness(0.3f);
+            block1.setMoveable(false);
             addComponent("PlayingGame", block1);
 
+            testBlocks();
+
+            /*
             BrazilFlyingBlock block2 = new BrazilFlyingBlock(BrazilColour.Brown, new BrazilVector3(0, 0, 0), new BrazilVector3(100, 20, 20));
-            //block2.setVelocity(new BrazilVector3(0.5f, 0, 0.1f));
-            //m_componentList.Add(block2);
             block2.setAffectedByGravity(false);
             block2.setHardness(10);
-            //addComponent("PlayingGame", block2);
+            addComponent("PlayingGame", block2);
+            */
 
+            /*
             BrazilFlyingBlock block3 = new BrazilFlyingBlock(BrazilColour.Orange, new BrazilVector3(0, 150, 0), new BrazilVector3(200, 50, 0));
             //block3.setRotation(0.01);
             block3.setHardness(10);
@@ -190,7 +212,7 @@ namespace Xyglo.Friendlier
             BrazilGoody goody2 = new BrazilGoody(BrazilGoodyType.Coin, 50, new BrazilVector3(0, 100, 0), new BrazilVector3(100, 50, 50), DateTime.Now);
             goody2.setRotation(0.01);
             addComponent("ComponentTest", goody2);
-
+*/
             // Setup some coins
             //
             for (int i = 0; i < 10; i++)
@@ -200,6 +222,7 @@ namespace Xyglo.Friendlier
                 newGoody.setRotation(0.2);
                 addComponent("PlayingGame", newGoody);
             }
+
         }
     }
 }
