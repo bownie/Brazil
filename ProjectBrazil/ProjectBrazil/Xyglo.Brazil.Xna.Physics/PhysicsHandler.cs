@@ -20,7 +20,8 @@ namespace Xyglo.Brazil.Xna.Physics
     /// <summary>
     /// The Xyglo wrapper to whatever physics implementation we are going
     /// to use.  Allows us to potentially change physics engines whenever
-    /// we want to.   Currently we're using Jitter Physics:
+    /// we want to.   Currently we're using Jitter Physics and this class
+    /// provides handles for initial setup, updates and movements.
     /// </summary>
     public class PhysicsHandler
     {
@@ -189,8 +190,6 @@ namespace Xyglo.Brazil.Xna.Physics
 
                 foreach (RigidBody body in bodyList)
                 {
-
-
                     // Update position
                     //
                     Vector3 position = Conversion.ToXNAVector(body.Position);
@@ -231,106 +230,6 @@ namespace Xyglo.Brazil.Xna.Physics
         }
 
 
-        protected void buildComponentGroup(Component component, XygloComponentGroup group)
-        {
-
-            if (group.getComponentGroupType() == XygloComponentGroupType.Interloper)
-            {
-                XygloXnaDrawable headDrawable = group.getComponents().Where(item => item.GetType() == typeof(XygloSphere)).ToList()[0];
-                RigidBody head = addDrawable(component, headDrawable);
-
-                XygloXnaDrawable bodyDrawable = group.getComponents().Where(item => item.GetType() == typeof(XygloFlyingBlock)).ToList()[0];
-                RigidBody body = addDrawable(component, bodyDrawable);
-                
-                // connect head and torso
-                PointPointDistance headTorso = new PointPointDistance(head, body, head.Position, body.Position);
-                    //position + new JVector(0, 1.6f, 0), position + new JVector(0, 1.5f, 0));
-
-                headTorso.Softness = 0.00001f;
-                // Add the parts and connections
-                //
-                //World.AddBody(head);
-                //World.AddBody(body);
-                World.AddConstraint(headTorso);
-
-                //XygloComponentGroup group = (XygloComponentGroup)drawable;
-                //foreach (XygloXnaDrawable subDrawable in group.getComponents())
-                //{
-                    //addDrawable(component, subDrawable);
-                //}
-
-                // Special value for collection
-                //
-                group.setPhysicsHash(-1);
-            }
-        }
-
-        /// <summary>
-        /// Interpret a Drawable and add it to the 
-        /// </summary>
-        /// <param name="drawable"></param>
-        /// <param name="affectedByGravity"></param>
-        /// <param name="moveable"></param>
-        public RigidBody addDrawable(Component component, XygloXnaDrawable drawable)
-        {
-            RigidBody body = null;
-
-            if (drawable is XygloFlyingBlock)
-            {
-                XygloFlyingBlock fb = (XygloFlyingBlock)drawable;
-                body = new RigidBody(new BoxShape(Conversion.ToJitterVector(fb.getSize())));             
-            }
-            else if (drawable is XygloTexturedBlock)
-            {
-                XygloTexturedBlock fb = (XygloTexturedBlock)drawable;
-                JVector size = Conversion.ToJitterVector(fb.getSize());
-                body = new RigidBody(new BoxShape(size));
-            }
-            else if (drawable is XygloSphere)
-            {
-                XygloSphere sphere = (XygloSphere)drawable;
-                body = new RigidBody(new SphereShape(sphere.getRadius()));
-            }
-            else if (drawable is XygloComponentGroup)
-            {
-                buildComponentGroup(component, (XygloComponentGroup)drawable);
-            }
-
-            // If we've constructed a body then populate and add
-            //
-            if (body != null)
-            {
-                body.Position = Conversion.ToJitterVector(drawable.getPosition());
-                body.AffectedByGravity = component.isAffectedByGravity();
-                body.IsStatic = !component.isMoveable();
-                body.Mass = Math.Max(component.getMass(), 1000);
-
-                // Set a velocity if we're not static
-                //
-                if (!body.IsStatic)
-                    body.LinearVelocity = Conversion.ToJitterVector(drawable.getVelocity());
-                
-                // Store this relationship in the calling drawable so we can link them back again
-                //
-                drawable.setPhysicsHash(body.GetHashCode());
-
-                body.EnableSpeculativeContacts = true;
-
-                // set restitution
-                body.Material.Restitution = component.getHardness();
-                //body.LinearVelocity = new JVector(0, 0, 0);  
-                body.Damping = RigidBody.DampingType.Angular;
-
-                World.AddBody(body);
-
-                return body;
-            }else
-            {
-                Logger.logMsg("Not constructed a physics objects from a XygloDrawable");
-            }
-
-            return null;
-        }
 
         /// <summary>
         /// Draw physics items in debug positions.  Not used.

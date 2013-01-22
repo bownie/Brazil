@@ -154,6 +154,11 @@ namespace Xyglo.Friendlier
         /// </summary>
         protected void generateComponents()
         {
+            // Setup the HUD
+            //
+            BrazilHud hud = new BrazilHud(BrazilColour.White, BrazilVector3.Zero, 1.0, "HUD");
+            addComponent("PlayingGame", hud);
+
             // Set up an interloper - we give it a name to aid debugging
             //
             BrazilInterloper paulo = new BrazilInterloper(BrazilColour.White, new BrazilVector3(0, 0, 0), new BrazilVector3(10, 10, 10));
@@ -165,6 +170,15 @@ namespace Xyglo.Friendlier
             //block1.setHardness(0.3f);
             block1.setMoveable(false);
             addComponent("PlayingGame", block1);
+
+            // Add another block below 
+            //
+            BrazilFlyingBlock block2 = new BrazilFlyingBlock(BrazilColour.Blue, new BrazilVector3(600, 400, 0), new BrazilVector3(600, 100, 10));
+            block1.setMoveable(false);
+            addComponent("PlayingGame", block2);
+
+            BrazilBaddy baddy = new BrazilBaddy(BrazilColour.White, new BrazilVector3(800, 400, 0), new BrazilVector3(20, 20, 20));
+            addComponent("PlayingGame", baddy);
 
             testBlocks();
 
@@ -190,11 +204,6 @@ namespace Xyglo.Friendlier
             block4.setName("LandingBlock2");
             block4.setInitialAngle(Math.PI / 8);
             addComponent("PlayingGame", block4);
-
-            // Setup the HUD
-            //
-            BrazilHud hud = new BrazilHud(BrazilColour.White, BrazilVector3.Zero, 1.0, "HUD");
-            addComponent("PlayingGame", hud);
 
             // Add the finishing block
             //

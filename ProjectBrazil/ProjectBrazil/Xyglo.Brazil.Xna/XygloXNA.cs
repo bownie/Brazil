@@ -89,9 +89,14 @@ namespace Xyglo.Brazil.Xna
             //
             m_eyeHandler = new EyeHandler(m_context, m_keyboardHandler);
 
-            // Initialise
+            // Initialise including the physics handler
             //
             initialise();
+
+            // Now we can generate the XygloFactory - the physics handler is only initialised above
+            //
+            m_xygloFactory = new XygloFactory(m_brazilContext, m_context, m_physicsHandler, m_eyeHandler, m_mouse, m_frameCounter);
+
         }
 
          /////////////////////////////// METHODS //////////////////////////////////////
@@ -1143,15 +1148,16 @@ namespace Xyglo.Brazil.Xna
             // Update the frustrum matrix
             //
             if (m_context.m_frustrum != null)
-            {
                 m_context.m_frustrum.Matrix = m_context.m_viewMatrix * m_context.m_projection;
-            }
 
             // Check for end states that require no further processing
             //
             if (m_brazilContext.m_state.equals("RestartLevel"))
             {
+                // Clear drawables and any physics simulations
+                //
                 m_context.m_drawableComponents.Clear();
+                m_physicsHandler.World.Clear();
                 setState("PlayingGame");
             }
 
@@ -1285,26 +1291,7 @@ namespace Xyglo.Brazil.Xna
                         break;
 
                     case "MoveLeft":
-                        /*
-                        Vector3 leftVector = new Vector3(-1, 0, 0);
                         // accelerate will accelerate in mid air or move
-
-
-                        Pair<XygloXnaDrawable, Vector3> coll = checkCollisions(m_brazilContext.m_interloper);
-
-                        // If there is an X component to the checkCollisions call then we're on an object
-                        // or so we guess at the moment until proven otherwise.
-                        //
-                        if (coll.Second.X != 0)
-                        {
-                            m_context.m_drawableComponents[m_brazilContext.m_interloper].moveLeft(1);
-                        }
-                        else // we're in free flight
-                        {
-                            m_context.m_drawableComponents[m_brazilContext.m_interloper].accelerate(leftVector);
-                        }
-                        */
-                        //RigidBody body = m_physicsHandler.getRigidBodyForDrawable(m_context.m_drawableComponents[m_brazilContext.m_interloper]);
                         if (m_brazilContext.m_interloper != null)
                             m_physicsHandler.accelerate(m_context.m_drawableComponents[m_brazilContext.m_interloper], new Vector3(-10, 0, 0));
 
@@ -1314,21 +1301,6 @@ namespace Xyglo.Brazil.Xna
                         // accelerate will accelerate in mid air or move
                         if (m_brazilContext.m_interloper != null)
                             m_physicsHandler.accelerate(m_context.m_drawableComponents[m_brazilContext.m_interloper], new Vector3(10, 0, 0));
-                        /*
-                        Pair<XygloXnaDrawable, Vector3> colr = checkCollisions(m_brazilContext.m_interloper);
-
-                        // If there is an X component to the checkCollisions call then we're on an object
-                        // or so we guess at the moment until proven otherwise.
-                        //
-                        if (colr.Second.X != 0)
-                        {
-                            m_context.m_drawableComponents[m_brazilContext.m_interloper].moveRight(1);
-                        }
-                        else // we're in free flight
-                        {
-                            m_context.m_drawableComponents[m_brazilContext.m_interloper].accelerate(rightVector);
-                        }
-                         */
                         break;
 
                         // Jump the interloper
@@ -1336,9 +1308,6 @@ namespace Xyglo.Brazil.Xna
                     case "Jump":
                         if (m_brazilContext.m_interloper != null)
                             m_physicsHandler.accelerate(m_context.m_drawableComponents[m_brazilContext.m_interloper], new Vector3(0, -200, 0));
-                        //m_context.m_drawableComponents[m_brazilContext.m_interloper].jump(new Vector3(0, -4, 0));
-
-
                         break;
 
                     case "MoveForward":
@@ -1479,7 +1448,7 @@ namespace Xyglo.Brazil.Xna
 
             // Update physics
             //
-            m_physicsHandler.update(gameTime) ;//, m_context.m_drawableComponents);
+            m_physicsHandler.update(gameTime);
 
             base.Update(gameTime);
         }
@@ -1927,9 +1896,7 @@ namespace Xyglo.Brazil.Xna
 
             // Are we drawing Friendlier - we cheat a bit here
             if (m_context.m_project != null)
-            {
                 drawFriendlier(gameTime);
-            }
 
             // Now draw any Xyglo components
             //
@@ -1988,242 +1955,6 @@ namespace Xyglo.Brazil.Xna
 
         }
 
-        /// <summary>
-        /// Turn a BrazilComponent into a XygloDrawable for the first time and
-        /// add it to the list of drawables.
-        /// </summary>
-        /// <param name="component"></param>
-        protected void createInitialXygloDrawable(BrazilView view, Component component)
-        {
-            // Ignore all but 3D components at this stage
-            //
-            //if (component.GetType() != typeof(Component3D))
-            //continue;
-
-            // If not then is it a drawable type? 
-            //
-            if (component.GetType() == typeof(Xyglo.Brazil.BrazilFlyingBlock))
-            {
-                // Found a FlyingBlock - initialise it and add it to the dictionary
-                //
-                BrazilFlyingBlock fb = (Xyglo.Brazil.BrazilFlyingBlock)component;
-
-                // Allow for container view
-                Vector3 position = XygloConvert.getVector3(fb.getPosition());
-                Vector3 size = XygloConvert.getVector3(fb.getSize());
-                float multiplier = 1.0f;
-
-                // If we're running in a container then move the position of the item and
-                // scale by the relative size of the worlds.
-                //
-                if (view != null && view.getApp().getWorldBounds() != null)
-                {
-                    // Translate
-                    position += view.getPosition();
-
-                    // Scale
-                    double xMult = view.getApp().getWorldBounds().getWidth() / view.getWidth();
-                    double yMult = view.getApp().getWorldBounds().getHeight() / view.getHeight();
-                    multiplier = Math.Min((float)xMult, (float)yMult);
-                    size *= multiplier;
-                }
-
-                XygloFlyingBlock drawBlock = new XygloFlyingBlock(XygloConvert.getColour(fb.getColour()), m_context.m_lineEffect, position, size);
-                drawBlock.setVelocity(XygloConvert.getVector3(fb.getVelocity()));
-
-                // Naming is useful for tracking these blocks
-                drawBlock.setName(fb.getName());
-
-                // Set any rotation amount
-                drawBlock.setRotation(fb.getInitialAngle());
-
-                // Initial build and draw
-                //
-                drawBlock.buildBuffers(m_context.m_graphics.GraphicsDevice);
-                drawBlock.draw(m_context.m_graphics.GraphicsDevice);
-
-                // Push to dictionary
-                //
-                m_context.m_drawableComponents[component] = drawBlock;
-
-                // Add to the physics handler if we need to
-                //
-                m_physicsHandler.addDrawable(component, drawBlock);
-
-            }
-            else if (component.GetType() == typeof(Xyglo.Brazil.BrazilInterloper))
-            {
-                BrazilInterloper il = (Xyglo.Brazil.BrazilInterloper)component;
-#if ATTEMPT_ONE
-                        XygloSphere drawSphere = new XygloSphere(XygloConvert.getColour(il.getColour()), m_lineEffect, il.getPosition(), 10.0f);
-                        drawSphere.setRotation(il.getRotation());
-#else
-                XygloComponentGroup group = new XygloComponentGroup(XygloComponentGroupType.Interloper, m_context.m_lineEffect, Vector3.Zero);
-                XygloFlyingBlock drawBlock = new XygloFlyingBlock(XygloConvert.getColour(il.getColour()), m_context.m_lineEffect, il.getPosition(), il.getSize());
-                group.addComponent(drawBlock);
-
-                // Set the name of the component group from the interloper
-                //
-                group.setName(il.getName());
-
-                XygloSphere drawSphere = new XygloSphere(XygloConvert.getColour(il.getColour()), m_context.m_lineEffect, il.getPosition(), il.getSize().X);
-                drawSphere.setRotation(il.getRotation());
-                group.addComponentRelative(drawSphere, new Vector3(0, -(float)il.getSize().X, 0));
-
-                group.buildBuffers(m_context.m_graphics.GraphicsDevice);
-                group.draw(m_context.m_graphics.GraphicsDevice);
-
-                //group.setVelocity(new Vector3(0.01f, 0, 0));
-
-                group.setVelocity(XygloConvert.getVector3(il.getVelocity()));
-                m_context.m_drawableComponents[component] = group;
-
-                m_physicsHandler.addDrawable(component, group);
-#endif
-            }
-            else if (component.GetType() == typeof(Xyglo.Brazil.BrazilBannerText))
-            {
-                // A BrazilBanner we have to draw according to app mode - if we're
-                // hosting a container then draw the banner within the container else
-                // we use the whole screen.
-                //
-                BrazilBannerText bt = (Xyglo.Brazil.BrazilBannerText)component;
-
-                // The helper method does all the hard work in getting this position
-                //
-                if (view == null)
-                {
-                    Vector3 position = XygloConvert.getTextPosition(bt, m_context.m_fontManager, m_context.m_graphics.GraphicsDevice.Viewport.Width, m_context.m_graphics.GraphicsDevice.Viewport.Height);
-                    m_context.m_overlaySpriteBatch.Begin();
-                    XygloBannerText bannerText = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(bt.getColour()), position, bt.getSize(), bt.getText());
-                    bannerText.draw(m_context.m_graphics.GraphicsDevice);
-                    m_context.m_overlaySpriteBatch.End();
-                }
-                else
-                {
-                    //Vector3 position = view.getPosition() + XygloConvert.getTextPosition(bt, m_context.m_fontManager, m_context.m_graphics.GraphicsDevice.Viewport.Width, m_context.m_graphics.GraphicsDevice.Viewport.Height);
-                    Vector3 position = view.getPosition() + XygloConvert.getComponentRelativePosition(bt, view);
-
-                    m_context.m_spriteBatch.Begin(SpriteSortMode.Texture, BlendState.Additive, SamplerState.PointClamp, DepthStencilState.DepthRead, RasterizerState.CullNone, m_context.m_basicEffect);
-                    XygloBannerText bannerText = new XygloBannerText(m_context.m_spriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(bt.getColour()), position, bt.getSize(), bt.getText());
-                    bannerText.draw(m_context.m_graphics.GraphicsDevice);
-                    m_context.m_spriteBatch.End();
-                }
-            }
-            else if (component.GetType() == typeof(Xyglo.Brazil.BrazilHud))
-            {
-                BrazilHud bh = (Xyglo.Brazil.BrazilHud)component;
-                Vector3 position = XygloConvert.getVector3(bh.getPosition());
-
-                if (bh.getApp() == null)
-                {
-                    if (m_frameCounter.getFrameRate() > 0)
-                    {
-                        string fpsText = "FPS = " + m_frameCounter.getFrameRate();
-
-                        m_context.m_overlaySpriteBatch.Begin();
-                        XygloBannerText bannerText = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(bh.getColour()), position, bh.getSize(), fpsText);
-                        bannerText.draw(m_context.m_graphics.GraphicsDevice);
-                        m_context.m_overlaySpriteBatch.End();
-                    }
-
-                    if (m_context.m_project != null)
-                    {
-                        string eyePosition = "[EyePosition] X " + m_eyeHandler.getEyePosition().X + ",Y " + m_eyeHandler.getEyePosition().Y + ",Z " + m_eyeHandler.getEyePosition().Z;
-                        position.Y += m_context.m_fontManager.getOverlayFont().LineSpacing;
-
-                        m_context.m_overlaySpriteBatch.Begin();
-                        XygloBannerText bannerText = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(bh.getColour()), position, bh.getSize(), eyePosition);
-                        bannerText.draw(m_context.m_graphics.GraphicsDevice);
-                        m_context.m_overlaySpriteBatch.End();
-                    }
-                    else if (m_brazilContext.m_interloper != null)
-                    {
-                        // Interloper position
-                        //
-                        Vector3 ipPos = m_context.m_drawableComponents[m_brazilContext.m_interloper].getPosition();
-                        string ipText = "Interloper Position X = " + ipPos.X + ", Y = " + ipPos.Y + ", Z = " + ipPos.Z;
-                        m_context.m_overlaySpriteBatch.Begin();
-                        XygloBannerText ipBanner = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(BrazilColour.Blue), new Vector3(0, m_context.m_fontManager.getOverlayFont().LineSpacing, 0), 1.0f, ipText);
-                        ipBanner.draw(m_context.m_graphics.GraphicsDevice);
-
-                        // Interloper score
-                        //
-                        string ipScore = "Score = " + m_brazilContext.m_interloper.getScore();
-                        XygloBannerText ipScoreText = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(BrazilColour.Green), new Vector3(0, m_context.m_fontManager.getOverlayFont().LineSpacing * 2, 0), 1.0f, ipScore);
-                        ipScoreText.draw(m_context.m_graphics.GraphicsDevice);
-
-                        string ipLives = "Lives = " + m_brazilContext.m_world.getLives();
-                        XygloBannerText ipLivesText = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(BrazilColour.Green), new Vector3(0, m_context.m_fontManager.getOverlayFont().LineSpacing * 3, 0), 1.0f, ipLives);
-                        ipLivesText.draw(m_context.m_graphics.GraphicsDevice);
-                        m_context.m_overlaySpriteBatch.End();
-                    }
-                }
-
-            }
-            else if (component.GetType() == typeof(Xyglo.Brazil.BrazilGoody))
-            {
-                BrazilGoody bg = (BrazilGoody)component;
-
-                if (bg.m_type == BrazilGoodyType.Coin)
-                {
-                    // Build a coin
-                    //
-                    XygloCoin coin = new XygloCoin(Color.Yellow, m_context.m_lineEffect, XygloConvert.getVector3(bg.getPosition()), bg.getSize().X);
-                    coin.setRotation(bg.getRotation());
-                    coin.buildBuffers(m_context.m_graphics.GraphicsDevice);
-                    coin.draw(m_context.m_graphics.GraphicsDevice);
-
-                    // And store in drawable component array
-                    //
-                    m_context.m_drawableComponents[component] = coin;
-
-                    m_physicsHandler.addDrawable(component, coin);
-                }
-                else
-                {
-                    throw new XygloException("Update", "Unsupported Goody Type");
-                }
-            }
-            else if (component.GetType() == typeof(Xyglo.Brazil.BrazilBaddy))
-            {
-                Logger.logMsg("Draw Baddy for the first time");
-            }
-            else if (component.GetType() == typeof(Xyglo.Brazil.BrazilFinishBlock))
-            {
-                //Logger.logMsg("Draw Finish Block for the first time");
-            }
-            else if (component.GetType() == typeof(Xyglo.Brazil.BrazilMenu))
-            {
-                BrazilMenu bMenu = (BrazilMenu)component;
-
-                // Line effect or Basic effect here?
-                //
-                XygloMenu menu = new XygloMenu(m_context.m_fontManager, m_context.m_spriteBatch, Color.DarkGray, m_context.m_lineEffect, m_mouse.getLastClickWorldPosition(), m_mouse.geLastClickCursorOffset(), m_context.m_project.getSelectedView().getViewSize());
-
-                foreach (BrazilMenuOption item in bMenu.getMenuOptions().Keys)
-                {
-                    menu.addOption(item.m_optionName);
-                }
-
-                // Build the buffers and draw
-                //
-                menu.buildBuffers(m_context.m_graphics.GraphicsDevice);
-                menu.draw(m_context.m_graphics.GraphicsDevice);
-                m_context.m_drawableComponents[component] = menu;
-            }
-            else if (component.GetType() == typeof(BrazilTestBlock))
-            {
-                BrazilTestBlock bTB = (BrazilTestBlock)component;
-                XygloTexturedBlock block = new XygloTexturedBlock(XygloConvert.getColour(bTB.getColour()), m_context.m_physicsEffect, bTB.getPosition(), bTB.getSize());
-
-                block.buildBuffers(m_context.m_graphics.GraphicsDevice);
-                block.draw(m_context.m_graphics.GraphicsDevice);
-                m_context.m_drawableComponents[component] = block;
-
-                m_physicsHandler.addDrawable(component, block);
-            }
-        }
 
         /// <summary>
         /// Draw the Xyglo Components
@@ -2271,7 +2002,7 @@ namespace Xyglo.Brazil.Xna
                 //
                 if (!m_context.m_drawableComponents.ContainsKey(component))
                 {
-                    createInitialXygloDrawable(view, component);
+                    m_xygloFactory.createInitialXygloDrawable(view, component);
                     continue;
                 }
 
@@ -3056,5 +2787,10 @@ namespace Xyglo.Brazil.Xna
         /// An eye perturber indeed
         /// </summary>
         protected EyePerturber m_eyePerturber = null;
+
+        /// <summary>
+        /// Handle for generating all of our Drawables and Physics related goods
+        /// </summary>
+        protected XygloFactory m_xygloFactory = null;
     }
 }
