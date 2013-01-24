@@ -1502,6 +1502,9 @@ namespace Xyglo.Brazil.Xna
                 if ((!component.getStates().Contains(state) && !m_brazilContext.m_state.equals(compState)) || component.isDestroyed() || component.isHiding())
                     continue;
 
+                // HUD needs to be drawn here
+                //
+
                 // Has this component already been added to the drawableComponent dictionary?  If it hasn't then
                 // we haven't drawn it yet.
                 //

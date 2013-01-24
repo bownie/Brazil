@@ -503,6 +503,15 @@ namespace Xyglo.Brazil.Xna
         /// <param name="gameTime"></param>
         public void performEyeMovement(GameTime gameTime)
         {
+            // First check to see if we have an interloper and if it needs some screen movement
+            //
+            if (m_brazilContext.m_interloper != null)
+            {
+                // Position within screen
+                //
+
+            }
+
             // Check for this change as necessary
             //
             if (m_eyeHandler.isChangingPosition())
@@ -518,17 +527,18 @@ namespace Xyglo.Brazil.Xna
                 m_eyeHandler.changeEyePosition(gameTime);
             }
             /*
-        else
-        {
-            // Perform some humanising/vomitising of the view depending on the effect..
-            //
-            if (m_eyePerturber == null)
+            else
             {
-                m_eyePerturber = new EyePerturber(XygloConvert.getBrazilVector3(m_eye), 5.0f, 5.0f, 10.0, gameTime.TotalGameTime.TotalSeconds);
-            }
+                // Perform some humanising/vomitising of the view depending on the effect..
+                //
+                if (m_eyePerturber == null)
+                {
+                    m_eyePerturber = new EyePerturber(XygloConvert.getBrazilVector3(m_eye), 5.0f, 5.0f, 10.0, gameTime.TotalGameTime.TotalSeconds);
+                }
 
-            m_eye = XygloConvert.getVector3(m_eyePerturber.getPerturbedPosition(gameTime.TotalGameTime.TotalSeconds));
-        }*/
+                m_eye = XygloConvert.getVector3(m_eyePerturber.getPerturbedPosition(gameTime.TotalGameTime.TotalSeconds));
+            }*/
+
         }
 
         /// <summary>
