@@ -138,6 +138,7 @@
     <Compile Include="Xyglo.Brazil.Xna\XygloCoin.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloContext.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloEgg.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\XygloEngine.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloEventEmitter.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloEvents.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloException.cs" />

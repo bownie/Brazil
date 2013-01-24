@@ -28,7 +28,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="eyeHandler"></param>
         /// <param name="mouse"></param>
         /// <param name="frameCounter"></param>
-        public XygloFactory(BrazilContext brazilContext, XygloContext context, PhysicsHandler physicsHandler, EyeHandler eyeHandler, XygloMouse mouse, FrameCounter frameCounter)
+        public XygloFactory(XygloContext context, BrazilContext brazilContext, PhysicsHandler physicsHandler, EyeHandler eyeHandler, XygloMouse mouse, FrameCounter frameCounter)
         {
             m_brazilContext = brazilContext;
             m_context = context;
@@ -99,7 +99,7 @@ namespace Xyglo.Brazil.Xna
                 // Add to the physics handler if we need to
                 //
                 //m_physicsHandler.
-                    addDrawable(component, drawBlock);
+                    createPhysical(component, drawBlock);
 
             }
             else if (component.GetType() == typeof(Xyglo.Brazil.BrazilInterloper))
@@ -127,7 +127,7 @@ namespace Xyglo.Brazil.Xna
                 m_context.m_drawableComponents[component] = group;
 
                 //m_physicsHandler.
-                addDrawable(component, group);
+                createPhysical(component, group);
             }
             else if (component.GetType() == typeof(Xyglo.Brazil.BrazilBannerText))
             {
@@ -227,7 +227,7 @@ namespace Xyglo.Brazil.Xna
                     m_context.m_drawableComponents[component] = coin;
 
                     //m_physicsHandler.
-                    addDrawable(component, coin);
+                    createPhysical(component, coin);
                 }
                 else
                 {
@@ -261,7 +261,7 @@ namespace Xyglo.Brazil.Xna
                 m_context.m_drawableComponents[component] = group;
 
                 //m_physicsHandler.
-                addDrawable(component, group);
+                createPhysical(component, group);
             }
             else if (component.GetType() == typeof(Xyglo.Brazil.BrazilFinishBlock))
             {
@@ -296,7 +296,7 @@ namespace Xyglo.Brazil.Xna
                 m_context.m_drawableComponents[component] = block;
 
                 //m_physicsHandler.
-                addDrawable(component, block);
+                createPhysical(component, block);
             }
         }
 
@@ -306,7 +306,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="drawable"></param>
         /// <param name="affectedByGravity"></param>
         /// <param name="moveable"></param>
-        public RigidBody addDrawable(Component component, XygloXnaDrawable drawable)
+        public RigidBody createPhysical(Component component, XygloXnaDrawable drawable)
         {
             RigidBody body = null;
 
@@ -328,7 +328,7 @@ namespace Xyglo.Brazil.Xna
             }
             else if (drawable is XygloComponentGroup)
             {
-                buildComponentGroup(component, (XygloComponentGroup)drawable);
+                createPhysicalComponentGroup(component, (XygloComponentGroup)drawable);
             }
 
             // If we've constructed a body then populate and add
@@ -376,20 +376,20 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="component"></param>
         /// <param name="group"></param>
-        protected void buildComponentGroup(Component component, XygloComponentGroup group)
+        protected void createPhysicalComponentGroup(Component component, XygloComponentGroup group)
         {
 
             if (group.getComponentGroupType() == XygloComponentGroupType.Interloper)
             {
                 XygloXnaDrawable headDrawable = group.getComponents().Where(item => item.GetType() == typeof(XygloSphere)).ToList()[0];
-                RigidBody head = addDrawable(component, headDrawable);
+                RigidBody head = createPhysical(component, headDrawable);
 
                 // Stop rotations  - this might be wrong!
                 //
                 head.SetMassProperties(JMatrix.Zero, 1.0f / 1000.0f, true);
 
                 XygloXnaDrawable bodyDrawable = group.getComponents().Where(item => item.GetType() == typeof(XygloFlyingBlock)).ToList()[0];
-                RigidBody body = addDrawable(component, bodyDrawable);
+                RigidBody body = createPhysical(component, bodyDrawable);
 
                 // See above caveat!
                 //
@@ -407,7 +407,42 @@ namespace Xyglo.Brazil.Xna
                 //XygloComponentGroup group = (XygloComponentGroup)drawable;
                 //foreach (XygloXnaDrawable subDrawable in group.getComponents())
                 //{
-                //addDrawable(component, subDrawable);
+                //createPhysical(component, subDrawable);
+                //}
+
+                // Special value for collection to indicate it
+                //
+                group.setPhysicsHash(-1);
+            }
+            else if (group.getComponentGroupType() == XygloComponentGroupType.Fiend)
+            {
+                XygloXnaDrawable headDrawable = group.getComponents().Where(item => item.GetType() == typeof(XygloSphere)).ToList()[0];
+                RigidBody head = createPhysical(component, headDrawable);
+
+                // Stop rotations  - this might be wrong!
+                //
+                head.SetMassProperties(JMatrix.Zero, 1.0f / 1000.0f, true);
+
+                XygloXnaDrawable bodyDrawable = group.getComponents().Where(item => item.GetType() == typeof(XygloFlyingBlock)).ToList()[0];
+                RigidBody body = createPhysical(component, bodyDrawable);
+
+                // See above caveat!
+                //
+                body.SetMassProperties(JMatrix.Zero, 1.0f / 1000.0f, true);
+
+                // Connect head and torso with a hard point to point connection like so
+                //
+                PointPointDistance headTorso = new PointPointDistance(head, body, head.Position, body.Position);
+                headTorso.Softness = 0.00001f;
+
+                // Add the connection - the body parts are already add implicitly (might want to change that)
+                //
+                m_physicsHandler.World.AddConstraint(headTorso);
+
+                //XygloComponentGroup group = (XygloComponentGroup)drawable;
+                //foreach (XygloXnaDrawable subDrawable in group.getComponents())
+                //{
+                //createPhysical(component, subDrawable);
                 //}
 
                 // Special value for collection to indicate it

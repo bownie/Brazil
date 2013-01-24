@@ -121,6 +121,29 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Check for and destroy any drawables that need removing.  Also do we need to check PhysicsHandler here?
+        /// </summary>
+        public void checkForDestroyedDrawables()
+        {
+            // Check for any drawables which need removing and get rid of them
+            //
+            Dictionary<Component, XygloXnaDrawable> destroyDict = m_context.m_drawableComponents.Where(item => item.Value.shouldBeDestroyed() == true).ToDictionary(p => p.Key, p => p.Value);
+            foreach (Component destroyKey in destroyDict.Keys)
+            {
+                XygloXnaDrawable drawable = m_context.m_drawableComponents[destroyKey];
+                m_context.m_drawableComponents.Remove(destroyKey);
+                drawable = null;
+
+                // Now set the Component to be destroyed so it's not recreated by the next event loop
+                //
+                destroyKey.setDestroyed(true);
+            }
+        }
+
+
+
+
+        /// <summary>
         /// Draw the system CPU load and memory usage next to the FileBuffer
         /// </summary>
         /// <param name="gameTime"></param>
@@ -2238,13 +2261,31 @@ namespace Xyglo.Brazil.Xna
             return (collisionList.Count > 0);
         }
 
+        /// <summary>
+        /// Update all components both in the current context and within any embedded apps
+        /// </summary>
+        public void updateAllComponents()
+        {
+            // Update the components on the main component list (in case we have any)
+            //
+            m_context.m_drawingHelper.updateComponents(m_context.m_componentList, m_brazilContext.m_world);
 
+            if (m_context.m_project != null)
+            {
+                List<BrazilView> brazilViews = m_context.m_project.getViews().Where(item => item.GetType() == typeof(BrazilView)).Cast<BrazilView>().ToList();
+
+                foreach (BrazilView view in brazilViews)
+                {
+                    updateComponents(view.getApp().getComponents(), view.getApp().getWorld());
+                }
+            }
+        }
 
         /// <summary>
         /// Process components for MOVEMENT or creation depending on key context
         /// </summary>
         /// <param name="components"></param>
-        public void updateComponents(List<Component> components, BrazilWorld world)
+        protected void updateComponents(List<Component> components, BrazilWorld world)
         {
             foreach (Component component in components)
             {

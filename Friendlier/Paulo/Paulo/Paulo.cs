@@ -177,7 +177,7 @@ namespace Xyglo.Friendlier
             block1.setMoveable(false);
             addComponent("PlayingGame", block2);
 
-            BrazilBaddy baddy = new BrazilBaddy(BrazilColour.White, new BrazilVector3(800, 400, 0), new BrazilVector3(20, 20, 20));
+            BrazilBaddy baddy = new BrazilBaddy(BrazilColour.Brown, new BrazilVector3(800, 400, 0), new BrazilVector3(20, 20, 20));
             addComponent("PlayingGame", baddy);
 
             testBlocks();

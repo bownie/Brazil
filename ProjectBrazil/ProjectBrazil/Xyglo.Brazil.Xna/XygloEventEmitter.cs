@@ -67,7 +67,7 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
-        ///  Clean exit event
+        ///  Clean exit event.  This calls checkExit() at the XygloXNA level.
         /// </summary>
         /// <param name="e"></param>
         protected virtual void OnCleanExitEvent(CleanExitEventArgs e)

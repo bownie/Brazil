@@ -83,6 +83,17 @@ namespace Xyglo.Brazil.Xna
     }
 
     /// <summary>
+    /// Mode for when we are adding a new BufferView
+    /// </summary>
+    public enum NewBufferViewMode
+    {
+        ScreenPosition,    // Used to position an existing file
+        Relative,          // Used when we're positioning a file that is to be opened
+        NewBuffer,         // Used to relative position a new file
+        Copy               // When copying a bufferview
+    }
+
+    /// <summary>
     /// Returned from XygloMouse
     /// </summary>
     public class NewBufferViewEventArgs : System.EventArgs
@@ -92,15 +103,59 @@ namespace Xyglo.Brazil.Xna
             m_filename = filename;
             m_screenPosition = sp;
             m_viewPosition = position;
+            m_mode = NewBufferViewMode.ScreenPosition;
         }
+
+        /// <summary>
+        /// Second constructor for different mode when we are positioning a file that needs to be opened
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <param name="position"></param>
+        /// <param name="readOnly"></param>
+        /// <param name="tailing"></param>
+        public NewBufferViewEventArgs(string filename, BufferView.ViewPosition position, bool readOnly, bool tailing)
+        {
+            m_filename = filename;
+            m_viewPosition = position;
+            m_readOnly = readOnly;
+            m_isTailing = tailing;
+            m_mode = NewBufferViewMode.Relative;
+        }
+
+        public NewBufferViewEventArgs(BufferView.ViewPosition position)
+        {
+            m_viewPosition = position;
+            m_mode = NewBufferViewMode.NewBuffer;
+        }
+
+        public NewBufferViewEventArgs(FontManager fontManager, BufferView sourceBufferView, BufferView.ViewPosition position)
+        {
+            m_viewPosition = position;
+            m_fontManager = fontManager;
+            m_sourceBufferView = sourceBufferView;
+            m_mode = NewBufferViewMode.Copy;
+        }
+
+
 
         public string getFileName() { return m_filename; }
         public ScreenPosition getScreenPosition() { return m_screenPosition; }
         public BufferView.ViewPosition getViewPosition() { return m_viewPosition; }
+        public bool isReadOnly() { return m_readOnly; }
+        public bool isTailing() { return m_isTailing; }
+        public NewBufferViewMode getMode() { return m_mode; }
+        public FontManager getFontManager() { return m_fontManager; }
+        public BufferView getSourceBufferView() { return m_sourceBufferView; }
 
         protected string m_filename;
         protected ScreenPosition m_screenPosition;
         protected BufferView.ViewPosition m_viewPosition;
+        protected bool m_readOnly = false;
+        protected bool m_isTailing = false;
+        protected FontManager m_fontManager;
+        protected BufferView m_sourceBufferView;
+
+        protected NewBufferViewMode m_mode;
     }
 
     /// <summary>
