@@ -534,11 +534,11 @@ namespace Xyglo.Brazil.Xna
                     BoundingBox bottomBox = new BoundingBox(pos - boxSize, pos - boxSize + new Vector3(boxSize.X, 1, 1));
                     BoundingBox topBox = new BoundingBox(pos + boxSize, pos + boxSize - new Vector3(boxSize.X, 1, 1));
 
-                    float leftLength = (m_eyeHandler.getEyePosition() - pos - boxSize.).Length();
+                    float leftLength = (m_eyeHandler.getEyePosition() + pos - new Vector3(boxSize.X, 0, 0)).Length();
                     float rightLength = (m_eyeHandler.getEyePosition() + pos + new Vector3(boxSize.X, 0, 0)).Length();
 
-                    float bottomLength = (m_eyeHandler.getEyePosition() + pos - new Vector3(0, box, 0)).Length();
-                    float rightLength = (m_eyeHandler.getEyePosition() + pos + new Vector3(boxSize.X, 0, 0)).Length();
+                    //float bottomLength = (m_eyeHandler.getEyePosition() + pos - new Vector3(X, 0, 0)).Length();
+                    //float rightLength = (m_eyeHandler.getEyePosition() + pos + new Vector3(boxSize.X, 0, 0)).Length();
                     
                     //bool doneMovement = false;
                     /*
