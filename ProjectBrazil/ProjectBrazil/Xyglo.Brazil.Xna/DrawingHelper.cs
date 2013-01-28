@@ -28,10 +28,12 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="project"></param>
         /// <param name="flatTexture"></param>
-        public DrawingHelper(XygloContext context, BrazilContext brazilContext)
+        public DrawingHelper(XygloContext context, BrazilContext brazilContext, FrameCounter frameCounter, EyeHandler eyeHandler)
         {
             m_context = context;
             m_brazilContext = brazilContext;
+            m_frameCounter = frameCounter;
+            m_eyeHandler = eyeHandler;
             setPreviewBoundingBox(m_context.m_graphics.GraphicsDevice.Viewport.Width, m_context.m_graphics.GraphicsDevice.Viewport.Height);
 
             // Populate the user help
@@ -2347,6 +2349,37 @@ namespace Xyglo.Brazil.Xna
                             m_context.m_drawableComponents[component].buildBuffers(m_context.m_graphics.GraphicsDevice);
                         }
                     }
+                    else if (component.GetType() == typeof(BrazilHud))
+                    {
+                        string bannerString = "";
+
+                        if (m_frameCounter.getFrameRate() > 0)
+                            bannerString += "FPS = " + m_frameCounter.getFrameRate() + "\n";
+
+                        if (m_context.m_project != null)
+                            bannerString += "[EyePosition] X " + m_eyeHandler.getEyePosition().X + ",Y " + m_eyeHandler.getEyePosition().Y + ",Z " + m_eyeHandler.getEyePosition().Z + "\n";
+
+                        else if (m_brazilContext.m_interloper != null)
+                        {
+                            // Interloper position - get the component group and reverse engineer average position by cheating
+                            //
+                            XygloComponentGroup group = (XygloComponentGroup)m_context.m_drawableComponents[m_brazilContext.m_interloper];
+                            group.updatePositionAfterPhysics();
+
+                            //Vector3 ipPos = m_context.m_drawableComponents[m_brazilContext.m_interloper].getPosition();
+                            //bannerString += "Interloper Position X = " + ipPos.X + ", Y = " + ipPos.Y + ", Z = " + ipPos.Z + "\n";
+
+                            // Interloper score
+                            //
+                            bannerString += "Score = " + m_brazilContext.m_interloper.getScore() + "\n";
+                            bannerString += "Lives = " + m_brazilContext.m_world.getLives() + "\n";
+                        }
+
+                        XygloBannerText bannerText = (XygloBannerText)m_context.m_drawableComponents[component];
+
+                        if (bannerText != null)
+                            bannerText.setText(bannerString);
+                    }
 
 
                     //else if (component.GetType() == typeof(Xyglo.Brazil.BrazilMenu))
@@ -2447,6 +2480,16 @@ namespace Xyglo.Brazil.Xna
         /// Length of information screen - so we know if we can page up or down
         /// </summary>
         protected int m_textScreenLength = 0;
+
+        /// <summary>
+        /// FrameCounter reference
+        /// </summary>
+        protected FrameCounter m_frameCounter;
+
+        /// <summary>
+        /// EyeHandler reference
+        /// </summary>
+        protected EyeHandler m_eyeHandler;
     }
 
 }

@@ -465,7 +465,7 @@ namespace Xyglo.Brazil.Xna
 
             // Initialise the DrawingHelper with our context
             //
-            m_context.m_drawingHelper = new DrawingHelper(m_context, m_brazilContext);
+            m_context.m_drawingHelper = new DrawingHelper(m_context, m_brazilContext, m_frameCounter, m_eyeHandler);
 
             // Setup the sprite font
             //
@@ -1502,25 +1502,16 @@ namespace Xyglo.Brazil.Xna
                 if ((!component.getStates().Contains(state) && !m_brazilContext.m_state.equals(compState)) || component.isDestroyed() || component.isHiding())
                     continue;
 
-                // HUD needs to be drawn here
-                //
-
                 // Has this component already been added to the drawableComponent dictionary?  If it hasn't then
                 // we haven't drawn it yet.
                 //
                 if (!m_context.m_drawableComponents.ContainsKey(component))
-                {
                     m_factory.createInitialXygloDrawable(view, component);
-                    continue;
-                }
 
                 // If a component is not hiding then draw it
                 //
-                m_context.m_drawableComponents[component].draw(m_context.m_graphics.GraphicsDevice);
-
-                // We don't want to use debugdraw
-                //
-                //m_physicsHandler.drawDebug();
+                if (!(component is BrazilInvisibleBlock))
+                    m_context.m_drawableComponents[component].draw(m_context.m_graphics.GraphicsDevice);
             }
 
             // Now we can draw any temporary drawables:

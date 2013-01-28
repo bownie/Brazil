@@ -121,7 +121,7 @@ namespace Xyglo.Brazil.Xna.Physics
         }
 
         /// <summary>
-        /// Accelerate a rigidbody by a certain vector
+        /// Accelerate a rigidbody by a certain vector - this is an input to the model
         /// </summary>
         /// <param name="drawable"></param>
         /// <param name="acceleration"></param>

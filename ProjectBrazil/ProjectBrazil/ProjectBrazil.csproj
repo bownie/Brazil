@@ -74,6 +74,7 @@
   <ItemGroup>
     <Compile Include="BrazilColour.cs" />
     <Compile Include="BrazilFlyingBlock.cs" />
+    <Compile Include="BrazilInvisibleBlock.cs" />
     <Compile Include="BrazilMenu.cs" />
     <Compile Include="BrazilPosition.cs" />
     <Compile Include="BrazilState.cs" />

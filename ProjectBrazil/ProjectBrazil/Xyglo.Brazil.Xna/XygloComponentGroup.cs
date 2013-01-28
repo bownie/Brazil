@@ -214,6 +214,17 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Little cheat to update our position element following a physics update
+        /// </summary>
+        public void updatePositionAfterPhysics()
+        {
+            Vector3 averageVector = Vector3.Zero;
+            foreach(XygloXnaDrawable drawable in m_componentList)
+                averageVector += drawable.getPosition();
+            m_position = averageVector / m_componentList.Count();
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="accelerationVector"></param>

@@ -136,27 +136,23 @@ namespace Xyglo.Brazil.Xna
                 // we use the whole screen.
                 //
                 BrazilBannerText bt = (Xyglo.Brazil.BrazilBannerText)component;
+                XygloBannerText bannerText = null;
 
                 // The helper method does all the hard work in getting this position
                 //
                 if (view == null)
                 {
                     Vector3 position = XygloConvert.getTextPosition(bt, m_context.m_fontManager, m_context.m_graphics.GraphicsDevice.Viewport.Width, m_context.m_graphics.GraphicsDevice.Viewport.Height);
-                    m_context.m_overlaySpriteBatch.Begin();
-                    XygloBannerText bannerText = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(bt.getColour()), position, bt.getSize(), bt.getText());
-                    bannerText.draw(m_context.m_graphics.GraphicsDevice);
-                    m_context.m_overlaySpriteBatch.End();
+                    bannerText = new XygloBannerText("banner1", m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(bt.getColour()), position, bt.getSize(), bt.getText());
                 }
                 else
                 {
-                    //Vector3 position = view.getPosition() + XygloConvert.getTextPosition(bt, m_context.m_fontManager, m_context.m_graphics.GraphicsDevice.Viewport.Width, m_context.m_graphics.GraphicsDevice.Viewport.Height);
                     Vector3 position = view.getPosition() + XygloConvert.getComponentRelativePosition(bt, view);
-
-                    m_context.m_spriteBatch.Begin(SpriteSortMode.Texture, BlendState.Additive, SamplerState.PointClamp, DepthStencilState.DepthRead, RasterizerState.CullNone, m_context.m_basicEffect);
-                    XygloBannerText bannerText = new XygloBannerText(m_context.m_spriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(bt.getColour()), position, bt.getSize(), bt.getText());
-                    bannerText.draw(m_context.m_graphics.GraphicsDevice);
-                    m_context.m_spriteBatch.End();
+                    bannerText = new XygloBannerText("banner2", m_context.m_spriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(bt.getColour()), position, bt.getSize(), bt.getText());
                 }
+
+                m_context.m_drawableComponents[component] = bannerText;
+                
             }
             else if (component.GetType() == typeof(Xyglo.Brazil.BrazilHud))
             {
@@ -165,49 +161,31 @@ namespace Xyglo.Brazil.Xna
 
                 if (bh.getApp() == null)
                 {
-                    if (m_frameCounter.getFrameRate() > 0)
-                    {
-                        string fpsText = "FPS = " + m_frameCounter.getFrameRate();
+                    string bannerString = "";
 
-                        m_context.m_overlaySpriteBatch.Begin();
-                        XygloBannerText bannerText = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(bh.getColour()), position, bh.getSize(), fpsText);
-                        bannerText.draw(m_context.m_graphics.GraphicsDevice);
-                        m_context.m_overlaySpriteBatch.End();
-                    }
+                    if (m_frameCounter.getFrameRate() > 0)
+                        bannerString += "FPS = " + m_frameCounter.getFrameRate() + "\n";
 
                     if (m_context.m_project != null)
                     {
-                        string eyePosition = "[EyePosition] X " + m_eyeHandler.getEyePosition().X + ",Y " + m_eyeHandler.getEyePosition().Y + ",Z " + m_eyeHandler.getEyePosition().Z;
-                        position.Y += m_context.m_fontManager.getOverlayFont().LineSpacing;
-
-                        m_context.m_overlaySpriteBatch.Begin();
-                        XygloBannerText bannerText = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(bh.getColour()), position, bh.getSize(), eyePosition);
-                        bannerText.draw(m_context.m_graphics.GraphicsDevice);
-                        m_context.m_overlaySpriteBatch.End();
+                        bannerString += "[EyePosition] X " + m_eyeHandler.getEyePosition().X + ",Y " + m_eyeHandler.getEyePosition().Y + ",Z " + m_eyeHandler.getEyePosition().Z + "\n";
                     }
                     else if (m_brazilContext.m_interloper != null)
                     {
                         // Interloper position
                         //
-                        Vector3 ipPos = m_context.m_drawableComponents[m_brazilContext.m_interloper].getPosition();
-                        string ipText = "Interloper Position X = " + ipPos.X + ", Y = " + ipPos.Y + ", Z = " + ipPos.Z;
-                        m_context.m_overlaySpriteBatch.Begin();
-                        XygloBannerText ipBanner = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(BrazilColour.Blue), new Vector3(0, m_context.m_fontManager.getOverlayFont().LineSpacing, 0), 1.0f, ipText);
-                        ipBanner.draw(m_context.m_graphics.GraphicsDevice);
+                        //Vector3 ipPos = m_context.m_drawableComponents[m_brazilContext.m_interloper].getPosition();
+                        //bannerString += "Interloper Position X = " + ipPos.X + ", Y = " + ipPos.Y + ", Z = " + ipPos.Z + "\n";
 
                         // Interloper score
                         //
-                        string ipScore = "Score = " + m_brazilContext.m_interloper.getScore();
-                        XygloBannerText ipScoreText = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(BrazilColour.Green), new Vector3(0, m_context.m_fontManager.getOverlayFont().LineSpacing * 2, 0), 1.0f, ipScore);
-                        ipScoreText.draw(m_context.m_graphics.GraphicsDevice);
-
-                        string ipLives = "Lives = " + m_brazilContext.m_world.getLives();
-                        XygloBannerText ipLivesText = new XygloBannerText(m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(BrazilColour.Green), new Vector3(0, m_context.m_fontManager.getOverlayFont().LineSpacing * 3, 0), 1.0f, ipLives);
-                        ipLivesText.draw(m_context.m_graphics.GraphicsDevice);
-                        m_context.m_overlaySpriteBatch.End();
+                        bannerString += "Score = " + m_brazilContext.m_interloper.getScore() +"\n";
+                        bannerString += "Lives = " + m_brazilContext.m_world.getLives() + "\n";
                     }
-                }
 
+                    XygloBannerText bannerText = new XygloBannerText("hug", m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(bh.getColour()), position, bh.getSize(), bannerString);
+                    m_context.m_drawableComponents[component] = bannerText;
+                }
             }
             else if (component.GetType() == typeof(Xyglo.Brazil.BrazilGoody))
             {
@@ -298,10 +276,35 @@ namespace Xyglo.Brazil.Xna
                 //m_physicsHandler.
                 createPhysical(component, block);
             }
+            else if (component.GetType() == typeof(BrazilInvisibleBlock))
+            {
+                createPhysical((BrazilInvisibleBlock)component);
+            }
+            else
+            {
+                throw new XygloException("Update", "Unsupported Brazil Type in XygloFactory");
+            }
         }
 
         /// <summary>
-        /// Interpret a Drawable and add it to the 
+        /// Create an invisible (physical only) item from a component
+        /// </summary>
+        /// <param name="component"></param>
+        /// <returns></returns>
+        public RigidBody createPhysical(BrazilInvisibleBlock block)
+        {
+            RigidBody body = null;
+            body = new RigidBody(new BoxShape(Conversion.ToJitterVector(XygloConvert.getVector3(block.getSize()))));
+            body.Position = Conversion.ToJitterVector(XygloConvert.getVector3(block.getPosition()));
+            body.IsStatic = true;
+            body.Mass = 10000;
+            m_physicsHandler.World.AddBody(body);
+
+            return body;
+        }
+
+        /// <summary>
+        /// Interpret a Drawable and add it to the Physics model according to type
         /// </summary>
         /// <param name="drawable"></param>
         /// <param name="affectedByGravity"></param>

@@ -503,12 +503,69 @@ namespace Xyglo.Brazil.Xna
         /// <param name="gameTime"></param>
         public void performEyeMovement(GameTime gameTime)
         {
-            // First check to see if we have an interloper and if it needs some screen movement
+            // First check to see if we have an interloper and if it needs some screen movement.  We draw a bounding box around
+            // the interloper and see if this intersects completely with the frustrum.  If it does then we're within the scope
+            // of the view - if not, work out which direction we're short in and pan the eye accordingly to keep the interloper
+            // in sight/
             //
             if (m_brazilContext.m_interloper != null)
             {
                 // Position within screen
                 //
+                Rectangle rect = m_context.m_graphics.GraphicsDevice.Viewport.Bounds;
+                
+                Vector3 pos = m_context.m_drawableComponents[m_brazilContext.m_interloper].getPosition();
+                Vector3 boxSize = new Vector3(100.0f, 20.0f, 10.0f);
+                BoundingBox playerBox = new BoundingBox(pos - boxSize, pos + boxSize);
+
+                // We only do frustrum culling for BufferViews for the moment
+                // - intersects might be too grabby but Disjoint didn't appear 
+                // to be grabby enough.
+                //
+                //if (m_context.m_frustrum.Intersects(bb))
+                if (m_context.m_frustrum.Contains(playerBox) != ContainmentType.Contains)
+                {
+                    Logger.logMsg("Escaping the frustrum");
+
+                    // Need to test which side has exited - we create new boundingboxen and retest these
+                    //
+                    BoundingBox leftBox = new BoundingBox(pos - boxSize, pos - boxSize + new Vector3(1, boxSize.Y, 1));
+                    BoundingBox rightBox = new BoundingBox(pos + boxSize, pos + boxSize - new Vector3(1, boxSize.Y, 1));
+                    BoundingBox bottomBox = new BoundingBox(pos - boxSize, pos - boxSize + new Vector3(boxSize.X, 1, 1));
+                    BoundingBox topBox = new BoundingBox(pos + boxSize, pos + boxSize - new Vector3(boxSize.X, 1, 1));
+
+                    float leftLength = (m_eyeHandler.getEyePosition() - pos - boxSize.).Length();
+                    float rightLength = (m_eyeHandler.getEyePosition() + pos + new Vector3(boxSize.X, 0, 0)).Length();
+
+                    float bottomLength = (m_eyeHandler.getEyePosition() + pos - new Vector3(0, box, 0)).Length();
+                    float rightLength = (m_eyeHandler.getEyePosition() + pos + new Vector3(boxSize.X, 0, 0)).Length();
+                    
+                    //bool doneMovement = false;
+                    /*
+                    if (m_context.m_frustrum.Contains(bottomBox) != ContainmentType.Contains)
+                    {
+                        m_eyeHandler.flyToPosition(m_eyeHandler.getEyePosition() + new Vector3(0.0f, 200.0f, 0));
+                        //doneMovement = true;
+                    }
+                    else
+                    if (m_context.m_frustrum.Contains(topBox) != ContainmentType.Contains)
+                    {
+                        m_eyeHandler.flyToPosition(m_eyeHandler.getEyePosition() + new Vector3(0.0f, -200.0f, 0));
+                        //doneMovement = true;
+                    }
+                    else*/
+                    if (m_context.m_frustrum.Contains(leftBox) != ContainmentType.Contains && leftLength > rightLength)
+                    {
+                        m_eyeHandler.flyToPosition(m_eyeHandler.getEyePosition() + new Vector3(-200.0f, 0, 0));
+                        //doneMovement = true;
+                    }
+                    else
+                    if (m_context.m_frustrum.Contains(rightBox) != ContainmentType.Contains && rightLength > leftLength)
+                    {
+                        m_eyeHandler.flyToPosition(m_eyeHandler.getEyePosition() + new Vector3(200.0f, 0, 0));
+                        //doneMovement = true;
+                    }
+                }
 
             }
 

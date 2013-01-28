@@ -17,10 +17,11 @@ namespace Xyglo.Brazil.Xna
         /// <param name="effect"></param>
         /// <param name="size"></param>
         /// <param name="position"></param>
-        public XygloBannerText(SpriteBatch spriteBatch, SpriteFont spriteFont, Color colour, Vector3 position, double size, string text)
+        public XygloBannerText(string label, SpriteBatch spriteBatch, SpriteFont spriteFont, Color colour, Vector3 position, double size, string text)
         {
             // Store the effect
             //m_effect = effect;
+            m_label = label;
             m_colour = colour;
 
             m_size = size;
@@ -39,6 +40,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="device"></param>
         public override void buildBuffers(GraphicsDevice device)
         {
+            Logger.logMsg("UPdating BB");
         }
 
         /// <summary>
@@ -65,9 +67,9 @@ namespace Xyglo.Brazil.Xna
         /// <param name="device"></param>
         public override void draw(GraphicsDevice device)
         {
-            //m_spriteBatch.Begin();
+            m_spriteBatch.Begin();
             m_spriteBatch.DrawString(m_spriteFont, m_text, new Vector2((int)m_position.X, (int)m_position.Y), m_colour, 0, new Vector2(0, 0), (float)m_size, SpriteEffects.None, 0);
-            //m_spriteBatch.End();
+            m_spriteBatch.End();
         }
 
         /// <summary>
@@ -78,6 +80,12 @@ namespace Xyglo.Brazil.Xna
         public override void drawPreview(GraphicsDevice device, BoundingBox fullBoundingBox, BoundingBox previewBoundingBox, Texture2D texture)
         {
         }
+
+        /// <summary>
+        /// Text setter
+        /// </summary>
+        /// <param name="text"></param>
+        public void setText(string text) { m_text = text; }
 
         /// <summary>
         /// Size of this block
@@ -108,6 +116,11 @@ namespace Xyglo.Brazil.Xna
         /// SpriteFont
         /// </summary>
         protected SpriteFont m_spriteFont = null;
+
+        /// <summary>
+        /// The label allows us to find a piece of text
+        /// </summary>
+        public string m_label;
     }
 }
 

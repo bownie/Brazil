@@ -182,6 +182,16 @@ namespace Xyglo.Friendlier
 
             testBlocks();
 
+
+            // Invisible walls front and back
+            //
+            BrazilInvisibleBlock invisibleWallFront = new BrazilInvisibleBlock(new BrazilVector3(-1000, -1000, 10), new BrazilVector3(2000, 2000, 10));
+            //addComponent("PlayingGame", invisibleWallFront);
+
+            BrazilInvisibleBlock invisibleWallBack = new BrazilInvisibleBlock(new BrazilVector3(-1000, -1000, -20), new BrazilVector3(2000, 2000, 10));
+            //addComponent("PlayingGame", invisibleWallBack);
+
+
             /*
             BrazilFlyingBlock block2 = new BrazilFlyingBlock(BrazilColour.Brown, new BrazilVector3(0, 0, 0), new BrazilVector3(100, 20, 20));
             block2.setAffectedByGravity(false);
