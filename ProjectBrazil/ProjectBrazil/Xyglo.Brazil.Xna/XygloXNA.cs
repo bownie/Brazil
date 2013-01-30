@@ -907,6 +907,10 @@ namespace Xyglo.Brazil.Xna
             //
             m_mouse.checkMouse(this, gameTime, m_keyboard, m_eyeHandler.getEyePosition(), m_eyeHandler.getTargetPosition());
 
+            // Look for interloper at the edge of the screen
+            //
+            m_engine.checkInterloperBoundaries(gameTime);
+
             // Eye movement performed here - including auto panning in a game context
             //
             m_engine.performEyeMovement(gameTime);

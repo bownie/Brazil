@@ -498,77 +498,77 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Check to see if we have an interloper and if it needs some screen movement to keep it visible.  We draw a bounding box
+        /// around the interloper and see if this intersects completely with the frustrum.  If it does then we're within the scope
+        /// of the view - if not, work out which direction we're short in and pan the eye accordingly to keep the interloper
+        /// in sight.
+        ///
+        /// </summary>
+        /// <param name="gameTime"></param>
+        public void checkInterloperBoundaries(GameTime gameTime)
+        {
+            if (m_brazilContext.m_interloper == null || m_eyeHandler.isChangingPosition())
+                return;
+
+            // Position within screen
+            //
+            Rectangle rect = m_context.m_graphics.GraphicsDevice.Viewport.Bounds;
+
+            Vector3 pos = m_context.m_drawableComponents[m_brazilContext.m_interloper].getPosition();
+            Vector3 boxSize = new Vector3(100.0f, 20.0f, 10.0f);
+            BoundingBox playerBox = new BoundingBox(pos - boxSize, pos + boxSize);
+
+            // If the player box is within the frustrum then we have nothing to do
+            //
+            if (m_context.m_frustrum.Contains(playerBox) != ContainmentType.Intersects) /// ???
+                return;
+
+            Logger.logMsg("Escaping the frustrum");
+
+            // Need to test which side has exited - we create new boundingboxen and retest these
+            //
+            BoundingBox leftBox = new BoundingBox(pos - boxSize, pos - boxSize + new Vector3(1, boxSize.Y, 1));
+            BoundingBox rightBox = new BoundingBox(pos + boxSize, pos + boxSize - new Vector3(1, boxSize.Y, 1));
+            BoundingBox bottomBox = new BoundingBox(pos - boxSize, pos - boxSize + new Vector3(boxSize.X, 1, 1));
+            BoundingBox topBox = new BoundingBox(pos + boxSize, pos + boxSize - new Vector3(boxSize.X, 1, 1));
+
+            //float leftLength = (m_eyeHandler.getEyePosition() + pos - new Vector3(boxSize.X, 0, 0)).Length();
+            //float rightLength = (m_eyeHandler.getEyePosition() + pos + new Vector3(boxSize.X, 0, 0)).Length();
+
+            // Start with a new eye position equalling old and affect this according to the results
+            //
+            Vector3 newEyePosition = m_eyeHandler.getEyePosition();
+
+            // Adjust new eye position accordindly
+            //
+            if (m_context.m_frustrum.Contains(bottomBox) != ContainmentType.Contains)
+                newEyePosition += new Vector3(0.0f, 100.0f, 0);
+
+            if (m_context.m_frustrum.Contains(topBox) != ContainmentType.Contains)
+                newEyePosition += new Vector3(0.0f, -100.0f, 0);
+
+            if (m_context.m_frustrum.Contains(leftBox) != ContainmentType.Contains)
+                newEyePosition += new Vector3(-2 * boxSize.X, 0, 0);
+
+            if (m_context.m_frustrum.Contains(rightBox) != ContainmentType.Contains)
+                newEyePosition += new Vector3(2 * boxSize.X, 0, 0);
+
+            // And perform movement if necessary - if we don't do any movement here
+            // then something strange is going on with our logic.
+            //
+            if (newEyePosition != m_eyeHandler.getEyePosition())
+                m_eyeHandler.flyToPosition(newEyePosition);
+            //else
+                //Logger.logMsg("checkInterloperBoundaries - should have moved somewhere here");
+        }
+
+
+        /// <summary>
         /// Do some eye movement here as necessary.  Put the auto movement code in here for games too.
         /// </summary>
         /// <param name="gameTime"></param>
         public void performEyeMovement(GameTime gameTime)
         {
-            // First check to see if we have an interloper and if it needs some screen movement.  We draw a bounding box around
-            // the interloper and see if this intersects completely with the frustrum.  If it does then we're within the scope
-            // of the view - if not, work out which direction we're short in and pan the eye accordingly to keep the interloper
-            // in sight/
-            //
-            if (m_brazilContext.m_interloper != null)
-            {
-                // Position within screen
-                //
-                Rectangle rect = m_context.m_graphics.GraphicsDevice.Viewport.Bounds;
-                
-                Vector3 pos = m_context.m_drawableComponents[m_brazilContext.m_interloper].getPosition();
-                Vector3 boxSize = new Vector3(100.0f, 20.0f, 10.0f);
-                BoundingBox playerBox = new BoundingBox(pos - boxSize, pos + boxSize);
-
-                // We only do frustrum culling for BufferViews for the moment
-                // - intersects might be too grabby but Disjoint didn't appear 
-                // to be grabby enough.
-                //
-                //if (m_context.m_frustrum.Intersects(bb))
-                if (m_context.m_frustrum.Contains(playerBox) != ContainmentType.Contains)
-                {
-                    Logger.logMsg("Escaping the frustrum");
-
-                    // Need to test which side has exited - we create new boundingboxen and retest these
-                    //
-                    BoundingBox leftBox = new BoundingBox(pos - boxSize, pos - boxSize + new Vector3(1, boxSize.Y, 1));
-                    BoundingBox rightBox = new BoundingBox(pos + boxSize, pos + boxSize - new Vector3(1, boxSize.Y, 1));
-                    BoundingBox bottomBox = new BoundingBox(pos - boxSize, pos - boxSize + new Vector3(boxSize.X, 1, 1));
-                    BoundingBox topBox = new BoundingBox(pos + boxSize, pos + boxSize - new Vector3(boxSize.X, 1, 1));
-
-                    float leftLength = (m_eyeHandler.getEyePosition() + pos - new Vector3(boxSize.X, 0, 0)).Length();
-                    float rightLength = (m_eyeHandler.getEyePosition() + pos + new Vector3(boxSize.X, 0, 0)).Length();
-
-                    //float bottomLength = (m_eyeHandler.getEyePosition() + pos - new Vector3(X, 0, 0)).Length();
-                    //float rightLength = (m_eyeHandler.getEyePosition() + pos + new Vector3(boxSize.X, 0, 0)).Length();
-                    
-                    //bool doneMovement = false;
-                    /*
-                    if (m_context.m_frustrum.Contains(bottomBox) != ContainmentType.Contains)
-                    {
-                        m_eyeHandler.flyToPosition(m_eyeHandler.getEyePosition() + new Vector3(0.0f, 200.0f, 0));
-                        //doneMovement = true;
-                    }
-                    else
-                    if (m_context.m_frustrum.Contains(topBox) != ContainmentType.Contains)
-                    {
-                        m_eyeHandler.flyToPosition(m_eyeHandler.getEyePosition() + new Vector3(0.0f, -200.0f, 0));
-                        //doneMovement = true;
-                    }
-                    else*/
-                    if (m_context.m_frustrum.Contains(leftBox) != ContainmentType.Contains && leftLength > rightLength)
-                    {
-                        m_eyeHandler.flyToPosition(m_eyeHandler.getEyePosition() + new Vector3(-200.0f, 0, 0));
-                        //doneMovement = true;
-                    }
-                    else
-                    if (m_context.m_frustrum.Contains(rightBox) != ContainmentType.Contains && rightLength > leftLength)
-                    {
-                        m_eyeHandler.flyToPosition(m_eyeHandler.getEyePosition() + new Vector3(200.0f, 0, 0));
-                        //doneMovement = true;
-                    }
-                }
-
-            }
-
             // Check for this change as necessary
             //
             if (m_eyeHandler.isChangingPosition())

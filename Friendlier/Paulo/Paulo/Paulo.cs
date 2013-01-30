@@ -17,7 +17,7 @@ namespace Xyglo.Friendlier
         public Paulo(BrazilVector3 gravity):base()
         {
             m_world.setGravity(gravity);
-            m_world.setBounds(new BrazilBoundingBox(new BrazilVector3(-400, -400, -300), new BrazilVector3(400, 400, 300)));
+            m_world.setBounds(new BrazilBoundingBox(new BrazilVector3(-400, -400, -50), new BrazilVector3(3000, 800, 100)));
 
             // Initialise the states
             //
@@ -163,9 +163,11 @@ namespace Xyglo.Friendlier
             //
             BrazilInterloper paulo = new BrazilInterloper(BrazilColour.White, new BrazilVector3(0, 0, 0), new BrazilVector3(10, 10, 10));
             paulo.setName("Interloper");
+            paulo.setVelocity(new BrazilVector3(250, 0, 0));
             addComponent("PlayingGame", paulo);
 
-            BrazilFlyingBlock block1 = new BrazilFlyingBlock(BrazilColour.Blue, new BrazilVector3(0, 200, 0), new BrazilVector3(600.0f, 100.0f, 10.0f));
+
+            BrazilFlyingBlock block1 = new BrazilFlyingBlock(BrazilColour.Blue, new BrazilVector3(0, 200, 0), new BrazilVector3(600, 20, 10));
             block1.setAffectedByGravity(false);
             //block1.setHardness(0.3f);
             block1.setMoveable(false);
@@ -173,11 +175,11 @@ namespace Xyglo.Friendlier
 
             // Add another block below 
             //
-            BrazilFlyingBlock block2 = new BrazilFlyingBlock(BrazilColour.Blue, new BrazilVector3(600, 400, 0), new BrazilVector3(600, 100, 10));
-            block1.setMoveable(false);
+            BrazilFlyingBlock block2 = new BrazilFlyingBlock(BrazilColour.Blue, new BrazilVector3(630, 260, 0), new BrazilVector3(600, 20, 10));
+            block2.setMoveable(false);
             addComponent("PlayingGame", block2);
 
-            BrazilBaddy baddy = new BrazilBaddy(BrazilColour.Brown, new BrazilVector3(800, 400, 0), new BrazilVector3(20, 20, 20));
+            BrazilBaddy baddy = new BrazilBaddy(BrazilColour.Brown, new BrazilVector3(20, 80, 0), new BrazilVector3(20, 20, 20));
             addComponent("PlayingGame", baddy);
 
             testBlocks();
@@ -190,7 +192,6 @@ namespace Xyglo.Friendlier
 
             BrazilInvisibleBlock invisibleWallBack = new BrazilInvisibleBlock(new BrazilVector3(-1000, -1000, -20), new BrazilVector3(2000, 2000, 10));
             //addComponent("PlayingGame", invisibleWallBack);
-
 
             /*
             BrazilFlyingBlock block2 = new BrazilFlyingBlock(BrazilColour.Brown, new BrazilVector3(0, 0, 0), new BrazilVector3(100, 20, 20));

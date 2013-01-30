@@ -107,6 +107,8 @@ namespace Xyglo.Brazil.Xna
                 BrazilInterloper il = (Xyglo.Brazil.BrazilInterloper)component;
 
                 XygloComponentGroup group = new XygloComponentGroup(XygloComponentGroupType.Interloper, m_context.m_lineEffect, Vector3.Zero);
+                group.setPosition(XygloConvert.getVector3(il.getPosition()));
+
                 XygloFlyingBlock drawBlock = new XygloFlyingBlock(XygloConvert.getColour(il.getColour()), m_context.m_lineEffect, il.getPosition(), il.getSize());
                 group.addComponent(drawBlock);
 
@@ -219,6 +221,8 @@ namespace Xyglo.Brazil.Xna
                 BrazilBaddy baddy = (BrazilBaddy)component;
 
                 XygloComponentGroup group = new XygloComponentGroup(XygloComponentGroupType.Fiend, m_context.m_lineEffect, Vector3.Zero);
+                group.setPosition(XygloConvert.getVector3(baddy.getPosition()));
+
                 XygloFlyingBlock drawBlock = new XygloFlyingBlock(XygloConvert.getColour(baddy.getColour()), m_context.m_lineEffect, baddy.getPosition(), baddy.getSize());
                 group.addComponent(drawBlock);
 
