@@ -120,7 +120,7 @@ namespace Xyglo.Brazil
         /// Get the Component behaviour
         /// </summary>
         /// <returns></returns>
-        public Behaviour getBehaviour() { return m_behaviour; }
+        //public Behaviour getBehaviour() { return m_behaviour; }
 
         /// Get the name
         /// </summary>
@@ -195,8 +195,8 @@ namespace Xyglo.Brazil
         /// <summary>
         /// Default behaviour is none - but could be a goody or a baddy
         /// </summary>
-        [DataMember]
-        protected Behaviour m_behaviour = Behaviour.None;
+        //[DataMember]
+        //protected Behaviour m_behaviour = Behaviour.None;
 
         /// <summary>
         /// List of sub-components

@@ -520,6 +520,8 @@ namespace Xyglo.Brazil.Xna
 
             // If the player box is within the frustrum then we have nothing to do
             //
+
+            Plane leftPlane = m_context.m_frustrum.Left;
             if (m_context.m_frustrum.Contains(playerBox) != ContainmentType.Intersects) /// ???
                 return;
 
@@ -558,8 +560,11 @@ namespace Xyglo.Brazil.Xna
             //
             if (newEyePosition != m_eyeHandler.getEyePosition())
                 m_eyeHandler.flyToPosition(newEyePosition);
-            //else
+            else
+            {
                 //Logger.logMsg("checkInterloperBoundaries - should have moved somewhere here");
+                Thread.Sleep(1);
+            }
         }
 
 

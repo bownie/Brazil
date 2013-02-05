@@ -18,6 +18,7 @@ using System.Diagnostics;
 using BloomPostprocess;
 using System.Security.Permissions;
 
+using Xyglo.Brazil;
 using Xyglo.Brazil.Xna.Physics;
 
 namespace Xyglo.Brazil.Xna
@@ -25,7 +26,7 @@ namespace Xyglo.Brazil.Xna
     /// <summary>
     /// XygloXNA is defined by a XNA Game class - the core of the XNA world.
     /// </summary>
-    public class XygloXNA : Game //, IBrazilApp
+    public class XygloXNA : Game, IBrazilTechnology
     {
         /////////////////////////////// CONSTRUCTORS ////////////////////////////
         /// <summary>
@@ -1083,12 +1084,22 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Public accessor
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="seconds"></param>
+        public void setTemporaryMessage(string message, double seconds)
+        {
+            setTemporaryMessage(message, seconds, null);
+        }
+
+        /// <summary>
         ///  Set a temporary message until a given end time (seconds into the future)
         /// </summary>
         /// <param name="message"></param>
         /// <param name="seconds"></param>
         /// <param name="gameTime"></param>
-        public void setTemporaryMessage(string message, double seconds, GameTime gameTime = null)
+        protected void setTemporaryMessage(string message, double seconds, GameTime gameTime = null)
         {
             m_tempMessage.setTemporaryMessage(message, seconds, gameTime);
         }

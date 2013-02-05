@@ -98,6 +98,7 @@
     <Compile Include="BrazilFinishBlock.cs" />
     <Compile Include="BrazilPaulo.cs" />
     <Compile Include="BrazilTestBlock.cs" />
+    <Compile Include="IBrazilTechnology.cs" />
     <Compile Include="IPhysicalObject.cs" />
     <Compile Include="Xyglo.Brazil.Xna.Physics\CharacterController.cs" />
     <Compile Include="Xyglo.Brazil.Xna.Physics\Conversion.cs" />

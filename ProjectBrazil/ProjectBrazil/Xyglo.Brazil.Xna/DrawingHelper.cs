@@ -2191,7 +2191,7 @@ namespace Xyglo.Brazil.Xna
             m_context.m_overlaySpriteBatch.End();
         }
 
-  
+  /*
         /// <summary>
         /// Check for collisions in m_context.m_drawableComponentss that have some form (hardness != 0).   Return true
         /// if we have a collision and we're also modifying the drawables to have correct velocity
@@ -2261,7 +2261,7 @@ namespace Xyglo.Brazil.Xna
             }
 
             return (collisionList.Count > 0);
-        }
+        }*/
 
         /// <summary>
         /// Update all components both in the current context and within any embedded apps
@@ -2311,7 +2311,7 @@ namespace Xyglo.Brazil.Xna
 
                         // Check for collisions and adjust the position and velocity accordingly before drawing this
                         //
-                        computeCollisions();
+                        //computeCollisions();
 
                         // Store our interloper object
                         //
