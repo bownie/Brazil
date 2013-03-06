@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+//using Xyglo.Gesture;
 
 namespace Xyglo.Brazil.Xna
 {
@@ -153,5 +154,15 @@ namespace Xyglo.Brazil.Xna
         /// Splash screen texture
         /// </summary>
         public Texture2D m_splashScreen;
+
+        /// <summary>
+        /// Listener derived class for the Leap Motion
+        /// </summary>
+        //public LeapListener m_leapListener;
+
+        /// <summary>
+        /// Leap Controller
+        /// </summary>
+        //public Leap.Controller m_leapController;
     }
 }

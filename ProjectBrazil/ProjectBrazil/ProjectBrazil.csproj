@@ -38,6 +38,9 @@
     <Reference Include="Jitter">
       <HintPath>..\OtherLibs\Jitter.dll</HintPath>
     </Reference>
+    <Reference Include="LeapCSharp.NET4.0">
+      <HintPath>..\OtherLibs\LeapCSharp.NET4.0.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Build" />
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
@@ -203,9 +206,16 @@
     <Compile Include="Xyglo.Brazil.Xna\XygloXNA.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloView.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloXnaTextureShape.cs" />
+    <Compile Include="Xyglo.Gesture\LeapListener.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Friendlier.ico" />
+    <Content Include="Leap.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="LeapCSharp.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

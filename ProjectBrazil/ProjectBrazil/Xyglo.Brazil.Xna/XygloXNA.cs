@@ -20,6 +20,7 @@ using System.Security.Permissions;
 
 using Xyglo.Brazil;
 using Xyglo.Brazil.Xna.Physics;
+using Xyglo.Gesture;
 
 namespace Xyglo.Brazil.Xna
 {
@@ -104,8 +105,21 @@ namespace Xyglo.Brazil.Xna
             m_engine.CleanExitEvent += new CleanExitEventHandler(handleCleanExit);
             m_engine.TemporaryMessageEvent += new TemporaryMessageEventHandler(handleTemporaryMessage);
             m_engine.NewBufferViewEvent += new NewBufferViewEventHandler(handleNewBufferView);
+
+
+            // Start the leap test
+            //
+            //testLeap();
         }
 
+        /*
+        protected void testLeap()
+        {
+            // Create a sample listener and controller
+            m_context.m_leapListener = new LeapListener();
+            m_context.m_leapController = new Leap.Controller(m_context.m_leapListener);
+        }
+*/
          /////////////////////////////// METHODS //////////////////////////////////////
         /// <summary>
         /// Set the project
@@ -1660,6 +1674,8 @@ namespace Xyglo.Brazil.Xna
             //
             if (m_kinectWorker != null || (m_systemAnalyser != null && m_systemAnalyser.isWorking()))
                 checkExit(m_context.m_gameTime, true);
+
+            //m_context.m_leapController.RemoveListener(m_context.m_leapListener);
         }
 
 

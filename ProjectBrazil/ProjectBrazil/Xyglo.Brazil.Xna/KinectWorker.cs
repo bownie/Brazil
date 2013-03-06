@@ -13,6 +13,7 @@ using System.Threading;
 using Microsoft.Xna.Framework;
 using System.Diagnostics;
 using System.Management;
+using Xyglo.Gesture;
 
 namespace Xyglo.Brazil.Xna
 {
@@ -38,6 +39,9 @@ namespace Xyglo.Brazil.Xna
                 Logger.logMsg("XygloXNA::initialiseProject() - no kinect device found");
             }
 #endif
+
+            m_leapListener = new LeapListener();
+            m_leapController = new Leap.Controller(m_leapListener);
         }
 
         /// <summary>
@@ -60,6 +64,11 @@ namespace Xyglo.Brazil.Xna
 #if GOT_KINECT
             m_kinectManager.close();
 #endif
+
+            // Remove the listener
+            //
+            m_leapController.RemoveListener(m_leapListener);
+
             Console.WriteLine("KinectWorker::startWorking() - terminating gracefully");
         }
 
@@ -128,5 +137,15 @@ namespace Xyglo.Brazil.Xna
         /// Volatile is used as hint to the compiler that this data member will be accessed by multiple threads.
         /// </summary>
         private volatile bool m_shouldStop;
+
+        /// <summary>
+        /// Xyglo Leap listener
+        /// </summary>
+        protected LeapListener m_leapListener;
+
+        /// <summary>
+        /// Leap controller
+        /// </summary>
+        protected Leap.Controller m_leapController;
     }
 }
