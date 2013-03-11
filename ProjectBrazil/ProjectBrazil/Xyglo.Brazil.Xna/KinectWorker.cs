@@ -20,7 +20,7 @@ namespace Xyglo.Brazil.Xna
     /// <summary>
     /// We have a KinecteWorker thread for initialising the (slow to start) Kinect interface.
     /// </summary>
-    public class KinectWorker
+    public class KinectWorker : XygloEventEmitter
     {
         XygloKinectManager m_kinectManager = null;
 
@@ -42,6 +42,44 @@ namespace Xyglo.Brazil.Xna
 
             m_leapListener = new LeapListener();
             m_leapController = new Leap.Controller(m_leapListener);
+
+            m_leapListener.SwipeEvent += new SwipeEventHandler(handleSwipeEvent);
+        }
+
+        /// <summary>
+        /// Handle the swipe event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        public void handleSwipeEvent(object sender, SwipeEventArgs args)
+        {
+            Logger.logMsg("Got swipe event");
+
+            m_eventQueueMutex.WaitOne();
+            m_eventArgs.Add(args);
+            m_eventQueueMutex.ReleaseMutex();
+        }
+
+
+        /// <summary>
+        /// Get the event queue
+        /// </summary>
+        /// <returns></returns>
+        public System.EventArgs getNextEvent()
+        {
+            m_eventQueueMutex.WaitOne();
+
+            if (m_eventArgs.Count == 0)
+            {
+                m_eventQueueMutex.ReleaseMutex();
+                return null;
+            }
+
+            System.EventArgs rE = m_eventArgs[0];
+            m_eventArgs.RemoveAt(0);
+            m_eventQueueMutex.ReleaseMutex();
+
+            return rE;
         }
 
         /// <summary>
@@ -147,5 +185,15 @@ namespace Xyglo.Brazil.Xna
         /// Leap controller
         /// </summary>
         protected Leap.Controller m_leapController;
+
+        /// <summary>
+        /// List of event args that we've received on this thread
+        /// </summary>
+        protected List<System.EventArgs> m_eventArgs = new List<System.EventArgs>();
+
+        /// <summary>
+        /// Control access to the m_eventArgs list using this mutex
+        /// </summary>
+        public Mutex m_eventQueueMutex = new Mutex();
     }
 }

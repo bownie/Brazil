@@ -896,6 +896,34 @@ namespace Xyglo.Brazil.Xna
             // Do some frame counting
             //
             m_frameCounter.incrementElapsedTime(gameTime.ElapsedGameTime);
+
+            if (m_frameCounter.getElapsedTime() > TimeSpan.FromMilliseconds(50))
+            {
+                System.EventArgs args = m_kinectWorker.getNextEvent();
+
+                if (args != null)
+                {
+                    // Handle swipe
+                    //
+                    if (args.GetType() == typeof(SwipeEventArgs))
+                    {
+                        SwipeEventArgs swipe = (SwipeEventArgs)args;
+
+
+                        // MOVE
+                        //
+                        Vector3 eyeDestination = m_eyeHandler.getEyePosition() + swipe.getDirection() * swipe.getSpeed() / 10.0f;
+                        m_eyeHandler.flyToPosition(eyeDestination);
+                        
+                        // Determine a location for the swipe and move towards it
+                        //
+                        //m_eyeHandler.getEyePosition(), m_eyeHandler.getTargetPosition()
+
+                    }
+
+                }
+
+            }
             if (m_frameCounter.getElapsedTime() > TimeSpan.FromSeconds(1))
                 m_frameCounter.setFrameRate();
 

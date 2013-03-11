@@ -206,6 +206,7 @@
     <Compile Include="Xyglo.Brazil.Xna\XygloXNA.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloView.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloXnaTextureShape.cs" />
+    <Compile Include="Xyglo.Gesture\GestureEvents.cs" />
     <Compile Include="Xyglo.Gesture\LeapListener.cs" />
   </ItemGroup>
   <ItemGroup>

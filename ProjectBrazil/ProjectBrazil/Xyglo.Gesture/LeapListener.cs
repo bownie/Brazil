@@ -45,8 +45,8 @@ namespace Xyglo.Gesture
         {
             Frame frame = arg0.Frame();
 
-            if (frame.Hands.Empty)
-                return;
+            //if (frame.Hands.Empty)
+                //return;
 
             //Logger.logMsg("Got some fingers - count = " + frame.Fingers.Count);
 
@@ -57,13 +57,19 @@ namespace Xyglo.Gesture
                 switch (g.Type)
                 {
                     case Leap.Gesture.GestureType.TYPESWIPE:   
-                        Logger.logMsg("Got swipe");
-
                         SwipeGesture swipe = new SwipeGesture(g);
-
-                        Logger.logMsg("Swipe direction = " + swipe.Direction.x + ", swipe speed = " + swipe.Speed);
-                        //MouseHelper.MouseEvent(MouseHelper.MouseEventFlags.Wheel, (long)(swipe.Direction.y * swipe.Speed));
+                        OnSwipe(new SwipeEventArgs(swipe));
                         break;
+
+                    case Leap.Gesture.GestureType.TYPESCREENTAP:
+
+
+                    case Leap.Gesture.GestureType.TYPECIRCLE:
+                    case Leap.Gesture.GestureType.TYPEKEYTAP:
+
+                    case Leap.Gesture.GestureType.TYPEINVALID:
+                        //Logger.logMsg(
+
 
                     default:
                         Logger.logMsg("Got other type");
@@ -71,6 +77,23 @@ namespace Xyglo.Gesture
                 }
             }
         }
+
+
+        /// <summary>
+        /// Convenience method for using the event
+        /// </summary>
+        /// <param name="e"></param>
+        protected virtual void OnSwipe(SwipeEventArgs e)
+        {
+            if (SwipeEvent != null) SwipeEvent(this, e);
+        }
+
+        /// <summary>
+        /// This listener can emit a SwipeEvent
+        /// </summary>
+        public event SwipeEventHandler SwipeEvent;
+
+        #region ORIGINAL_CPP
         /*
 #include <iostream>
 #include "Leap.h"
@@ -233,5 +256,7 @@ int main() {
   return 0;
 }
         */
+        #endregion
+
     }
 }
