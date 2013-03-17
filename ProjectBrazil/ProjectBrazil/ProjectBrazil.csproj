@@ -152,6 +152,7 @@
     <Compile Include="Xyglo.Brazil.Xna\Component.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloFactory.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloFile.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\XygloFingerPointer.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloGraphics.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloKeyboard.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloKeyboardHandler.cs" />

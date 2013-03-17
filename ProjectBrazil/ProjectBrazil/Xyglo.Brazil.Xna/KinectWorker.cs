@@ -43,18 +43,19 @@ namespace Xyglo.Brazil.Xna
             m_leapListener = new LeapListener();
             m_leapController = new Leap.Controller(m_leapListener);
 
-            m_leapListener.SwipeEvent += new SwipeEventHandler(handleSwipeEvent);
+
+            m_leapListener.SwipeEvent += new SwipeEventHandler(handleQueueEvent);
+            m_leapListener.ScreenTapEvent += new ScreenTapEventHandler(handleQueueEvent);
+            m_leapListener.ScreenPositionEvent += new ScreenPositionEventHandler(handleQueueEvent);
         }
 
         /// <summary>
-        /// Handle the swipe event
+        /// Generic event handler for our local events
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="args"></param>
-        public void handleSwipeEvent(object sender, SwipeEventArgs args)
+        public void handleQueueEvent(object sender, System.EventArgs args)
         {
-            Logger.logMsg("Got swipe event");
-
             m_eventQueueMutex.WaitOne();
             m_eventArgs.Add(args);
             m_eventQueueMutex.ReleaseMutex();
@@ -80,6 +81,20 @@ namespace Xyglo.Brazil.Xna
             m_eventQueueMutex.ReleaseMutex();
 
             return rE;
+        }
+
+        /// <summary>
+        /// Get all the event args that are queued and clear down
+        /// </summary>
+        /// <returns></returns>
+        public System.EventArgs [] getAllEvents()
+        {
+            m_eventQueueMutex.WaitOne();
+            System.EventArgs []rL = new System.EventArgs[m_eventArgs.Count];
+            m_eventArgs.CopyTo(rL);
+            m_eventArgs.Clear();
+            m_eventQueueMutex.ReleaseMutex();
+            return rL;
         }
 
         /// <summary>

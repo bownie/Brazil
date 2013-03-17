@@ -5,7 +5,8 @@
     /// </summary>
     public enum BrazilTemporaryType
     {
-        CopyText
+        CopyText,
+        FingerPointer
     }
     /// <summary>
     /// A BrazilTemporary drawable type - we use this as a Key into a Dictionary that points to a

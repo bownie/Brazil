@@ -36,6 +36,42 @@ namespace Xyglo.Gesture
         protected SwipeGesture m_swipe;
     }
 
+    /// <summary>
+    /// Arguments for a Screen Tap
+    /// </summary>
+    public class ScreenTapEventArgs : System.EventArgs
+    {
+        public ScreenTapEventArgs(ScreenTapGesture screenTap)
+        {
+            m_screenTap = screenTap;
+        }
+
+        protected ScreenTapGesture m_screenTap;
+    }
+
+    
+    /// <summary>
+    /// Screen position with the a pointer
+    /// </summary>
+    public class ScreenPositionEventArgs : System.EventArgs
+    {
+        public ScreenPositionEventArgs(Vector screenPosition, int id)
+        {
+            m_position = new Vector3(screenPosition.x, screenPosition.y, screenPosition.z);
+            m_id = id;
+        }
+
+        public float X() { return m_position.X; }
+        public float Y() { return m_position.Y; }
+        public Vector3 getPosition() { return m_position; }
+        public int getId() { return m_id; }
+
+        protected int m_id;
+        protected Vector3 m_position;
+    }
+
     public delegate void SwipeEventHandler(object sender, SwipeEventArgs e);
+    public delegate void ScreenTapEventHandler(object sender, ScreenTapEventArgs e);
+    public delegate void ScreenPositionEventHandler(object sender, ScreenPositionEventArgs e);
 
 }

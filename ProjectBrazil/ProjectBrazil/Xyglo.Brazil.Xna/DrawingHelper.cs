@@ -101,6 +101,35 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Helper
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
+        public Vector3 getScreenPlaneIntersection(Vector3 v)
+        {
+            return getScreenPlaneIntersection(v.X, v.Y, v.Z);
+        }
+
+        /// <summary>
+        /// Get the Z intersection - defaults to 0
+        /// </summary>
+        /// <returns></returns>
+        public Vector3 getScreenPlaneIntersection(float x, float y, float z = 0)
+        {
+            Vector3 nearsource = new Vector3(x, y, m_context.m_zoomLevel);
+            Vector3 farsource = new Vector3(x, y, z);
+
+            // Invert the Y
+            //
+            Matrix world = Matrix.CreateScale(1, -1, 1);
+
+            Vector3 nearPoint = m_context.m_graphics.GraphicsDevice.Viewport.Unproject(nearsource, m_context.m_projection, m_context.m_viewMatrix, world);
+            Vector3 farPoint = m_context.m_graphics.GraphicsDevice.Viewport.Unproject(farsource, m_context.m_projection, m_context.m_viewMatrix, world);
+
+            return farsource;
+        }
+        
+        /// <summary>
         /// Set the current main display SpriteFont to something in keeping with the resolution and reset some important variables.
         /// </summary>
         public void setSpriteFont()

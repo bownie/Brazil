@@ -598,12 +598,12 @@ namespace Xyglo.Brazil.Xna
 
             // Calculate new window size and resize all BufferViews accordingly
             //
-            if (Window.ClientBounds.Width != m_lastWindowSize.X)
+            if (Window.ClientBounds.Width != m_lastWindowSize.X && Window.ClientBounds.Width > 0)
             {
                 m_context.m_graphics.PreferredBackBufferWidth = Window.ClientBounds.Width;
                 m_context.m_graphics.PreferredBackBufferHeight = (int)(Window.ClientBounds.Width / m_context.m_fontManager.getAspectRatio());
             }
-            else if (Window.ClientBounds.Height != m_lastWindowSize.Y)
+            else if (Window.ClientBounds.Height != m_lastWindowSize.Y && Window.ClientBounds.Height > 0)
             {
                 m_context.m_graphics.PreferredBackBufferWidth = (int)(Window.ClientBounds.Height * m_context.m_fontManager.getAspectRatio());
                 m_context.m_graphics.PreferredBackBufferHeight = Window.ClientBounds.Height;
@@ -885,6 +885,89 @@ namespace Xyglo.Brazil.Xna
             m_brazilContext.m_state = State.Test(newState);
         }
 
+
+        /// <summary>
+        /// Handle gesture controller
+        /// </summary>
+        protected void handleGestures(GameTime gameTime)
+        {
+            // Sanity check
+            //
+            if (m_kinectWorker == null)
+                return;
+
+            foreach (System.EventArgs args in m_kinectWorker.getAllEvents())
+            {
+                // Handle swipe
+                //
+                if (args.GetType() == typeof(SwipeEventArgs))
+                {
+                    SwipeEventArgs swipe = (SwipeEventArgs)args;
+
+
+                    // MOVE
+                    //
+                    Vector3 eyeDestination = m_eyeHandler.getEyePosition() + swipe.getDirection() * swipe.getSpeed() / 10.0f;
+                    m_eyeHandler.flyToPosition(eyeDestination);
+
+                    // Determine a location for the swipe and move towards it
+                    //
+                    //m_eyeHandler.getEyePosition(), m_eyeHandler.getTargetPosition()
+
+                }
+                else if (args.GetType() == typeof(ScreenTapEventArgs))
+                {
+                    Logger.logMsg("Got screen tap");
+                }
+                else if (args.GetType() == typeof(ScreenPositionEventArgs))
+                {
+                    ScreenPositionEventArgs pos = (ScreenPositionEventArgs)args;
+                    //Logger.logMsg("Set pointer ghost X = " + pos.X() + ", Y = " + pos.Y());
+
+                    bool found = false;
+                    // First search for an existing temporary with the same id
+                    //
+                    foreach(BrazilTemporary temp in m_context.m_temporaryDrawables.Keys)
+                    {
+                        if (temp.getIndex() == pos.getId())
+                        {
+                            Vector3 position = m_context.m_drawingHelper.getScreenPlaneIntersection(pos.getPosition());
+                            //Logger.logMsg("Got screen position = " + position);
+                            m_context.m_temporaryDrawables[temp].setPosition(position);
+                            found = true;
+                        }
+                    }
+
+                    // If we've not found a temporary then create one
+                    //
+                    if (!found)
+                    {
+                        XygloFingerPointer pointer = new XygloFingerPointer(pos.getId(), m_context.m_lineEffect, XygloConvert.getBrazilVector3(m_context.m_drawingHelper.getScreenPlaneIntersection(pos.getPosition())));
+
+                        BrazilTemporary temp = new BrazilTemporary(BrazilTemporaryType.FingerPointer, pos.getId());
+                        // Set drop dead as five seconds into the future
+                        temp.setDropDead(gameTime.TotalGameTime.TotalSeconds + 0.5);
+                        m_context.m_temporaryDrawables[temp] = pointer;
+
+
+                        Logger.logMsg("Finger count is now " + m_context.m_temporaryDrawables.Keys.Select(item => item.getType() == BrazilTemporaryType.FingerPointer).Count());
+                    }
+
+
+                    // WIDTH                        
+                    //Window.ClientBounds.Width
+                    /*
+                    if (pos.X() >= Window.ClientBounds.X && (Window.ClientBounds.X + Window.ClientBounds.Width) <= pos.X() &&
+                        pos.Y() >= Window.ClientBounds.Y && (Window.ClientBounds.Y + Window.ClientBounds.Height) <= pos.Y())
+                    {
+                        Logger.logMsg("Pointing at friendlier window");
+                    }*/
+                }
+
+            }
+        }
+
+
         /// <summary>
         /// Allows the game to run logic such as updating the world, checking for collisions, gathering input, and playing audio.
         /// Also handles all the keypresses and other movemements.
@@ -898,32 +981,8 @@ namespace Xyglo.Brazil.Xna
             m_frameCounter.incrementElapsedTime(gameTime.ElapsedGameTime);
 
             if (m_frameCounter.getElapsedTime() > TimeSpan.FromMilliseconds(50))
-            {
-                System.EventArgs args = m_kinectWorker.getNextEvent();
+                handleGestures(gameTime);
 
-                if (args != null)
-                {
-                    // Handle swipe
-                    //
-                    if (args.GetType() == typeof(SwipeEventArgs))
-                    {
-                        SwipeEventArgs swipe = (SwipeEventArgs)args;
-
-
-                        // MOVE
-                        //
-                        Vector3 eyeDestination = m_eyeHandler.getEyePosition() + swipe.getDirection() * swipe.getSpeed() / 10.0f;
-                        m_eyeHandler.flyToPosition(eyeDestination);
-                        
-                        // Determine a location for the swipe and move towards it
-                        //
-                        //m_eyeHandler.getEyePosition(), m_eyeHandler.getTargetPosition()
-
-                    }
-
-                }
-
-            }
             if (m_frameCounter.getElapsedTime() > TimeSpan.FromSeconds(1))
                 m_frameCounter.setFrameRate();
 
