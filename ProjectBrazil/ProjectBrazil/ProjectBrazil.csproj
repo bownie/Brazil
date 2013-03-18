@@ -101,8 +101,11 @@
     <Compile Include="BrazilFinishBlock.cs" />
     <Compile Include="BrazilPaulo.cs" />
     <Compile Include="BrazilTestBlock.cs" />
+    <Compile Include="IBrazilExporter.cs" />
+    <Compile Include="IBrazilScriptable.cs" />
     <Compile Include="IBrazilTechnology.cs" />
     <Compile Include="IPhysicalObject.cs" />
+    <Compile Include="ScriptExporter.cs" />
     <Compile Include="Xyglo.Brazil.Xna.Physics\CharacterController.cs" />
     <Compile Include="Xyglo.Brazil.Xna.Physics\Conversion.cs" />
     <Compile Include="IBrazilApp.cs" />

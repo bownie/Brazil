@@ -9,7 +9,7 @@ namespace Xyglo.Brazil
     /// Interfaces for an App - we need these at the BrazilApp level and also at the XygloXNA level (or
     /// equivalent) if we are to implement Brazil within Brazil
     /// </summary>
-    interface IBrazilApp
+    public interface IBrazilApp
     {
         /// <summary>
         /// Add a Component with a given State - by state name
@@ -41,6 +41,12 @@ namespace Xyglo.Brazil
         /// </summary>
         /// <returns></returns>
         State getState();
+
+        /// <summary>
+        /// Componetn list
+        /// </summary>
+        /// <returns></returns>
+        List<Component> getComponents();
         
     }
 }
