@@ -929,11 +929,21 @@ namespace Xyglo.Brazil.Xna
                     //
                     foreach(BrazilTemporary temp in m_context.m_temporaryDrawables.Keys)
                     {
-                        if (temp.getIndex() == pos.getId())
+                        if (temp.getIndex() == pos.getId() && temp.getType() == BrazilTemporaryType.FingerPointer)
                         {
-                            Vector3 position = m_context.m_drawingHelper.getScreenPlaneIntersection(pos.getPosition());
-                            //Logger.logMsg("Got screen position = " + position);
+                            Vector3 position = m_context.m_drawingHelper.getScreenPlaneIntersection(pos.getScreenPosition());
                             m_context.m_temporaryDrawables[temp].setPosition(position);
+                            found = true;
+                        }
+                        else if (temp.getIndex() == pos.getId() && temp.getAltIndex() == pos.getHandIndex() && temp.getType() == BrazilTemporaryType.FingerBone)
+                        {
+                            Vector3 position = (pos.getFingerStartPosition() + pos.getFingerEndPosition()) / 2;
+                            XygloXnaDrawable drw = m_context.m_temporaryDrawables[temp];
+                            drw.setPosition(m_context.m_drawingHelper.getScreenPlaneIntersection(position));
+
+                            
+                            //drw.setOrientation();
+                            
                             found = true;
                         }
                     }
@@ -942,13 +952,18 @@ namespace Xyglo.Brazil.Xna
                     //
                     if (!found)
                     {
-                        XygloFingerPointer pointer = new XygloFingerPointer(pos.getId(), m_context.m_lineEffect, XygloConvert.getBrazilVector3(m_context.m_drawingHelper.getScreenPlaneIntersection(pos.getPosition())));
+                        XygloFingerPointer pointer = new XygloFingerPointer(pos.getId(), m_context.m_lineEffect, XygloConvert.getBrazilVector3(m_context.m_drawingHelper.getScreenPlaneIntersection(pos.getScreenPosition())));
 
                         BrazilTemporary temp = new BrazilTemporary(BrazilTemporaryType.FingerPointer, pos.getId());
                         // Set drop dead as five seconds into the future
                         temp.setDropDead(gameTime.TotalGameTime.TotalSeconds + 0.5);
                         m_context.m_temporaryDrawables[temp] = pointer;
 
+                        XygloFingerBone bone = new XygloFingerBone(pos.getId(), pos.getHandIndex().ToString(), m_context.m_lineEffect, m_context.m_drawingHelper.getScreenPlaneIntersection(pos.getFingerStartPosition()), m_context.m_drawingHelper.getScreenPlaneIntersection(pos.getFingerEndPosition()));
+                        BrazilTemporary boneTemp = new BrazilTemporary(BrazilTemporaryType.FingerBone, pos.getId());
+                        boneTemp.setAltIndex(pos.getHandIndex().ToString());
+                        boneTemp.setDropDead(gameTime.TotalGameTime.TotalSeconds + 0.5);
+                        m_context.m_temporaryDrawables[boneTemp] = bone;
 
                         Logger.logMsg("Finger count is now " + m_context.m_temporaryDrawables.Keys.Select(item => item.getType() == BrazilTemporaryType.FingerPointer).Count());
                     }

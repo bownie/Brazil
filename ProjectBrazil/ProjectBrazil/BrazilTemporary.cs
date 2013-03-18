@@ -5,8 +5,9 @@
     /// </summary>
     public enum BrazilTemporaryType
     {
-        CopyText,
-        FingerPointer
+        CopyText,       // some ghost text
+        FingerPointer,  // position that the finger is nominally pointing to
+        FingerBone      // the bone of a finger showing its position
     }
     /// <summary>
     /// A BrazilTemporary drawable type - we use this as a Key into a Dictionary that points to a
@@ -49,6 +50,25 @@
         public void setIndex(int index)
         {
             m_index = index;
+        }
+
+
+        /// <summary>
+        /// Set an alternative label
+        /// </summary>
+        /// <param name="altIndex"></param>
+        public void setAltIndex(string altIndex)
+        {
+            m_altIndex = altIndex;
+        }
+
+        /// <summary>
+        /// A label we use in addition to the index
+        /// </summary>
+        /// <returns></returns>
+        public string getAltIndex()
+        {
+            return m_altIndex;
         }
 
         /// <summary>
@@ -119,5 +139,10 @@
         /// Dropdead time for this and associated object if there is no other scope limitation
         /// </summary>
         double m_dropdead = 0;
+
+        /// <summary>
+        /// An alternative index which might take some form of descriptiojn
+        /// </summary>
+        protected string m_altIndex = "";
     }
 }

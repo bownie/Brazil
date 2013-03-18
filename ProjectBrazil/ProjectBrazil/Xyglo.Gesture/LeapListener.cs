@@ -21,6 +21,16 @@ namespace Xyglo.Gesture
             //arg0.EnableGesture(Leap.Gesture.GestureType.TYPEKEYTAP);
             arg0.EnableGesture(Leap.Gesture.GestureType.TYPESCREENTAP);
             arg0.EnableGesture(Leap.Gesture.GestureType.TYPESWIPE);
+
+
+            // Vanilla?
+            //
+            m_mtxFrameTransform = new Matrix();
+
+            m_fFrameScale = 10.0f; // 0.0075f;
+            m_mtxFrameTransform.origin = new Vector(0.0f, -2.0f, 0.5f);
+            m_fPointableRadius = 1.0f; // 0.05f;
+
         }
 
         public override void OnInit(Controller arg0)
@@ -119,7 +129,9 @@ namespace Xyglo.Gesture
                 //Logger.logMsg("Got one pointable");
 
                 Vector hitPoint = pointableScreenPos(latestFrame.Pointables[0], screens);
-                OnScreenPosition(new ScreenPositionEventArgs(hitPoint, latestFrame.Pointables[0].Id));
+                Vector vStartPos = m_mtxFrameTransform.TransformPoint(latestFrame.Pointables[0].TipPosition * m_fFrameScale);
+                Vector vEndPos = m_mtxFrameTransform.TransformDirection(latestFrame.Pointables[0].Direction) * -0.25f;
+                OnScreenPosition(new ScreenPositionEventArgs(hitPoint, vStartPos, vEndPos, latestFrame.Pointables[0].Hand.ToString(), latestFrame.Pointables[0].Id));
                 return;
 
                 /*
@@ -140,8 +152,19 @@ namespace Xyglo.Gesture
             }
         }
 
+        /// <summary>
+        /// Store some timing information from leap
+        /// </summary>
         private long m_currentTime;
+
+        /// <summary>
+        /// Preview time
+        /// </summary>
         private long m_previousTime;
+
+        /// <summary>
+        /// Ticks
+        /// </summary>
         private long m_timeChange;
 
         protected void testFingers(Controller cntrlr)
@@ -203,7 +226,11 @@ namespace Xyglo.Gesture
                                     //MouseCursor.MoveCursor(x, y);
                                     ScreenList screens = cntrlr.CalibratedScreens;
                                     Vector hitPoint = pointableScreenPos(finger, screens);
-                                    OnScreenPosition(new ScreenPositionEventArgs(hitPoint, finger.Id));
+
+                                    Vector vStartPos = m_mtxFrameTransform.TransformPoint(finger.TipPosition * m_fFrameScale );
+                                    Vector vEndPos = m_mtxFrameTransform.TransformDirection(finger.Direction ) * -0.25f;
+
+                                    OnScreenPosition(new ScreenPositionEventArgs(hitPoint, vStartPos, vEndPos, finger.Hand.ToString(), finger.Id));
 
                                     //Console.WriteLine("\n" + new String('=', 40) + "\n");
                                 }
@@ -271,170 +298,12 @@ namespace Xyglo.Gesture
         public event ScreenTapEventHandler ScreenTapEvent;
         public event ScreenPositionEventHandler ScreenPositionEvent;
 
-        #region ORIGINAL_CPP
-        /*
-#include <iostream>
-#include "Leap.h"
-using namespace Leap;
+        /// <summary>
+        /// 
+        /// </summary>
+        protected Matrix m_mtxFrameTransform;
 
-class SampleListener : public Listener {
-  public:
-    virtual void onInit(const Controller&);
-    virtual void onConnect(const Controller&);
-    virtual void onDisconnect(const Controller&);
-    virtual void onExit(const Controller&);
-    virtual void onFrame(const Controller&);
-};
-
-void SampleListener::onInit(const Controller& controller) {
-  std::cout << "Initialized" << std::endl;
-}
-
-void SampleListener::onConnect(const Controller& controller) {
-  std::cout << "Connected" << std::endl;
-  controller.enableGesture(Gesture::TYPE_CIRCLE);
-  controller.enableGesture(Gesture::TYPE_KEY_TAP);
-  controller.enableGesture(Gesture::TYPE_SCREEN_TAP);
-  controller.enableGesture(Gesture::TYPE_SWIPE);
-}
-
-void SampleListener::onDisconnect(const Controller& controller) {
-  std::cout << "Disconnected" << std::endl;
-}
-
-void SampleListener::onExit(const Controller& controller) {
-  std::cout << "Exited" << std::endl;
-}
-
-void SampleListener::onFrame(const Controller& controller) {
-  // Get the most recent frame and report some basic information
-  const Frame frame = controller.frame();
-  std::cout << "Frame id: " << frame.id()
-            << ", timestamp: " << frame.timestamp()
-            << ", hands: " << frame.hands().count()
-            << ", fingers: " << frame.fingers().count()
-            << ", tools: " << frame.tools().count()
-            << ", gestures: " << frame.gestures().count() << std::endl;
-
-  if (!frame.hands().empty()) {
-    // Get the first hand
-    const Hand hand = frame.hands()[0];
-
-    // Check if the hand has any fingers
-    const FingerList fingers = hand.fingers();
-    if (!fingers.empty()) {
-      // Calculate the hand's average finger tip position
-      Vector avgPos;
-      for (int i = 0; i < fingers.count(); ++i) {
-        avgPos += fingers[i].tipPosition();
-      }
-      avgPos /= (float)fingers.count();
-      std::cout << "Hand has " << fingers.count()
-                << " fingers, average finger tip position" << avgPos << std::endl;
-    }
-
-    // Get the hand's sphere radius and palm position
-    std::cout << "Hand sphere radius: " << hand.sphereRadius()
-              << " mm, palm position: " << hand.palmPosition() << std::endl;
-
-    // Get the hand's normal vector and direction
-    const Vector normal = hand.palmNormal();
-    const Vector direction = hand.direction();
-
-    // Calculate the hand's pitch, roll, and yaw angles
-    std::cout << "Hand pitch: " << direction.pitch() * RAD_TO_DEG << " degrees, "
-              << "roll: " << normal.roll() * RAD_TO_DEG << " degrees, "
-              << "yaw: " << direction.yaw() * RAD_TO_DEG << " degrees" << std::endl;
-  }
-
-  // Get gestures
-  const GestureList gestures = frame.gestures();
-  for (int g = 0; g < gestures.count(); ++g) {
-    Gesture gesture = gestures[g];
-
-    switch (gesture.type()) {
-      case Gesture::TYPE_CIRCLE:
-      {
-        CircleGesture circle = gesture;
-        std::string clockwiseness;
-
-        if (circle.pointable().direction().angleTo(circle.normal()) <= PI/4) {
-          clockwiseness = "clockwise";
-        } else {
-          clockwiseness = "counterclockwise";
-        }
-
-        // Calculate angle swept since last frame
-        float sweptAngle = 0;
-        if (circle.state() != Gesture::STATE_START) {
-          CircleGesture previousUpdate = CircleGesture(controller.frame(1).gesture(circle.id()));
-          sweptAngle = (circle.progress() - previousUpdate.progress()) * 2 * PI;
-        }
-        std::cout << "Circle id: " << gesture.id()
-                  << ", state: " << gesture.state()
-                  << ", progress: " << circle.progress()
-                  << ", radius: " << circle.radius()
-                  << ", angle " << sweptAngle * RAD_TO_DEG
-                  <<  ", " << clockwiseness << std::endl;
-        break;
-      }
-      case Gesture::TYPE_SWIPE:
-      {
-        SwipeGesture swipe = gesture;
-        std::cout << "Swipe id: " << gesture.id()
-          << ", state: " << gesture.state()
-          << ", direction: " << swipe.direction()
-          << ", speed: " << swipe.speed() << std::endl;
-        break;
-      }
-      case Gesture::TYPE_KEY_TAP:
-      {
-        KeyTapGesture tap = gesture;
-        std::cout << "Key Tap id: " << gesture.id()
-          << ", state: " << gesture.state()
-          << ", position: " << tap.position()
-          << ", direction: " << tap.direction()<< std::endl;
-        break;
-      }
-      case Gesture::TYPE_SCREEN_TAP:
-      {
-        ScreenTapGesture screentap = gesture;
-        std::cout << "Screen Tap id: " << gesture.id()
-        << ", state: " << gesture.state()
-        << ", position: " << screentap.position()
-        << ", direction: " << screentap.direction()<< std::endl;
-        break;
-      }
-      default:
-        std::cout << "Unknown gesture type." << std::endl;
-        break;
-    }
-  }
-
-  if (!frame.hands().empty() || !gestures.empty()) {
-    std::cout << std::endl;
-  }
-}
-
-int main() {
-  // Create a sample listener and controller
-  SampleListener listener;
-  Controller controller;
-
-  // Have the sample listener receive events from the controller
-  controller.addListener(listener);
-
-  // Keep this process running until Enter is pressed
-  std::cout << "Press Enter to quit..." << std::endl;
-  std::cin.get();
-
-  // Remove the sample listener when done
-  controller.removeListener(listener);
-
-  return 0;
-}
-        */
-        #endregion
-
+        float m_fFrameScale;
+        float m_fPointableRadius;
     }
 }

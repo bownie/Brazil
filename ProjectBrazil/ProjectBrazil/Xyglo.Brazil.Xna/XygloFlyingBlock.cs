@@ -11,6 +11,20 @@ namespace Xyglo.Brazil.Xna
     public class XygloFlyingBlock : XygloXnaDrawableShape
     {
         /// <summary>
+        /// Use this constructor usually when we don't want to draw it yet - for a temp drawable which is going
+        /// to be start/end point based rather than a static or semi-static shape.
+        /// </summary>
+        /// <param name="color"></param>
+        /// <param name="?"></param>
+        public XygloFlyingBlock(Color colour, BasicEffect effect)
+        {
+            m_colour = colour;
+            m_effect = effect;
+
+            if (m_alphaBlendingTest) m_colour.A = 10;
+        }
+
+        /// <summary>
         /// Positional constructor
         /// </summary>
         /// <param name="colour"></param>

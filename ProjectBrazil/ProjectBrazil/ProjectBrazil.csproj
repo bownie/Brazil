@@ -136,6 +136,7 @@
     <Compile Include="Xyglo.Brazil.Xna\BrazilView.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BufferView.cs" />
     <Compile Include="Xyglo.Brazil.Xna\ColourScheme.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\XygloFingerBone.cs" />
     <Compile Include="Xyglo.Brazil.Xna\EyeHandler.cs" />
     <Compile Include="Xyglo.Brazil.Xna\EyePerturber.cs" />
     <Compile Include="Xyglo.Brazil.Xna\FileSystemHelper.cs" />
