@@ -542,6 +542,12 @@ namespace Xyglo.Brazil
         public List<Component> getComponents() { return m_componentList; }
 
         /// <summary>
+        /// Get the resource map
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<string, Resource> getResources() { return m_resourceMap; }
+
+        /// <summary>
         /// Get the world we're operating in
         /// </summary>
         /// <returns></returns>
@@ -569,7 +575,7 @@ namespace Xyglo.Brazil
         protected ActionMap m_actionMap = new ActionMap();
 
         /// <summary>
-        /// List of States our application can be in
+        /// List of States our application can be in - this can relate to Android Activities
         /// </summary>
         [DataMember]
         protected List<State> m_states = new List<State>();
@@ -598,5 +604,18 @@ namespace Xyglo.Brazil
         /// </summary>
         [DataMember]
         protected BrazilAppMode m_mode = BrazilAppMode.App;
+
+        /// <summary>
+        /// Store some resources at the app level
+        /// </summary>
+        [DataMember]
+        protected Dictionary<string, Resource> m_resourceMap = new Dictionary<string, Resource>();
+
+        /// <summary>
+        /// Define a loading screen
+        /// </summary>
+        protected Resource m_loadingScreen;
+
+
     }
 }

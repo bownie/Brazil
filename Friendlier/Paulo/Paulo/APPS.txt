@@ -1,0 +1,21 @@
+﻿Template applications for advertising purposes - wrap and display advert for businesses, also provide an
+income stream through admob integration.
+
+End clients:
+
+- pubs/bars/cafes - drinking games, beer or wine related paraphenalia/games
+- cafes/restaurants - menus, cooking games, food quiz
+- electrical shops/retailers
+- supermarkets - shopping game/recipe suggestions
+- clothes shops - dressing gamess or apps
+- dinner suggestion app - menu planning
+
+Features:
+
+- push notifications
+- news from business
+- offers
+- events
+- share with others via twitter/email etc.
+- website and banner
+

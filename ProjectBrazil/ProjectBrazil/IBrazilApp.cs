@@ -43,6 +43,12 @@ namespace Xyglo.Brazil
         State getState();
 
         /// <summary>
+        /// Get all the states
+        /// </summary>
+        /// <returns></returns>
+        List<State> getStates();
+
+        /// <summary>
         /// Componetn list
         /// </summary>
         /// <returns></returns>

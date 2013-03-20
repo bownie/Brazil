@@ -298,9 +298,14 @@ namespace Xyglo.Brazil.Xna
         public void setOrientation(Matrix orientation) { m_orientation = orientation; }
 
         /// <summary>
-        /// Position of this block
+        /// Position of this block - there might not be an endPosition defined for this shape
         /// </summary>
-        public Vector3 m_position;
+        protected Vector3 m_position;
+
+        /// <summary>
+        /// End point of this drawable if for example it's a line or something
+        /// </summary>
+        protected Vector3 m_endPosition;
 
         /// <summary>
         /// Store locally our colour

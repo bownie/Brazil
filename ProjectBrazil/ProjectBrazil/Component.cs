@@ -191,12 +191,6 @@ namespace Xyglo.Brazil
         /// </summary>
         [DataMember]
         protected bool m_moveable = true;
-        
-        /// <summary>
-        /// Default behaviour is none - but could be a goody or a baddy
-        /// </summary>
-        //[DataMember]
-        //protected Behaviour m_behaviour = Behaviour.None;
 
         /// <summary>
         /// List of sub-components

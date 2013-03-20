@@ -1,10 +1,53 @@
 ﻿Brazil Framework and Paulo
 --------------------------
 
+Backlog
+-------
+
+- Resource definition/class and integration with BrazilApp
+- XML exporter for Android Activities
+- Java generator for Android Activities
+- item preview window
+- position from 
+- colour picker
+- effects picker
+- sky box
+- property viewer
+- texture library
+- image and video previews in directory browser
+- AdMob integration
+
+
+March Sprint 2
+--------------
+- creation of AngelScript output
+- packaging whole lot for deployment
+- integration with Android build path
+- integration with Urho build
+- finger representations on screen
+- select items and windows
+- some form of level design with leap/kinect integration (??)
+- creation/updating of LoomScript output
+- positioning in 3d space
+- apply button (apply changes as a set to the model and files)
+- text buffers to write AI etc
+- screen design and layout (XML interpolation)
+
+
+
+March Sprint 1
+--------------
+- Java android build
+- OpenGL integration at a low level
+- Loom initial playing
+- Urho3D playing
+
+
+
 BUGS
 ----
 
-
+- Position new windows don't work?
 - m_interloper needs nulling when the last BrazilView is closed
 - Font sizes for Overview fonts seem blurred for some reason in other than size 14 for high resolution (small screen)
 

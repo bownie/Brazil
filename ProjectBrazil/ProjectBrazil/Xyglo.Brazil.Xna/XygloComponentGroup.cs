@@ -60,7 +60,7 @@ namespace Xyglo.Brazil.Xna
             newComponent.setParent(this);
 
             // Set position relative to this group and store the component
-            newComponent.m_position = m_position + relativePosition;
+            newComponent.setPosition(m_position + relativePosition);
             m_componentList.Add(newComponent);
 
             // Store the position we've used for this relative add - it's assumed that

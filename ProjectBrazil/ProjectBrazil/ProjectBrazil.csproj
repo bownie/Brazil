@@ -105,6 +105,7 @@
     <Compile Include="IBrazilScriptable.cs" />
     <Compile Include="IBrazilTechnology.cs" />
     <Compile Include="IPhysicalObject.cs" />
+    <Compile Include="Resource.cs" />
     <Compile Include="ScriptExporter.cs" />
     <Compile Include="Xyglo.Brazil.Xna.Physics\CharacterController.cs" />
     <Compile Include="Xyglo.Brazil.Xna.Physics\Conversion.cs" />
@@ -136,6 +137,7 @@
     <Compile Include="Xyglo.Brazil.Xna\BrazilView.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BufferView.cs" />
     <Compile Include="Xyglo.Brazil.Xna\ColourScheme.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\Shape3D.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloFingerBone.cs" />
     <Compile Include="Xyglo.Brazil.Xna\EyeHandler.cs" />
     <Compile Include="Xyglo.Brazil.Xna\EyePerturber.cs" />
