@@ -20,6 +20,7 @@ Backlog
 
 March Sprint 2
 --------------
+- Template BrazilProjects with previews
 - creation of AngelScript output
 - packaging whole lot for deployment
 - integration with Android build path

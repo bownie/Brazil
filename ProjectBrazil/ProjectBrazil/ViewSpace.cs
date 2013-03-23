@@ -79,9 +79,9 @@ namespace Xyglo.Brazil
         /// Default initialise with just an ActionMap
         /// </summary>
         /// <param name="actionMap"></param>
-        public void initialise(ActionMap actionMap, List<Component> componentList, BrazilWorld world, List<State> states, List<Target> targets)
+        public void initialise(ActionMap actionMap, List<Component> componentList, BrazilWorld world, List<State> states, List<Target> targets, Dictionary<string, Resource> resources, string homePath)
         {
-            m_xna = new XygloXNA(actionMap, componentList, world, states, targets);
+            m_xna = new XygloXNA(actionMap, componentList, world, states, targets, resources, homePath);
         }
 
         // Run the main loop

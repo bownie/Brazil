@@ -478,6 +478,7 @@ namespace Xyglo.Brazil.Xna
                         //
                         //BufferView newBV = addNewFileBuffer(position);
                         //setActiveBuffer(newBV);
+                        OnNewBufferViewEvent(new NewBufferViewEventArgs(m_context.m_fontManager, m_context.m_project.getSelectedBufferView(), position));
                         m_brazilContext.m_state = State.Test("TextEditing");
                     }
                     else if (m_brazilContext.m_state.equals("PositionScreenCopy"))

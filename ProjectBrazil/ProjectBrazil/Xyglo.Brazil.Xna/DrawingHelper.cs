@@ -1735,7 +1735,8 @@ namespace Xyglo.Brazil.Xna
             // Draw the project file name
             //
             drawCentredTextOverlay(spriteBatch, graphics, 3, "Project Overview", Color.AntiqueWhite);
-            drawCentredTextOverlay(spriteBatch, graphics, 5, "Project file : " + m_context.m_project.getProjectFile(), Color.LightSeaGreen);
+            drawCentredTextOverlay(spriteBatch, graphics, 5, "Friendlier Project file : " + m_context.m_project.getProjectFile(), Color.LightSeaGreen);
+
 
             // Help text
             //

@@ -271,7 +271,8 @@ namespace Xyglo.Brazil.Xna
             RasterizerState rasterizerState = new RasterizerState();
             rasterizerState.CullMode = CullMode.None;
 
-            device.SamplerStates[0] = SamplerState.AnisotropicWrap; // or Clamp
+            //device.SamplerStates[0] = SamplerState.AnisotropicWrap; // or Clamp
+            device.SamplerStates[0] = SamplerState.AnisotropicClamp; // or Clamp
             device.DepthStencilState = DepthStencilState.Default;
            
             device.RasterizerState = rasterizerState;

@@ -169,6 +169,41 @@ namespace Xyglo.Brazil
         public BrazilApp getApp() { return m_app; }
 
         /// <summary>
+        /// Add a resource to this component
+        /// </summary>
+        /// <param name="resourceName"></param>
+        /// <param name="mode"></param>
+        public void addResource(Resource resource, ResourceMode mode)
+        {
+            m_resourceInstances.Add(new ResourceInstance(resource, mode));
+        }
+
+        /// <summary>
+        /// Get list of resources attached
+        /// </summary>
+        /// <returns></returns>
+        public List<ResourceInstance> getResources()
+        {
+            return m_resourceInstances;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public List<ResourceInstance> getResourceByType(ResourceType type)
+        {
+            return m_resourceInstances.Where(item => item.getResource().getType() == type).ToList();
+        }
+
+        /// <summary>
+        /// List of ResourceInstances
+        /// </summary>
+        [DataMember]
+        List<ResourceInstance> m_resourceInstances = new List<ResourceInstance>();
+
+        /// <summary>
         /// Affected by gravity?
         /// </summary>
         [DataMember]

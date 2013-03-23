@@ -156,13 +156,9 @@ namespace Xyglo.Brazil.Xna
         public Texture2D m_splashScreen;
 
         /// <summary>
-        /// Listener derived class for the Leap Motion
+        /// Xyglo side resource manager
         /// </summary>
-        //public LeapListener m_leapListener;
+        public Dictionary<string, XygloResource> m_resourceMap = new Dictionary<string, XygloResource>();
 
-        /// <summary>
-        /// Leap Controller
-        /// </summary>
-        //public Leap.Controller m_leapController;
     }
 }

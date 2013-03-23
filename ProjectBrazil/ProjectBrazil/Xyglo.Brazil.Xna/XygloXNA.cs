@@ -33,7 +33,7 @@ namespace Xyglo.Brazil.Xna
         /// <summary>
         /// Default constructor
         /// </summary>
-        public XygloXNA(ActionMap actionMap, List<Component> componentList, BrazilWorld world, List<State> states, List<Target> targets)
+        public XygloXNA(ActionMap actionMap, List<Component> componentList, BrazilWorld world, List<State> states, List<Target> targets, Dictionary<string, Resource> resources, string homePath)
         {
             // Setup context and handlers
             //
@@ -47,6 +47,8 @@ namespace Xyglo.Brazil.Xna
             m_brazilContext.m_world = world;
             m_brazilContext.m_states = states;
             m_brazilContext.m_targets = targets;
+            m_brazilContext.m_resourceMap = resources;
+            m_brazilContext.m_homePath = homePath;
 
             // Setup the XygloMouse
             //
@@ -390,6 +392,41 @@ namespace Xyglo.Brazil.Xna
             m_context.m_pannerSpriteBatch = new SpriteBatch(m_context.m_graphics.GraphicsDevice);
         }
 
+        /// <summary>
+        /// Load resources from files into our xyglo resource map
+        /// </summary>
+        protected void loadResources()
+        {
+            foreach (string key in m_brazilContext.m_resourceMap.Keys)
+            {
+                Resource res = m_brazilContext.m_resourceMap[key];
+                switch (res.getType())
+                {
+                    case ResourceType.Image:
+                        XygloImageResource xir = new XygloImageResource(key, m_brazilContext.m_homePath + res.getFilePath());
+                        xir.loadResource(m_context.m_graphics.GraphicsDevice);
+                        m_context.m_resourceMap.Add(key, xir);
+                        Logger.logMsg("Loaded Image resource \"" + key + "\" from " + res.getFilePath());
+                        break;
+
+                    case ResourceType.Audio:
+                        Logger.logMsg("Didn't load Audio resource");
+                        break;
+
+                    case ResourceType.Midi:
+                        Logger.logMsg("Didn't load MIDI resource");
+                        break;
+
+                    case ResourceType.Video:
+                        Logger.logMsg("Didn't load video resource");
+                        break;
+
+                    default:
+                        Logger.logMsg("Unknown resource type");
+                        break;
+                }
+            }
+        }
 
         /// <summary>
         /// LoadContent will be called once per game and is the place to load
@@ -451,6 +488,10 @@ namespace Xyglo.Brazil.Xna
             // Create the overlay SpriteBatch
             //
             m_context.m_overlaySpriteBatch = new SpriteBatch(m_context.m_graphics.GraphicsDevice);
+
+            // Load all the resources
+            //
+            loadResources();
 
             // Create a flat texture for drawing rectangles etc
             //
@@ -1591,6 +1632,22 @@ namespace Xyglo.Brazil.Xna
 
         }
 
+        /// <summary>
+        /// Ensure that the correct texture is loaded into the BasicEffect
+        /// </summary>
+        /// <param name="component"></param>
+        /// <param name="effect"></param>
+        protected void loadComponentTexture(Component component, BasicEffect effect)
+        {
+            if (component.getResourceByType(ResourceType.Image).Count == 0)
+                return;
+
+            // Get the XygloResource using the unique name
+            //
+            XygloImageResource xir = (XygloImageResource)m_context.m_resourceMap[component.getResources()[0].getResource().getName()];
+            effect.Texture = xir.getTexture();
+        }
+
 
         /// <summary>
         /// Draw the Xyglo Components
@@ -1641,8 +1698,11 @@ namespace Xyglo.Brazil.Xna
 
                 // If a component is not hiding then draw it
                 //
-                if (!(component is BrazilInvisibleBlock))
+                if (!(component is BrazilInvisibleBlock) && !(component is BrazilHud))
+                {
+                    loadComponentTexture(component, m_context.m_physicsEffect);
                     m_context.m_drawableComponents[component].draw(m_context.m_graphics.GraphicsDevice);
+                }
             }
 
             // Now we can draw any temporary drawables:
@@ -2269,7 +2329,7 @@ namespace Xyglo.Brazil.Xna
             // as we must avoid circular dependencies.  BrazilPaulo is of app type 'Hosted' so it
             // won't reinitialise XygloXna via the ViewSpace
             //
-            BrazilApp app = new BrazilPaulo(new BrazilVector3(0, 0.1f, 0));
+            BrazilApp app = new BrazilPaulo(new BrazilVector3(0, 0.1f, 0), @"..\..\..\..\..\..\projects\testproject\");
 
             // Now attach the container to this application at the right state for Friendlier - this is
             // the context in which the app itself will be shown and not the state context for the app to

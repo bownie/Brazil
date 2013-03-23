@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Runtime.Serialization;
+using System.IO;
 
 namespace Xyglo.Brazil
 {
@@ -26,16 +27,24 @@ namespace Xyglo.Brazil
     public abstract class BrazilApp : IWorld, IBrazilApp
     {
         /// <summary>
-        /// Default constructor
+        /// Constructor for an app includes a project path for resources
         /// </summary>
-        public BrazilApp(BrazilAppMode appMode = BrazilAppMode.App)
+        public BrazilApp(string projectHome, BrazilAppMode appMode = BrazilAppMode.App)
         {
+            m_homePath = projectHome;
             m_mode = appMode;
 
             // Only initialise the viewspace if the 
             if (m_mode == BrazilAppMode.App)
             {
-                m_viewSpace.initialise(m_actionMap, m_componentList, m_world, m_states, m_targets);
+                m_viewSpace.initialise(m_actionMap, m_componentList, m_world, m_states, m_targets, m_resourceMap, m_homePath);
+            }
+
+            // Check for this directory
+            //
+            if (!Directory.Exists(projectHome))
+            {
+                throw new DirectoryNotFoundException();
             }
         }
 
@@ -548,6 +557,39 @@ namespace Xyglo.Brazil
         public Dictionary<string, Resource> getResources() { return m_resourceMap; }
 
         /// <summary>
+        /// An app has a project home where resources can be loaded
+        /// </summary>
+        public void setProjectHome(string homePath)
+        {
+            m_homePath = homePath;
+        }
+
+        /// <summary>
+        /// Get the home path
+        /// </summary>
+        /// <returns></returns>
+        public string getProjectHome()
+        {
+            return m_homePath;
+        }
+
+        /// <summary>
+        /// Add a resource to a componenet
+        /// </summary>
+        /// <param name="resourceName"></param>
+        /// <param name="component"></param>
+        public void addResource(string resourceName, string filePath, ResourceType type, ResourceMode mode, Component component)
+        {
+            //if (!m_resourceMap.Keys.Contains(resourceName))
+                //throw new Exception("No resource of name " + resourceName + " found in app.");
+
+            if (!m_resourceMap.Keys.Contains(resourceName))
+                m_resourceMap[resourceName] = new Resource(type, resourceName, filePath);
+
+            component.addResource(m_resourceMap[resourceName], mode);
+        }
+
+        /// <summary>
         /// Get the world we're operating in
         /// </summary>
         /// <returns></returns>
@@ -612,10 +654,8 @@ namespace Xyglo.Brazil
         protected Dictionary<string, Resource> m_resourceMap = new Dictionary<string, Resource>();
 
         /// <summary>
-        /// Define a loading screen
+        /// Home path for a project - where resources live
         /// </summary>
-        protected Resource m_loadingScreen;
-
-
+        protected string m_homePath;
     }
 }

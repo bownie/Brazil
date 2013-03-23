@@ -78,28 +78,77 @@ namespace Xyglo.Brazil.Xna
                     size *= multiplier;
                 }
 
-                XygloFlyingBlock drawBlock = new XygloFlyingBlock(XygloConvert.getColour(fb.getColour()), m_context.m_lineEffect, position, size);
-                drawBlock.setVelocity(XygloConvert.getVector3(fb.getVelocity()));
+                /*
+                foreach(ResourceInstance resource in fb.getResources())
+                {
+                    switch (resource.getResource().getType())
+                    {
 
-                // Naming is useful for tracking these blocks
-                drawBlock.setName(fb.getName());
+                    }
+                }*/
 
-                // Set any rotation amount
-                drawBlock.setRotation(fb.getInitialAngle());
-
-                // Initial build and draw
+                // If we have an image attached to this component then draw it with the image
                 //
-                drawBlock.buildBuffers(m_context.m_graphics.GraphicsDevice);
-                drawBlock.draw(m_context.m_graphics.GraphicsDevice);
+                if (m_context.m_resourceMap.Count() > 0) 
+                {
+                    if (fb.getResourceByType(ResourceType.Image).Count > 0)
+                    {
+                        // Get the XygloResource using the unique name
+                        //
+                        XygloImageResource xir = (XygloImageResource)m_context.m_resourceMap[fb.getResources()[0].getResource().getName()];
+                        m_context.m_physicsEffect.Texture = xir.getTexture();
 
-                // Push to dictionary
-                //
-                m_context.m_drawableComponents[component] = drawBlock;
+                        XygloTexturedBlock drawBlock = new XygloTexturedBlock(XygloConvert.getColour(fb.getColour()), m_context.m_physicsEffect, fb.getPosition(), fb.getSize());
+                        drawBlock.setVelocity(XygloConvert.getVector3(fb.getVelocity()));
 
-                // Add to the physics handler if we need to
-                //
-                //m_physicsHandler.
+                        // Naming is useful for tracking these blocks
+                        drawBlock.setName(fb.getName());
+
+                        // Set any rotation amount
+                        drawBlock.setRotation(fb.getInitialAngle());
+
+                        // Initial build and draw
+                        //
+                        drawBlock.buildBuffers(m_context.m_graphics.GraphicsDevice);
+                        drawBlock.draw(m_context.m_graphics.GraphicsDevice);
+
+                        // Push to dictionary
+                        //
+                        m_context.m_drawableComponents[component] = drawBlock;
+
+                        // Add to the physics handler if we need to
+                        //
+                        //m_physicsHandler.
+                        createPhysical(component, drawBlock);
+                    }
+                }
+                else
+                {
+                    // Draw it without a texture
+                    //
+                    XygloFlyingBlock drawBlock = new XygloFlyingBlock(XygloConvert.getColour(fb.getColour()), m_context.m_lineEffect, position, size);
+                    drawBlock.setVelocity(XygloConvert.getVector3(fb.getVelocity()));
+
+                    // Naming is useful for tracking these blocks
+                    drawBlock.setName(fb.getName());
+
+                    // Set any rotation amount
+                    drawBlock.setRotation(fb.getInitialAngle());
+
+                    // Initial build and draw
+                    //
+                    drawBlock.buildBuffers(m_context.m_graphics.GraphicsDevice);
+                    drawBlock.draw(m_context.m_graphics.GraphicsDevice);
+
+                    // Push to dictionary
+                    //
+                    m_context.m_drawableComponents[component] = drawBlock;
+
+                    // Add to the physics handler if we need to
+                    //
+                    //m_physicsHandler.
                     createPhysical(component, drawBlock);
+                }
 
             }
             else if (component.GetType() == typeof(Xyglo.Brazil.BrazilInterloper))
@@ -247,7 +296,38 @@ namespace Xyglo.Brazil.Xna
             }
             else if (component.GetType() == typeof(Xyglo.Brazil.BrazilFinishBlock))
             {
+                BrazilFinishBlock fb = (BrazilFinishBlock)component;
+                // Allow for container view
+                Vector3 position = XygloConvert.getVector3(fb.getPosition());
+                Vector3 size = XygloConvert.getVector3(fb.getSize());
+                float multiplier = 1.0f;
+
                 //Logger.logMsg("Draw Finish Block for the first time");
+                // Draw it without a texture
+                //
+                XygloFinishBlock drawBlock = new XygloFinishBlock(XygloConvert.getColour(fb.getColour()), m_context.m_lineEffect, position, size);
+                drawBlock.setVelocity(XygloConvert.getVector3(fb.getVelocity()));
+
+                // Naming is useful for tracking these blocks
+                drawBlock.setName(fb.getName());
+
+                // Set any rotation amount
+                drawBlock.setRotation(fb.getInitialAngle());
+
+                // Initial build and draw
+                //
+                drawBlock.buildBuffers(m_context.m_graphics.GraphicsDevice);
+                drawBlock.draw(m_context.m_graphics.GraphicsDevice);
+
+                // Push to dictionary
+                //
+                m_context.m_drawableComponents[component] = drawBlock;
+
+                // Add to the physics handler if we need to
+                //
+                //m_physicsHandler.
+                createPhysical(component, drawBlock);
+
             }
             else if (component.GetType() == typeof(Xyglo.Brazil.BrazilMenu))
             {

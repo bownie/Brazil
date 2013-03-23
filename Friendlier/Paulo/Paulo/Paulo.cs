@@ -14,7 +14,7 @@ namespace Xyglo.Friendlier
         /// <summary>
         /// Default constructor
         /// </summary>
-        public Paulo(BrazilVector3 gravity):base()
+        public Paulo(BrazilVector3 gravity, string homePath):base(homePath)
         {
             m_world.setGravity(gravity);
             m_world.setBounds(new BrazilBoundingBox(new BrazilVector3(-400, -400, -50), new BrazilVector3(3000, 800, 100)));
@@ -39,8 +39,8 @@ namespace Xyglo.Friendlier
 
             // Generate our components for our levels and other things blocks
             //
-            generateComponents();
-
+            //generateComponents();
+            testBlocks();
 
             // Big dummy interloper
             //
@@ -129,8 +129,9 @@ namespace Xyglo.Friendlier
 
         protected void testBlocks()
         {
-            BrazilTestBlock testBlock1 = new BrazilTestBlock(BrazilColour.Pink, new BrazilVector3(-60, 0, 0), new BrazilVector3(40, 40, 40));
+            BrazilTestBlock testBlock1 = new BrazilTestBlock(BrazilColour.Pink, new BrazilVector3(0, 0, 0), new BrazilVector3(40, 40, 40));
             //testBlock1.setAffectedByGravity(false);
+            addResource("logo", "xyglo-logo.png", ResourceType.Image, ResourceMode.Centre, testBlock1);
             addComponent("PlayingGame", testBlock1);
 
             BrazilTestBlock testBlock2 = new BrazilTestBlock(BrazilColour.Pink, new BrazilVector3(-120, 0, 0), new BrazilVector3(40, 40, 40));
@@ -171,6 +172,7 @@ namespace Xyglo.Friendlier
             block1.setAffectedByGravity(false);
             //block1.setHardness(0.3f);
             block1.setMoveable(false);
+            addResource("logo", "xyglo-logo.png", ResourceType.Image, ResourceMode.Centre, block1);
             addComponent("PlayingGame", block1);
 
             // Add another block below 
@@ -181,8 +183,6 @@ namespace Xyglo.Friendlier
 
             BrazilBaddy baddy = new BrazilBaddy(BrazilColour.Brown, new BrazilVector3(20, 80, 0), new BrazilVector3(20, 20, 20));
             addComponent("PlayingGame", baddy);
-
-            testBlocks();
 
 
             // Invisible walls front and back

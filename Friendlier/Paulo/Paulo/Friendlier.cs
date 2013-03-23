@@ -13,7 +13,8 @@ namespace Xyglo.Friendlier
     /// </summary>
     class Friendlier : BrazilApp
     {
-        public Friendlier() 
+        public Friendlier(string homePath)
+            : base(homePath)
         {
             initialiseStates();
 

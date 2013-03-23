@@ -9,6 +9,7 @@ End clients:
 - supermarkets - shopping game/recipe suggestions
 - clothes shops - dressing gamess or apps
 - dinner suggestion app - menu planning
+- sports clubs - cricket/rugby/football
 
 Features:
 

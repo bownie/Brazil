@@ -18,7 +18,7 @@ namespace Xyglo.Brazil
         /// BrazilPaulo constructor - note we used the Hosted mode so we don't reinitialise
         /// anything at the drawing level.
         /// </summary>
-        public BrazilPaulo(BrazilVector3 gravity): base(BrazilAppMode.Hosted)
+        public BrazilPaulo(BrazilVector3 gravity, string homePath): base(homePath, BrazilAppMode.Hosted)
         {
             m_world.setGravity(gravity);
             m_world.setBounds(new BrazilBoundingBox(new BrazilVector3(-400, -400, -300), new BrazilVector3(400, 400, 300)));
@@ -151,6 +151,7 @@ namespace Xyglo.Brazil
             // Push onto component list
             //
             //m_componentList.Add(block1);
+            addResource("logo", "xyglo-logo.png", ResourceType.Image, ResourceMode.Centre, block1);
             addComponent("PlayingGame", block1);
 
             BrazilFlyingBlock block2 = new BrazilFlyingBlock(BrazilColour.Brown, new BrazilVector3(0, 0, 0), new BrazilVector3(100, 20, 20));

@@ -12,14 +12,14 @@ namespace Xyglo.Friendlier
         [STAThread]// Setting this as single threaded for cut and paste of all things to work
         static void Main(string[] args)
         {
-            bool friendlier = true;
+            bool friendlier = false;
             BrazilApp app = null;
 
             if (friendlier)
             {
                 // We can create a Friendlier
                 //
-                app = new Friendlier();
+                app = new Friendlier(@"..\..\..\..\..\..\projects\testproject\");
 
                 // And initiliase with default state of TextEditing
                 //
@@ -27,9 +27,9 @@ namespace Xyglo.Friendlier
             }
             else
             {
-                // Or we create a Paulo with an initial gravity vector
+                // Or we create a Paulo with an initial gravity vector and home project directory
                 //
-                app = new Paulo(new BrazilVector3(0, 0.1f, 0));
+                app = new Paulo(new BrazilVector3(0, 0.1f, 0), @"..\..\..\..\..\..\projects\testproject\");
 
                 // Initialise with default state
                 //

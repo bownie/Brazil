@@ -45,5 +45,25 @@ namespace Xyglo.Brazil.Xna
         /// our input.
         /// </summary>
         public BrazilInterloper m_interloper = null;
+
+        /// <summary>
+        /// Store the resources
+        /// </summary>
+        public Dictionary<string, Resource> m_resourceMap = null;
+
+        /// <summary>
+        /// Project home path for resources
+        /// </summary>
+        public string m_homePath;
+
+        /// <summary>
+        /// The current BrazilApp if we have one
+        /// </summary>
+        protected BrazilProject m_brazilProject = null;
+
+        /// <summary>
+        /// Template projects that we can choose from
+        /// </summary>
+        protected List<BrazilProject> m_templateProjects = new List<BrazilProject>();
     }
 }

@@ -2770,7 +2770,5 @@ namespace Xyglo.Brazil.Xna
         //
         [DataMember]
         protected string m_initialMessage = "";
-
     }
-
 }
