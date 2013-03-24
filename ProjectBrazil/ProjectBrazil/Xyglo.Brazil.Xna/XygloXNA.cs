@@ -245,7 +245,7 @@ namespace Xyglo.Brazil.Xna
             // We need to do this to connect up all the BufferViews, FileBuffers and the other components
             // such as FontManager etc.
             //
-            m_context.m_project.connectFloatingWorld();
+            m_context.m_project.connectFloatingWorld(m_brazilContext, m_context);
 
             // Reconnect these views if they exist
             //
@@ -395,11 +395,11 @@ namespace Xyglo.Brazil.Xna
         /// <summary>
         /// Load resources from files into our xyglo resource map
         /// </summary>
-        protected void loadResources()
+        protected void loadResources(Dictionary<string, Resource> resources)
         {
-            foreach (string key in m_brazilContext.m_resourceMap.Keys)
+            foreach (string key in resources.Keys)
             {
-                Resource res = m_brazilContext.m_resourceMap[key];
+                Resource res = resources[key];
                 switch (res.getType())
                 {
                     case ResourceType.Image:
@@ -489,9 +489,9 @@ namespace Xyglo.Brazil.Xna
             //
             m_context.m_overlaySpriteBatch = new SpriteBatch(m_context.m_graphics.GraphicsDevice);
 
-            // Load all the resources
+            // Load all the resources from current resource map
             //
-            loadResources();
+            loadResources(m_brazilContext.m_resourceMap);
 
             // Create a flat texture for drawing rectangles etc
             //
@@ -2340,6 +2340,11 @@ namespace Xyglo.Brazil.Xna
             // Initialise the app with a default state
             //
             app.initialise(State.Test("PlayingGame"));
+
+            // Now we need to instantiate any resources and ensure that they are added to our current resource list
+            //
+            loadResources(app.getResources());
+
 
             // Now insert the app, inside the container into a BrazilView 
             //

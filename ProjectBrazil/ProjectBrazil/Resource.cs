@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace Xyglo.Brazil
 {
@@ -36,6 +37,7 @@ namespace Xyglo.Brazil
     /// We can assign a resource to a State or to a Component and they may be re-used.
     /// 
     /// </summary>
+    [DataContract(Namespace = "http://www.xyglo.com")]
     public class Resource
     {
         public Resource(ResourceType type, string name, string filePath, string description = "")
@@ -75,6 +77,7 @@ namespace Xyglo.Brazil
     /// <summary>
     /// The instance of a Resource in a Component
     /// </summary>
+    [DataContract(Namespace = "http://www.xyglo.com")]
     public class ResourceInstance
     {
         public ResourceInstance(Resource resource, ResourceMode mode = ResourceMode.None, string description = "")
@@ -82,6 +85,19 @@ namespace Xyglo.Brazil
             m_mode = mode;
             m_resource = resource;
         }
+
+        /*
+        private void OnCreated()
+        {
+            m_resource = new Resource(ResourceType.Image, "none");
+        }
+
+        [OnDeserializing]
+        private void OnDeserializing(StreamingContext c)
+        {
+            OnCreated();
+        }
+        */
 
         public Resource getResource() { return m_resource; }
         public ResourceMode getMode() { return m_mode; }

@@ -1070,7 +1070,7 @@ namespace Xyglo.Brazil.Xna
         /// to stop things breaking.  Also we need to initialise things that we haven't
         /// persisted such as commands in the FileBuffers etc.
         /// </summary>
-        public void connectFloatingWorld()
+        public void connectFloatingWorld(BrazilContext brazilContext, XygloContext xygloContext)
         {
             List<BufferView> removeList = new List<BufferView>();
 
@@ -1134,7 +1134,50 @@ namespace Xyglo.Brazil.Xna
                 fb.initialiseAfterDeseralising();
             }
 
+            // Now we have to regenerate any floating Resources to new ResourceInstances
+            //
+            /*
+            foreach (string resourceName in brazilContext.m_resourceMap.Keys)
+            {
+                Resource resource = brazilContext.m_resourceMap[resourceName];
 
+                switch (resource.getType())
+                {
+                }
+
+                XygloResource xygloResource = new XygloResource(resourceName, resource.getFilePath());
+                xygloContext.m_resourceMap.Add(xygloResource);
+            }*/
+
+            foreach (string key in brazilContext.m_resourceMap.Keys)
+            {
+                Resource res = brazilContext.m_resourceMap[key];
+                switch (res.getType())
+                {
+                    case ResourceType.Image:
+                        XygloImageResource xir = new XygloImageResource(key, brazilContext.m_homePath + res.getFilePath());
+                        xir.loadResource(xygloContext.m_graphics.GraphicsDevice);
+                        xygloContext.m_resourceMap.Add(key, xir);
+                        Logger.logMsg("Loaded Image resource \"" + key + "\" from " + res.getFilePath());
+                        break;
+
+                    case ResourceType.Audio:
+                        Logger.logMsg("Didn't load Audio resource");
+                        break;
+
+                    case ResourceType.Midi:
+                        Logger.logMsg("Didn't load MIDI resource");
+                        break;
+
+                    case ResourceType.Video:
+                        Logger.logMsg("Didn't load video resource");
+                        break;
+
+                    default:
+                        Logger.logMsg("Unknown resource type");
+                        break;
+                }
+            }
         }
 
         /// <summary>

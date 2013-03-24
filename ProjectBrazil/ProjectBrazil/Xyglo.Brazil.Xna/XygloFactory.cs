@@ -89,38 +89,35 @@ namespace Xyglo.Brazil.Xna
 
                 // If we have an image attached to this component then draw it with the image
                 //
-                if (m_context.m_resourceMap.Count() > 0) 
+                if (fb.getResourceByType(ResourceType.Image).Count > 0 && m_context.m_resourceMap.Count() > 0)
                 {
-                    if (fb.getResourceByType(ResourceType.Image).Count > 0)
-                    {
-                        // Get the XygloResource using the unique name
-                        //
-                        XygloImageResource xir = (XygloImageResource)m_context.m_resourceMap[fb.getResources()[0].getResource().getName()];
-                        m_context.m_physicsEffect.Texture = xir.getTexture();
+                    // Get the XygloResource using the unique name
+                    //
+                    XygloImageResource xir = (XygloImageResource)m_context.m_resourceMap[fb.getResources()[0].getResource().getName()];
+                    m_context.m_physicsEffect.Texture = xir.getTexture();
 
-                        XygloTexturedBlock drawBlock = new XygloTexturedBlock(XygloConvert.getColour(fb.getColour()), m_context.m_physicsEffect, fb.getPosition(), fb.getSize());
-                        drawBlock.setVelocity(XygloConvert.getVector3(fb.getVelocity()));
+                    XygloTexturedBlock drawBlock = new XygloTexturedBlock(XygloConvert.getColour(fb.getColour()), m_context.m_physicsEffect, fb.getPosition(), fb.getSize());
+                    drawBlock.setVelocity(XygloConvert.getVector3(fb.getVelocity()));
 
-                        // Naming is useful for tracking these blocks
-                        drawBlock.setName(fb.getName());
+                    // Naming is useful for tracking these blocks
+                    drawBlock.setName(fb.getName());
 
-                        // Set any rotation amount
-                        drawBlock.setRotation(fb.getInitialAngle());
+                    // Set any rotation amount
+                    drawBlock.setRotation(fb.getInitialAngle());
 
-                        // Initial build and draw
-                        //
-                        drawBlock.buildBuffers(m_context.m_graphics.GraphicsDevice);
-                        drawBlock.draw(m_context.m_graphics.GraphicsDevice);
+                    // Initial build and draw
+                    //
+                    drawBlock.buildBuffers(m_context.m_graphics.GraphicsDevice);
+                    drawBlock.draw(m_context.m_graphics.GraphicsDevice);
 
-                        // Push to dictionary
-                        //
-                        m_context.m_drawableComponents[component] = drawBlock;
+                    // Push to dictionary
+                    //
+                    m_context.m_drawableComponents[component] = drawBlock;
 
-                        // Add to the physics handler if we need to
-                        //
-                        //m_physicsHandler.
-                        createPhysical(component, drawBlock);
-                    }
+                    // Add to the physics handler if we need to
+                    //
+                    //m_physicsHandler.
+                    createPhysical(component, drawBlock);
                 }
                 else
                 {

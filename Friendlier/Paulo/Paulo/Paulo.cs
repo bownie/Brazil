@@ -135,7 +135,8 @@ namespace Xyglo.Friendlier
             addComponent("PlayingGame", testBlock1);
 
             BrazilTestBlock testBlock2 = new BrazilTestBlock(BrazilColour.Pink, new BrazilVector3(-120, 0, 0), new BrazilVector3(40, 40, 40));
-            //testBlock2.setAffectedByGravity(false);
+            testBlock2.setAffectedByGravity(false);
+            testBlock2.setRotation(2.0f);
             testBlock2.setHardness(1.0f);
             addComponent("PlayingGame", testBlock2);
 

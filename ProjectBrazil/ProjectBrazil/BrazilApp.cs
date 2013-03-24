@@ -46,6 +46,22 @@ namespace Xyglo.Brazil
             {
                 throw new DirectoryNotFoundException();
             }
+
+            connectResourceInstances();
+        }
+
+        protected void connectResourceInstances()
+        {
+            foreach (Component component in m_componentList)
+            {
+                foreach (ResourceInstance instance in component.getResources())
+                {
+                    if (instance.getResource() == null)
+                    {
+                        Console.WriteLine("Need to reinit ResourceINstance");
+                    }
+                }
+            }
         }
 
         /// <summary>

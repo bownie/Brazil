@@ -197,6 +197,17 @@ namespace Xyglo.Brazil
             return m_resourceInstances.Where(item => item.getResource().getType() == type).ToList();
         }
 
+        private void OnCreated()
+        {
+            m_resourceInstances = new List<ResourceInstance>();
+        }
+
+        [OnDeserializing]
+        private void OnDeserializing(StreamingContext c)
+        {
+            OnCreated();
+        }
+
         /// <summary>
         /// List of ResourceInstances
         /// </summary>
