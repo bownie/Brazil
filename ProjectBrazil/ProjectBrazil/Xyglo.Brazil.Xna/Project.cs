@@ -1157,7 +1157,7 @@ namespace Xyglo.Brazil.Xna
                     case ResourceType.Image:
                         XygloImageResource xir = new XygloImageResource(key, brazilContext.m_homePath + res.getFilePath());
                         xir.loadResource(xygloContext.m_graphics.GraphicsDevice);
-                        xygloContext.m_resourceMap.Add(key, xir);
+                        xygloContext.m_xygloResourceMap.Add(key, xir);
                         Logger.logMsg("Loaded Image resource \"" + key + "\" from " + res.getFilePath());
                         break;
 
@@ -1178,6 +1178,7 @@ namespace Xyglo.Brazil.Xna
                         break;
                 }
             }
+
         }
 
         /// <summary>

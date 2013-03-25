@@ -89,11 +89,11 @@ namespace Xyglo.Brazil.Xna
 
                 // If we have an image attached to this component then draw it with the image
                 //
-                if (fb.getResourceByType(ResourceType.Image).Count > 0 && m_context.m_resourceMap.Count() > 0)
+                if (fb.getResourceByType(ResourceType.Image).Count > 0 && m_context.m_xygloResourceMap.Count() > 0)
                 {
                     // Get the XygloResource using the unique name
                     //
-                    XygloImageResource xir = (XygloImageResource)m_context.m_resourceMap[fb.getResources()[0].getResource().getName()];
+                    XygloImageResource xir = (XygloImageResource)m_context.m_xygloResourceMap[fb.getResources()[0].getResource().getName()];
                     m_context.m_physicsEffect.Texture = xir.getTexture();
 
                     XygloTexturedBlock drawBlock = new XygloTexturedBlock(XygloConvert.getColour(fb.getColour()), m_context.m_physicsEffect, fb.getPosition(), fb.getSize());

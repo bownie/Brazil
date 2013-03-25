@@ -158,7 +158,7 @@ namespace Xyglo.Brazil.Xna
         /// <summary>
         /// Xyglo side resource manager
         /// </summary>
-        public Dictionary<string, XygloResource> m_resourceMap = new Dictionary<string, XygloResource>();
+        public Dictionary<string, XygloResource> m_xygloResourceMap = new Dictionary<string, XygloResource>();
 
     }
 }

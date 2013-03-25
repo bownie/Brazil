@@ -599,10 +599,41 @@ namespace Xyglo.Brazil
             //if (!m_resourceMap.Keys.Contains(resourceName))
                 //throw new Exception("No resource of name " + resourceName + " found in app.");
 
-            if (!m_resourceMap.Keys.Contains(resourceName))
+            // Add this resource in if it's eitehr not present in the map or null
+            //
+            if (!m_resourceMap.Keys.Contains(resourceName) || m_resourceMap[resourceName] == null)
                 m_resourceMap[resourceName] = new Resource(type, resourceName, filePath);
 
             component.addResource(m_resourceMap[resourceName], mode);
+        }
+
+        /// <summary>
+        /// In the case of a serialise/deserialise then we have no references to the Resources in ResourceInstances.
+        /// We need to fix this.
+        /// </summary>
+        public void fixResourceInstances()
+        {
+            foreach (Component component in m_componentList)
+            {
+                foreach(ResourceInstance resourceInstance in component.getResources())
+                {
+                    if (resourceInstance.getResource() == null)
+                    {
+                        resourceInstance.setResource(m_resourceMap[resourceInstance.getResourceName()]);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handle after deseriliasation
+        /// </summary>
+        /// <param name="context"></param>
+        [OnDeserialized]
+        private void SetValuesOnDeserialized(StreamingContext context)
+        {
+            fixResourceInstances();
+            // Code not shown.
         }
 
         /// <summary>

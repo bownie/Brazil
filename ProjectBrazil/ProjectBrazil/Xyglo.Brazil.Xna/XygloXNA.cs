@@ -393,7 +393,8 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
-        /// Load resources from files into our xyglo resource map
+        /// Load resources from files into our xyglo resource map.  Possibly completely not necessary any more after
+        /// sorting out serialisation problems.
         /// </summary>
         protected void loadResources(Dictionary<string, Resource> resources)
         {
@@ -405,7 +406,7 @@ namespace Xyglo.Brazil.Xna
                     case ResourceType.Image:
                         XygloImageResource xir = new XygloImageResource(key, m_brazilContext.m_homePath + res.getFilePath());
                         xir.loadResource(m_context.m_graphics.GraphicsDevice);
-                        m_context.m_resourceMap.Add(key, xir);
+                        m_context.m_xygloResourceMap.Add(key, xir);
                         Logger.logMsg("Loaded Image resource \"" + key + "\" from " + res.getFilePath());
                         break;
 
@@ -491,7 +492,7 @@ namespace Xyglo.Brazil.Xna
 
             // Load all the resources from current resource map
             //
-            loadResources(m_brazilContext.m_resourceMap);
+            //loadResources(m_brazilContext.m_resourceMap);
 
             // Create a flat texture for drawing rectangles etc
             //
@@ -1642,9 +1643,16 @@ namespace Xyglo.Brazil.Xna
             if (component.getResourceByType(ResourceType.Image).Count == 0)
                 return;
 
+            // Load the resource if it's not already available
+            //
+            //if (!m_context.m_xygloResourceMap.ContainsKey(component.getResources()[0].getResource().getName()))
+            //{
+                //loadResources(m_brazilContext.m_resourceMap);
+            //}
+
             // Get the XygloResource using the unique name
             //
-            XygloImageResource xir = (XygloImageResource)m_context.m_resourceMap[component.getResources()[0].getResource().getName()];
+            XygloImageResource xir = (XygloImageResource)m_context.m_xygloResourceMap[component.getResources()[0].getResource().getName()];
             effect.Texture = xir.getTexture();
         }
 
@@ -2344,7 +2352,6 @@ namespace Xyglo.Brazil.Xna
             // Now we need to instantiate any resources and ensure that they are added to our current resource list
             //
             loadResources(app.getResources());
-
 
             // Now insert the app, inside the container into a BrazilView 
             //

@@ -56,21 +56,25 @@ namespace Xyglo.Brazil
         /// <summary>
         /// Name for this resource which should be unique in a Resource collection
         /// </summary>
+        [DataMember]
         protected string m_name;
 
         /// <summary>
         /// Path to this resource
         /// </summary>
+        [DataMember]
         protected string m_filePath;
 
         /// <summary>
         /// Type of this resource
         /// </summary>
+        [DataMember]
         protected ResourceType m_type;
 
         /// <summary>
         /// Description
         /// </summary>
+        [DataMember]
         protected string m_description;
     }
 
@@ -82,6 +86,7 @@ namespace Xyglo.Brazil
     {
         public ResourceInstance(Resource resource, ResourceMode mode = ResourceMode.None, string description = "")
         {
+            m_resourceName = resource.getName();
             m_mode = mode;
             m_resource = resource;
         }
@@ -99,11 +104,46 @@ namespace Xyglo.Brazil
         }
         */
 
+        /// <summary>
+        /// Get the resource reference
+        /// </summary>
+        /// <returns></returns>
         public Resource getResource() { return m_resource; }
+
+        /// <summary>
+        /// Set the resource reference
+        /// </summary>
+        /// <param name="resource"></param>
+        public void setResource(Resource resource) { m_resource = resource; }
+
+        /// <summary>
+        /// Get resource mode
+        /// </summary>
+        /// <returns></returns>
         public ResourceMode getMode() { return m_mode; }
 
+        /// <summary>
+        /// Get the resource name
+        /// </summary>
+        /// <returns></returns>
+        public string getResourceName() { return m_resourceName; }
+
+        /// <summary>
+        /// Resource pointer - don't serialise
+        /// </summary>
+        [NonSerialized]
         protected Resource m_resource;
 
+        /// <summary>
+        /// Unique name of resource
+        /// </summary>
+        [DataMember]
+        protected string m_resourceName;
+
+        /// <summary>
+        /// Resource mode
+        /// </summary>
+        [DataMember]
         protected ResourceMode m_mode;
     }
 

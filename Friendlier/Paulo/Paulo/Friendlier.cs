@@ -51,6 +51,7 @@ namespace Xyglo.Friendlier
                 try
                 {
                     project = Project.dataContractDeserialise(fontManager, projectFile);
+                    copyResourceMap(project, m_resourceMap);
                 }
                 catch (Exception /*e*/)
                 {
@@ -176,6 +177,31 @@ namespace Xyglo.Friendlier
             //
             contextMenus();
         }
+
+        /// <summary>
+        /// For all the BrazilView (that harbour BrazilApps) in the project then copy the resources into the 
+        /// proferred target so that this target can emulate the resources correctly for the app.
+        /// </summary>
+        /// <param name="project"></param>
+        /// <param name="targetResourceMap"></param>
+        protected void copyResourceMap(Project project, Dictionary<string, Resource> targetResourceMap)
+        {
+            foreach(BrazilView bV in project.getViews().Where(item => item is BrazilView).ToList())
+            {
+                foreach (string resourceName in bV.getApp().getResources().Keys)
+                {
+                    if (targetResourceMap.ContainsKey(resourceName))
+                    {
+                        throw new XygloException("copyResourceMap", "Got a duplicate resource key");
+                    }
+                    else
+                    {
+                        targetResourceMap[resourceName] = bV.getApp().getResources()[resourceName];
+                    }
+                }
+            }
+        }
+
 
         /// <summary>
         /// Initialise the Function Keys
