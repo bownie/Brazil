@@ -378,6 +378,7 @@ namespace Xyglo.Brazil.Xna
                     case "PositionScreenNew":
                     case "PositionScreenCopy":
                     case "SplashScreen":
+                    case "ProjectOpen":
                     case "Help":
                         m_brazilContext.m_state = State.Test("TextEditing");
                         m_keyboardHandler.setEditConfigurationItem(false);
@@ -469,7 +470,7 @@ namespace Xyglo.Brazil.Xna
                         //
                         //BufferView newBV = addNewFileBuffer(position, m_keyboardHandler.getSelectedFile(), m_keyboardHandler.getFileIsReadOnly(), m_keyboardHandler.getFileIsTailing());
                         //setActiveBuffer(newBV);
-                        OnNewBufferViewEvent(new NewBufferViewEventArgs(m_keyboardHandler.getSelectedFile(), position, m_keyboardHandler.getFileIsReadOnly(), m_keyboardHandler.getFileIsTailing()));
+                        OnNewBufferViewEvent(new NewViewEventArgs(m_keyboardHandler.getSelectedFile(), position, m_keyboardHandler.getFileIsReadOnly(), m_keyboardHandler.getFileIsTailing()));
                         m_brazilContext.m_state = State.Test("TextEditing");
                     }
                     else if (m_brazilContext.m_state.equals("PositionScreenNew"))
@@ -478,7 +479,7 @@ namespace Xyglo.Brazil.Xna
                         //
                         //BufferView newBV = addNewFileBuffer(position);
                         //setActiveBuffer(newBV);
-                        OnNewBufferViewEvent(new NewBufferViewEventArgs(m_context.m_fontManager, m_context.m_project.getSelectedBufferView(), position));
+                        OnNewBufferViewEvent(new NewViewEventArgs(m_context.m_fontManager, m_context.m_project.getSelectedBufferView(), position, NewViewMode.NewBuffer));
                         m_brazilContext.m_state = State.Test("TextEditing");
                     }
                     else if (m_brazilContext.m_state.equals("PositionScreenCopy"))
@@ -488,7 +489,7 @@ namespace Xyglo.Brazil.Xna
                         //BufferView newBV = new BufferView(m_context.m_fontManager, m_context.m_project.getSelectedBufferView(), position);
                         //m_context.m_project.addBufferView(newBV);
                         //setActiveBuffer(newBV);
-                        OnNewBufferViewEvent(new NewBufferViewEventArgs(m_context.m_fontManager, m_context.m_project.getSelectedBufferView(), position));
+                        OnNewBufferViewEvent(new NewViewEventArgs(m_context.m_fontManager, m_context.m_project.getSelectedBufferView(), position, NewViewMode.Copy));
                         m_brazilContext.m_state = State.Test("TextEditing");
                     }
                 }

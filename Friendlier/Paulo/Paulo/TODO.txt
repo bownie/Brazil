@@ -1,6 +1,25 @@
 ﻿Brazil Framework and Paulo
 --------------------------
 
+TODO
+----
+- Load/Save project files
+- View/edit state screens
+- ResouceView (type of XygloView) (??)
+- Previews during directory traverse [IMAGES DONE]
+- opening image files and videos in Friendlier
+- attaching images to shapes
+- Templates
+
+
+Done
+----
+- serialise and deserialise with an app running
+
+
+
+
+
 Backlog
 -------
 

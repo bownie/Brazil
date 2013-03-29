@@ -841,7 +841,7 @@ namespace Xyglo.Brazil.Xna
                                 //BufferView newBv = addNewFileBuffer(rL[0]);
                                 ScreenPosition sp = new ScreenPosition(fpEntry.Second.Second, fpEntry.Second.First);
                                 //setHighlightAndCenter(newBv, sp);
-                                OnNewBufferViewEvent(new NewBufferViewEventArgs(rL[0], sp, XygloView.ViewPosition.Right));
+                                OnNewBufferViewEvent(new NewViewEventArgs(rL[0], sp, XygloView.ViewPosition.Right));
                                 break;
                            }
                         }

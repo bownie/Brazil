@@ -19,6 +19,7 @@ namespace Xyglo.Brazil.Xna
         public event NewBufferViewEventHandler NewBufferViewEvent;
         public event CleanExitEventHandler CleanExitEvent;
         public event CommandEventHandler CommandEvent;
+        public event NewProjectEventHandler NewProjectEvent;
 
         /// <summary>
         /// Convenience method for using the event
@@ -61,7 +62,7 @@ namespace Xyglo.Brazil.Xna
         /// New BufferView
         /// </summary>
         /// <param name="e"></param>
-        protected virtual void OnNewBufferViewEvent(NewBufferViewEventArgs e)
+        protected virtual void OnNewBufferViewEvent(NewViewEventArgs e)
         {
             if (NewBufferViewEvent != null) NewBufferViewEvent(this, e);
         }
@@ -82,6 +83,15 @@ namespace Xyglo.Brazil.Xna
         protected virtual void OnCommandEvent(CommandEventArgs e)
         {
             if (CommandEvent != null) CommandEvent(this, e);
+        }
+
+        /// <summary>
+        /// New Project event
+        /// </summary>
+        /// <param name="e"></param>
+        protected virtual void OnNewProjectEvent(NewProjectEventArgs e)
+        {
+            if (NewProjectEvent != null) NewProjectEvent(this, e);
         }
     }
 }

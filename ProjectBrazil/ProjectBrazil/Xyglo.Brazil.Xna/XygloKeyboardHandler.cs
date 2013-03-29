@@ -120,7 +120,7 @@ namespace Xyglo.Brazil.Xna
             //
             if (keyList.Contains(Keys.Up))
             {
-                if (m_brazilContext.m_state.equals("FileSaveAs") || m_brazilContext.m_state.equals("FileOpen"))
+                if (m_brazilContext.m_state.equals("FileSaveAs") || m_brazilContext.m_state.equals("FileOpen") || m_brazilContext.m_state.equals("ProjectOpen"))
                 {
                     m_context.m_fileSystemView.incrementHighlightIndex(-1);
                     consumed = true;
@@ -176,7 +176,7 @@ namespace Xyglo.Brazil.Xna
             //else if (keyActionList.Find(item => item.m_key == Keys.Down && item.m_modifier == KeyboardModifier.None).ToString() != "")
             else if (keyList.Contains(Keys.Down))
             {
-                if (m_brazilContext.m_state.equals("FileSaveAs") || m_brazilContext.m_state.equals("FileOpen"))
+                if (m_brazilContext.m_state.equals("FileSaveAs") || m_brazilContext.m_state.equals("FileOpen") || m_brazilContext.m_state.equals("ProjectOpen"))
                 {
                     m_context.m_fileSystemView.incrementHighlightIndex(1);
                 }
@@ -240,7 +240,7 @@ namespace Xyglo.Brazil.Xna
             }
             else if (keyList.Contains(Keys.Left))
             {
-                if (m_brazilContext.m_state.equals("FileSaveAs") || m_brazilContext.m_state.equals("FileOpen"))
+                if (m_brazilContext.m_state.equals("FileSaveAs") || m_brazilContext.m_state.equals("FileOpen") || m_brazilContext.m_state.equals("ProjectOpen"))
                 {
                     string parDirectory = "";
 
@@ -311,7 +311,7 @@ namespace Xyglo.Brazil.Xna
             }
             else if (keyList.Contains(Keys.Right))
             {
-                if (m_brazilContext.m_state.equals("FileSaveAs") || m_brazilContext.m_state.equals("FileOpen"))
+                if (m_brazilContext.m_state.equals("FileSaveAs") || m_brazilContext.m_state.equals("FileOpen") || m_brazilContext.m_state.equals("ProjectOpen"))
                 {
                     traverseDirectory(gameTime);
                     consumed = true;
@@ -812,7 +812,7 @@ namespace Xyglo.Brazil.Xna
 
                     consumed = true;
                 }
-                else if (m_brazilContext.m_state.equals("FileOpen"))
+                else if (m_brazilContext.m_state.equals("FileOpen") || m_brazilContext.m_state.equals("ProjectOpen"))
                 {
                     traverseDirectory(gameTime);
                     consumed = true;
@@ -1162,20 +1162,33 @@ namespace Xyglo.Brazil.Xna
                         }
                         else
                         {
-                            Logger.logMsg("XygloXNA::processCombinationsCommands() - pasting text");
-                            // If we have a selection then replace it - else insert
+                            // For file open/project open mode then allow cutting and pasting of the
+                            // directory from buffer (if it's a valid directory)
                             //
-                            if (bv.gotHighlight())
+                            if (m_brazilContext.m_state.equals("ProjectOpen") || m_brazilContext.m_state.equals("FileOpen"))
                             {
-                                bv.replaceCurrentSelection(m_context.m_project, System.Windows.Forms.Clipboard.GetText());
+                                if (Directory.Exists(System.Windows.Forms.Clipboard.GetText()))
+                                {
+                                    m_context.m_fileSystemView.setDirectory(System.Windows.Forms.Clipboard.GetText());
+                                }
                             }
                             else
                             {
-                                bv.insertText(m_context.m_project, System.Windows.Forms.Clipboard.GetText());
+                                Logger.logMsg("XygloXNA::processCombinationsCommands() - pasting text");
+                                // If we have a selection then replace it - else insert
+                                //
+                                if (bv.gotHighlight())
+                                {
+                                    bv.replaceCurrentSelection(m_context.m_project, System.Windows.Forms.Clipboard.GetText());
+                                }
+                                else
+                                {
+                                    bv.insertText(m_context.m_project, System.Windows.Forms.Clipboard.GetText());
+                                }
+                                // NEED THIS
+                                //updateSmartHelp();
+                                rC = true;
                             }
-                            // NEED THIS
-                            //updateSmartHelp();
-                            rC = true;
                         }
                     }
                 }
@@ -1369,6 +1382,11 @@ namespace Xyglo.Brazil.Xna
                     // NEED THIS
                     //selectOpenFile();
                     m_brazilContext.m_state = State.Test("FileOpen");
+                    rC = true;
+                }
+                else if (keyList.Contains(Keys.P)) // Open a project
+                {
+                    m_brazilContext.m_state = State.Test("ProjectOpen");
                     rC = true;
                 }
                 else if (keyList.Contains(Keys.H)) // Show the help screen
@@ -1731,8 +1749,14 @@ namespace Xyglo.Brazil.Xna
                         //
                         DirectoryInfo[] testAccess = directoryToAccess.GetDirectories();
 
+                        FileInfo[] testFiles;
 
-                        FileInfo[] testFiles = directoryToAccess.GetFiles();
+                        // Filter for project files or not
+                        //
+                        if (m_brazilContext.m_state.equals("ProjectOpen"))
+                            testFiles = directoryToAccess.GetFiles("*.fpr");
+                        else
+                            testFiles = directoryToAccess.GetFiles();
 
                         m_context.m_fileSystemView.setDirectory(directoryToAccess.FullName);
 
@@ -1760,6 +1784,10 @@ namespace Xyglo.Brazil.Xna
                             // Now we need to choose a position for the new file we're opening
                             //
                             m_brazilContext.m_state = State.Test("PositionScreenOpen");
+                        }
+                        else if (m_brazilContext.m_state.equals("ProjectOpen"))
+                        {
+                            OnNewProjectEvent(new NewProjectEventArgs(fileInfo.FullName));
                         }
                         else if (m_brazilContext.m_state.equals("FileSaveAs"))
                         {

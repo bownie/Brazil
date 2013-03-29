@@ -40,6 +40,9 @@
     <Reference Include="Microsoft.Xna.Framework.Content.Pipeline.VideoImporters, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL">
       <Private>False</Private>
     </Reference>
+    <Reference Include="Nuclex.Fonts.Content.TrueTypeImporter">
+      <HintPath>..\..\..\Build Libraries\Nuclex.Fonts.Content.TrueTypeImporter.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Effects\Ambient.fx">
@@ -67,78 +70,79 @@
     <Compile Include="Bitstream Vera Sans Mono_fullScreen.spritefont">
       <Name>Bitstream Vera Sans Mono_fullScreen</Name>
       <Importer>FontDescriptionImporter</Importer>
-      <Processor>FontDescriptionProcessor</Processor>
+      <Processor>NuclexSpriteFontDescriptionProcessor</Processor>
       <SubType>Designer</SubType>
     </Compile>
     <Compile Include="Bitstream Vera Sans Mono_overlayBigScreen.spritefont">
       <Name>Bitstream Vera Sans Mono_overlayBigScreen</Name>
       <Importer>FontDescriptionImporter</Importer>
-      <Processor>FontDescriptionProcessor</Processor>
+      <Processor>NuclexSpriteFontDescriptionProcessor</Processor>
     </Compile>
     <Compile Include="Bitstream Vera Sans Mono_overlaySmallScreen.spritefont">
       <Name>Bitstream Vera Sans Mono_overlaySmallScreen</Name>
       <Importer>FontDescriptionImporter</Importer>
-      <Processor>FontDescriptionProcessor</Processor>
+      <Processor>NuclexSpriteFontDescriptionProcessor</Processor>
     </Compile>
     <Compile Include="Bitstream Vera Sans Mono_smallWindow.spritefont">
       <Name>Bitstream Vera Sans Mono_smallWindow</Name>
       <Importer>FontDescriptionImporter</Importer>
-      <Processor>FontDescriptionProcessor</Processor>
+      <Processor>NuclexSpriteFontDescriptionProcessor</Processor>
     </Compile>
     <Compile Include="Bitstream Vera Sans Mono_window.spritefont">
       <Name>Bitstream Vera Sans Mono_window</Name>
       <Importer>FontDescriptionImporter</Importer>
-      <Processor>FontDescriptionProcessor</Processor>
+      <Processor>NuclexSpriteFontDescriptionProcessor</Processor>
     </Compile>
     <Compile Include="Nuclex_Bitstream Vera Sans Mono_enormous.spritefont">
       <Name>Nuclex_Bitstream Vera Sans Mono_enormous</Name>
       <Importer>FontDescriptionImporter</Importer>
-      <Processor>FontDescriptionProcessor</Processor>
+      <Processor>NuclexSpriteFontDescriptionProcessor</Processor>
     </Compile>
     <Compile Include="Nuclex_Bitstream Vera Sans Mono_huge.spritefont">
       <Name>Nuclex_Bitstream Vera Sans Mono_huge</Name>
       <Importer>FontDescriptionImporter</Importer>
-      <Processor>FontDescriptionProcessor</Processor>
+      <Processor>NuclexSpriteFontDescriptionProcessor</Processor>
     </Compile>
     <Compile Include="Nuclex_Bitstream Vera Sans Mono_large.spritefont">
       <Name>Nuclex_Bitstream Vera Sans Mono_large</Name>
       <Importer>FontDescriptionImporter</Importer>
-      <Processor>FontDescriptionProcessor</Processor>
+      <Processor>NuclexSpriteFontDescriptionProcessor</Processor>
     </Compile>
     <Compile Include="Nuclex_Bitstream Vera Sans Mono_medium.spritefont">
       <Name>Nuclex_Bitstream Vera Sans Mono_medium</Name>
       <Importer>FontDescriptionImporter</Importer>
-      <Processor>FontDescriptionProcessor</Processor>
+      <Processor>NuclexSpriteFontDescriptionProcessor</Processor>
     </Compile>
     <Compile Include="Nuclex_Bitstream Vera Sans Mono_micro.spritefont">
       <Name>Nuclex_Bitstream Vera Sans Mono_micro</Name>
       <Importer>FontDescriptionImporter</Importer>
-      <Processor>FontDescriptionProcessor</Processor>
+      <Processor>NuclexSpriteFontDescriptionProcessor</Processor>
     </Compile>
     <Compile Include="Nuclex_Bitstream Vera Sans Mono_overlayBigScreen.spritefont">
       <Name>Nuclex_Bitstream Vera Sans Mono_overlayBigScreen</Name>
       <Importer>FontDescriptionImporter</Importer>
-      <Processor>FontDescriptionProcessor</Processor>
+      <Processor>NuclexSpriteFontDescriptionProcessor</Processor>
+      <SubType>Designer</SubType>
     </Compile>
     <Compile Include="Nuclex_Bitstream Vera Sans Mono_overlaySmallScreen.spritefont">
       <Name>Nuclex_Bitstream Vera Sans Mono_overlaySmallScreen</Name>
       <Importer>FontDescriptionImporter</Importer>
-      <Processor>FontDescriptionProcessor</Processor>
+      <Processor>NuclexSpriteFontDescriptionProcessor</Processor>
     </Compile>
     <Compile Include="Nuclex_Bitstream Vera Sans Mono_small.spritefont">
       <Name>Nuclex_Bitstream Vera Sans Mono_small</Name>
       <Importer>FontDescriptionImporter</Importer>
-      <Processor>FontDescriptionProcessor</Processor>
+      <Processor>NuclexSpriteFontDescriptionProcessor</Processor>
     </Compile>
     <Compile Include="Nuclex_Bitstream Vera Sans Mono_tiny.spritefont">
       <Name>Nuclex_Bitstream Vera Sans Mono_tiny</Name>
       <Importer>FontDescriptionImporter</Importer>
-      <Processor>FontDescriptionProcessor</Processor>
+      <Processor>NuclexSpriteFontDescriptionProcessor</Processor>
     </Compile>
     <Compile Include="Nuclex_Bitstream Vera Sans Mono_verylarge.spritefont">
       <Name>Nuclex_Bitstream Vera Sans Mono_verylarge</Name>
       <Importer>FontDescriptionImporter</Importer>
-      <Processor>FontDescriptionProcessor</Processor>
+      <Processor>NuclexSpriteFontDescriptionProcessor</Processor>
     </Compile>
   </ItemGroup>
   <ItemGroup>

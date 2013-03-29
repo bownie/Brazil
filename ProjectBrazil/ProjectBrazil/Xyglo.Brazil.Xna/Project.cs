@@ -1134,21 +1134,8 @@ namespace Xyglo.Brazil.Xna
                 fb.initialiseAfterDeseralising();
             }
 
-            // Now we have to regenerate any floating Resources to new ResourceInstances
+            // Add resources
             //
-            /*
-            foreach (string resourceName in brazilContext.m_resourceMap.Keys)
-            {
-                Resource resource = brazilContext.m_resourceMap[resourceName];
-
-                switch (resource.getType())
-                {
-                }
-
-                XygloResource xygloResource = new XygloResource(resourceName, resource.getFilePath());
-                xygloContext.m_resourceMap.Add(xygloResource);
-            }*/
-
             foreach (string key in brazilContext.m_resourceMap.Keys)
             {
                 Resource res = brazilContext.m_resourceMap[key];
@@ -1157,7 +1144,7 @@ namespace Xyglo.Brazil.Xna
                     case ResourceType.Image:
                         XygloImageResource xir = new XygloImageResource(key, brazilContext.m_homePath + res.getFilePath());
                         xir.loadResource(xygloContext.m_graphics.GraphicsDevice);
-                        xygloContext.m_xygloResourceMap.Add(key, xir);
+                        xygloContext.m_xygloResourceMap[key] = xir;
                         Logger.logMsg("Loaded Image resource \"" + key + "\" from " + res.getFilePath());
                         break;
 

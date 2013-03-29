@@ -13,7 +13,7 @@ namespace Xyglo.Brazil.Xna
     /// </summary>
     public class SystemAnalyser : IDisposable
     {
-        public SystemAnalyser()
+        public SystemAnalyser(XygloContext context)
         {
             // Start up the worker thread for the performance counters
             //
@@ -169,5 +169,15 @@ namespace Xyglo.Brazil.Xna
         /// The thread that is used for the counter
         /// </summary>
         protected Thread m_counterWorkerThread;
+
+        /// <summary>
+        /// Directory previewer is run in this thread as well
+        /// </summary>
+        protected DirectoryPreview m_directoryPreview;
+
+        /// <summary>
+        /// Xyglo context - be careful with threading!
+        /// </summary>
+        protected XygloContext m_context;
     }
 }

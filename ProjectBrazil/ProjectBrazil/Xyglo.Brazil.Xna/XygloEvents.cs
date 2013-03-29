@@ -83,9 +83,9 @@ namespace Xyglo.Brazil.Xna
     }
 
     /// <summary>
-    /// Mode for when we are adding a new BufferView
+    /// Mode for when we are adding a new XygloView
     /// </summary>
-    public enum NewBufferViewMode
+    public enum NewViewMode
     {
         ScreenPosition,    // Used to position an existing file
         Relative,          // Used when we're positioning a file that is to be opened
@@ -96,14 +96,14 @@ namespace Xyglo.Brazil.Xna
     /// <summary>
     /// Returned from XygloMouse
     /// </summary>
-    public class NewBufferViewEventArgs : System.EventArgs
+    public class NewViewEventArgs : System.EventArgs
     {
-        public NewBufferViewEventArgs(string filename, ScreenPosition sp, BufferView.ViewPosition position)
+        public NewViewEventArgs(string filename, ScreenPosition sp, BufferView.ViewPosition position)
         {
             m_filename = filename;
             m_screenPosition = sp;
             m_viewPosition = position;
-            m_mode = NewBufferViewMode.ScreenPosition;
+            m_mode = NewViewMode.ScreenPosition;
         }
 
         /// <summary>
@@ -113,39 +113,37 @@ namespace Xyglo.Brazil.Xna
         /// <param name="position"></param>
         /// <param name="readOnly"></param>
         /// <param name="tailing"></param>
-        public NewBufferViewEventArgs(string filename, BufferView.ViewPosition position, bool readOnly, bool tailing)
+        public NewViewEventArgs(string filename, BufferView.ViewPosition position, bool readOnly, bool tailing)
         {
             m_filename = filename;
             m_viewPosition = position;
             m_readOnly = readOnly;
             m_isTailing = tailing;
-            m_mode = NewBufferViewMode.Relative;
+            m_mode = NewViewMode.Relative;
         }
 
-        public NewBufferViewEventArgs(BufferView.ViewPosition position)
+        public NewViewEventArgs(BufferView.ViewPosition position)
         {
             m_viewPosition = position;
-            m_mode = NewBufferViewMode.NewBuffer;
+            m_mode = NewViewMode.NewBuffer;
         }
 
-        public NewBufferViewEventArgs(FontManager fontManager, BufferView sourceBufferView, BufferView.ViewPosition position)
+        public NewViewEventArgs(FontManager fontManager, XygloView sourceView, BufferView.ViewPosition position, NewViewMode mode)
         {
             m_viewPosition = position;
             m_fontManager = fontManager;
-            m_sourceBufferView = sourceBufferView;
-            m_mode = NewBufferViewMode.Copy;
+            m_sourceView = sourceView;
+            m_mode = mode;
         }
-
-
 
         public string getFileName() { return m_filename; }
         public ScreenPosition getScreenPosition() { return m_screenPosition; }
         public BufferView.ViewPosition getViewPosition() { return m_viewPosition; }
         public bool isReadOnly() { return m_readOnly; }
         public bool isTailing() { return m_isTailing; }
-        public NewBufferViewMode getMode() { return m_mode; }
+        public NewViewMode getMode() { return m_mode; }
         public FontManager getFontManager() { return m_fontManager; }
-        public BufferView getSourceBufferView() { return m_sourceBufferView; }
+        public XygloView getSourceView() { return m_sourceView; }
 
         protected string m_filename;
         protected ScreenPosition m_screenPosition;
@@ -153,9 +151,9 @@ namespace Xyglo.Brazil.Xna
         protected bool m_readOnly = false;
         protected bool m_isTailing = false;
         protected FontManager m_fontManager;
-        protected BufferView m_sourceBufferView;
+        protected XygloView m_sourceView;
 
-        protected NewBufferViewMode m_mode;
+        protected NewViewMode m_mode;
     }
 
     /// <summary>
@@ -208,6 +206,23 @@ namespace Xyglo.Brazil.Xna
         protected GameTime m_gameTime;
     }
 
+    /// <summary>
+    /// When loading a new project
+    /// </summary>
+    public class NewProjectEventArgs : System.EventArgs
+    {
+        public NewProjectEventArgs(string projectFile)
+        {
+            m_projectFile = projectFile;
+        }
+
+        public string getProjectFile()
+        {
+            return m_projectFile;
+        }
+
+        protected string m_projectFile;
+    }
 
     // Declare some delegates
     //
@@ -215,7 +230,8 @@ namespace Xyglo.Brazil.Xna
     public delegate void TemporaryMessageEventHandler(object sender, TextEventArgs e);
     public delegate void XygloViewChangeEventHandler(object sender, XygloViewEventArgs e);
     public delegate void EyeChangeEventHandler(object sender, PositionEventArgs eye, PositionEventArgs target);
-    public delegate void NewBufferViewEventHandler(object sender, NewBufferViewEventArgs e);
+    public delegate void NewBufferViewEventHandler(object sender, NewViewEventArgs e);
     public delegate void CleanExitEventHandler(object sender, CleanExitEventArgs e);
     public delegate void CommandEventHandler(object sender, CommandEventArgs e);
+    public delegate void NewProjectEventHandler(object sender, NewProjectEventArgs e);
 }

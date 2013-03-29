@@ -13,6 +13,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 
 namespace Xyglo.Brazil.Xna
@@ -32,6 +33,7 @@ namespace Xyglo.Brazil.Xna
             m_project = project;
             m_fontManager = fontManager;
             scanDirectory();
+            //m_renderTarget = new RenderTarget2D(m_context.m_graphics.GraphicsDevice, m_previewWidth, m_previewHeight);
         }
 
         /// <summary>
@@ -368,7 +370,7 @@ namespace Xyglo.Brazil.Xna
                 }
             }
         }
-        
+
         /// <summary>
         /// This is a list of directories and files based on the current position of the FileSystemView
         /// </summary>
@@ -377,6 +379,10 @@ namespace Xyglo.Brazil.Xna
         {
             // Could be null
             BufferView bv = m_context.m_project.getSelectedBufferView();
+
+            // preview list to be rendered after main text list 
+            //
+            List<Pair<Texture2D, Rectangle>> previewList = new List<Pair<Texture2D, Rectangle>>();
 
             // Draw header
             //
@@ -394,6 +400,10 @@ namespace Xyglo.Brazil.Xna
             if (m_brazilContext.m_state.equals("FileOpen"))
             {
                 line = "Open file...";
+            }
+            else if (m_brazilContext.m_state.equals("ProjectOpen"))
+            {
+                line = "Open project...";
             }
             else if (m_brazilContext.m_state.equals("FileSaveAs"))
             {
@@ -414,7 +424,7 @@ namespace Xyglo.Brazil.Xna
 
             // Draw header line
             //
-            m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), line, new Vector2((int)startPosition.X, (int)(startPosition.Y - (bv == null ? 0 : bv.getLineSpacing() * 3))), Color.White, 0, lineOrigin, 1.0f, 0, 0);
+            m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), line, new Vector2((int)startPosition.X, (int)(startPosition.Y - (bv == null ? m_context.m_fontManager.getOverlayFont().LineSpacing : bv.getLineSpacing()) * 3)), Color.White, 0, lineOrigin, 1.0f, 0, 0);
 
             // If we're using this method to position a new window only then don't show the directory chooser part..
             //
@@ -485,14 +495,33 @@ namespace Xyglo.Brazil.Xna
                 // For drives and directories we highlight item 1  - not zero
                 //
                 lineNumber = 1;
-                FileInfo[] fileInfo = getDirectoryInfo().GetFiles();
+                string fileFilter = "*.*";
+
+                // Filter for project files or not
+                //
+                if (m_brazilContext.m_state.equals("ProjectOpen"))
+                    fileFilter = "*.fpr";
+
+                // Get file and directory info
+                //
+                FileInfo[] fileInfo = getDirectoryInfo().GetFiles(fileFilter);
                 DirectoryInfo[] dirInfo = getDirectoryInfo().GetDirectories();
 
-#if DIRECTORY_CHOOSER_DEBUG
-                Logger.logMsg("showPage = " + showPage);
-                Logger.logMsg("showOffset = " + showOffset);
-                Logger.logMsg("m_directoryHighlight = " + m_directoryHighlight);
-#endif
+                // First time through generate this
+                //
+                if (m_directoryPreview == null)
+                {
+                    m_directoryPreview = new DirectoryPreview(m_context, getDirectoryInfo().FullName, fileFilter);
+                    m_directoryPreview.changeDirectory(getDirectoryInfo().FullName, true);
+                }
+                else
+                {
+                    m_directoryPreview.setFilter(fileFilter);
+
+                    // Change the directory - doesn't always generate a preview
+                    //
+                    m_directoryPreview.changeDirectory(getDirectoryInfo().FullName);
+                }
 
                 line = m_path + keyboardHandler.getSaveFileName();
                 m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), line, new Vector2((int)startPosition.X, (int)startPosition.Y), (m_directoryHighlight == 0 ? ColourScheme.getHighlightColour() : dirColour), 0, lineOrigin, 1.0f, 0, 0);
@@ -542,6 +571,17 @@ namespace Xyglo.Brazil.Xna
                             line = "...";
                         }
 
+                        // Add a preview if we have an image
+                        //
+                        if (m_directoryPreview.isImage(f.FullName))
+                        {
+                            m_previewWidth = m_context.m_fontManager.getOverlayFont().LineSpacing - 2;
+                            m_previewHeight = m_context.m_fontManager.getOverlayFont().LineSpacing - 2;
+
+                            Rectangle destinationRectangle = new Rectangle((int)(startPosition.X - (int)(m_previewWidth * 1.5)), (int)(startPosition.Y + yPosition), m_previewWidth, m_previewHeight);
+                            previewList.Add(new Pair<Texture2D, Rectangle>(m_directoryPreview.getTexture(f.FullName), destinationRectangle));
+                        }
+
                         m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(),
                                                  line,
                                                  new Vector2((int)startPosition.X, (int)(startPosition.Y + yPosition)),
@@ -575,9 +615,49 @@ namespace Xyglo.Brazil.Xna
             // Close the SpriteBatch
             //
             m_context.m_overlaySpriteBatch.End();
+
+            m_context.m_spriteBatch.Begin();
+            //m_context.m_spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.PointClamp, DepthStencilState.DepthRead, RasterizerState.CullNone, m_context.m_lineEffect);
+            //m_context.m_pannerSpriteBatch.Begin(SpriteSortMode.Textre, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.DepthRead, RasterizerState.CullNone /*, m_pannerEffect */ );
+            
+            foreach (Pair<Texture2D, Rectangle> preview in previewList)
+            {
+                /*
+                m_context.m_graphics.GraphicsDevice.SetRenderTarget(renderTarget);
+                //m_context.m_graphics.GraphicsDevice.Clear(Color.Red);
+                m_context.m_spriteBatch.Draw(preview.First, new Rectangle(0, 0, preview.Second.Width, preview.Second.Height), Color.White);
+                m_context.m_graphics.GraphicsDevice.SetRenderTarget(null);
+                m_context.m_spriteBatch.Draw(m_context.m_flatTexture, preview.Second, Color.White);
+                m_context.m_spriteBatch.Draw(m_context.m_flatTexture, new Vector2(preview.Second.X, preview.Second.Y), null, Color.White, 0f, Vector2.Zero, 1.0f, 0, 0);
+                //m_context.m_spriteBatch.Draw(
+                //m_context.m_spriteBatch.Draw(m_context.m_flatTexture, new Rectangle(0, 0, 1000, 1000), Color.White); 
+                */
+                m_context.m_spriteBatch.Draw(preview.First, preview.Second, Color.White);
+            }
+            m_context.m_spriteBatch.End();
         }
 
         ///////////////////// MEMBER VARIABLES //////////////////////
+
+        /// <summary>
+        /// Render target
+        /// </summary>
+        //protected RenderTarget2D m_renderTarget;
+
+        /// <summary>
+        /// Render preview rectange
+        /// </summary>
+        //protected Rectangle m_previewRectangle = new Rectangle();
+
+        /// <summary>
+        /// Preview width
+        /// </summary>
+        protected int m_previewWidth = 40;
+
+        /// <summary>
+        /// Preview height
+        /// </summary>
+        protected int m_previewHeight = 40;
 
         /// <summary>
         /// Our current directory
@@ -618,10 +698,26 @@ namespace Xyglo.Brazil.Xna
         /// Position in 3D land
         /// </summary>
         Vector3 m_position;
+
+        /// <summary>
+        /// The brazil context
+        /// </summary>
         protected BrazilContext m_brazilContext;
 
+        /// <summary>
+        /// Xyglo context
+        /// </summary>
         protected XygloContext m_context;
 
+        /// <summary>
+        /// Something to do with directory searching I think - need to confirm this!
+        /// </summary>
         List<string> m_fileHolder = new List<string>();
+
+        /// <summary>
+        /// Directory preview handler
+        /// </summary>
+        protected DirectoryPreview m_directoryPreview = null;
+
     }
 }

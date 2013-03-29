@@ -59,7 +59,7 @@ namespace Xyglo.Brazil.Xna
             m_mouse.ChangePositionEvent += new PositionChangeEventHandler(handleFlyToPosition);
             m_mouse.XygloViewChangeEvent += new XygloViewChangeEventHandler(handleViewChange);
             m_mouse.EyeChangeEvent += new EyeChangeEventHandler(handleEyeChange);
-            m_mouse.NewBufferViewEvent += new NewBufferViewEventHandler(handleNewBufferView);
+            m_mouse.NewBufferViewEvent += new NewBufferViewEventHandler(handleNewView);
             m_mouse.TemporaryMessageEvent += new TemporaryMessageEventHandler(handleTemporaryMessage);
 
             // Keyboard wrapper class
@@ -83,6 +83,7 @@ namespace Xyglo.Brazil.Xna
             m_keyboardHandler.ChangePositionEvent += new PositionChangeEventHandler(handleFlyToPosition);
             m_keyboardHandler.CleanExitEvent += new CleanExitEventHandler(handleCleanExit);
             m_keyboardHandler.CommandEvent += new CommandEventHandler(handleCommand);
+            m_keyboardHandler.NewProjectEvent += new NewProjectEventHandler(handleNewProject);
 
             // Temporary Messages
             //
@@ -106,22 +107,9 @@ namespace Xyglo.Brazil.Xna
             m_engine = new XygloEngine(m_context, m_brazilContext, m_physicsHandler, m_keyboard, m_keyboardHandler, m_eyeHandler);
             m_engine.CleanExitEvent += new CleanExitEventHandler(handleCleanExit);
             m_engine.TemporaryMessageEvent += new TemporaryMessageEventHandler(handleTemporaryMessage);
-            m_engine.NewBufferViewEvent += new NewBufferViewEventHandler(handleNewBufferView);
-
-
-            // Start the leap test
-            //
-            //testLeap();
+            m_engine.NewBufferViewEvent += new NewBufferViewEventHandler(handleNewView);
         }
 
-        /*
-        protected void testLeap()
-        {
-            // Create a sample listener and controller
-            m_context.m_leapListener = new LeapListener();
-            m_context.m_leapController = new Leap.Controller(m_context.m_leapListener);
-        }
-*/
          /////////////////////////////// METHODS //////////////////////////////////////
         /// <summary>
         /// Set the project
@@ -134,7 +122,7 @@ namespace Xyglo.Brazil.Xna
             // System Analyser for performance stats
             //
             if (m_context.m_project != null)
-                m_systemAnalyser = new SystemAnalyser();
+                m_systemAnalyser = new SystemAnalyser(m_context);
 
             // Reset windowed mode
             //
@@ -400,6 +388,11 @@ namespace Xyglo.Brazil.Xna
         {
             foreach (string key in resources.Keys)
             {
+                // Skip if this is already in the resource map
+                //
+                if (m_context.m_xygloResourceMap.ContainsKey(key))
+                    continue;
+
                 Resource res = resources[key];
                 switch (res.getType())
                 {
@@ -1451,6 +1444,67 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Handle a new project
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected void handleNewProject(object sender, NewProjectEventArgs e)
+        {
+            Project project = null;
+
+            if (File.Exists(e.getProjectFile()))
+            {
+                try
+                {
+                    project = Project.dataContractDeserialise(m_context.m_fontManager, e.getProjectFile());
+                    copyResourceMap(project, m_brazilContext.m_resourceMap);
+                }
+                catch (Exception /*e*/)
+                {
+                    setTemporaryMessage("Could not load project file " + e.getProjectFile(), 5);
+                }
+            }
+
+            if (project != null)
+            {
+                project.setLicenced(true);
+                project.setViewMode(Project.ViewMode.Formal);
+
+                setProject(project);
+                initialiseProject();
+                //m_context.m_project = project;
+                // Set the project
+                //
+                //m_context.
+                //m_viewSpace.setProject(project);
+            }
+        }
+
+        /// <summary>
+        /// For all the BrazilView (that harbour BrazilApps) in the project then copy the resources into the 
+        /// proferred target so that this target can emulate the resources correctly for the app.
+        /// </summary>
+        /// <param name="project"></param>
+        /// <param name="targetResourceMap"></param>
+        protected void copyResourceMap(Project project, Dictionary<string, Resource> targetResourceMap)
+        {
+            foreach (BrazilView bV in project.getViews().Where(item => item is BrazilView).ToList())
+            {
+                foreach (string resourceName in bV.getApp().getResources().Keys)
+                {
+                    if (targetResourceMap.ContainsKey(resourceName))
+                    {
+                        throw new XygloException("copyResourceMap", "Got a duplicate resource key");
+                    }
+                    else
+                    {
+                        targetResourceMap[resourceName] = bV.getApp().getResources()[resourceName];
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Hook for flying to new position
         /// </summary>
         /// <param name="sender"></param>
@@ -1505,29 +1559,29 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        protected void handleNewBufferView(object sender, NewBufferViewEventArgs e)
+        protected void handleNewView(object sender, NewViewEventArgs e)
         {
             BufferView newBV;
 
             switch(e.getMode())
             {
-                case NewBufferViewMode.ScreenPosition:
+                case NewViewMode.ScreenPosition:
                     newBV = addNewFileBuffer(e.getViewPosition(), e.getFileName(), e.isReadOnly(), e.isTailing());
                     setHighlightAndCenter(newBV, e.getScreenPosition());
                     break;
 
-                case NewBufferViewMode.Relative:
+                case NewViewMode.Relative:
                     newBV = addNewFileBuffer(e.getViewPosition(), e.getFileName(), e.isReadOnly(), e.isTailing());
                     setActiveBuffer(newBV);
                     break;
 
-                case NewBufferViewMode.NewBuffer:
+                case NewViewMode.NewBuffer:
                     newBV = addNewFileBuffer(e.getViewPosition());
                     setActiveBuffer(newBV);
                     break;
 
-                case NewBufferViewMode.Copy:
-                    newBV = new BufferView(e.getFontManager(), e.getSourceBufferView(), e.getViewPosition());
+                case NewViewMode.Copy:
+                    newBV = new BufferView(e.getFontManager(), (BufferView)e.getSourceView(), e.getViewPosition());
                     m_context.m_project.addBufferView(newBV);
                     setActiveBuffer(newBV);
                     break;

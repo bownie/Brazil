@@ -34,11 +34,8 @@ namespace Xyglo.Brazil.Xna
             m_position = (startPosition + endPosition) / 2;
             m_orientation = createQuarternion(startPosition, endPosition);
 
-
-
-
-            m_blockSize.Z = (endPosition - startPosition).Length();
-            m_blockSize.X = m_width;
+            m_blockSize.X = (endPosition - startPosition).Length();
+            m_blockSize.Z = m_width;
             m_blockSize.Y = m_width;
         }
 
@@ -74,7 +71,7 @@ namespace Xyglo.Brazil.Xna
             return quart;
         }
 
-        protected float m_width = 50.0f;
+        protected float m_width = 10.0f;
         /// <summary>
         /// Id of this finger pointer
         /// </summary>

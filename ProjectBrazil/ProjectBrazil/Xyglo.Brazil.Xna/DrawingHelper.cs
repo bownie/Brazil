@@ -1840,7 +1840,7 @@ namespace Xyglo.Brazil.Xna
         {
             // If we're choosing a file then
             //
-            if (m_brazilContext.m_state.equals("FileSaveAs") || m_brazilContext.m_state.equals("FileOpen") || m_brazilContext.m_state.equals("PositionScreenOpen") || m_brazilContext.m_state.equals("PositionScreenNew") || m_brazilContext.m_state.equals("PositionScreenCopy"))
+            if (m_brazilContext.m_state.equals("FileSaveAs") || m_brazilContext.m_state.equals("FileOpen") || m_brazilContext.m_state.equals("ProjectOpen") || m_brazilContext.m_state.equals("PositionScreenOpen") || m_brazilContext.m_state.equals("PositionScreenNew") || m_brazilContext.m_state.equals("PositionScreenCopy"))
             {
                 m_context.m_fileSystemView.drawDirectoryChooser(gameTime, keyboardHandler, tempMessage.getTemporaryMessage(), tempMessage.getTemporaryMessageEndTime());
             }
