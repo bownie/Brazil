@@ -38,7 +38,8 @@
     <Reference Include="Jitter">
       <HintPath>..\OtherLibs\Jitter.dll</HintPath>
     </Reference>
-    <Reference Include="LeapCSharp.NET4.0">
+    <Reference Include="LeapCSharp.NET4.0, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\OtherLibs\LeapCSharp.NET4.0.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Build" />
@@ -77,11 +78,13 @@
   <ItemGroup>
     <Compile Include="BrazilColour.cs" />
     <Compile Include="BrazilFlyingBlock.cs" />
+    <Compile Include="BrazilGameTime.cs" />
     <Compile Include="BrazilInvisibleBlock.cs" />
     <Compile Include="BrazilMenu.cs" />
     <Compile Include="BrazilPosition.cs" />
     <Compile Include="BrazilState.cs" />
     <Compile Include="BrazilTemporary.cs" />
+    <Compile Include="BrazilTransport.cs" />
     <Compile Include="BrazilVector2.cs" />
     <Compile Include="Component3D.cs" />
     <Compile Include="Action.cs" />

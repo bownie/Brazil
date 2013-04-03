@@ -152,21 +152,6 @@ namespace Xyglo.Gesture
             }
         }
 
-        /// <summary>
-        /// Store some timing information from leap
-        /// </summary>
-        private long m_currentTime;
-
-        /// <summary>
-        /// Preview time
-        /// </summary>
-        private long m_previousTime;
-
-        /// <summary>
-        /// Ticks
-        /// </summary>
-        private long m_timeChange;
-
         protected void testFingers(Controller cntrlr)
         {
                       // Get the current frame.
@@ -175,6 +160,8 @@ namespace Xyglo.Gesture
             m_currentTime = currentFrame.Timestamp;
             m_timeChange = m_currentTime - m_previousTime;
 
+            // Every 500us I guess
+            //
             if (m_timeChange > 1000)
             {
                 if (!currentFrame.Hands.Empty)
@@ -196,7 +183,7 @@ namespace Xyglo.Gesture
 
                             // Use tipVelocity to reduce jitters when attempting to hold
                             // the cursor steady
-                            if (tipVelocity > 25)
+                            if (tipVelocity > 10)
                             {
                                 var xScreenIntersect = screen.Intersect(finger, true).x;
                                 var yScreenIntersect = screen.Intersect(finger, true).y;
@@ -303,7 +290,23 @@ namespace Xyglo.Gesture
         /// </summary>
         protected Matrix m_mtxFrameTransform;
 
-        float m_fFrameScale;
-        float m_fPointableRadius;
+
+        protected float m_fFrameScale;
+        protected float m_fPointableRadius;
+
+        /// <summary>
+        /// Store some timing information from leap
+        /// </summary>
+        protected long m_currentTime;
+
+        /// <summary>
+        /// Preview time
+        /// </summary>
+        protected long m_previousTime;
+
+        /// <summary>
+        /// Ticks
+        /// </summary>
+        protected long m_timeChange;
     }
 }

@@ -30,6 +30,10 @@ namespace Xyglo.Brazil.Xna
             //
             Microsoft.VisualBasic.Devices.ComputerInfo ci = new Microsoft.VisualBasic.Devices.ComputerInfo();
             m_physicalMemory = (float)(ci.TotalPhysicalMemory / (1024 * 1024));
+
+            // Keep the external context local - careful!!
+            //
+            m_context = context;
         }
 
 

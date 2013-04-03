@@ -245,5 +245,14 @@ namespace Xyglo.Friendlier
             }
 
         }
+
+        /// <summary>
+        /// Provide a control interface for this app
+        /// </summary>
+        /// <param name="command"></param>
+        public override void sendCommand(BrazilAppControl command)
+        {
+        }
+
     }
 }

@@ -563,7 +563,7 @@ namespace Xyglo.Brazil.Xna
                     {
                         if (lineNumber < endShowing)
                         {
-                            line = f.Name;
+                            line = f.Name + "(" + IntToBytesExtension.ToBytes((int)f.Length) + ")";
                         }
                         else
                         {
@@ -611,30 +611,22 @@ namespace Xyglo.Brazil.Xna
                                          0,
                                          0);
             }
-
             // Close the SpriteBatch
             //
             m_context.m_overlaySpriteBatch.End();
 
+            // Draw any previews
+            //
             m_context.m_spriteBatch.Begin();
-            //m_context.m_spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.PointClamp, DepthStencilState.DepthRead, RasterizerState.CullNone, m_context.m_lineEffect);
-            //m_context.m_pannerSpriteBatch.Begin(SpriteSortMode.Textre, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.DepthRead, RasterizerState.CullNone /*, m_pannerEffect */ );
-            
+
             foreach (Pair<Texture2D, Rectangle> preview in previewList)
             {
-                /*
-                m_context.m_graphics.GraphicsDevice.SetRenderTarget(renderTarget);
-                //m_context.m_graphics.GraphicsDevice.Clear(Color.Red);
-                m_context.m_spriteBatch.Draw(preview.First, new Rectangle(0, 0, preview.Second.Width, preview.Second.Height), Color.White);
-                m_context.m_graphics.GraphicsDevice.SetRenderTarget(null);
-                m_context.m_spriteBatch.Draw(m_context.m_flatTexture, preview.Second, Color.White);
-                m_context.m_spriteBatch.Draw(m_context.m_flatTexture, new Vector2(preview.Second.X, preview.Second.Y), null, Color.White, 0f, Vector2.Zero, 1.0f, 0, 0);
-                //m_context.m_spriteBatch.Draw(
-                //m_context.m_spriteBatch.Draw(m_context.m_flatTexture, new Rectangle(0, 0, 1000, 1000), Color.White); 
-                */
                 m_context.m_spriteBatch.Draw(preview.First, preview.Second, Color.White);
             }
             m_context.m_spriteBatch.End();
+
+            //
+            // Stop drawing any previews
         }
 
         ///////////////////// MEMBER VARIABLES //////////////////////

@@ -54,7 +54,7 @@ namespace Xyglo.Brazil.Xna
                 // Clear drawables and any physics simulations
                 //
                 m_context.m_drawableComponents.Clear();
-                m_physicsHandler.World.Clear();
+                m_physicsHandler.m_world.Clear();
                 setState("PlayingGame");
             }
 
@@ -87,7 +87,7 @@ namespace Xyglo.Brazil.Xna
 
                     // Check and continue if consumed
                     //
-                    if (m_keyboardHandler.processCombinationsCommands(gameTime, keyActionList))
+                    if (m_keyboardHandler.processCombinationsCommands(gameTime, keyActionList, m_eyeHandler))
                         continue;
                 }
 
@@ -302,8 +302,9 @@ namespace Xyglo.Brazil.Xna
                         break;
 
                     case "ManageProject":
-                        newPosition = m_context.m_project.getSelectedBufferView().getLookPosition();
-                        newPosition.Z = 500.0f;
+                        newPosition = m_context.m_project.getSelectedView().getEyePosition();
+                        //newPosition.Z = 500.0f;
+                        //newPosition = m_eyeHandler.getEyePosition();
                         m_brazilContext.m_state = State.Test("TextEditing");
                         m_keyboardHandler.setEditConfigurationItem(false);
                         break;
@@ -394,6 +395,7 @@ namespace Xyglo.Brazil.Xna
                     default:
                         // Ummmm??
                         //
+                        m_brazilContext.m_state = State.Test("TextEditing");
                         break;
                 }
 

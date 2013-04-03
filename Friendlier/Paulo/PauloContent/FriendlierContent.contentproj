@@ -143,6 +143,7 @@
       <Name>Nuclex_Bitstream Vera Sans Mono_verylarge</Name>
       <Importer>FontDescriptionImporter</Importer>
       <Processor>NuclexSpriteFontDescriptionProcessor</Processor>
+      <SubType>Designer</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>

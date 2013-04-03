@@ -214,5 +214,14 @@ namespace Xyglo.Brazil
             // Might want a m_mode check here?
             //
         }*/
+
+        /// <summary>
+        /// Provide a control interface for this app
+        /// </summary>
+        /// <param name="command"></param>
+        public override void sendCommand(BrazilAppControl command)
+        {
+        }
+
     }
 }

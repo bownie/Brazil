@@ -3,21 +3,25 @@
 
 TODO
 ----
-- Load/Save project files
-- View/edit state screens
-- ResouceView (type of XygloView) (??)
-- Previews during directory traverse [IMAGES DONE]
-- opening image files and videos in Friendlier
+- paulo run modes and how to progress them
+
+  - show paulo frames run, show position/stepping
+  - 
+- editing paulo - dynamically loading Brazil model
+- ResouceView (type of XygloView) opening image files and videos in Friendlier 
+- View/edit state screens/templates
+- Template for android game app
 - attaching images to shapes
-- Templates
+- Previews during directory traverse [IMAGES DONE]
+
+
 
 
 Done
 ----
-- serialise and deserialise with an app running
-
-
-
+- serialise and deserialise with an app running [DONE]
+- Load/Save project files [DONE]
+- Registry entries for loaded project etc [DONE]
 
 
 Backlog

@@ -223,18 +223,21 @@ namespace Xyglo.Brazil.Xna
                     }
                     else
                     {
-                        ScreenPosition sP = bv.getCursorPosition();
-                        bv.moveCursorDown(false, m_keyboard.isShiftDown());
+                        if (bv != null)
+                        {
+                            ScreenPosition sP = bv.getCursorPosition();
+                            bv.moveCursorDown(false, m_keyboard.isShiftDown());
 
-                        if (m_keyboard.isShiftDown())
-                        {
-                            bv.extendHighlight(sP);
+                            if (m_keyboard.isShiftDown())
+                            {
+                                bv.extendHighlight(sP);
+                            }
+                            else
+                            {
+                                bv.noHighlight(); // Disable
+                            }
+                            consumed = true;
                         }
-                        else
-                        {
-                            bv.noHighlight(); // Disable
-                        }
-                        consumed = true;
                     }
                 }
             }
@@ -939,7 +942,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="?"></param>
         /// <returns></returns>
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
-        public bool processCombinationsCommands(GameTime gameTime, List<KeyAction> keyActionList)
+        public bool processCombinationsCommands(GameTime gameTime, List<KeyAction> keyActionList, EyeHandler eyeHandler)
         {
             bool rC = false;
             List<Keys> keyList = new List<Keys>();
@@ -1452,7 +1455,16 @@ namespace Xyglo.Brazil.Xna
 
                     // Copy current position to m_projectPosition - then rebuild model
                     //
-                    m_projectPosition = bv.getPosition();
+                    if (bv != null)
+                    {
+                        m_projectPosition = bv.getPosition();
+                    }
+                    else
+                    {
+                        m_projectPosition = eyeHandler.getEyePosition();
+                    }
+
+
                     m_projectPosition.X = -1000.0f;
                     m_projectPosition.Y = -1000.0f;
 

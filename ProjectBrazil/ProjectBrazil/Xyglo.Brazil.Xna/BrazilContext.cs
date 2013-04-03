@@ -59,11 +59,13 @@ namespace Xyglo.Brazil.Xna
         /// <summary>
         /// The current BrazilApp if we have one
         /// </summary>
-        protected BrazilProject m_brazilProject = null;
+        //protected BrazilProject m_brazilProject = null;
 
         /// <summary>
         /// Template projects that we can choose from
         /// </summary>
-        protected List<BrazilProject> m_templateProjects = new List<BrazilProject>();
+        //protected List<BrazilProject> m_templateProjects = new List<BrazilProject>();
+
+        public BrazilTransport m_transport = null;
     }
 }

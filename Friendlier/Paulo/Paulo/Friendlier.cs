@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 using Xyglo.Brazil;
 using Xyglo.Brazil.Xna;
+using Microsoft.Win32;
 
 namespace Xyglo.Friendlier
 {
@@ -44,7 +45,19 @@ namespace Xyglo.Friendlier
             FontManager fontManager = new FontManager();
 
             Project project = null;
-            string projectFile = Project.getUserDataPath() + "default_project.xml";
+            string projectFile = ""; // Project.getUserDataPath() + "default_project.xml";
+
+            // Attempt to get the project file from the registry
+            try
+            {
+                RegistryKey rKey = Registry.CurrentUser.OpenSubKey("Software\\Xyglo\\Friendlier");
+                projectFile = rKey.GetValue("Project File").ToString();
+            }
+            catch (Exception e)
+            {
+                Logger.logMsg("Found no regsitry entry for project file - defaulting");
+                projectFile = Project.getUserDataPath() + "default_project.xml";
+            }
 
             if (File.Exists(projectFile))
             {
@@ -267,5 +280,12 @@ namespace Xyglo.Friendlier
             //connect("TextEditing", new MouseAction(Mouse.RightButtonRelease), "Default");
         }
 
+        /// <summary>
+        /// Provide a control interface for this app
+        /// </summary>
+        /// <param name="command"></param>
+        public override void sendCommand(BrazilAppControl command)
+        {
+        }
     }
 }

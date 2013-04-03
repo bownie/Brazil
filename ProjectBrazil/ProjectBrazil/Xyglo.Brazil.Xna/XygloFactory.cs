@@ -207,8 +207,8 @@ namespace Xyglo.Brazil.Xna
                 BrazilHud bh = (Xyglo.Brazil.BrazilHud)component;
                 Vector3 position = XygloConvert.getVector3(bh.getPosition());
 
-                if (bh.getApp() == null)
-                {
+                //if (bh.getApp() == null)
+                //{
                     string bannerString = "";
 
                     if (m_frameCounter.getFrameRate() > 0)
@@ -233,7 +233,7 @@ namespace Xyglo.Brazil.Xna
 
                     XygloBannerText bannerText = new XygloBannerText("hug", m_context.m_overlaySpriteBatch, m_context.m_fontManager.getOverlayFont(), XygloConvert.getColour(bh.getColour()), position, bh.getSize(), bannerString);
                     m_context.m_drawableComponents[component] = bannerText;
-                }
+                //}
             }
             else if (component.GetType() == typeof(Xyglo.Brazil.BrazilGoody))
             {
@@ -379,7 +379,7 @@ namespace Xyglo.Brazil.Xna
             body.Position = Conversion.ToJitterVector(XygloConvert.getVector3(block.getPosition()));
             body.IsStatic = true;
             body.Mass = 10000;
-            m_physicsHandler.World.AddBody(body);
+            m_physicsHandler.m_world.AddBody(body);
 
             return body;
         }
@@ -441,7 +441,7 @@ namespace Xyglo.Brazil.Xna
                 body.Damping = RigidBody.DampingType.Angular;
 
                 //World.AddBody(body);
-                m_physicsHandler.World.AddBody(body);
+                m_physicsHandler.m_world.AddBody(body);
 
                 return body;
             }
@@ -486,7 +486,7 @@ namespace Xyglo.Brazil.Xna
 
                 // Add the connection - the body parts are already add implicitly (might want to change that)
                 //
-                m_physicsHandler.World.AddConstraint(headTorso);
+                m_physicsHandler.m_world.AddConstraint(headTorso);
 
                 //XygloComponentGroup group = (XygloComponentGroup)drawable;
                 //foreach (XygloXnaDrawable subDrawable in group.getComponents())
@@ -521,7 +521,7 @@ namespace Xyglo.Brazil.Xna
 
                 // Add the connection - the body parts are already add implicitly (might want to change that)
                 //
-                m_physicsHandler.World.AddConstraint(headTorso);
+                m_physicsHandler.m_world.AddConstraint(headTorso);
 
                 //XygloComponentGroup group = (XygloComponentGroup)drawable;
                 //foreach (XygloXnaDrawable subDrawable in group.getComponents())

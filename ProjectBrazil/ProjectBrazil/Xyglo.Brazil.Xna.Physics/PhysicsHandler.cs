@@ -35,9 +35,9 @@ namespace Xyglo.Brazil.Xna.Physics
             // Set up collision and world for physics
             //
             CollisionSystem collision = new CollisionSystemPersistentSAP();
-            World = new World(collision);
-            World.AllowDeactivation = true;
-            World.Gravity = new JVector(0, 500, 0);
+            m_world = new World(collision);
+            m_world.AllowDeactivation = true;
+            m_world.Gravity = new JVector(0, 500, 0);
         }
 
         public void initialise()
@@ -141,7 +141,7 @@ namespace Xyglo.Brazil.Xna.Physics
         /// <returns></returns>
         public List<RigidBody> getRigidBodiesForDrawable(XygloXnaDrawable drawable)
         {
-            List<RigidBody> bodyList = World.RigidBodies.Where(item => item.GetHashCode() == drawable.getPhysicsHash()).ToList();
+            List<RigidBody> bodyList = m_world.RigidBodies.Where(item => item.GetHashCode() == drawable.getPhysicsHash()).ToList();
 
             // If no match then check for ComponentGroup
             //
@@ -151,7 +151,7 @@ namespace Xyglo.Brazil.Xna.Physics
                 {
                     XygloComponentGroup group = (XygloComponentGroup)drawable;
                     foreach (XygloXnaDrawable subDrawable in group.getComponents())
-                        bodyList.AddRange(World.RigidBodies.Where(item => item.GetHashCode() == subDrawable.getPhysicsHash()).ToList());
+                        bodyList.AddRange(m_world.RigidBodies.Where(item => item.GetHashCode() == subDrawable.getPhysicsHash()).ToList());
                 }
             }
 
@@ -170,7 +170,7 @@ namespace Xyglo.Brazil.Xna.Physics
             float step = (float)gameTime.ElapsedGameTime.TotalSeconds;
             bool multithread = true;
             if (step > 1.0f / 100.0f) step = 1.0f / 100.0f;
-            World.Step(step, multithread);
+            m_world.Step(step, multithread);
 
             // Prescan for any component groups and add these to a temporary list for updating
             //
@@ -180,13 +180,13 @@ namespace Xyglo.Brazil.Xna.Physics
                 addList.AddRange(xCG.getComponents());
 
             List<RigidBody> remainderList = new List<RigidBody>();
-            remainderList.AddRange(World.RigidBodies);
+            remainderList.AddRange(m_world.RigidBodies);
 
             // Now perform any updates on composite component groups and maintain the remainder list
             //
             foreach (XygloXnaDrawable drawable in addList)
             {
-                List<RigidBody> bodyList = World.RigidBodies.Where(item => item.GetHashCode() == drawable.getPhysicsHash()).ToList();
+                List<RigidBody> bodyList = m_world.RigidBodies.Where(item => item.GetHashCode() == drawable.getPhysicsHash()).ToList();
 
                 foreach (RigidBody body in bodyList)
                 {
@@ -241,17 +241,17 @@ namespace Xyglo.Brazil.Xna.Physics
             m_activeBodies = 0;
 
             // Draw all shapes
-            foreach (RigidBody body in World.RigidBodies)
+            foreach (RigidBody body in m_world.RigidBodies)
             {
                 if (body.IsActive) m_activeBodies++;
                 if (body.Tag is int || body.IsParticle) continue;
                 AddBodyToDrawList(body);
             }
 
-            foreach (Constraint constr in World.Constraints)
+            foreach (Constraint constr in m_world.Constraints)
                 constr.DebugDraw(DebugDrawer);
 
-            foreach (RigidBody body in World.RigidBodies)
+            foreach (RigidBody body in m_world.RigidBodies)
             {
                 DebugDrawer.Color = Color.White;
                 body.DebugDraw(DebugDrawer);
@@ -277,7 +277,7 @@ namespace Xyglo.Brazil.Xna.Physics
             // This kills performance
             //
             //m_ground.EnableDebugDraw = true;
-            World.AddBody(m_ground);
+            m_world.AddBody(m_ground);
 
             //ground.Restitution = 1.0f;
             m_ground.Material.KineticFriction = 0.0f;
@@ -307,7 +307,7 @@ namespace Xyglo.Brazil.Xna.Physics
                     RigidBody body = new RigidBody(new BoxShape(size));
                     body.Position = new JVector(3.0f + (even ? e : 1.0f), i + 0.5f, -13.0f + (even ? 1.0f : e));
 
-                    World.AddBody(body);
+                    m_world.AddBody(body);
                 }
             }
         }
@@ -315,7 +315,7 @@ namespace Xyglo.Brazil.Xna.Physics
         /// <summary>
         /// This is the JitterPhysics World definition
         /// </summary>
-        public World World { private set; get; }
+        public World m_world { private set; get; }
 
         /// <summary>
         /// XygloContext is useful

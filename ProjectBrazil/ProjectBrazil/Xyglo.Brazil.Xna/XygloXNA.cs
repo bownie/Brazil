@@ -17,6 +17,7 @@ using Microsoft.Xna.Framework.Input;
 using System.Diagnostics;
 using BloomPostprocess;
 using System.Security.Permissions;
+using Microsoft.Win32;
 
 using Xyglo.Brazil;
 using Xyglo.Brazil.Xna.Physics;
@@ -122,11 +123,27 @@ namespace Xyglo.Brazil.Xna
             // System Analyser for performance stats
             //
             if (m_context.m_project != null)
-                m_systemAnalyser = new SystemAnalyser(m_context);
+            {
+                if (m_systemAnalyser == null)
+                {
+                    m_systemAnalyser = new SystemAnalyser(m_context);
+                }
+                // else - maybe we need to update the analyser?
+                //
+            }
 
             // Reset windowed mode
             //
             m_graphics.windowedMode(this);
+        }
+
+        /// <summary>
+        /// Set the transport object which has to be initialised outside the XNA layer
+        /// </summary>
+        /// <param name="transport"></param>
+        public void setTransport(BrazilTransport transport)
+        {
+            m_brazilContext.m_transport = transport;
         }
 
         /// <summary>
@@ -904,11 +921,25 @@ namespace Xyglo.Brazil.Xna
                 //
                 m_context.m_project.dataContractSerialise();
 
+                // Store some app settings
+                //
+                storeFriendlierSettings();
+
                 this.Exit();
             }
         }
 
-         /// <summary>
+        /// <summary>
+        /// Store some registry settings
+        /// </summary>
+        protected void storeFriendlierSettings()
+        {
+            RegistryKey rKey = Registry.CurrentUser.CreateSubKey("Software\\Xyglo\\Friendlier");
+            rKey.SetValue("Project File", m_context.m_project.getProjectFile());
+            rKey.Close();
+        }
+
+        /// <summary>
         /// Ensure that all components are reactivated before changing to that state
         /// </summary>
         /// <param name="newState"></param>
@@ -968,6 +999,9 @@ namespace Xyglo.Brazil.Xna
                         {
                             Vector3 position = m_context.m_drawingHelper.getScreenPlaneIntersection(pos.getScreenPosition());
                             m_context.m_temporaryDrawables[temp].setPosition(position);
+
+                            // update the drop dead
+                            temp.setDropDead(gameTime.TotalGameTime.TotalSeconds + 0.5);
                             found = true;
                         }
                         else if (temp.getIndex() == pos.getId() && temp.getAltIndex() == pos.getHandIndex() && temp.getType() == BrazilTemporaryType.FingerBone)
@@ -976,7 +1010,8 @@ namespace Xyglo.Brazil.Xna
                             XygloXnaDrawable drw = m_context.m_temporaryDrawables[temp];
                             drw.setPosition(m_context.m_drawingHelper.getScreenPlaneIntersection(position));
 
-                            
+                            // update the drop dead time
+                            temp.setDropDead(gameTime.TotalGameTime.TotalSeconds + 0.5);
                             //drw.setOrientation();
                             
                             found = true;
@@ -1081,6 +1116,10 @@ namespace Xyglo.Brazil.Xna
             m_engine.checkWorldEscape();
 
             // Update physics
+            //
+            // Possibly want to put the transport check in here for playing/stopped - might need to
+            // rethink the model a bit if there is no way of identifying which components belong to
+            // which app.
             //
             m_physicsHandler.update(gameTime);
 
@@ -1452,32 +1491,41 @@ namespace Xyglo.Brazil.Xna
         {
             Project project = null;
 
-            if (File.Exists(e.getProjectFile()))
+            try
             {
-                try
+                if (File.Exists(e.getProjectFile()))
                 {
+                    // Deserialise and set the location of where it came from
+                    //
                     project = Project.dataContractDeserialise(m_context.m_fontManager, e.getProjectFile());
+                    project.m_projectFile = e.getProjectFile();
+
                     copyResourceMap(project, m_brazilContext.m_resourceMap);
                 }
-                catch (Exception /*e*/)
+
+                if (project != null)
                 {
-                    setTemporaryMessage("Could not load project file " + e.getProjectFile(), 5);
+                    project.setLicenced(true);
+                    project.setViewMode(Project.ViewMode.Formal);
+
+                    setProject(project);
+                    initialiseProject();
+
+                    //m_context.m_project = project;
+                    // Set the project
+                    //
+                    //m_context.
+                    //m_viewSpace.setProject(project);
+
+                    m_brazilContext.m_state = State.Test("TextEditing");
                 }
-            }
 
-            if (project != null)
+            }
+            catch (Exception exp)
             {
-                project.setLicenced(true);
-                project.setViewMode(Project.ViewMode.Formal);
-
-                setProject(project);
-                initialiseProject();
-                //m_context.m_project = project;
-                // Set the project
-                //
-                //m_context.
-                //m_viewSpace.setProject(project);
+                setTemporaryMessage("Could not load project file " + e.getProjectFile() + " with message " + exp.Message, 5);
             }
+
         }
 
         /// <summary>
@@ -1492,14 +1540,14 @@ namespace Xyglo.Brazil.Xna
             {
                 foreach (string resourceName in bV.getApp().getResources().Keys)
                 {
-                    if (targetResourceMap.ContainsKey(resourceName))
-                    {
-                        throw new XygloException("copyResourceMap", "Got a duplicate resource key");
-                    }
-                    else
-                    {
+                    //if (targetResourceMap.ContainsKey(resourceName))
+                    //{
+                        //throw new XygloException("copyResourceMap", "Got a duplicate resource key");
+                    //}
+                    //else
+                    //{
                         targetResourceMap[resourceName] = bV.getApp().getResources()[resourceName];
-                    }
+                    //}
                 }
             }
         }
@@ -1760,7 +1808,7 @@ namespace Xyglo.Brazil.Xna
 
                 // If a component is not hiding then draw it
                 //
-                if (!(component is BrazilInvisibleBlock) && !(component is BrazilHud))
+                if (!(component is BrazilInvisibleBlock))
                 {
                     loadComponentTexture(component, m_context.m_physicsEffect);
                     m_context.m_drawableComponents[component].draw(m_context.m_graphics.GraphicsDevice);
@@ -2435,6 +2483,15 @@ namespace Xyglo.Brazil.Xna
             block.setAffectedByGravity(false);
             block.setMoveable(false);
             m_context.m_componentList.Add(block);
+        }
+
+        /// <summary>
+        /// Get the GameTime
+        /// </summary>
+        /// <returns></returns>
+        public GameTime getGameTime()
+        {
+            return m_context.m_gameTime;
         }
 
         ///////////////// MEMBER VARIABLES //////////////////

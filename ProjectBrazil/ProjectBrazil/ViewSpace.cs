@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Runtime.Serialization;
 
-
 namespace Xyglo.Brazil
 {
     using Xyglo.Brazil.Xna;
@@ -115,6 +114,44 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
+        /// Get the Xna time in BrazilGameTime
+        /// </summary>
+        /// <returns></returns>
+        public BrazilGameTime getAppTime()
+        {
+            if (m_xna != null)
+                return XygloConvert.getBrazilGameTime(m_xna.getGameTime());
+            else
+            {
+                BrazilGameTime gameTime = new BrazilGameTime();
+                gameTime.TotalGameTime = new TimeSpan(m_localTransport.getAppTime().Ticks);
+                return gameTime;
+            }
+        }
+
+        /// <summary>
+        /// Set the local app time
+        /// </summary>
+        /// <param name="gameTime"></param>
+        public void setLocalAppTime(BrazilGameTime gameTime)
+        {
+            m_localTransport.setAppTime(new DateTime(gameTime.TotalGameTime.Ticks));
+        }
+
+
+        /// <summary>
+        /// Reach through to set the transport object
+        /// </summary>
+        /// <param name="transport"></param>
+        public void setTransport(BrazilTransport transport)
+        {
+            if (m_xna != null)
+                m_xna.setTransport(transport);
+            else
+                m_localTransport = transport;
+        }
+
+        /// <summary>
         /// Set the State of the app
         /// </summary>
         /// <param name="state"></param>
@@ -190,5 +227,12 @@ namespace Xyglo.Brazil
         /// </summary>
         [DataMember]
         protected State m_localState;
+
+        /// <summary>
+        /// Simialr to above we may have no XNA to connect to within the Viewspace - if you're running
+        /// in  Hosted mode we want to store the transport state at this level instead.
+        /// </summary>
+        [DataMember]
+        protected BrazilTransport m_localTransport;
     }
 }

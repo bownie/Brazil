@@ -15,6 +15,28 @@ namespace Xyglo.Brazil
     };
 
     /// <summary>
+    /// Enable some control of an app from outside
+    /// </summary>
+    public enum BrazilAppControl
+    {
+        Stop,
+        Play,
+        Beginning,
+        End,
+        Rewind,
+        FastFoward
+    }
+
+    /// <summary>
+    /// Current app state
+    /// </summary>
+    public enum BrazilAppTransport
+    {
+        Stopped,
+        Playing
+    }
+
+    /// <summary>
     /// A BrazilApp has to inherit and implement this class.  This is the proper - outside world view
     /// of our application.  At this class we create and hold various other components which we
     /// need to pass into the implementation of this world.  We use the ViewSpace as the actual
@@ -39,6 +61,11 @@ namespace Xyglo.Brazil
             {
                 m_viewSpace.initialise(m_actionMap, m_componentList, m_world, m_states, m_targets, m_resourceMap, m_homePath);
             }
+
+            // Initialise the transport and hook it up to the XNA layer
+            //
+            m_transport = new BrazilTransport(m_viewSpace);
+            m_viewSpace.setTransport(m_transport);
 
             // Check for this directory
             //
@@ -69,6 +96,27 @@ namespace Xyglo.Brazil
         /// overridden in derived classes to allow the behaviour to be specified.
         /// </summary>
         public virtual void run() { m_viewSpace.run(m_mode); }
+
+        /// <summary>
+        /// An app must handle external control mechanism - this is the entry point for this control
+        /// and there is feedback from getAppTime and getTransportState.
+        /// </summary>
+        /// <param name="command"></param>
+        public abstract void sendCommand(BrazilAppControl command);
+
+        /// <summary>
+        /// Get the current app run time
+        /// </summary>
+        /// <returns></returns>
+        public DateTime getAppTime() { return m_transport.getAppTime(); }
+
+        //public void setLocalAppTime(BrazilGameTime gameTime) { m_transport.setAppTime(gameTime)); }
+
+        /// <summary>
+        /// Get the current transport state
+        /// </summary>
+        /// <returns></returns>
+        public BrazilAppTransport getTransportState() { return m_transport.getTransportState(); }
 
         /// <summary>
         /// Initialise abstract
@@ -633,7 +681,11 @@ namespace Xyglo.Brazil
         private void SetValuesOnDeserialized(StreamingContext context)
         {
             fixResourceInstances();
-            // Code not shown.
+
+            // Fix a new transport
+            //
+            m_transport = new BrazilTransport(m_viewSpace);
+            m_viewSpace.setTransport(m_transport);
         }
 
         /// <summary>
@@ -704,5 +756,11 @@ namespace Xyglo.Brazil
         /// Home path for a project - where resources live
         /// </summary>
         protected string m_homePath;
+
+        /// <summary>
+        /// Transport object
+        /// </summary>
+        [NonSerialized]
+        protected BrazilTransport m_transport = null;
     }
 }

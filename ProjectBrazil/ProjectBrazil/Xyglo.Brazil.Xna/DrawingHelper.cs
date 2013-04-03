@@ -1321,6 +1321,10 @@ namespace Xyglo.Brazil.Xna
                 string brazilViewInfo = "Components: " + bv.getApp().getComponents().Count() + ", Polygons: " + polygonCount(bv.getApp().getComponents());
                 int xPos = (int)(graphics.GraphicsDevice.Viewport.Width - brazilViewInfo.Length * m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) - (m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay)));
                 spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), brazilViewInfo, new Vector2(xPos, yPos), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
+
+                //string brazilAppTime = "App time: " + bv.getApp().getAppTime().ToString();
+                //yPos = (int)(graphics.GraphicsDevice.Viewport.Height - m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay) * 2);
+                //spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), brazilAppTime, new Vector2(xPos, yPos), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
             }
 
 
@@ -1702,28 +1706,35 @@ namespace Xyglo.Brazil.Xna
             //
             int maxWidth = ((int)((float)m_context.m_project.getSelectedView().getBufferShowWidth() * 0.9f));
 
-            // This is very simply modelled at the moment
+            // List the files
             //
-            foreach (string fileName in modelBuilder.getReturnString().Split('\n'))
+            string [] files = modelBuilder.getReturnString().Split('\n');
+            if (files.Count() > 0)
             {
-                // Ignore the last split
-                //
-                if (fileName != "")
-                {
-                    if ((modelBuilder.getRootString().Length + fileName.Length) < maxWidth)
-                    {
-                        text += modelBuilder.getRootString() + fileName + "\n";
-                    }
-                    else
-                    {
-                        //text += m_context.m_project.buildFileString(m_modelBuilder.getRootString(), fileName, maxWidth) + "\n";
-                        text += m_context.m_project.estimateFileStringTruncation(modelBuilder.getRootString(), fileName, maxWidth) + "\n";
-                    }
+                //text += "Project contains:\n\n";
 
+                // This is very simply modelled at the moment
+                //
+                foreach (string fileName in files)
+                {
+                    // Ignore the last split
+                    //
+                    if (fileName != "")
+                    {
+                        if ((modelBuilder.getRootString().Length + fileName.Length) < maxWidth)
+                        {
+                            text += modelBuilder.getRootString() + fileName + "\n";
+                        }
+                        else
+                        {
+                            //text += m_context.m_project.buildFileString(m_modelBuilder.getRootString(), fileName, maxWidth) + "\n";
+                            text += m_context.m_project.estimateFileStringTruncation(modelBuilder.getRootString(), fileName, maxWidth) + "\n";
+                        }
+
+                    }
                 }
             }
-
-            if (text == "")
+            else
             {
                 text = "[Project contains no Files]";
             }
@@ -1734,15 +1745,15 @@ namespace Xyglo.Brazil.Xna
 
             // Draw the project file name
             //
-            drawCentredTextOverlay(spriteBatch, graphics, 3, "Project Overview", Color.AntiqueWhite);
-            drawCentredTextOverlay(spriteBatch, graphics, 5, "Friendlier Project file : " + m_context.m_project.getProjectFile(), Color.LightSeaGreen);
+            drawCentredTextOverlay(spriteBatch, graphics, 2, "Project Name : " + m_context.m_project.m_projectName, Color.AntiqueWhite);
+            drawCentredTextOverlay(spriteBatch, graphics, 3, "Friendlier Project file : " + m_context.m_project.estimateFileStringTruncation("", m_context.m_project.getProjectFile(), maxWidth), Color.LightSeaGreen);
 
 
             // Help text
             //
             string commandText = "[Delete] - remove file from project       [Insert]  - edit file\n";
             commandText += "[Home]   - change project file location   [N]       - create new project file";
-            drawCentredTextOverlay(spriteBatch, graphics, 30, commandText, Color.LightCoral);
+            drawCentredTextOverlay(spriteBatch, graphics, m_context.m_project.getSelectedView().getBufferShowLength(), commandText, Color.LightCoral);
 
             // End the batch
             //
@@ -2389,7 +2400,10 @@ namespace Xyglo.Brazil.Xna
                         if (m_context.m_project != null)
                             bannerString += "[EyePosition] X " + m_eyeHandler.getEyePosition().X + ",Y " + m_eyeHandler.getEyePosition().Y + ",Z " + m_eyeHandler.getEyePosition().Z + "\n";
 
-                        else if (m_brazilContext.m_interloper != null)
+
+                        // If interloepr is live then we are in a game
+                        //
+                        if (m_brazilContext.m_interloper != null)
                         {
                             // Interloper position - get the component group and reverse engineer average position by cheating
                             //

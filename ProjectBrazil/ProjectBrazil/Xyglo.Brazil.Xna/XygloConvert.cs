@@ -875,5 +875,120 @@ namespace Xyglo.Brazil.Xna
             
             return position;
         }
+
+        /// <summary>
+        /// Declare this statically
+        /// </summary>
+        public static BrazilGameTime m_localGameTime = new BrazilGameTime();
+
+        /// <summary>
+        /// Convert an XNA GameTime our local copy which is the same thing
+        /// </summary>
+        /// <param name="gameTime"></param>
+        /// <returns></returns>
+        public static BrazilGameTime getBrazilGameTime(GameTime gameTime)
+        {
+            XygloConvert.m_localGameTime.TotalGameTime = gameTime.TotalGameTime;
+            XygloConvert.m_localGameTime.ElapsedGameTime = gameTime.ElapsedGameTime;
+            return XygloConvert.m_localGameTime;
+        }
+
+        //public static DateTime getBrazilDateTime(GameTime gameTime)
+        //{
+            //DateTime datetime = new DateTime(
+        //}
+
+
+        /*
+        /// <summary>
+        /// Get a pretty print size from bytes supplied
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <returns></returns>
+        static public string getNiceSize(int bytes, int depth = 0)
+        {
+            string rS;
+
+            if (bytes > 1024)
+            {
+                rS = bytes + " Bytes";
+            }
+            else if (bytes < 1024 * 1024)
+            {
+                int fullBytes = bytes / 1024;
+                int diffBytes = bytes - fullBytes;
+                rS = fullBytes + "." + (diffBytes / 1024) + " KB";
+            }
+            else if (bytes < 1024 * 1024 * 1024)
+            {
+
+            }
+
+            return rS;
+        }*/
+
+        public static string ToFileSize(this long size)
+        {
+            if (size < 1024)
+            {
+                return (size).ToString("F0") + " bytes";
+            }
+            else if (size < Math.Pow(1024, 2))
+            {
+                return (size / 1024).ToString("F0") + " KB";
+            }
+            else if (size < Math.Pow(1024, 3))
+            {
+                return (size / Math.Pow(1024, 2)).ToString("F0") + " MB";
+            }
+            else if (size < Math.Pow(1024, 4))
+            {
+                return (size / Math.Pow(1024, 3)).ToString("F0") + " GB";
+            }
+            else if (size < Math.Pow(1024, 5))
+            {
+                return (size / Math.Pow(1024, 4)).ToString("F0") + " TB";
+            }
+            else if (size < Math.Pow(1024, 6))
+            {
+                return (size / Math.Pow(1024, 5)).ToString("F0") + " PB";
+            }
+            else
+            {
+                return (size / Math.Pow(1024, 6)).ToString("F0") + " EB";
+            }
+        }
+  
     }
+
+    /// <summary>
+    /// From http://stackoverflow.com/questions/128618/c-file-size-format-provider
+    /// </summary>
+    public static class IntToBytesExtension
+    {
+        private const int PRECISION = 2;
+
+        private static IList<string> Units;
+
+        static IntToBytesExtension()
+            {
+                Units = new List<string>(){
+                "B", "KB", "MB", "GB", "TB"
+            };
+        }
+
+        /// <summary>
+        /// Formats the value as a filesize in bytes (KB, MB, etc.)
+        /// </summary>
+        /// <param name="bytes">This value.</param>
+        /// <returns>Filesize and quantifier formatted as a string.</returns>
+        public static string ToBytes(this int bytes)
+        {
+            double pow = Math.Floor((bytes > 0 ? Math.Log(bytes) : 0) / Math.Log(1024));
+            pow = Math.Min(pow, Units.Count - 1);
+            double value = (double)bytes / Math.Pow(1024, pow);
+            return value.ToString(pow == 0 ? "F0" : "F" + PRECISION.ToString()) + " " + Units[(int)pow];
+        }
+    }
+
 }
