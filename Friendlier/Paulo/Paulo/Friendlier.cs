@@ -38,7 +38,7 @@ namespace Xyglo.Friendlier
         {
             // Set the initial state
             //
-            setInitialState(state);
+            setState(state);
 
             // Create a FontManager
             //
@@ -55,7 +55,7 @@ namespace Xyglo.Friendlier
             }
             catch (Exception e)
             {
-                Logger.logMsg("Found no regsitry entry for project file - defaulting");
+                Logger.logMsg("Found no regsitry entry for project file - defaulting - " + e.Message);
                 projectFile = Project.getUserDataPath() + "default_project.xml";
             }
 
@@ -284,8 +284,8 @@ namespace Xyglo.Friendlier
         /// Provide a control interface for this app
         /// </summary>
         /// <param name="command"></param>
-        public override void sendCommand(BrazilAppControl command)
-        {
-        }
+        //public override void sendCommand(BrazilAppControl command)
+        //{
+        //}
     }
 }

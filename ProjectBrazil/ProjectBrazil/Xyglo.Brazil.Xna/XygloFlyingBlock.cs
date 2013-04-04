@@ -43,6 +43,7 @@ namespace Xyglo.Brazil.Xna
             if (m_alphaBlendingTest) m_colour.A = 10;
         }
 
+        /*
         /// <summary>
         /// Position and size
         /// </summary>
@@ -65,7 +66,7 @@ namespace Xyglo.Brazil.Xna
             m_position.Z = position.Z;
 
             if (m_alphaBlendingTest) m_colour.A = 10;
-        }
+        }*/
 
         /// <summary>
         /// Build the shape and populate the Vertex and Index buffers

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-//using Xyglo.Gesture;
+using Xyglo.Brazil.Xna.Physics;
 
 namespace Xyglo.Brazil.Xna
 {
@@ -159,6 +159,11 @@ namespace Xyglo.Brazil.Xna
         /// Xyglo side resource manager
         /// </summary>
         public Dictionary<string, XygloResource> m_xygloResourceMap = new Dictionary<string, XygloResource>();
+
+        /// <summary>
+        /// Physics handler
+        /// </summary>
+        public PhysicsHandler m_physicsHandler = null;
 
     }
 }

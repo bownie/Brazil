@@ -117,17 +117,20 @@ namespace Xyglo.Brazil
         /// Get the Xna time in BrazilGameTime
         /// </summary>
         /// <returns></returns>
+ /*
         public BrazilGameTime getAppTime()
         {
             if (m_xna != null)
                 return XygloConvert.getBrazilGameTime(m_xna.getGameTime());
-            else
-            {
-                BrazilGameTime gameTime = new BrazilGameTime();
-                gameTime.TotalGameTime = new TimeSpan(m_localTransport.getAppTime().Ticks);
-                return gameTime;
-            }
+
+//            else
+  //          {
+    //            BrazilGameTime gameTime = new BrazilGameTime();
+      //          gameTime.TotalGameTime = new TimeSpan(m_localTransport.getAppTime().Ticks);
+        //        return gameTime;
+          //  }
         }
+        */
 
         /// <summary>
         /// Set the local app time

@@ -26,7 +26,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="effect"></param>
         /// <param name="position"></param>
         /// <param name="radius"></param>
-        public XygloSphere(Color colour, BasicEffect effect, BrazilVector3 position, float radius)
+        public XygloSphere(Color colour, BasicEffect effect, Vector3 position, float radius)
         {
             m_colour = colour;
             m_effect = effect;

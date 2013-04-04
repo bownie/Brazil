@@ -34,7 +34,7 @@ namespace Xyglo.Brazil.Xna.Physics
             m_ground.Position = new JVector(0, -10, 0);
             //m_ground.Tag = BodyTag.DontDrawMe;
             m_ground.IsStatic = true;
-            m_handler.m_world.AddBody(m_ground);
+            m_handler.addRigidBody(m_ground);
             //ground.Restitution = 1.0f;
             m_ground.Material.KineticFriction = 0.0f;
 

@@ -12,7 +12,7 @@ namespace Xyglo.Brazil.Xna
     /// </summary>
     public class XygloFingerPointer : XygloSphere
     {
-        public XygloFingerPointer(int fingerId, BasicEffect effect, BrazilVector3 position)  : base(Color.Pink, effect, position, 10.0f)
+        public XygloFingerPointer(int fingerId, BasicEffect effect, Vector3 position)  : base(Color.Pink, effect, position, 10.0f)
         {
             m_fingerId = fingerId;
         }

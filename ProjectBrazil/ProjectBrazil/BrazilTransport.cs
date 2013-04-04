@@ -21,10 +21,11 @@ namespace Xyglo.Brazil
         /// Get the current app run time
         /// </summary>
         /// <returns></returns>
+        /*
         public DateTime getAppTime()
         {
             return new DateTime(m_viewSpace.getAppTime().TotalGameTime.Ticks);
-        }
+        }*/
 
         /// <summary>
         /// XNA won't update local app time itself so we need to use this to push the app time
@@ -50,7 +51,7 @@ namespace Xyglo.Brazil
         /// </summary>
         public void start()
         {
-            m_lastStartTime = new DateTime(m_viewSpace.getAppTime().TotalGameTime.Ticks);
+            //m_lastStartTime = new DateTime(m_viewSpace.getAppTime().TotalGameTime.Ticks);
             m_lastUpdateTime = m_lastStartTime;
             m_transport = BrazilAppTransport.Playing;
         }
@@ -61,7 +62,7 @@ namespace Xyglo.Brazil
         public void stop()
         {
             m_transport = BrazilAppTransport.Stopped;
-            m_lastUpdateTime = new DateTime(m_viewSpace.getAppTime().TotalGameTime.Ticks);
+            //m_lastUpdateTime = new DateTime(m_viewSpace.getAppTime().TotalGameTime.Ticks);
         }
 
         /// <summary>

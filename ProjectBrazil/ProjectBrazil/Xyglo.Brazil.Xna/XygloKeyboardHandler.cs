@@ -157,19 +157,22 @@ namespace Xyglo.Brazil.Xna
                     }
                     else
                     {
-                        ScreenPosition sP = bv.getCursorPosition();
-                        bv.moveCursorUp(m_context.m_project, false, m_keyboard.isShiftDown());
-
-                        if (m_keyboard.isShiftDown())
+                        if (bv != null)
                         {
-                            bv.extendHighlight(sP);  // Extend 
-                        }
-                        else
-                        {
-                            bv.noHighlight(); // Disable
-                        }
+                            ScreenPosition sP = bv.getCursorPosition();
+                            bv.moveCursorUp(m_context.m_project, false, m_keyboard.isShiftDown());
 
-                        consumed = true;
+                            if (m_keyboard.isShiftDown())
+                            {
+                                bv.extendHighlight(sP);  // Extend 
+                            }
+                            else
+                            {
+                                bv.noHighlight(); // Disable
+                            }
+
+                            consumed = true;
+                        }
                     }
                 }
             }
@@ -390,29 +393,32 @@ namespace Xyglo.Brazil.Xna
             }
             else if (keyList.Contains(Keys.Home))
             {
-                // Store cursor position
-                //
-                ScreenPosition sP = bv.getCursorPosition();
-
-                // Reset the cursor to zero
-                //
-                ScreenPosition fp = bv.getFirstNonSpace(m_context.m_project);
-
-                bv.setCursorPosition(fp);
-
-                // Reset any X offset to zero
-                //
-                bv.setBufferShowStartX(0);
-
-                if (m_keyboard.isShiftDown())
+                if (bv != null)
                 {
-                    bv.extendHighlight(sP); // Extend
+                    // Store cursor position
+                    //
+                    ScreenPosition sP = bv.getCursorPosition();
+
+                    // Reset the cursor to zero
+                    //
+                    ScreenPosition fp = bv.getFirstNonSpace(m_context.m_project);
+
+                    bv.setCursorPosition(fp);
+
+                    // Reset any X offset to zero
+                    //
+                    bv.setBufferShowStartX(0);
+
+                    if (m_keyboard.isShiftDown())
+                    {
+                        bv.extendHighlight(sP); // Extend
+                    }
+                    else
+                    {
+                        bv.noHighlight(); // Disable
+                    }
+                    consumed = true;
                 }
-                else
-                {
-                    bv.noHighlight(); // Disable
-                }
-                consumed = true;
             }
                 /*
             else if (keyList.Contains(Keys.F9)) // Spin anticlockwise though BVs
@@ -651,6 +657,7 @@ namespace Xyglo.Brazil.Xna
                     {
                         m_saveFileName = m_saveFileName.Substring(0, m_saveFileName.Length - 1);
                     }
+                    consumed = true;
                 }
                 else if (m_brazilContext.m_state.equals("FindText") && keyList.Contains(Keys.Back))
                 {
@@ -661,6 +668,7 @@ namespace Xyglo.Brazil.Xna
                     {
                         bv.setSearchText(searchText.Substring(0, searchText.Length - 1));
                     }
+                    consumed = true;
                 }
                 else if (m_brazilContext.m_state.equals("GotoLine") && keyList.Contains(Keys.Back))
                 {
@@ -668,6 +676,7 @@ namespace Xyglo.Brazil.Xna
                     {
                         m_gotoLine = m_gotoLine.Substring(0, m_gotoLine.Length - 1);
                     }
+                    consumed = true;
                 }
                 else if (m_brazilContext.m_state.equals("Configuration") && m_editConfigurationItem && keyList.Contains(Keys.Back))
                 {
@@ -675,6 +684,7 @@ namespace Xyglo.Brazil.Xna
                     {
                         m_editConfigurationItemValue = m_editConfigurationItemValue.Substring(0, m_editConfigurationItemValue.Length - 1);
                     }
+                    consumed = true;
                 }
                 else if (m_brazilContext.m_state.equals("ManageProject"))
                 {
@@ -702,13 +712,15 @@ namespace Xyglo.Brazil.Xna
                             Logger.logMsg("XygloXNA::processActionKeys() - failed to remove FileBuffer for " + fileToRemove);
                         }
                     }
+                    consumed = true;
                 }
-                else if (bv.gotHighlight()) // If we have a valid highlighted selection then delete it (normal editing)
+                else if (bv != null && bv.gotHighlight()) // If we have a valid highlighted selection then delete it (normal editing)
                 {
                     // All the clever stuff with the cursor is done at the BufferView level and it also
                     // calls the command in the FileBuffer.
                     //
                     bv.deleteCurrentSelection(m_context.m_project);
+                    consumed = true;
                     // NEED THIS
                     //updateSmartHelp();
                 }
@@ -716,7 +728,11 @@ namespace Xyglo.Brazil.Xna
                 {
                     if (keyList.Contains(Keys.Delete))
                     {
-                        bv.deleteSingle(m_context.m_project);
+                        if (bv != null)
+                        {
+                            bv.deleteSingle(m_context.m_project);
+                            consumed = true;
+                        }
                     }
                     else if (keyList.Contains(Keys.Back))
                     {
@@ -750,12 +766,13 @@ namespace Xyglo.Brazil.Xna
                         bv.setCursorPosition(new ScreenPosition(fp));
 
                         bv.deleteSingle(m_context.m_project);
+                        consumed = true;
                     }
                     // NEED THIS
                     //updateSmartHelp();
                 }
 
-                consumed = true;
+
             }
             else if (keyList.Contains(Keys.Enter))
             {
@@ -1930,10 +1947,84 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Process keys for BrazilViews
+        /// </summary>
+        /// <param name="gameTime"></param>
+        /// <param name="keyAction"></param>
+        public void processBrazilViewKey(GameTime gameTime, KeyAction keyAction)
+        {
+            // Skip for all non bufferviews
+            if (m_context.m_project == null || m_context.m_project.getSelectedView().GetType() != typeof(BrazilView))
+                return;
+
+            List<Keys> keyList = new List<Keys>();
+            keyList.Add(keyAction.m_key);
+            //bool consumed = false;
+
+            BrazilView bv = (BrazilView)m_context.m_project.getSelectedView();
+
+            // Now we need to process some BrazilView keys that can modify our app model
+            //
+            if (keyList.Contains(Keys.Space))
+            {
+                bv.getApp().toggleRunning();
+            } else if (keyList.Contains(Keys.Left))
+            {
+                bv.getApp().rewind(1);
+            }
+            else if (keyList.Contains(Keys.Right))
+            {
+                bv.getApp().fastForward(1);
+            }
+            else if (keyList.Contains(Keys.Home))
+            {
+                // Dump all the existing xyglo drawables for this app
+                //
+                //List<XygloXnaDrawable> removeList = new List<XygloXnaDrawable>();
+
+                foreach(Component toRemove in bv.getApp().getComponents())
+                {
+                    if (m_context.m_drawableComponents.ContainsKey(toRemove))
+                    {
+                        m_context.m_drawableComponents[toRemove] = null;
+                        m_context.m_drawableComponents.Remove(toRemove);
+                    }
+                }
+
+                // Unset the interloper
+                //
+                m_brazilContext.m_interloper = null;
+
+                // Clear the physics handler
+                m_context.m_physicsHandler.clear();
+
+                // Also reset any statuses in the app components
+                //
+                bv.getApp().reset();
+
+                // Clear any highlight list
+                //
+                bv.getApp().clearHighlights();
+            }
+            else if (keyList.Contains(Keys.Delete)) // Delete any selected objects
+            {
+                // We want to delete the drawable but also the component from the model
+                //
+                foreach(Component component in bv.getApp().getHighlightList())
+                {
+                    m_context.m_drawableComponents[component] = null;
+                    m_context.m_drawableComponents.Remove(component);
+                    bv.getApp().getComponents().Remove(component);
+                }
+            }
+        }
+
+
+        /// <summary>
         /// Process any keys that need to be printed
         /// </summary>
         /// <param name="gameTime"></param>
-        public void processKey(GameTime gameTime, KeyAction keyAction)
+        public void processBufferViewKey(GameTime gameTime, KeyAction keyAction)
         {
             // Skip for all non bufferviews
             if (m_context.m_project == null || m_context.m_project.getSelectedBufferView() == null)

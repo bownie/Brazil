@@ -17,10 +17,16 @@ namespace Xyglo.Brazil
         //List<string> getFeatures();
 
         /// <summary>
-        /// We want this to set our entry point for the application
+        /// Allow setting of state from the outside
         /// </summary>
         /// <param name="initialState"></param>
-        void setInitialState(State initialState);
+        void setState(State state);
+
+        /// <summary>
+        /// Also allow setting by string
+        /// </summary>
+        /// <param name="state"></param>
+        void setState(string state);
 
         /// <summary>
         /// Return the list of states that the world can be in

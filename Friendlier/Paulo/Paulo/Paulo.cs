@@ -31,7 +31,7 @@ namespace Xyglo.Friendlier
         {
             // Now set the initial state
             //
-            setInitialState(state);
+            setState(state);
 
             // Connect some keys
             //
@@ -250,9 +250,9 @@ namespace Xyglo.Friendlier
         /// Provide a control interface for this app
         /// </summary>
         /// <param name="command"></param>
-        public override void sendCommand(BrazilAppControl command)
-        {
-        }
+        //public override void sendCommand(BrazilAppControl command)
+        //{
+        //}
 
     }
 }

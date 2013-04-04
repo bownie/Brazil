@@ -1312,14 +1312,20 @@ namespace Xyglo.Brazil.Xna
             else if (view.GetType() == typeof(BrazilView))
             {
                 BrazilView bv = (BrazilView)view;
-                string brazilViewAppType = "Showing App Type: " + bv.getApp().ToString();
-                int yPos = (int)(graphics.GraphicsDevice.Viewport.Height - m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay));
-                spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), brazilViewAppType, new Vector2(0, yPos), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
+                string appState = "";
+                appState += "App State : " + (bv.getApp().isPlaying() ? "Playing\n" : "Stopped\n");
+                appState += "App Score : " + bv.getApp().getInterloper().getScore() + "\n";
+                appState += "App Lives : " + bv.getApp().getWorld().getLives() + "\n";
+                appState += "App Type  : " + bv.getApp().ToString();
+
+                int yPos = (int)(graphics.GraphicsDevice.Viewport.Height - m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay) * 4);
+                spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), appState, new Vector2(0, yPos), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
 
                 // Get objects and polygons
                 //
                 string brazilViewInfo = "Components: " + bv.getApp().getComponents().Count() + ", Polygons: " + polygonCount(bv.getApp().getComponents());
                 int xPos = (int)(graphics.GraphicsDevice.Viewport.Width - brazilViewInfo.Length * m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) - (m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay)));
+                yPos = (int)(graphics.GraphicsDevice.Viewport.Height - m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay));
                 spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), brazilViewInfo, new Vector2(xPos, yPos), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
 
                 //string brazilAppTime = "App time: " + bv.getApp().getAppTime().ToString();
@@ -1330,12 +1336,13 @@ namespace Xyglo.Brazil.Xna
 
             // Debug eye position
             //
+            /*
             if (m_context.m_project.getViewMode() != Project.ViewMode.Formal)
             {
                 string eyePosition = "[EyePosition] X " + eye.X + ",Y " + eye.Y + ",Z " + eye.Z;
                 float xPos = graphics.GraphicsDevice.Viewport.Width - eyePosition.Length * m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay);
                 spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), eyePosition, new Vector2(0.0f, 0.0f), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
-            }
+            }*/
 
             // Draw any temporary message
             //
@@ -2317,7 +2324,9 @@ namespace Xyglo.Brazil.Xna
             {
                 List<BrazilView> brazilViews = m_context.m_project.getViews().Where(item => item.GetType() == typeof(BrazilView)).Cast<BrazilView>().ToList();
 
-                foreach (BrazilView view in brazilViews)
+                // Only update app components when the app is shown as playing
+                //
+                foreach (BrazilView view in brazilViews.Where(item => item.getApp().isPlaying()).ToList())
                 {
                     updateComponents(view.getApp().getComponents(), view.getApp().getWorld());
                 }
@@ -2390,20 +2399,17 @@ namespace Xyglo.Brazil.Xna
                             m_context.m_drawableComponents[component].buildBuffers(m_context.m_graphics.GraphicsDevice);
                         }
                     }
-                    else if (component.GetType() == typeof(BrazilHud))
+                    else if (component.GetType() == typeof(BrazilHud) && component.getApp() == null)
                     {
                         string bannerString = "";
 
                         if (m_frameCounter.getFrameRate() > 0)
                             bannerString += "FPS = " + m_frameCounter.getFrameRate() + "\n";
-
+                            
                         if (m_context.m_project != null)
                             bannerString += "[EyePosition] X " + m_eyeHandler.getEyePosition().X + ",Y " + m_eyeHandler.getEyePosition().Y + ",Z " + m_eyeHandler.getEyePosition().Z + "\n";
 
-
-                        // If interloepr is live then we are in a game
-                        //
-                        if (m_brazilContext.m_interloper != null)
+                        if (m_brazilContext.m_interloper != null) // If interloper is live then we are in a game
                         {
                             // Interloper position - get the component group and reverse engineer average position by cheating
                             //
@@ -2418,6 +2424,17 @@ namespace Xyglo.Brazil.Xna
                             bannerString += "Score = " + m_brazilContext.m_interloper.getScore() + "\n";
                             bannerString += "Lives = " + m_brazilContext.m_world.getLives() + "\n";
                         }
+
+                            /*
+                        else if (m_context.m_project.getSelectedView().GetType() == typeof(BrazilView))
+                        {
+                            BrazilView bV = (BrazilView)m_context.m_project.getSelectedView();
+                            // Interloper score
+                            //
+                            bannerString += "App State : " + (bV.getApp().isPlaying() ? "Playing\n" : "Stopped\n");
+                            bannerString += "App Score :  " + bV.getApp().getInterloper().getScore() + "\n";
+                            bannerString += "App Lives : " + bV.getApp().getWorld().getLives() + "\n";
+                        }*/
 
                         XygloBannerText bannerText = (XygloBannerText)m_context.m_drawableComponents[component];
 

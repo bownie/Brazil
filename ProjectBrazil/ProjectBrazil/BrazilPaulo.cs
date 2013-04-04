@@ -35,7 +35,7 @@ namespace Xyglo.Brazil
         {
             // Now set the initial state
             //
-            setInitialState(state);
+            setState(state);
 
             // Connect some keys
             //
@@ -83,7 +83,7 @@ namespace Xyglo.Brazil
             // States of the application - where are we in the navigation around the app.  States will affect what 
             // components are showing and how we interact with them.
             //
-            string[] states = { "Menu", "PlayingGame", "LevelComplete", "ComponentTest" };
+            string[] states = { "Menu", "PlayingGame", "LevelComplete", "ComponentTest", "GameOver" };
             foreach (string state in states)
             {
                 addState(state);
@@ -203,6 +203,9 @@ namespace Xyglo.Brazil
                 newGoody.setRotation(0.2);
                 addComponent("PlayingGame", newGoody);
             }
+
+            BrazilBannerText gameOverText = new BrazilBannerText(BrazilColour.Red, BrazilPosition.Middle, 2.0f, "GAME OVER");
+            addComponent("GameOver", gameOverText);
         }
 
         /*
@@ -219,9 +222,9 @@ namespace Xyglo.Brazil
         /// Provide a control interface for this app
         /// </summary>
         /// <param name="command"></param>
-        public override void sendCommand(BrazilAppControl command)
-        {
-        }
+        //public override void sendCommand(BrazilAppControl command)
+        //{
+        //}
 
     }
 }

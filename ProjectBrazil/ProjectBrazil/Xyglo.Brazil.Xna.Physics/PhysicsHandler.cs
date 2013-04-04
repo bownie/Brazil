@@ -163,8 +163,13 @@ namespace Xyglo.Brazil.Xna.Physics
         /// Run the physics model for a given time
         /// </summary>
         /// <param name="gameTime"></param>
-        public void update(GameTime gameTime)
+        public void update(GameTime gameTime, List<XygloXnaDrawable> includeList)
         {
+            // Don't do anything for no drawables
+            //
+            if (includeList.Count() == 0)
+                return;
+
             // Physics model updating
             //
             float step = (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -172,9 +177,11 @@ namespace Xyglo.Brazil.Xna.Physics
             if (step > 1.0f / 100.0f) step = 1.0f / 100.0f;
             m_world.Step(step, multithread);
 
+            //List<XygloXnaDrawable> activeList = m_context.m_drawableComponents.Where(item => excludeList.Contains(item)).ToList();
+
             // Prescan for any component groups and add these to a temporary list for updating
             //
-            List<XygloXnaDrawable> cgList = m_context.m_drawableComponents.Values.Where(item => item.GetType() == typeof(XygloComponentGroup)).ToList();
+            List<XygloXnaDrawable> cgList = includeList.Where(item => item.GetType() == typeof(XygloComponentGroup)).ToList();
             List<XygloXnaDrawable> addList = new List<XygloXnaDrawable>();
             foreach (XygloComponentGroup xCG in cgList)
                 addList.AddRange(xCG.getComponents());
@@ -208,7 +215,7 @@ namespace Xyglo.Brazil.Xna.Physics
             foreach (RigidBody body in remainderList)
             {
                 //int hashCode = body.GetHashCode();
-                List<XygloXnaDrawable> drawableList = m_context.m_drawableComponents.Values.Where(item => item.getPhysicsHash() == body.GetHashCode()).ToList();
+                List<XygloXnaDrawable> drawableList = includeList.Where(item => item.getPhysicsHash() == body.GetHashCode()).ToList();
 
 //                List<XygloXnaDrawable> componentGroupDrawableList = m_context.m_drawableComponents.Values.Where(item => item.get
                 
@@ -227,6 +234,14 @@ namespace Xyglo.Brazil.Xna.Physics
 
                 body.Update();
             }
+        }
+
+        /// <summary>
+        /// Ensure that the physics arena is clear of objects
+        /// </summary>
+        public void clear()
+        {
+            m_world.Clear();
         }
 
 
@@ -313,9 +328,27 @@ namespace Xyglo.Brazil.Xna.Physics
         }
 
         /// <summary>
+        /// Add rigid body
+        /// </summary>
+        /// <param name="body"></param>
+        public void addRigidBody(RigidBody body)
+        {
+            m_world.AddBody(body);
+        }
+
+        /// <summary>
+        /// Add contraint
+        /// </summary>
+        /// <param name="constraint"></param>
+        public void addConstraint(Constraint constraint)
+        {
+            m_world.AddConstraint(constraint);
+        }
+
+        /// <summary>
         /// This is the JitterPhysics World definition
         /// </summary>
-        public World m_world { private set; get; }
+        protected World m_world;
 
         /// <summary>
         /// XygloContext is useful
@@ -325,22 +358,22 @@ namespace Xyglo.Brazil.Xna.Physics
         /// <summary>
         /// Probably don't need these
         /// </summary>
-        private Primitives3D.GeometricPrimitive[] primitives = new Primitives3D.GeometricPrimitive[5];
+        protected Primitives3D.GeometricPrimitive[] primitives = new Primitives3D.GeometricPrimitive[5];
 
         /// <summary>
         /// Or these..
         /// </summary>
-        private enum Primitives { box, sphere, cylinder, cone, capsule }
+        protected enum Primitives { box, sphere, cylinder, cone, capsule }
 
         /// <summary>
         /// Or this..
         /// </summary>
-        public DebugDrawer DebugDrawer { private set; get; }
+        protected DebugDrawer DebugDrawer { private set; get; }
 
         /// <summary>
         /// Or this..
         /// </summary>
-        private int m_activeBodies = 0;
+        protected int m_activeBodies = 0;
 
         /// <summary>
         /// Or this..
@@ -350,6 +383,6 @@ namespace Xyglo.Brazil.Xna.Physics
         /// <summary>
         /// Or indeed this..
         /// </summary>
-        private QuadDrawer m_quadDrawer = null;
+        protected QuadDrawer m_quadDrawer = null;
     }
 }

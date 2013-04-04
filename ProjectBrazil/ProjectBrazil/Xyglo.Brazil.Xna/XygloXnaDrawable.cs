@@ -30,6 +30,24 @@ namespace Xyglo.Brazil.Xna
         public abstract void draw(GraphicsDevice device);
 
         /// <summary>
+        /// Draw this component with or without a highlight - used in editing mode.
+        /// We store the colour, slash it for non highlighted, draw and restore.
+        /// 
+        /// Ok, made it much simpler for the moment due to textures.
+        /// </summary>
+        /// <param name="device"></param>
+        /// <param name="highlight"></param>
+        public void draw(GraphicsDevice device, bool highlight)
+        {
+            //Color originalColour = m_colour;
+            if (highlight)
+                draw(device);
+                //m_colour *= 0.3f;
+
+            //m_colour = originalColour;
+        }
+
+        /// <summary>
         /// Draw a preview of this component scaled into a BoundingBox
         /// </summary>
         /// <param name="device"></param>

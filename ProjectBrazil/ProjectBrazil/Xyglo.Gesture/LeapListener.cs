@@ -17,11 +17,10 @@ namespace Xyglo.Gesture
             Logger.logMsg("Leap connected");
             //base.OnConnect(arg0);
 
-            //arg0.EnableGesture(Leap.Gesture.GestureType.TYPECIRCLE);
-            //arg0.EnableGesture(Leap.Gesture.GestureType.TYPEKEYTAP);
+            arg0.EnableGesture(Leap.Gesture.GestureType.TYPECIRCLE);
+            arg0.EnableGesture(Leap.Gesture.GestureType.TYPEKEYTAP);
             arg0.EnableGesture(Leap.Gesture.GestureType.TYPESCREENTAP);
             arg0.EnableGesture(Leap.Gesture.GestureType.TYPESWIPE);
-
 
             // Vanilla?
             //
@@ -63,6 +62,55 @@ namespace Xyglo.Gesture
             testFingers(controller);
         }
 
+        /// <summary>
+        /// Return if the gesture was recognised
+        /// </summary>
+        /// <param name="controller"></param>
+        /// <returns></returns>
+        protected bool processGestures(Controller controller)
+        {
+            Frame latestFrame = controller.Frame();
+            Frame refFrame = controller.Frame(handGestureFrameInterval);
+            Leap.GestureList gestures = latestFrame.Gestures();
+            bool gotGesture = false;
+
+            foreach (Leap.Gesture g in gestures)
+            {
+                switch (g.Type)
+                {
+                    case Leap.Gesture.GestureType.TYPESWIPE:   
+                        SwipeGesture swipe = new SwipeGesture(g);
+                        OnSwipe(new SwipeEventArgs(swipe));
+                        gotGesture = true;
+                        break;
+
+                    case Leap.Gesture.GestureType.TYPESCREENTAP:
+                       ScreenTapGesture screenTap = new ScreenTapGesture(g);
+                        OnScreenTap(new ScreenTapEventArgs(screenTap));
+                        gotGesture = true;
+                        break;
+
+                    case Leap.Gesture.GestureType.TYPECIRCLE:
+                        Logger.logMsg("Circle gesture");
+                        gotGesture = true;
+                        break;
+
+                    case Leap.Gesture.GestureType.TYPEKEYTAP:
+                        Logger.logMsg("Key tap gesture");
+                        gotGesture = true;
+                        break;
+
+                    case Leap.Gesture.GestureType.TYPEINVALID:
+                        Logger.logMsg("Invalid gesture");
+                        break;
+
+                    default:
+                        Logger.logMsg("Got other type");
+                        break;
+                }
+            }
+            return gotGesture;
+        }
 
         protected void originalFingers(Controller controller)
         {
@@ -85,7 +133,10 @@ namespace Xyglo.Gesture
             ScreenList screens = controller.CalibratedScreens;
             //Leap::GestureList gestures = latestFrame.gestures();
 
-
+            // Process gestures here and if we have one then return
+            //
+            if (processGestures(controller))
+                return;
 
             // For the moment leave out the gestures
             //
@@ -152,13 +203,18 @@ namespace Xyglo.Gesture
             }
         }
 
-        protected void testFingers(Controller cntrlr)
+        protected void testFingers(Controller controller)
         {
                       // Get the current frame.
-            Frame currentFrame = cntrlr.Frame();
+            Frame currentFrame = controller.Frame();
 
             m_currentTime = currentFrame.Timestamp;
             m_timeChange = m_currentTime - m_previousTime;
+
+            // Process gestures here and if we have one then return
+            //
+            if (processGestures(controller))
+                return;
 
             // Every 500us I guess
             //
@@ -173,7 +229,7 @@ namespace Xyglo.Gesture
                     foreach (Finger finger in currentFrame.Fingers)
                     {
                         // Get the closest screen intercepting a ray projecting from the finger
-                        Screen screen = cntrlr.CalibratedScreens.ClosestScreenHit(finger);
+                        Screen screen = controller.CalibratedScreens.ClosestScreenHit(finger);
 
                         if (screen != null && screen.IsValid)
                         {
@@ -211,7 +267,7 @@ namespace Xyglo.Gesture
 
                                     // Move the cursor
                                     //MouseCursor.MoveCursor(x, y);
-                                    ScreenList screens = cntrlr.CalibratedScreens;
+                                    ScreenList screens = controller.CalibratedScreens;
                                     Vector hitPoint = pointableScreenPos(finger, screens);
 
                                     Vector vStartPos = m_mtxFrameTransform.TransformPoint(finger.TipPosition * m_fFrameScale );
@@ -273,6 +329,7 @@ namespace Xyglo.Gesture
         {
             if (ScreenTapEvent != null) ScreenTapEvent(this, e);
         }
+
         protected virtual void OnScreenPosition(ScreenPositionEventArgs e)
         {
             if (ScreenPositionEvent != null) ScreenPositionEvent(this, e);

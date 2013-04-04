@@ -101,11 +101,11 @@ namespace Xyglo.Brazil.Xna
 
             // Now we can generate the XygloFactory - the physics handler is only initialised above
             //
-            m_factory = new XygloFactory(m_context, m_brazilContext, m_physicsHandler, m_eyeHandler, m_mouse, m_frameCounter);
+            m_factory = new XygloFactory(m_context, m_brazilContext, m_eyeHandler, m_mouse, m_frameCounter);
 
             // And generate the XygloEngine object that does our state transitions
             //
-            m_engine = new XygloEngine(m_context, m_brazilContext, m_physicsHandler, m_keyboard, m_keyboardHandler, m_eyeHandler);
+            m_engine = new XygloEngine(m_context, m_brazilContext, m_keyboard, m_keyboardHandler, m_eyeHandler);
             m_engine.CleanExitEvent += new CleanExitEventHandler(handleCleanExit);
             m_engine.TemporaryMessageEvent += new TemporaryMessageEventHandler(handleTemporaryMessage);
             m_engine.NewBufferViewEvent += new NewBufferViewEventHandler(handleNewView);
@@ -216,7 +216,7 @@ namespace Xyglo.Brazil.Xna
 
             // Create our physics handler
             //
-            m_physicsHandler = new PhysicsHandler(this, m_context);
+            m_context.m_physicsHandler = new PhysicsHandler(this, m_context);
             //m_physicsHandler.addGround(this);
         }
 
@@ -348,7 +348,7 @@ namespace Xyglo.Brazil.Xna
             base.Initialize();
             initializeWorld();
 
-            m_physicsHandler.initialise();
+            m_context.m_physicsHandler.initialise();
         }
 
         /// <summary>
@@ -999,9 +999,6 @@ namespace Xyglo.Brazil.Xna
                         {
                             Vector3 position = m_context.m_drawingHelper.getScreenPlaneIntersection(pos.getScreenPosition());
                             m_context.m_temporaryDrawables[temp].setPosition(position);
-
-                            // update the drop dead
-                            temp.setDropDead(gameTime.TotalGameTime.TotalSeconds + 0.5);
                             found = true;
                         }
                         else if (temp.getIndex() == pos.getId() && temp.getAltIndex() == pos.getHandIndex() && temp.getType() == BrazilTemporaryType.FingerBone)
@@ -1010,8 +1007,7 @@ namespace Xyglo.Brazil.Xna
                             XygloXnaDrawable drw = m_context.m_temporaryDrawables[temp];
                             drw.setPosition(m_context.m_drawingHelper.getScreenPlaneIntersection(position));
 
-                            // update the drop dead time
-                            temp.setDropDead(gameTime.TotalGameTime.TotalSeconds + 0.5);
+                            
                             //drw.setOrientation();
                             
                             found = true;
@@ -1022,7 +1018,7 @@ namespace Xyglo.Brazil.Xna
                     //
                     if (!found)
                     {
-                        XygloFingerPointer pointer = new XygloFingerPointer(pos.getId(), m_context.m_lineEffect, XygloConvert.getBrazilVector3(m_context.m_drawingHelper.getScreenPlaneIntersection(pos.getScreenPosition())));
+                        XygloFingerPointer pointer = new XygloFingerPointer(pos.getId(), m_context.m_lineEffect, m_context.m_drawingHelper.getScreenPlaneIntersection(pos.getScreenPosition()));
 
                         BrazilTemporary temp = new BrazilTemporary(BrazilTemporaryType.FingerPointer, pos.getId());
                         // Set drop dead as five seconds into the future
@@ -1103,7 +1099,8 @@ namespace Xyglo.Brazil.Xna
             m_engine.performEyeMovement(gameTime);
 
             // Update all Xyglo/Brazil Components whether they be embedded in Friendlier or
-            // free in their own app.
+            // free in their own app.  If they are 'in app' then this call also checks for
+            // the playing state of the application.
             ///
             m_context.m_drawingHelper.updateAllComponents();
 
@@ -1113,7 +1110,7 @@ namespace Xyglo.Brazil.Xna
 
             // Check for world escape and set as necessary
             //
-            m_engine.checkWorldEscape();
+            //m_engine.checkWorldEscape();
 
             // Update physics
             //
@@ -1121,11 +1118,53 @@ namespace Xyglo.Brazil.Xna
             // rethink the model a bit if there is no way of identifying which components belong to
             // which app.
             //
-            m_physicsHandler.update(gameTime);
+            m_context.m_physicsHandler.update(gameTime, getDrawableUpdateList());
 
             base.Update(gameTime);
         }
 
+        /// <summary>
+        /// Get a list of components we're going to exclude from world updates due to the transport state
+        /// of the hosted app.
+        /// </summary>
+        /// <returns></returns>
+        protected List<Component> getUpdateList()
+        {
+            List<Component> rL = new List<Component>();
+
+            if (m_context.m_project == null)
+                return rL;
+
+            foreach (BrazilView bV in m_context.m_project.getBrazilViews())
+            {
+                if (bV.getApp().isPlaying())
+                {
+                    rL.AddRange(bV.getApp().getComponents());
+                }
+            }
+
+            return rL;
+        }
+
+        /// <summary>
+        /// Get a list of drawables from 
+        /// </summary>
+        /// <returns></returns>
+        protected List<XygloXnaDrawable> getDrawableUpdateList()
+        {
+            List<Component> updateList = getUpdateList();
+            List<XygloXnaDrawable> rL = new List<XygloXnaDrawable>();
+
+            foreach (Component drawComp in m_context.m_drawableComponents.Keys)
+            {
+                if (updateList.Contains(drawComp))
+                {
+                    rL.Add(m_context.m_drawableComponents[drawComp]);
+                }
+            }
+
+            return rL;
+        }
 
         /// <summary>
         /// Given two components that have collided - play back the velocities of these components until
@@ -1774,11 +1813,14 @@ namespace Xyglo.Brazil.Xna
             // exist it just calls redraw on it.
             //
             List<Component> componentList = null;
+            List<Component> highlightList = null;
+
             State state = null;
             if (view != null)
             {
                 componentList = view.getApp().getComponents();
                 state = view.getApp().getState();
+                highlightList = view.getApp().getHighlightList();
             }
             else
             {
@@ -1808,12 +1850,18 @@ namespace Xyglo.Brazil.Xna
 
                 // If a component is not hiding then draw it
                 //
-                if (!(component is BrazilInvisibleBlock))
-                {
-                    loadComponentTexture(component, m_context.m_physicsEffect);
+                if (component is BrazilInvisibleBlock || (component is BrazilHud && component.getApp() != null))
+                    continue;
+
+                loadComponentTexture(component, m_context.m_physicsEffect);
+
+                // We may want to alter colouring of the objects if there is a highlight list in operation
+                if (highlightList == null || highlightList.Count() == 0)
                     m_context.m_drawableComponents[component].draw(m_context.m_graphics.GraphicsDevice);
-                }
+                else
+                    m_context.m_drawableComponents[component].draw(m_context.m_graphics.GraphicsDevice, highlightList.Contains(component));
             }
+
 
             // Now we can draw any temporary drawables:
             // List to remove
@@ -2590,11 +2638,6 @@ namespace Xyglo.Brazil.Xna
         /// XygloGraphics helper
         /// </summary>
         protected XygloGraphics m_graphics;
-
-        /// <summary>
-        /// Physics handler
-        /// </summary>
-        protected PhysicsHandler m_physicsHandler = null;
 
         /// <summary>
         /// An eye perturber indeed

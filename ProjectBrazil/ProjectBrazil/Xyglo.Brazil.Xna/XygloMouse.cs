@@ -142,6 +142,35 @@ namespace Xyglo.Brazil.Xna
 
                     Logger.logMsg("Friender::checkMouse() - mouse clicked");
 
+
+                    // If we're in a BrazilView then we need to see if the click has hit an object
+                    //
+                    if (m_context.m_project.getSelectedView().GetType() == typeof(BrazilView))
+                    {
+                        BrazilView brazilView = (BrazilView)m_context.m_project.getSelectedView();
+                        bool gotComponent = false;
+                        foreach (Component component in m_context.m_drawableComponents.Keys)
+                        {
+                            if (component.getApp() == null)
+                                continue;
+
+                            XygloXnaDrawable testDrawable = m_context.m_drawableComponents[component];
+
+                            if (testDrawable.getBoundingBox().Intersects(pickRay) != null) // == ContainmentType.Intersects)
+                            {
+                                //Logger.logMsg("Clicked on an app object");
+                                component.getApp().addToHighlight(component);
+                                gotComponent = true;
+                            }
+                        }
+
+                        // Clear the highlights if we've not added any (we've clicked outside them)
+                        //
+                        if (!gotComponent)
+                            brazilView.getApp().clearHighlights();
+                    }
+
+
                 }
                 else if (mouseAction.m_mouse == Mouse.LeftButtonHeld)
                 {
@@ -407,18 +436,25 @@ namespace Xyglo.Brazil.Xna
                         //
                         XygloView newView = m_context.m_project.testNearBufferView(eye);
 
+
                         if (newView != null)
                         {
-                            // Calling this constructor sets active buffer only
+                            // Only jump back for non BrazilViews
                             //
-                            OnViewChange(new XygloViewEventArgs(newView));
+                            if (newView.GetType() != typeof(BrazilView))
+                            {
+                                // Calling this constructor sets active buffer only
+                                //
+                                OnViewChange(new XygloViewEventArgs(newView));
+                            }
                         }
-                        else
-                        {
+                        //else
+                        //{
                             // Emit the event
                             //
-                            OnChangePosition(new PositionEventArgs(m_lastClickEyePosition));
-                        }
+                            //OnChangePosition(new PositionEventArgs(m_lastClickEyePosition));
+                        //}
+                        
 
                         // Set default cursor back
                         //

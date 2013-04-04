@@ -36,7 +36,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="effect"></param>
         /// <param name="position"></param>
         /// <param name="size"></param>
-        public XygloTexturedBlock(Color colour, BasicEffect effect, BrazilVector3 position, BrazilVector3 size)
+        public XygloTexturedBlock(Color colour, BasicEffect effect, Vector3 position, Vector3 size)
         {
             // Store the effect
             m_effect = effect;

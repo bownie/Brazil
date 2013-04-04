@@ -23,12 +23,11 @@ namespace Xyglo.Brazil.Xna
     public class XygloEngine : XygloEventEmitter
     {
 
-        public XygloEngine(XygloContext context, BrazilContext brazilContext, PhysicsHandler physicsHandler,
+        public XygloEngine(XygloContext context, BrazilContext brazilContext, 
                            XygloKeyboard keyboard, XygloKeyboardHandler keyboardHandler, EyeHandler eyeHandler)
         {
             m_context = context;
             m_brazilContext = brazilContext;
-            m_physicsHandler = physicsHandler;
             m_keyboard = keyboard;
             m_keyboardHandler = keyboardHandler;
             m_eyeHandler = eyeHandler;
@@ -54,7 +53,7 @@ namespace Xyglo.Brazil.Xna
                 // Clear drawables and any physics simulations
                 //
                 m_context.m_drawableComponents.Clear();
-                m_physicsHandler.m_world.Clear();
+                m_context.m_physicsHandler.clear();
                 setState("PlayingGame");
             }
 
@@ -110,7 +109,11 @@ namespace Xyglo.Brazil.Xna
                     case "CurrentBufferView":
                         // The default target will process meta key commands
                         //
-                        m_keyboardHandler.processKey(gameTime, keyAction);
+                        if (m_context.m_project != null && m_context.m_project.getSelectedView().GetType() == typeof(BrazilView))
+                            m_keyboardHandler.processBrazilViewKey(gameTime, keyAction);
+                        else
+                            m_keyboardHandler.processBufferViewKey(gameTime, keyAction);
+
                         processMetaCommand(gameTime, keyAction, buildProcess);
                         break;
                     
@@ -162,7 +165,11 @@ namespace Xyglo.Brazil.Xna
                         // The default target will process meta key commands
                         //
                     case "Exit":
-                        m_keyboardHandler.processKey(gameTime, keyAction);
+                        if (m_context.m_project != null && m_context.m_project.getSelectedView().GetType() == typeof(BrazilView))
+                            m_keyboardHandler.processBrazilViewKey(gameTime, keyAction);
+                        else
+                            m_keyboardHandler.processBufferViewKey(gameTime, keyAction);
+
                         processMetaCommand(gameTime, keyAction, buildProcess);
                         break;
 
@@ -186,21 +193,21 @@ namespace Xyglo.Brazil.Xna
                     case "MoveLeft":
                         // accelerate will accelerate in mid air or move
                         if (m_brazilContext.m_interloper != null)
-                            m_physicsHandler.accelerate(m_context.m_drawableComponents[m_brazilContext.m_interloper], new Vector3(-10, 0, 0));
+                            m_context.m_physicsHandler.accelerate(m_context.m_drawableComponents[m_brazilContext.m_interloper], new Vector3(-10, 0, 0));
 
                         break;
 
                     case "MoveRight":
                         // accelerate will accelerate in mid air or move
                         if (m_brazilContext.m_interloper != null)
-                            m_physicsHandler.accelerate(m_context.m_drawableComponents[m_brazilContext.m_interloper], new Vector3(10, 0, 0));
+                            m_context.m_physicsHandler.accelerate(m_context.m_drawableComponents[m_brazilContext.m_interloper], new Vector3(10, 0, 0));
                         break;
 
                         // Jump the interloper
                         //
                     case "Jump":
                         if (m_brazilContext.m_interloper != null)
-                            m_physicsHandler.accelerate(m_context.m_drawableComponents[m_brazilContext.m_interloper], new Vector3(0, -200, 0));
+                            m_context.m_physicsHandler.accelerate(m_context.m_drawableComponents[m_brazilContext.m_interloper], new Vector3(0, -200, 0));
                         break;
 
                     case "MoveForward":
@@ -511,7 +518,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="gameTime"></param>
         public void checkInterloperBoundaries(GameTime gameTime)
         {
-            if (m_brazilContext.m_interloper == null || m_eyeHandler.isChangingPosition())
+            if (m_brazilContext.m_interloper == null || m_eyeHandler.isChangingPosition() || !m_context.m_drawableComponents.ContainsKey(m_brazilContext.m_interloper))
                 return;
 
             // Position within screen
@@ -608,27 +615,101 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
-        /// Check for the world escape and return the state we should be in now
+        /// Check for the world escape and return the state we should be in now.  Whether we being this level or whether
+        /// we being an app within a BrazilView.  If we're doing this in an app then we need to find the interloper and
+        /// remove all drawables for this app if we've died.  This restarts the level.
         /// </summary>
         /// <returns></returns>
         public void checkWorldEscape()
         {
-            // Check for world boundary escape
+            // Process any apps
             //
-            if (m_brazilContext.m_interloper != null && !XygloConvert.getBoundingBox(m_brazilContext.m_world.getBounds()).Intersects(m_context.m_drawableComponents[m_brazilContext.m_interloper].getBoundingBox()))
+            if (m_context.m_project != null)
             {
-                Logger.logMsg("Interloper has left the world");
-                m_brazilContext.m_world.setLives(m_brazilContext.m_world.getLives() - 1);
+                foreach (BrazilView bV in m_context.m_project.getBrazilViews())
+                {
+                    // Ignore once game over has happened
+                    //
+                    if (bV.getApp().getState() == State.Test("GameOver"))
+                        continue;
 
-                if (m_brazilContext.m_world.getLives() < 0)
-                {
-                    setState("GameOver");
+                    // List from removal of objects
+                    //
+                    List<Component> removeList = new List<Component>();
+
+                    // Fetch the interloper
+                    //
+                    foreach(Component intComp in bV.getApp().getComponents().Where(item => item.GetType() == typeof(BrazilInterloper)).ToList())
+                    {
+                        // Ensure that the interloper drawable is available
+                        //
+                        if (!m_context.m_drawableComponents.ContainsKey(intComp))
+                            continue;
+
+                        // Get the rendered drawable for each component
+                        //
+                        XygloComponentGroup group = (XygloComponentGroup)m_context.m_drawableComponents[intComp];
+
+                        // Test for the interloper leaving its own bounding box
+                        //
+                        if (XygloConvert.getBoundingBox(bV.getApp().getWorldBounds()).Contains(group.getBoundingBox()) == ContainmentType.Disjoint)
+                        {
+                            // Decrement lives
+                            //
+                            bV.getApp().getWorld().setLives(bV.getApp().getWorld().getLives() - 1);
+
+                            if (bV.getApp().getWorld().getLives() < 0)
+                            {
+                                bV.getApp().setState("GameOver");
+                            }
+                            else
+                            {
+                                // We've got one less life - this effectively restarts the level from scratch - we want to
+                                // remove all the drawables from this current state and then they will get recreated 
+                                // with the next draw run.
+                                //
+                                removeList.AddRange(bV.getApp().getComponents());
+                            }
+                        }
+                    }
+
+                    // Remove all the flagged defunct components
+                    //
+                    foreach (Component remove in removeList)
+                    {
+                        m_context.m_drawableComponents[remove] = null;
+                        m_context.m_drawableComponents.Remove(remove);
+                    }
+
+                    // Clear the removal list ready for the next app
+                    //
+                    removeList.Clear();
                 }
-                else
+            }
+            else
+            {
+                // Checking for the top level (this is a game)
+                //
+                if (m_brazilContext.m_interloper == null || !m_context.m_drawableComponents.ContainsKey(m_brazilContext.m_interloper))
+                    return;
+
+                // Check for world boundary escape
+                //
+                if (!XygloConvert.getBoundingBox(m_brazilContext.m_world.getBounds()).Intersects(m_context.m_drawableComponents[m_brazilContext.m_interloper].getBoundingBox()))
                 {
-                    // We've got one less life - this effectively restarts the level from scratch
-                    m_brazilContext.m_interloper = null;
-                    m_context.m_drawableComponents.Clear();
+                    Logger.logMsg("Interloper has left the world");
+                    m_brazilContext.m_world.setLives(m_brazilContext.m_world.getLives() - 1);
+
+                    if (m_brazilContext.m_world.getLives() < 0)
+                    {
+                        setState("GameOver");
+                    }
+                    else
+                    {
+                        // We've got one less life - this effectively restarts the level from scratch
+                        m_brazilContext.m_interloper = null;
+                        m_context.m_drawableComponents.Clear();
+                    }
                 }
             }
         }
@@ -672,11 +753,12 @@ namespace Xyglo.Brazil.Xna
         }
 
 
+        /// <summary>
+        /// The xyglo context
+        /// </summary>
         protected XygloContext m_context;
 
         protected BrazilContext m_brazilContext;
-
-        protected PhysicsHandler m_physicsHandler;
 
         protected XygloKeyboard m_keyboard;
 

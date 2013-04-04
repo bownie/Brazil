@@ -102,13 +102,13 @@ namespace Xyglo.Brazil
         /// and there is feedback from getAppTime and getTransportState.
         /// </summary>
         /// <param name="command"></param>
-        public abstract void sendCommand(BrazilAppControl command);
+        //public abstract void sendCommand(BrazilAppControl command);
 
         /// <summary>
         /// Get the current app run time
         /// </summary>
         /// <returns></returns>
-        public DateTime getAppTime() { return m_transport.getAppTime(); }
+        //public DateTime getAppTime() { return m_transport.getAppTime(); }
 
         //public void setLocalAppTime(BrazilGameTime gameTime) { m_transport.setAppTime(gameTime)); }
 
@@ -117,6 +117,77 @@ namespace Xyglo.Brazil
         /// </summary>
         /// <returns></returns>
         public BrazilAppTransport getTransportState() { return m_transport.getTransportState(); }
+
+        /// <summary>
+        /// Toggle transport between running and not
+        /// </summary>
+        public void toggleRunning()
+        {
+            if (m_transport.getTransportState() == BrazilAppTransport.Playing)
+                m_transport.stop();
+            else
+                m_transport.start();
+        }
+
+        /// <summary>
+        /// Set the transport state
+        /// </summary>
+        /// <param name="control"></param>
+        public void setTransportState(BrazilAppControl control)
+        {
+            switch(control)
+            {
+                case BrazilAppControl.Play:
+                    m_transport.start();
+                    break;
+
+                    case BrazilAppControl.Stop:
+                    m_transport.stop();
+                    break;
+
+                case BrazilAppControl.Rewind:
+                case BrazilAppControl.FastFoward:
+                case BrazilAppControl.Beginning:
+                case BrazilAppControl.End:
+                default:
+                    throw new Exception("Unsupported BrazilAppControl type");
+                    break;
+            }
+
+        }
+
+        public void rewind(float seconds)
+        {
+
+        }
+
+        public void fastForward(float seconds)
+        {
+
+        }
+
+        // Reset the app to inital state
+        //
+        public void reset()
+        {
+            foreach (Component component in m_componentList)
+            {
+                component.setDestroyed(false);
+            }
+        }
+
+
+        /// <summary>
+        /// Transport status
+        /// </summary>
+        /// <returns></returns>
+        public bool isPlaying() { return m_transport.isPlaying(); }
+
+        /// <summary>
+        /// Transport status
+        /// </summary>
+        /// <returns></returns>
+        public bool isStopped() { return m_transport.isStopped(); }
 
         /// <summary>
         /// Initialise abstract
@@ -389,7 +460,7 @@ namespace Xyglo.Brazil
 
             // Other keys
             //
-            Keys[] otherKeys = { Keys.Space, Keys.OemComma, Keys.OemSemicolon, Keys.OemPeriod, Keys.OemQuotes, Keys.OemCloseBrackets, Keys.OemOpenBrackets, Keys.OemPipe, Keys.OemMinus, Keys.OemPlus, Keys.OemQuestion, Keys.Back, Keys.Delete, Keys.Decimal, Keys.OemBackslash, Keys.LeftWindows, Keys.RightWindows, Keys.LeftControl, Keys.RightControl, Keys.RightShift, Keys.LeftShift, Keys.LeftShift, Keys.RightAlt, Keys.LeftAlt, Keys.Tab };
+            Keys[] otherKeys = { Keys.Space, Keys.OemComma, Keys.OemSemicolon, Keys.OemPeriod, Keys.OemQuotes, Keys.OemCloseBrackets, Keys.OemOpenBrackets, Keys.OemPipe, Keys.OemMinus, Keys.OemPlus, Keys.OemQuestion, Keys.Back, Keys.Delete, Keys.Decimal, Keys.OemBackslash, Keys.LeftWindows, Keys.RightWindows, Keys.LeftControl, Keys.RightControl, Keys.RightShift, Keys.LeftShift, Keys.LeftShift, Keys.RightAlt, Keys.LeftAlt, Keys.Tab, Keys.Home, Keys.End };
             foreach (Keys key in otherKeys)
             {
                 connectKey(state, key, target);
@@ -581,21 +652,44 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
-        /// We can initialise our world using this method
+        /// We can modify state of our app using this
         /// </summary>
         /// <param name="initialState"></param>
-        public void setInitialState(State initialState)
+        public void setState(State state)
         {
             // First check to see if this state is valid
             //
-            if (!m_states.Contains(initialState))
+            if (!m_states.Contains(state))
             {
-                throw new Exception("Unrecognized initial state " + initialState.m_name);
+                throw new Exception("Unrecognized initial state " + state.m_name);
             }
 
-            m_viewSpace.setState(initialState);
+            // Reset all components for this state
+            foreach (Component component in m_componentList)
+                component.setDestroyed(false);
+
+            m_viewSpace.setState(state);
         }
 
+        /// <summary>
+        /// Set state by string
+        /// </summary>
+        /// <param name="stateString"></param>
+        public void setState(string stateString)
+        {
+            // First check to see if this state is valid
+            //
+            if (!m_states.Contains(State.Test(stateString)))
+            {
+                throw new Exception("Unrecognized initial state " + stateString);
+            }
+
+            // Reset all components for this state
+            foreach (Component component in m_componentList)
+                component.setDestroyed(false);
+
+            m_viewSpace.setState(State.Test(stateString));
+        }
 
         /// <summary>
         /// Push any world changes through to XNA
@@ -635,6 +729,20 @@ namespace Xyglo.Brazil
         public string getProjectHome()
         {
             return m_homePath;
+        }
+
+        /// <summary>
+        /// Get the interloper Component
+        /// </summary>
+        /// <returns></returns>
+        public BrazilInterloper getInterloper()
+        {
+            List<Component> lI = m_componentList.Where(item => item.GetType() == typeof(BrazilInterloper)).ToList();
+
+            if (lI.Count() > 0)
+                return (BrazilInterloper)lI[0];
+
+            return null;
         }
 
         /// <summary>
@@ -686,6 +794,43 @@ namespace Xyglo.Brazil
             //
             m_transport = new BrazilTransport(m_viewSpace);
             m_viewSpace.setTransport(m_transport);
+
+            // Set up the highlightComponents list
+            //
+            m_highlightComponents = new List<Component>();
+        }
+
+        /// <summary>
+        /// Add a component to the highlight list
+        /// </summary>
+        /// <param name="component"></param>
+        public void addToHighlight(Component component)
+        {
+            // Initialise if it's not been done so already
+            //
+            if (m_highlightComponents == null)
+            {
+                m_highlightComponents = new List<Component>();
+            }
+
+            m_highlightComponents.Add(component);
+        }
+
+        /// <summary>
+        /// Get a list of highlight components
+        /// </summary>
+        /// <returns></returns>
+        public List<Component> getHighlightList()
+        {
+            return m_highlightComponents;
+        }
+
+        /// <summary>
+        /// Clear the highlight list
+        /// </summary>
+        public void clearHighlights()
+        {
+            m_highlightComponents.Clear();
         }
 
         /// <summary>
@@ -762,5 +907,12 @@ namespace Xyglo.Brazil
         /// </summary>
         [NonSerialized]
         protected BrazilTransport m_transport = null;
+
+        /// <summary>
+        /// To be used when editing - these are the selected objects for highlight
+        /// </summary>
+        [NonSerialized]
+        protected List<Component> m_highlightComponents = new List<Component>();
+
     }
 }
