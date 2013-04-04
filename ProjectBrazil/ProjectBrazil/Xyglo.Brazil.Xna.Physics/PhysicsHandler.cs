@@ -244,6 +244,19 @@ namespace Xyglo.Brazil.Xna.Physics
             m_world.Clear();
         }
 
+        /// <summary>
+        /// Remove by drawable from physics
+        /// </summary>
+        /// <param name="drawables"></param>
+        public void removeBodyForDrawable(XygloXnaDrawable drawable)
+        {
+            List<RigidBody> bodyList = m_world.RigidBodies.Where(item => item.GetHashCode() == drawable.getPhysicsHash()).ToList();
+
+            foreach(RigidBody body in bodyList)
+            {
+                m_world.RemoveBody(body);
+            }
+        }
 
 
         /// <summary>

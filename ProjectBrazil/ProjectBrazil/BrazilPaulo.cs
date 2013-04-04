@@ -161,7 +161,7 @@ namespace Xyglo.Brazil
 
             BrazilFlyingBlock block3 = new BrazilFlyingBlock(BrazilColour.Orange, new BrazilVector3(0, 150, 0), new BrazilVector3(200, 50, 0));
             //block3.setRotation(0.01);
-            block3.setHardness(10);
+            //block3.setHardness(10);
             block3.setName("LandingBlock1");
             addComponent("PlayingGame", block3);
 
@@ -181,7 +181,7 @@ namespace Xyglo.Brazil
 
             // Add the finishing block
             //
-            BrazilFinishBlock finishBlock = new BrazilFinishBlock(BrazilColour.Pink, new BrazilVector3(0, -500, 0), new BrazilVector3(200, 10, 10), getState("LevelComplete"));
+            BrazilFinishBlock finishBlock = new BrazilFinishBlock(BrazilColour.Pink, new BrazilVector3(0, 230, 0), new BrazilVector3(200, 10, 10), getState("LevelComplete"));
             addComponent("PlayingGame", finishBlock);
 
             // Add some prizes

@@ -1957,6 +1957,10 @@ namespace Xyglo.Brazil.Xna
             if (m_context.m_project == null || m_context.m_project.getSelectedView().GetType() != typeof(BrazilView))
                 return;
 
+            // ignore if Alt is down
+            if (keyAction.withAlt())
+                return;
+
             List<Keys> keyList = new List<Keys>();
             keyList.Add(keyAction.m_key);
             //bool consumed = false;
@@ -1968,11 +1972,11 @@ namespace Xyglo.Brazil.Xna
             if (keyList.Contains(Keys.Space))
             {
                 bv.getApp().toggleRunning();
-            } else if (keyList.Contains(Keys.Left))
+            } else if (keyList.Contains(Keys.OemComma)) // less than
             {
                 bv.getApp().rewind(1);
             }
-            else if (keyList.Contains(Keys.Right))
+            else if (keyList.Contains(Keys.OemPeriod)) // greater than
             {
                 bv.getApp().fastForward(1);
             }
@@ -2012,13 +2016,76 @@ namespace Xyglo.Brazil.Xna
                 //
                 foreach(Component component in bv.getApp().getHighlightList())
                 {
+                    m_context.m_physicsHandler.removeBodyForDrawable(m_context.m_drawableComponents[component]);
                     m_context.m_drawableComponents[component] = null;
                     m_context.m_drawableComponents.Remove(component);
                     bv.getApp().getComponents().Remove(component);
                 }
+
+                // And clear highlights
+                //
+                bv.getApp().clearHighlights();
+            }
+            else if (keyList.Contains(Keys.Down))
+            {
+                foreach (Component component in bv.getApp().getHighlightList())
+                    moveAppComponent(component, 0, 10, 0);
+            }
+            else if (keyList.Contains(Keys.Up))
+            {
+                foreach (Component component in bv.getApp().getHighlightList())
+                    moveAppComponent(component, 0, -10, 0);
+            }
+            else if (keyList.Contains(Keys.Left))
+            {
+                foreach (Component component in bv.getApp().getHighlightList())
+                    moveAppComponent(component, -10, 0, 0);
+            }
+            else if (keyList.Contains(Keys.Right))
+            {
+                foreach (Component component in bv.getApp().getHighlightList())
+                    moveAppComponent(component, 10, 0, 0);
             }
         }
 
+        /// <summary>
+        /// Move an app component by an amount
+        /// </summary>
+        /// <param name="component"></param>
+        protected void moveAppComponent(Component component, int dx, int dy, int dz)
+        {
+            if (component is BrazilFlyingBlock)
+            {
+                BrazilFlyingBlock fb = (BrazilFlyingBlock)component;
+                BrazilVector3 pos = fb.getPosition();
+                pos.X += dx;
+                pos.Y += dy;
+                pos.Z += dz;
+                fb.setPosition(pos);
+            } else if (component is BrazilInterloper)
+            {
+                BrazilInterloper bi = (BrazilInterloper)component;
+                BrazilVector3 pos = bi.getPosition();
+                pos.X += dx;
+                pos.Y += dy;
+                pos.Z += dz;
+                bi.setPosition(pos);
+            } // etc
+
+            // Now adjust the drawable (and also need to do this for physics!)
+            //
+            Vector3 existPos = m_context.m_drawableComponents[component].getPosition();
+            existPos.X += dx;
+            existPos.Y += dy;
+            existPos.Z += dz;
+            m_context.m_drawableComponents[component].setPosition(existPos);
+            
+            // Rebuild the vertex buffer
+            //
+            m_context.m_drawableComponents[component].buildBuffers(m_context.m_graphics.GraphicsDevice);
+
+            //m_context.m_drawableComponents.Remove(component);
+        }
 
         /// <summary>
         /// Process any keys that need to be printed
