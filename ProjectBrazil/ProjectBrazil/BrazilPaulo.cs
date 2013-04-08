@@ -172,6 +172,7 @@ namespace Xyglo.Brazil
             //block4.setVelocity(new BrazilVector3(-0.5f, -1f, -0.4f));
             //m_componentList.Add(block4);
             block4.setHardness(10);
+            block4.setMoveable(false);
             block4.setName("LandingBlock2");
             block4.setInitialAngle(Math.PI / 8);
             addComponent("PlayingGame", block4);

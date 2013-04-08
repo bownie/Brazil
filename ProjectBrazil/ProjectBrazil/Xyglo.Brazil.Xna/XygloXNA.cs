@@ -1845,7 +1845,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="effect"></param>
         protected void loadComponentTexture(Component component, BasicEffect effect)
         {
-            if (component.getResourceByType(ResourceType.Image).Count == 0)
+            if (m_context.m_xygloResourceMap.Count() == 0 || component.getResourceByType(ResourceType.Image).Count == 0)
                 return;
 
             // Load the resource if it's not already available

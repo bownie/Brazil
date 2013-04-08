@@ -39,8 +39,8 @@ namespace Xyglo.Friendlier
 
             // Generate our components for our levels and other things blocks
             //
-            //generateComponents();
-            testBlocks();
+            generateComponents();
+            //testBlocks();
 
             // Big dummy interloper
             //
@@ -199,9 +199,9 @@ namespace Xyglo.Friendlier
             block2.setAffectedByGravity(false);
             block2.setHardness(10);
             addComponent("PlayingGame", block2);
-            */
+           */
 
-            /*
+           
             BrazilFlyingBlock block3 = new BrazilFlyingBlock(BrazilColour.Orange, new BrazilVector3(0, 150, 0), new BrazilVector3(200, 50, 0));
             //block3.setRotation(0.01);
             block3.setHardness(10);
@@ -233,7 +233,7 @@ namespace Xyglo.Friendlier
             BrazilGoody goody2 = new BrazilGoody(BrazilGoodyType.Coin, 50, new BrazilVector3(0, 100, 0), new BrazilVector3(100, 50, 50), DateTime.Now);
             goody2.setRotation(0.01);
             addComponent("ComponentTest", goody2);
-*/
+
             // Setup some coins
             //
             for (int i = 0; i < 10; i++)

@@ -48,7 +48,7 @@ namespace Xyglo.Brazil.Xna
 
             // Check for end states that require no further processing
             //
-            if (m_context.m_project.getSelectedView().GetType() == typeof(BrazilView))
+            if (m_context.m_project != null && m_context.m_project.getSelectedView().GetType() == typeof(BrazilView))
             {
                 BrazilView brazilView = (BrazilView)m_context.m_project.getSelectedView();
 
