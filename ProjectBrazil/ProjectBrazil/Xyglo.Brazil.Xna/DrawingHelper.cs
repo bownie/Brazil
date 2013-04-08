@@ -36,6 +36,10 @@ namespace Xyglo.Brazil.Xna
             m_eyeHandler = eyeHandler;
             setPreviewBoundingBox(m_context.m_graphics.GraphicsDevice.Viewport.Width, m_context.m_graphics.GraphicsDevice.Viewport.Height);
 
+            // Create the ComponentPalette
+            //
+            m_componentPalette = new ComponentPalette(context, brazilContext, eyeHandler);
+
             // Populate the user help
             //
             populateUserHelp();
@@ -1169,6 +1173,8 @@ namespace Xyglo.Brazil.Xna
             return count;
         }
 
+
+
         /// <summary>
         /// Draw the HUD Overlay for the editor with information about the current file we're viewing
         /// and position in that file.
@@ -1331,6 +1337,10 @@ namespace Xyglo.Brazil.Xna
                 //string brazilAppTime = "App time: " + bv.getApp().getAppTime().ToString();
                 //yPos = (int)(graphics.GraphicsDevice.Viewport.Height - m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay) * 2);
                 //spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), brazilAppTime, new Vector2(xPos, yPos), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
+
+                // Draw the palette
+                //
+                m_componentPalette.draw(gameTime);
             }
 
 
@@ -2177,7 +2187,7 @@ namespace Xyglo.Brazil.Xna
             bool editConfigurationItem = keyboardHandler.getEditConfigurationItem();
             string editConfigurationItemValue = keyboardHandler.getEditConfigurationItemValue();
 
-            Vector3 fp = m_context.m_project.getSelectedBufferView().getPosition();
+            Vector3 fp = m_context.m_project.getSelectedView().getPosition();
 
             // Starting positions
             //
@@ -2551,6 +2561,11 @@ namespace Xyglo.Brazil.Xna
         /// EyeHandler reference
         /// </summary>
         protected EyeHandler m_eyeHandler;
+
+        /// <summary>
+        /// Palette for brazil components shown in the BrazilView
+        /// </summary>
+        protected ComponentPalette m_componentPalette;
     }
 
 }

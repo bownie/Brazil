@@ -26,9 +26,27 @@ namespace Xyglo.Gesture
             return new Vector3(m_swipe.Direction.x, m_swipe.Direction.y, m_swipe.Direction.z);
         }
 
+        /// <summary>
+        /// Speed of the swipe
+        /// </summary>
+        /// <returns></returns>
         public float getSpeed()
         {
             return m_swipe.Speed;
+        }
+
+        /// <summary>
+        /// Start position of the swipe
+        /// </summary>
+        /// <returns></returns>
+        public Vector3 getStartPosition()
+        {
+            return new Vector3(m_swipe.StartPosition.x, m_swipe.StartPosition.y, m_swipe.StartPosition.z);
+        }
+
+        public Vector3 getEndPosition()
+        {
+            return new Vector3(m_swipe.Position.x, m_swipe.Position.y, m_swipe.Position.z);
         }
 
         public SwipeGesture getSwipe() { return m_swipe; }
@@ -84,8 +102,27 @@ namespace Xyglo.Gesture
         protected string m_handIndex;
     }
 
+    public class CircleEventArgs : System.EventArgs
+    {
+        public CircleEventArgs(Vector screenPosition, float duration, bool clockwise)
+        {
+            m_clockwise = clockwise;
+            m_screenPosition = new Vector3(screenPosition.x, screenPosition.y, screenPosition.z);
+            m_duration = duration;
+        }
+
+        public bool isClockwise() { return m_clockwise; }
+        public Vector3 getPosition() { return m_screenPosition; }
+        public float getDuration() { return m_duration; }
+
+        protected Vector3 m_screenPosition;
+        protected bool m_clockwise;
+        protected float m_duration;
+    }
+
+
     public delegate void SwipeEventHandler(object sender, SwipeEventArgs e);
     public delegate void ScreenTapEventHandler(object sender, ScreenTapEventArgs e);
     public delegate void ScreenPositionEventHandler(object sender, ScreenPositionEventArgs e);
-
+    public delegate void CircleEventHandler(object sender, CircleEventArgs e);
 }

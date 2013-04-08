@@ -91,7 +91,21 @@ namespace Xyglo.Gesture
                         break;
 
                     case Leap.Gesture.GestureType.TYPECIRCLE:
-                        Logger.logMsg("Circle gesture");
+                        Leap.CircleGesture circleGesture = new Leap.CircleGesture(g);
+
+                        bool clockWise = (circleGesture.Pointable.Direction.AngleTo(circleGesture.Normal) <= Math.PI / 4);
+
+                        if (clockWise)
+                        {
+                            Logger.logMsg("Circle gesture clockwise");
+                        }
+                        else
+                        {
+                            Logger.logMsg("Circle gesture anticlockwise");
+                        }
+
+                        OnCircle(new CircleEventArgs(circleGesture.Center, circleGesture.DurationSeconds, clockWise));
+
                         gotGesture = true;
                         break;
 
@@ -335,12 +349,18 @@ namespace Xyglo.Gesture
             if (ScreenPositionEvent != null) ScreenPositionEvent(this, e);
         }
 
+        protected virtual void OnCircle(CircleEventArgs e)
+        {
+            if (CircleEvent != null) CircleEvent(this, e);
+        }
+
         /// <summary>
         /// This listener can emit a SwipeEvent
         /// </summary>
         public event SwipeEventHandler SwipeEvent;
         public event ScreenTapEventHandler ScreenTapEvent;
         public event ScreenPositionEventHandler ScreenPositionEvent;
+        public event CircleEventHandler CircleEvent;
 
         /// <summary>
         /// 

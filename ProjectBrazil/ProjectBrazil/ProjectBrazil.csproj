@@ -141,6 +141,7 @@
     <Compile Include="Xyglo.Brazil.Xna\BrazilView.cs" />
     <Compile Include="Xyglo.Brazil.Xna\BufferView.cs" />
     <Compile Include="Xyglo.Brazil.Xna\ColourScheme.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\ComponentPalette.cs" />
     <Compile Include="Xyglo.Brazil.Xna\DirectoryPreview.cs" />
     <Compile Include="Xyglo.Brazil.Xna\Shape3D.cs" />
     <Compile Include="Xyglo.Brazil.Xna\XygloFingerBone.cs" />

@@ -47,6 +47,7 @@ namespace Xyglo.Brazil.Xna
             m_leapListener.SwipeEvent += new SwipeEventHandler(handleQueueEvent);
             m_leapListener.ScreenTapEvent += new ScreenTapEventHandler(handleQueueEvent);
             m_leapListener.ScreenPositionEvent += new ScreenPositionEventHandler(handleQueueEvent);
+            m_leapListener.CircleEvent += new CircleEventHandler(handleQueueEvent);
         }
 
         /// <summary>

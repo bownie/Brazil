@@ -951,6 +951,22 @@ namespace Xyglo.Brazil.Xna
             m_brazilContext.m_state = State.Test(newState);
         }
 
+        /// <summary>
+        /// List of Vector3 pairs - first is swipe destination, next is swipe direction stored from a leap
+        /// swipe gesture.  Destination is then checked against existing pointers to see if a movement is
+        /// required through a held finger.
+        /// </summary>
+        protected Dictionary<Vector3, Vector3> m_swipeDirectionDestination = new Dictionary<Vector3, Vector3>();
+
+        /// <summary>
+        /// Store last circle gesture total seconds to avoid false results
+        /// </summary>
+        protected double m_lastCircleGestureTime = 0.0f;
+
+        /// <summary>
+        /// Direction of last circle gesture
+        /// </summary>
+        protected bool m_lastCircleGestureClockwise = false;
 
         /// <summary>
         /// Handle gesture controller
@@ -964,21 +980,53 @@ namespace Xyglo.Brazil.Xna
 
             foreach (System.EventArgs args in m_kinectWorker.getAllEvents())
             {
-                // Handle swipe
+                // Handle swipe - use swipe as intent to move
                 //
                 if (args.GetType() == typeof(SwipeEventArgs))
                 {
                     SwipeEventArgs swipe = (SwipeEventArgs)args;
 
-
                     // MOVE
                     //
-                    Vector3 eyeDestination = m_eyeHandler.getEyePosition() + swipe.getDirection() * swipe.getSpeed() / 10.0f;
-                    m_eyeHandler.flyToPosition(eyeDestination);
+                    //Vector3 eyeDestination = m_eyeHandler.getEyePosition() + swipe.getDirection() * swipe.getSpeed() / 10.0f;
+                    //m_eyeHandler.flyToPosition(eyeDestination);
+                    //Vector3 startPositoin = swipe.getStartPosition();
+                    //Vector3 position = swipe.getEndPosition();
+
+                    // Store the swipe end position somewhere and check this against remaining pointers
+                    //
+                    m_swipeDirectionDestination[swipe.getEndPosition()] = swipe.getDirection();
 
                     // Determine a location for the swipe and move towards it
                     //
                     //m_eyeHandler.getEyePosition(), m_eyeHandler.getTargetPosition()
+
+                }
+                else if (args.GetType() == typeof(CircleEventArgs))
+                {
+                    CircleEventArgs circle = (CircleEventArgs)args;
+                    Vector3 eyeDestination = m_eyeHandler.getEyePosition();
+
+                    // Duration of the event appears to be long milliseconds so we set the Z difference
+                    // accordingly - the faster the circle the faster we scroll in and out.
+                    //
+                    float multiplier = 0.6f / circle.getDuration();
+
+                    if (circle.isClockwise())
+                        eyeDestination.Z -= 100 * multiplier;
+                    else
+                        eyeDestination.Z += 100 * multiplier;
+
+                    // We need to use a second guard around this gesture to ensure that we don't
+                    // react to false positives (i.e. anticlockwises during stream of clockwises).
+                    //
+                    if ((gameTime.TotalGameTime.TotalSeconds > m_lastCircleGestureTime + 1.0f)  ||
+                        m_lastCircleGestureClockwise == circle.isClockwise())
+                    {
+                        m_eyeHandler.flyToPosition(eyeDestination);
+                        m_lastCircleGestureTime = gameTime.TotalGameTime.TotalSeconds;
+                        m_lastCircleGestureClockwise = circle.isClockwise();
+                    }
 
                 }
                 else if (args.GetType() == typeof(ScreenTapEventArgs))
@@ -993,7 +1041,7 @@ namespace Xyglo.Brazil.Xna
                     bool found = false;
                     // First search for an existing temporary with the same id
                     //
-                    foreach(BrazilTemporary temp in m_context.m_temporaryDrawables.Keys)
+                    foreach (BrazilTemporary temp in m_context.m_temporaryDrawables.Keys)
                     {
                         if (temp.getIndex() == pos.getId() && temp.getType() == BrazilTemporaryType.FingerPointer)
                         {
@@ -1007,9 +1055,9 @@ namespace Xyglo.Brazil.Xna
                             XygloXnaDrawable drw = m_context.m_temporaryDrawables[temp];
                             drw.setPosition(m_context.m_drawingHelper.getScreenPlaneIntersection(position));
 
-                            
+
                             //drw.setOrientation();
-                            
+
                             found = true;
                         }
                     }
@@ -1031,8 +1079,24 @@ namespace Xyglo.Brazil.Xna
                         boneTemp.setDropDead(gameTime.TotalGameTime.TotalSeconds + 0.5);
                         m_context.m_temporaryDrawables[boneTemp] = bone;
 
-                        Logger.logMsg("Finger count is now " + m_context.m_temporaryDrawables.Keys.Select(item => item.getType() == BrazilTemporaryType.FingerPointer).Count());
+                        Logger.logMsg("Finger count is now " + m_context.m_temporaryDrawables.Keys.Where(item => item.getType() == BrazilTemporaryType.FingerPointer).ToList().Count());
                     }
+                    else
+                    {
+                        // We have found a finger pointer - need to check if it's within the area of a gesture movement and
+                        // do that movement if it's still valid to do so.
+                        //
+                        foreach (Vector3 destination in m_swipeDirectionDestination.Keys)
+                        {
+                            BoundingSphere bS = new BoundingSphere(destination, 40.0f);
+
+                            if (bS.Contains(pos.getScreenPosition()) == ContainmentType.Contains)
+                            {
+                                Logger.logMsg("Got gesture pointer position");
+                            }
+                        }
+                    }
+
 
 
                     // WIDTH                        
@@ -1888,14 +1952,23 @@ namespace Xyglo.Brazil.Xna
             //
             foreach (BrazilTemporary temporary in deleteTemps)
             {
+                int fingerCount = m_context.m_temporaryDrawables.Keys.Where(item => item.getType() == BrazilTemporaryType.FingerPointer).ToList().Count();
                 foreach (BrazilTemporary testTemp in m_context.m_temporaryDrawables.Keys)
                 {
                     if (testTemp == temporary)
                     {
+                        //if (m_context.m_temporaryDrawables[testTemp] is XygloFingerPointer)
+                        
                         m_context.m_temporaryDrawables[testTemp] = null;
                         m_context.m_temporaryDrawables.Remove(testTemp);
                         break;
                     }
+                }
+
+                int afterFingerCount = m_context.m_temporaryDrawables.Keys.Where(item => item.getType() == BrazilTemporaryType.FingerPointer).ToList().Count();
+                if (fingerCount != afterFingerCount)
+                {
+                    Logger.logMsg("Finger count is now " + afterFingerCount);
                 }
             }
 
