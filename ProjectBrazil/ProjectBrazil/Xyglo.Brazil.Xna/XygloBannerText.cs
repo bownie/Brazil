@@ -65,7 +65,7 @@ namespace Xyglo.Brazil.Xna
         /// Draw this FlyingBlock by setting and swriting the 
         /// </summary>
         /// <param name="device"></param>
-        public override void draw(GraphicsDevice device)
+        public override void draw(GraphicsDevice device, FillMode fillMode = FillMode.Solid)
         {
             m_spriteBatch.Begin();
             m_spriteBatch.DrawString(m_spriteFont, m_text, new Vector2((int)m_position.X, (int)m_position.Y), m_colour, 0, new Vector2(0, 0), (float)m_size, SpriteEffects.None, 0);

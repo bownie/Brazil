@@ -24,7 +24,7 @@ namespace Xyglo.Brazil.Xna
             throw new NotImplementedException();
         }
 
-        public override void draw(Microsoft.Xna.Framework.Graphics.GraphicsDevice device)
+        public override void draw(Microsoft.Xna.Framework.Graphics.GraphicsDevice device, FillMode fillMode)
         {
             throw new NotImplementedException();
         }

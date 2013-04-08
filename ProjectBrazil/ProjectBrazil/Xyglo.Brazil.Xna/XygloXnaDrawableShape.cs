@@ -26,6 +26,23 @@ namespace Xyglo.Brazil.Xna
         //public abstract void buildBuffers(GraphicsDevice device);
 
         /// <summary>
+        /// Change colour in all color vertices
+        /// </summary>
+        /// <param name="newColour"></param>
+        protected void changeColour(Color newColour)
+        {
+            // Do this slightly intelligently - in other words if the first entry is the correct colour then assume they
+            // all are.
+            if (m_vertices[0].Color == newColour)
+                return;
+
+            for (int c = 0; c < m_vertices.Length; c++)
+            {
+                m_vertices[c].Color = newColour;
+            }
+        }
+
+        /// <summary>
         /// Store locally our effect
         /// </summary>
         protected BasicEffect m_effect;

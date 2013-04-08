@@ -78,7 +78,7 @@ namespace Xyglo.Brazil.Xna
             // Keyboard handling class - performs interpretation of the key commands into
             // whatever we want to do.
             //
-            m_keyboardHandler = new XygloKeyboardHandler(m_context, m_brazilContext, m_graphics, m_keyboard);
+            m_keyboardHandler = new XygloKeyboardHandler(m_context, m_brazilContext, m_graphics, m_keyboard, m_mouse);
             m_keyboardHandler.TemporaryMessageEvent += new TemporaryMessageEventHandler(handleTemporaryMessage);
             m_keyboardHandler.XygloViewChangeEvent += new XygloViewChangeEventHandler(handleViewChange);
             m_keyboardHandler.ChangePositionEvent += new PositionChangeEventHandler(handleFlyToPosition);
@@ -1920,10 +1920,8 @@ namespace Xyglo.Brazil.Xna
                 loadComponentTexture(component, m_context.m_physicsEffect);
 
                 // We may want to alter colouring of the objects if there is a highlight list in operation
-                if (highlightList == null || highlightList.Count() == 0)
-                    m_context.m_drawableComponents[component].draw(m_context.m_graphics.GraphicsDevice);
-                else
-                    m_context.m_drawableComponents[component].draw(m_context.m_graphics.GraphicsDevice, highlightList.Contains(component));
+                //
+                m_context.m_drawableComponents[component].draw(m_context.m_graphics.GraphicsDevice, highlightList == null || highlightList.Contains(component) || highlightList.Count() == 0 ? FillMode.Solid : FillMode.WireFrame );
             }
 
 
@@ -1941,7 +1939,7 @@ namespace Xyglo.Brazil.Xna
                 // Rebuild any buffers and draw
                 //
                 m_context.m_temporaryDrawables[temporary].buildBuffers(m_context.m_graphics.GraphicsDevice);
-                m_context.m_temporaryDrawables[temporary].draw(m_context.m_graphics.GraphicsDevice);
+                m_context.m_temporaryDrawables[temporary].draw(m_context.m_graphics.GraphicsDevice, FillMode.Solid);
 
                 // Drop any temporaries that have exceeded their lifespan
                 if (temporary.getDropDead() < gameTime.TotalGameTime.TotalSeconds)

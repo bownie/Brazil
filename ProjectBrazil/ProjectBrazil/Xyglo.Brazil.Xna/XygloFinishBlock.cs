@@ -218,7 +218,7 @@ namespace Xyglo.Brazil.Xna
         /// Draw this FlyingBlock by setting and swriting the 
         /// </summary>
         /// <param name="device"></param>
-        public override void draw(GraphicsDevice device)
+        public override void draw(GraphicsDevice device, FillMode fillMode = FillMode.Solid)
         {
             device.Indices = m_indexBuffer;
             device.SetVertexBuffer(m_vertexBuffer);
@@ -227,7 +227,7 @@ namespace Xyglo.Brazil.Xna
 
             RasterizerState rasterizerState = new RasterizerState();
             rasterizerState.CullMode = CullMode.None;
-           
+            rasterizerState.FillMode = fillMode;
             device.RasterizerState = rasterizerState;
 
             foreach (EffectPass pass in m_effect.CurrentTechnique.Passes)

@@ -48,18 +48,31 @@ namespace Xyglo.Brazil.Xna
 
             // Check for end states that require no further processing
             //
-            if (m_brazilContext.m_state.equals("RestartLevel"))
+            if (m_context.m_project.getSelectedView().GetType() == typeof(BrazilView))
             {
-                // Clear drawables and any physics simulations
-                //
-                m_context.m_drawableComponents.Clear();
-                m_context.m_physicsHandler.clear();
-                setState("PlayingGame");
+                BrazilView brazilView = (BrazilView)m_context.m_project.getSelectedView();
+
+                if (m_brazilContext.m_state.equals("RestartLevel"))
+                {
+                    // Clear drawables and any physics simulations
+                    //
+                    //m_context.m_physicsHandler.clearAppComponents(brazilView.getApp().getComponents());
+                    m_context.m_physicsHandler.clearAll();
+
+                    // Remove drawables
+                    //
+                    foreach (Component component in brazilView.getApp().getComponents())
+                    {
+                        m_context.m_drawableComponents[component] = null;
+                        m_context.m_drawableComponents.Remove(component);
+                    }
+
+                    setState("PlayingGame");
+                }
+
+                if (m_brazilContext.m_state.equals("GameOver"))
+                    m_context.m_drawableComponents.Clear();
             }
-
-            if (m_brazilContext.m_state.equals("GameOver"))
-                m_context.m_drawableComponents.Clear();
-
 
             // getAllKeyActions also works out the modifiers and applies them
             // to the KeyActions in the list.  This also sets the relevant shift,
@@ -109,12 +122,21 @@ namespace Xyglo.Brazil.Xna
                     case "CurrentBufferView":
                         // The default target will process meta key commands
                         //
-                        if (m_context.m_project != null && m_context.m_project.getSelectedView().GetType() == typeof(BrazilView))
-                            m_keyboardHandler.processBrazilViewKey(gameTime, keyAction);
-                        else
-                            m_keyboardHandler.processBufferViewKey(gameTime, keyAction);
+                        if (processMetaCommand(gameTime, keyAction, buildProcess))
+                            continue;
 
-                        processMetaCommand(gameTime, keyAction, buildProcess);
+                        if (m_context.m_project != null && m_context.m_project.getSelectedView().GetType() == typeof(BrazilView))
+                        {
+                            if (m_keyboardHandler.processBrazilViewKey(gameTime, keyAction))
+                                continue;
+                        }
+                        else
+                        {
+                            if (m_keyboardHandler.processBufferViewKey(gameTime, keyAction))
+                                continue;
+                        }
+
+                        
                         break;
                     
                         // For OpenFile all we need to do is change state (for the moment)

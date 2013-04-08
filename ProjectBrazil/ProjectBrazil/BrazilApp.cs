@@ -498,6 +498,7 @@ namespace Xyglo.Brazil
             foreach (Keys key in otherKeys)
             {
                 connectKey(state, key, target);
+                connect(state, new KeyAction(key, KeyButtonState.Held, KeyboardModifier.Shift), target);
             }
         }
 
@@ -582,6 +583,16 @@ namespace Xyglo.Brazil
             throw new Exception("BrazilApp: target not defined " + targetName);
         }
 
+
+        /// <summary>
+        /// Add a component in the current state
+        /// </summary>
+        /// <param name="component"></param>
+        public void addComponent(Component component)
+        {
+            addComponent(getState(), component);
+        }
+        
         /// <summary>
         /// Add a Component with a given State - by state name
         /// </summary>

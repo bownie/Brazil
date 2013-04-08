@@ -84,11 +84,11 @@ namespace Xyglo.Brazil.Xna
         /// Draw everything
         /// </summary>
         /// <param name="device"></param>
-        public override void draw(GraphicsDevice device)
+        public override void draw(GraphicsDevice device, FillMode fillMode = FillMode.Solid)
         {
             foreach (XygloXnaDrawableShape component in m_componentList)
             {
-                component.draw(device);
+                component.draw(device, fillMode);
             }
         }
 

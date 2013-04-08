@@ -268,7 +268,7 @@ namespace Xyglo.Brazil.Xna
                     XygloCoin coin = new XygloCoin(Color.Yellow, m_context.m_lineEffect, viewTranslation + XygloConvert.getVector3(bg.getPosition()) * multiplier, bg.getSize().X * multiplier);
                     coin.setRotation(bg.getRotation());
                     coin.buildBuffers(m_context.m_graphics.GraphicsDevice);
-                    coin.draw(m_context.m_graphics.GraphicsDevice);
+                    coin.draw(m_context.m_graphics.GraphicsDevice, FillMode.Solid);
 
                     // And store in drawable component array
                     //

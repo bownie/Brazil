@@ -154,25 +154,28 @@ namespace Xyglo.Brazil
             addResource("logo", "xyglo-logo.png", ResourceType.Image, ResourceMode.Centre, block1);
             addComponent("PlayingGame", block1);
 
+            /*
             BrazilFlyingBlock block2 = new BrazilFlyingBlock(BrazilColour.Brown, new BrazilVector3(0, 0, 0), new BrazilVector3(100, 20, 20));
             //block2.setVelocity(new BrazilVector3(0.5f, 0, 0.1f));
             //m_componentList.Add(block2);
             addComponent("PlayingGame", block2);
-
+            */
             BrazilFlyingBlock block3 = new BrazilFlyingBlock(BrazilColour.Orange, new BrazilVector3(0, 150, 0), new BrazilVector3(200, 50, 0));
-            //block3.setRotation(0.01);
-            //block3.setHardness(10);
+            block3.setRotation(0.2);
+            block3.setHardness(10);
             block3.setName("LandingBlock1");
             addComponent("PlayingGame", block3);
+            
 
-            BrazilFlyingBlock block4 = new BrazilFlyingBlock(BrazilColour.Green, new BrazilVector3(-170, 170, 0), new BrazilVector3(70, 20, 10));
-            block4.setRotation(0.03);
+            BrazilFlyingBlock block4 = new BrazilFlyingBlock(BrazilColour.Green, new BrazilVector3(0, 300, 0), new BrazilVector3(100, 10, 100));
+            //block4.setRotation(0.03);
             //block4.setVelocity(new BrazilVector3(-0.5f, -1f, -0.4f));
             //m_componentList.Add(block4);
             block4.setHardness(10);
             block4.setName("LandingBlock2");
             block4.setInitialAngle(Math.PI / 8);
             addComponent("PlayingGame", block4);
+            
 
             // Setup the HUD
             //
@@ -181,9 +184,11 @@ namespace Xyglo.Brazil
 
             // Add the finishing block
             //
-            BrazilFinishBlock finishBlock = new BrazilFinishBlock(BrazilColour.Pink, new BrazilVector3(0, 230, 0), new BrazilVector3(200, 10, 10), getState("LevelComplete"));
-            addComponent("PlayingGame", finishBlock);
+            //BrazilFinishBlock finishBlock = new BrazilFinishBlock(BrazilColour.Pink, new BrazilVector3(0, 230, 0), new BrazilVector3(200, 10, 10), getState("LevelComplete"));
+            //block4.setHardness(10);
+            //addComponent("PlayingGame", finishBlock);
 
+            /*
             // Add some prizes
             //
             BrazilGoody goody1 = new BrazilGoody(BrazilGoodyType.Coin, 50, new BrazilVector3(0, 100, 0), new BrazilVector3(5, 10, 10), DateTime.Now);
@@ -206,25 +211,7 @@ namespace Xyglo.Brazil
 
             BrazilBannerText gameOverText = new BrazilBannerText(BrazilColour.Red, BrazilPosition.Middle, 2.0f, "GAME OVER");
             addComponent("GameOver", gameOverText);
+             * */
         }
-
-        /*
-        /// <summary>
-        /// Override the default run statement and do something event handling in here
-        /// </summary>
-        public override void run()
-        {
-            // Might want a m_mode check here?
-            //
-        }*/
-
-        /// <summary>
-        /// Provide a control interface for this app
-        /// </summary>
-        /// <param name="command"></param>
-        //public override void sendCommand(BrazilAppControl command)
-        //{
-        //}
-
     }
 }

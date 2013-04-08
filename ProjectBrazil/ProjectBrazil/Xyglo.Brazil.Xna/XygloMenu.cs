@@ -207,7 +207,7 @@ namespace Xyglo.Brazil.Xna
         /// Draw this XygloCoin
         /// </summary>
         /// <param name="device"></param>
-        public override void draw(GraphicsDevice device)
+        public override void draw(GraphicsDevice device, FillMode fillMode = FillMode.Solid)
         {
             // See here for information on restoring the renderstate:
             //
@@ -220,7 +220,7 @@ namespace Xyglo.Brazil.Xna
 
             RasterizerState rasterizerState = new RasterizerState();
             rasterizerState.CullMode = CullMode.None;
-            rasterizerState.FillMode = FillMode.Solid;
+            rasterizerState.FillMode = fillMode;
             device.RasterizerState = rasterizerState;
 
             // Disable the texture

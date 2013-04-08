@@ -165,5 +165,9 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         public PhysicsHandler m_physicsHandler = null;
 
+        /// <summary>
+        /// Palette for brazil components shown in the BrazilView
+        /// </summary>
+        public ComponentPalette m_componentPalette;
     }
 }

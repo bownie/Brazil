@@ -239,9 +239,22 @@ namespace Xyglo.Brazil.Xna.Physics
         /// <summary>
         /// Ensure that the physics arena is clear of objects
         /// </summary>
-        public void clear()
+        public void clearAll()
         {
             m_world.Clear();
+        }
+
+        /// <summary>
+        /// Remove only a list of specified components
+        /// </summary>
+        /// <param name="removeList"></param>
+        public void clearAppComponents(List<Component> removeList)
+        {
+            foreach (Component component in removeList)
+            {
+                if (m_context.m_drawableComponents.ContainsKey(component))
+                    removeBodyForDrawable(m_context.m_drawableComponents[component]);
+            }
         }
 
         /// <summary>

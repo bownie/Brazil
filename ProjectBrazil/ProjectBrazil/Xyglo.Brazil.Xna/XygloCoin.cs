@@ -187,7 +187,7 @@ namespace Xyglo.Brazil.Xna
         /// Draw this XygloCoin
         /// </summary>
         /// <param name="device"></param>
-        public override void draw(GraphicsDevice device)
+        public override void draw(GraphicsDevice device, FillMode fillMode)
         {
             device.Indices = m_indexBuffer;
             device.SetVertexBuffer(m_vertexBuffer);
@@ -196,8 +196,13 @@ namespace Xyglo.Brazil.Xna
 
             RasterizerState rasterizerState = new RasterizerState();
             rasterizerState.CullMode = CullMode.None;
-
+            rasterizerState.FillMode = fillMode;
             device.RasterizerState = rasterizerState;
+
+            if (fillMode == FillMode.WireFrame)
+                changeColour(m_colour * 0.3f);
+            else
+                changeColour(m_colour);
 
             foreach (EffectPass pass in m_effect.CurrentTechnique.Passes)
             {
@@ -283,7 +288,7 @@ namespace Xyglo.Brazil.Xna
         /// <summary>
         /// Vertices in a circle
         /// </summary>
-        protected int m_vertsInCircle = 50;
+        protected int m_vertsInCircle = 10;
 
         /// <summary>
         /// Total number of vertices in coin

@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Xml.Serialization;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Xyglo.Brazil.Xna
 {
@@ -10,10 +12,10 @@ namespace Xyglo.Brazil.Xna
     {
         PlainBlock,
         TextureBlock,
-        Interloper,
-        Coin,
-        Baddy,
-        Sphere
+        //Interloper,
+        Coin
+        //Baddy,
+        //Sphere
     }
 
     /// <summary>
@@ -49,10 +51,17 @@ namespace Xyglo.Brazil.Xna
             bottomRight.Y -= insideBorder;
             m_context.m_drawingHelper.drawQuad(m_context.m_overlaySpriteBatch, topLeft, bottomRight, Color.LightGreen, 0.08f);
 
-            XygloXnaDrawable drawable = paletteFactory(m_selectedComponent);
+            int width = (int)(bottomRight.X - topLeft.X - 100);
+            int height = (int)(bottomRight.Y - topLeft.Y - 40);
 
-            drawable.buildBuffers(m_context.m_graphics.GraphicsDevice);
-            drawable.draw(m_context.m_graphics.GraphicsDevice);
+            if (m_previewTarget == null)
+            {
+                m_previewTarget = new RenderTarget2D(m_context.m_graphics.GraphicsDevice, width, height);
+                m_previewRectangle = new Rectangle((int)topLeft.X + 50, (int)bottomRight.Y - 20, width, height);
+            }
+
+            //renderObjectPreview(); 
+            //spriteBatch.Draw(m_previewTarget, new Rectangle((int)topLeft.X + 50, (int)topLeft.Y + 20, width, height), Color.Transparent);
 
             drawTextRepresentation(m_selectedComponent, topLeft, bottomRight);
 
@@ -72,25 +81,25 @@ namespace Xyglo.Brazil.Xna
                     rS = "TextureBlock";
                     break;
 
-                case BrazilComponentType.Sphere:
-                    rS = "Sphere";
-                    break;
+                //case BrazilComponentType.Sphere:
+                    //rS = "Sphere";
+                    //break;
 
                 case BrazilComponentType.PlainBlock:
                     rS = "PlainBlock";
                     break;
 
-                case BrazilComponentType.Interloper:
-                    rS = "Interloper";
-                    break;
+                //case BrazilComponentType.Interloper:
+                    //rS = "Interloper";
+                    //break;
 
                 case BrazilComponentType.Coin:
                     rS = "Coin";
                     break;
 
-                case BrazilComponentType.Baddy:
-                    rS = "Baddy";
-                    break;
+                //case BrazilComponentType.Baddy:
+                    //rS = "Baddy";
+                    //break;
 
                 default:
                     rS = "<default>";
@@ -116,15 +125,61 @@ namespace Xyglo.Brazil.Xna
             //m_context.m_overlaySpriteBatch.End();
         }
 
+        /// <summary>
+        /// Create a component at a position for insertion into the model
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        public Component getComponentInstance(Vector3 position, float size)
+        {
+            Component rC = null;
 
+            switch (m_selectedComponent)
+            {
+                case BrazilComponentType.PlainBlock:
+                    rC = new BrazilFlyingBlock(BrazilColour.Blue, XygloConvert.getBrazilVector3(position), new BrazilVector3(size, size, size));
+                    break;
+
+                case BrazilComponentType.TextureBlock:
+                    rC = new BrazilFlyingBlock(BrazilColour.Red, XygloConvert.getBrazilVector3(position), new BrazilVector3(size, size, size));
+                    // and add a texture to it
+                    //m_palette[type] = new XygloTexturedBlock(Color.Blue, m_context.m_physicsEffect, position, size);
+                    break;
+
+                case BrazilComponentType.Coin:
+                    rC = new BrazilGoody(BrazilGoodyType.Coin, 20, XygloConvert.getBrazilVector3(position), new BrazilVector3(size, size, size), DateTime.Now);
+                    BrazilGoody coin = (BrazilGoody)rC;
+                    coin.setRotation(0.2f);
+                    break;
+
+                //case BrazilComponentType.:
+                    //m_palette[type] = new XygloSphere(Color.White, m_context.m_lineEffect, position, maxSize);
+                    //break;
+
+                default:
+                    Logger.logMsg("Couldn't find a valid BrazilComponentType");
+                    break;
+
+            }
+
+            return rC;
+        }
+
+        /// <summary>
+        /// Createa a palette drawable component
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         protected XygloXnaDrawable paletteFactory(BrazilComponentType type)
         {
             // Build it if it doesn't exist
             //
             if (!m_palette.ContainsKey(type))
             {
-                Vector3 position = Vector3.Zero;
-                Vector3 size = new Vector3(20, 20, 20);
+                Vector3 position = new Vector3(m_previewRectangle.Width / 2, m_previewRectangle.Height / 2, 0);
+                float maxSize = 2 * Math.Min(m_previewRectangle.Width, m_previewRectangle.Height) / 3;
+                Vector3 size = new Vector3(maxSize, maxSize, maxSize);
 
                 //BoundingFrustum bf = new BoundingFrustum(
                 //m_eyeHandler.getTargetPosition();
@@ -138,10 +193,19 @@ namespace Xyglo.Brazil.Xna
                         break;
 
                     case BrazilComponentType.TextureBlock:
-                        m_palette[type] = new XygloTexturedBlock(Color.Blue, m_context.m_lineEffect, position, size);
+                        m_palette[type] = new XygloTexturedBlock(Color.Blue, m_context.m_physicsEffect, position, size);
                         break;
 
+                    case BrazilComponentType.Coin:
+                        m_palette[type] = new XygloCoin(Color.Yellow, m_context.m_lineEffect, position, maxSize);
+                        break;
+
+                    //case BrazilComponentType.Sphere:
+                        //m_palette[type] = new XygloSphere(Color.White, m_context.m_lineEffect, position, maxSize);
+                        //break;
+
                     default:
+                        Logger.logMsg("Couldn't find a valid BrazilComponentType");
                         break;
 
                 }
@@ -153,6 +217,65 @@ namespace Xyglo.Brazil.Xna
 
             return m_palette[type];
         }
+
+
+        /// <summary>
+        /// Draw the object preview
+        /// </summary>
+        /// <param name="spriteBatch"></param>
+        public void renderObjectPreview(SpriteBatch spriteBatch)
+        {
+            // These can be uninitialised
+            //
+            if (m_previewTarget == null || m_previewRectangle == null)
+                return;
+
+            // Set the render target and clear the buffer
+            //
+            m_context.m_graphics.GraphicsDevice.SetRenderTarget(m_previewTarget);
+            m_context.m_graphics.GraphicsDevice.Clear(Color.Yellow);
+
+            XygloXnaDrawable drawable = paletteFactory(m_selectedComponent);
+            drawable.buildBuffers(m_context.m_graphics.GraphicsDevice);
+            drawable.draw(m_context.m_graphics.GraphicsDevice);
+
+            // Now reset the render target to the back buffer
+            //
+            m_context.m_graphics.GraphicsDevice.SetRenderTarget(null);
+
+            spriteBatch.Draw(m_previewTarget, m_previewRectangle, Color.Red);
+
+            //spriteBatch.Draw(m_previewRectangle, 
+            spriteBatch.Draw(m_previewTarget, new Vector2(0, 0), null, Color.White, 0, new Vector2(0, 0), 0.4f, SpriteEffects.None, 1);
+            //spriteBatch.Draw(m_previewTarget, new Rectangle(0, 0, 500, 500), Color.Red);
+
+            //m_context.m_textScrollTexture = (Texture2D)m_context.m_textScroller;
+        }
+
+        /// <summary>
+        /// Change the selection in the palette
+        /// </summary>
+        public void incrementSelection()
+        {
+            if (m_selectedComponent == BrazilComponentType.Coin)
+                m_selectedComponent = BrazilComponentType.PlainBlock;
+            else
+                m_selectedComponent++;
+        }
+
+        /// <summary>
+        /// Change the selection in the palette
+        /// </summary>
+        public void decrementSelection()
+        {
+            if (m_selectedComponent == BrazilComponentType.PlainBlock)
+                m_selectedComponent = BrazilComponentType.Coin;
+            else
+                m_selectedComponent--;
+        }
+
+
+        protected RenderTarget2D m_previewTarget;
 
         /// <summary>
         /// List of components that we are previewing in this view
@@ -173,6 +296,11 @@ namespace Xyglo.Brazil.Xna
         /// Currently selected component type
         /// </summary>
         protected BrazilComponentType m_selectedComponent;
+
+        /// <summary>
+        /// Target rectangle for the preview
+        /// </summary>
+        protected Rectangle m_previewRectangle;
 
         /// <summary>
         /// Eye handler reference

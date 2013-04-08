@@ -38,7 +38,7 @@ namespace Xyglo.Brazil.Xna
 
             // Create the ComponentPalette
             //
-            m_componentPalette = new ComponentPalette(context, brazilContext, eyeHandler);
+            m_context.m_componentPalette = new ComponentPalette(context, brazilContext, eyeHandler);
 
             // Populate the user help
             //
@@ -1338,9 +1338,9 @@ namespace Xyglo.Brazil.Xna
                 //yPos = (int)(graphics.GraphicsDevice.Viewport.Height - m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay) * 2);
                 //spriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), brazilAppTime, new Vector2(xPos, yPos), overlayColour, 0, Vector2.Zero, 1.0f, 0, 0);
 
-                // Draw the palette
+                // Draw the palette background and any text
                 //
-                m_componentPalette.draw(gameTime);
+                m_context.m_componentPalette.draw(gameTime);
             }
 
 
@@ -1906,6 +1906,7 @@ namespace Xyglo.Brazil.Xna
                 //
                 m_context.m_pannerSpriteBatch.Begin(SpriteSortMode.Texture, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.DepthRead, RasterizerState.CullNone /*, m_pannerEffect */ );
 
+                // 
                 // Draw the differ
                 //
                 drawDiffer(gameTime, m_context.m_pannerSpriteBatch, m_brazilContext, keyboardHandler);
@@ -1914,7 +1915,16 @@ namespace Xyglo.Brazil.Xna
                 //
                 drawSystemLoad(gameTime, m_context.m_pannerSpriteBatch, systemAnalyser);
 
+                // Draw the palette object
+                //
+                m_context.m_componentPalette.renderObjectPreview(m_context.m_pannerSpriteBatch);
+
                 m_context.m_pannerSpriteBatch.End();
+
+                //m_context.m_spriteBatch.Begin(SpriteSortMode.Texture, BlendState.Additive, SamplerState.AnisotropicClamp, DepthStencilState.DepthRead, RasterizerState.CullNone, m_context.m_basicEffect);
+                //m_context.m_spriteBatch.Begin();
+                //m_componentPalette.renderObjectPreview(m_context.m_spriteBatch);
+                //m_context.m_spriteBatch.End();
             }
 
             // Draw a welcome banner
@@ -2362,6 +2372,13 @@ namespace Xyglo.Brazil.Xna
                         // Found a FlyingBlock - initialise it and add it to the dictionary
                         //
                         BrazilFlyingBlock fb = (Xyglo.Brazil.BrazilFlyingBlock)component;
+
+                        if (fb.getRotation() != 0)
+                        {
+                            m_context.m_drawableComponents[component].incrementRotation(fb.getRotation());
+                            m_context.m_drawableComponents[component].buildBuffers(m_context.m_graphics.GraphicsDevice);
+                        }
+
                         m_context.m_drawableComponents[component].buildBuffers(m_context.m_graphics.GraphicsDevice);
                     }
                     else if (component.GetType() == typeof(Xyglo.Brazil.BrazilInterloper))
@@ -2562,10 +2579,6 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         protected EyeHandler m_eyeHandler;
 
-        /// <summary>
-        /// Palette for brazil components shown in the BrazilView
-        /// </summary>
-        protected ComponentPalette m_componentPalette;
     }
 
 }

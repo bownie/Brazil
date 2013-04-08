@@ -27,7 +27,7 @@ namespace Xyglo.Brazil.Xna
         /// <summary>
         /// Draw this component
         /// </summary>
-        public abstract void draw(GraphicsDevice device);
+        public abstract void draw(GraphicsDevice device, FillMode fillMode = FillMode.Solid);
 
         /// <summary>
         /// Draw this component with or without a highlight - used in editing mode.
@@ -37,15 +37,18 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="device"></param>
         /// <param name="highlight"></param>
+        /*
         public void draw(GraphicsDevice device, bool highlight)
         {
             //Color originalColour = m_colour;
-            if (highlight)
-                draw(device);
+            if (!highlight)
+                //draw(device);
+                device.RasterizerState.FillMode = FillMode.WireFrame;
                 //m_colour *= 0.3f;
 
             //m_colour = originalColour;
         }
+        */
 
         /// <summary>
         /// Draw a preview of this component scaled into a BoundingBox

@@ -124,7 +124,7 @@ namespace Xyglo.Brazil.Xna
         /// Draw this XygloText
         /// </summary>
         /// <param name="device"></param>
-        public override void draw(GraphicsDevice device)
+        public override void draw(GraphicsDevice device, FillMode fillMode)
         {
             // Reenable the texture
             //

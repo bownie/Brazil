@@ -223,7 +223,7 @@ namespace Xyglo.Brazil.Xna
         /// Draw this XygloCoin
         /// </summary>
         /// <param name="device"></param>
-        public override void draw(GraphicsDevice device)
+        public override void draw(GraphicsDevice device, FillMode fillMode = FillMode.Solid)
         {
             device.Indices = m_indexBuffer;
             device.SetVertexBuffer(m_vertexBuffer);
@@ -232,6 +232,7 @@ namespace Xyglo.Brazil.Xna
 
             RasterizerState rasterizerState = new RasterizerState();
             rasterizerState.CullMode = CullMode.None;
+            rasterizerState.FillMode = fillMode;
 
             device.RasterizerState = rasterizerState;
 

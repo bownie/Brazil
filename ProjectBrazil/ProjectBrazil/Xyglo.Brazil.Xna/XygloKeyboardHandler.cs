@@ -15,12 +15,13 @@ namespace Xyglo.Brazil.Xna
     /// </summary>
     public class XygloKeyboardHandler : XygloEventEmitter
     {
-        public XygloKeyboardHandler(XygloContext context, BrazilContext brazilContext, XygloGraphics graphics, XygloKeyboard keyboard)
+        public XygloKeyboardHandler(XygloContext context, BrazilContext brazilContext, XygloGraphics graphics, XygloKeyboard keyboard, XygloMouse mouse)
         {
             m_context = context;
             m_brazilContext = brazilContext;
             m_keyboard = keyboard;
             m_graphics = graphics;
+            m_mouse = mouse;
         }
 
         /// <summary>
@@ -313,6 +314,12 @@ namespace Xyglo.Brazil.Xna
                         }
                         consumed = true;
                     }
+
+                    if (m_context.m_project.getSelectedView().GetType() == typeof(BrazilView) && m_keyboard.isShiftDown())
+                    {
+                        m_context.m_componentPalette.decrementSelection();
+                        consumed = true;
+                    }
                 }
             }
             else if (keyList.Contains(Keys.Right))
@@ -356,7 +363,12 @@ namespace Xyglo.Brazil.Xna
                         }
                         consumed = true;
                     }
-                    
+
+                    if (m_context.m_project.getSelectedView().GetType() == typeof(BrazilView) && m_keyboard.isShiftDown())
+                    {
+                        m_context.m_componentPalette.incrementSelection();
+                        consumed = true;
+                    }
                 }
 
             }
@@ -1584,11 +1596,41 @@ namespace Xyglo.Brazil.Xna
 
                 if (m_context.m_project.getViews()[index].GetType() == typeof(BrazilView))
                 {
-                    message = "Removed BrazilView.";
+                    BrazilView brazilView = (BrazilView)m_context.m_project.getViews()[index];
+
+                    // Clear down any physics associated with these components
+                    //
+                    // Unset the interloper
+                    //
+                    m_brazilContext.m_interloper = null;
+
+                    // Clear the physics handler
+                    //m_context.m_physicsHandler.clearAppComponents(brazilView.getApp().getComponents());
+                    m_context.m_physicsHandler.clearAll();
+
+                    // Remove drawables
+                    //
+                    foreach (Component component in brazilView.getApp().getComponents())
+                    {
+                        m_context.m_drawableComponents[component] = null;
+                        m_context.m_drawableComponents.Remove(component);
+                    }
+
+                    // Also reset any statuses in the app components
+                    //
+                    brazilView.getApp().reset();
+
+                    // Clear any highlight list
+                    //
+                    brazilView.getApp().clearHighlights();
 
                     // Need to clear down all the drawables associated with this component
                     //
-                    clearDrawables((BrazilView)m_context.m_project.getViews()[index]);
+                    clearDrawables(brazilView);
+
+                    // Set a message
+                    //
+                    message = "Removed BrazilView.";
                 }
 
                 // Remove view
@@ -1951,19 +1993,19 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         /// <param name="gameTime"></param>
         /// <param name="keyAction"></param>
-        public void processBrazilViewKey(GameTime gameTime, KeyAction keyAction)
+        public bool processBrazilViewKey(GameTime gameTime, KeyAction keyAction)
         {
             // Skip for all non bufferviews
             if (m_context.m_project == null || m_context.m_project.getSelectedView().GetType() != typeof(BrazilView))
-                return;
+                return false;
 
             // ignore if Alt is down
             if (keyAction.withAlt())
-                return;
+                return false;
 
             List<Keys> keyList = new List<Keys>();
             keyList.Add(keyAction.m_key);
-            //bool consumed = false;
+            bool consumed = false;
 
             BrazilView bv = (BrazilView)m_context.m_project.getSelectedView();
 
@@ -1972,13 +2014,16 @@ namespace Xyglo.Brazil.Xna
             if (keyList.Contains(Keys.Space))
             {
                 bv.getApp().toggleRunning();
+                consumed = true;
             } else if (keyList.Contains(Keys.OemComma)) // less than
             {
                 bv.getApp().rewind(1);
+                consumed = true;
             }
             else if (keyList.Contains(Keys.OemPeriod)) // greater than
             {
                 bv.getApp().fastForward(1);
+                consumed = true;
             }
             else if (keyList.Contains(Keys.Home))
             {
@@ -1986,6 +2031,13 @@ namespace Xyglo.Brazil.Xna
                 //
                 //List<XygloXnaDrawable> removeList = new List<XygloXnaDrawable>();
 
+                // Clear the physics handler
+                //
+                //m_context.m_physicsHandler.clearAppComponents(bv.getApp().getComponents());
+                m_context.m_physicsHandler.clearAll();
+
+                // Clear drawables
+                //
                 foreach(Component toRemove in bv.getApp().getComponents())
                 {
                     if (m_context.m_drawableComponents.ContainsKey(toRemove))
@@ -1999,9 +2051,6 @@ namespace Xyglo.Brazil.Xna
                 //
                 m_brazilContext.m_interloper = null;
 
-                // Clear the physics handler
-                m_context.m_physicsHandler.clear();
-
                 // Also reset any statuses in the app components
                 //
                 bv.getApp().reset();
@@ -2009,6 +2058,8 @@ namespace Xyglo.Brazil.Xna
                 // Clear any highlight list
                 //
                 bv.getApp().clearHighlights();
+
+                consumed = true;
             }
             else if (keyList.Contains(Keys.Delete)) // Delete any selected objects
             {
@@ -2025,28 +2076,59 @@ namespace Xyglo.Brazil.Xna
                 // And clear highlights
                 //
                 bv.getApp().clearHighlights();
+
+                consumed = true;
             }
             else if (keyList.Contains(Keys.Down))
             {
                 foreach (Component component in bv.getApp().getHighlightList())
                     moveAppComponent(component, 0, 10, 0);
+
+                consumed = true;
             }
             else if (keyList.Contains(Keys.Up))
             {
                 foreach (Component component in bv.getApp().getHighlightList())
                     moveAppComponent(component, 0, -10, 0);
+
+                consumed = true;
             }
             else if (keyList.Contains(Keys.Left))
             {
                 foreach (Component component in bv.getApp().getHighlightList())
                     moveAppComponent(component, -10, 0, 0);
+                consumed = true;
             }
             else if (keyList.Contains(Keys.Right))
             {
                 foreach (Component component in bv.getApp().getHighlightList())
                     moveAppComponent(component, 10, 0, 0);
+                consumed = true;
+            }
+            else if (keyList.Contains(Keys.I))
+            {
+                insertAppComponent(bv.getApp());
+                consumed = true;
+            }
+
+            return consumed;
+        }
+
+        /// <summary>
+        /// Insert an app component and the currently selected point (somehow decided by mouse position or something)
+        /// </summary>
+        protected void insertAppComponent(BrazilApp app)
+        {
+            //Ray current m_mouse.getPickRay()
+            Vector3? position = m_context.m_project.getZeroPlaneIntersection(m_mouse.getPickRay());
+            if (position != null)
+            {
+                Vector3 placePosition = (Vector3)position;
+                //BrazilFlyingBlock bfb = new BrazilFlyingBlock(BrazilColour.Blue, XygloConvert.getBrazilVector3(placePosition), new BrazilVector3(20, 20, 20));
+                app.addComponent(m_context.m_componentPalette.getComponentInstance(placePosition, 20));
             }
         }
+
 
         /// <summary>
         /// Move an app component by an amount
@@ -2091,18 +2173,20 @@ namespace Xyglo.Brazil.Xna
         /// Process any keys that need to be printed
         /// </summary>
         /// <param name="gameTime"></param>
-        public void processBufferViewKey(GameTime gameTime, KeyAction keyAction)
+        public bool  processBufferViewKey(GameTime gameTime, KeyAction keyAction)
         {
             // Skip for all non bufferviews
             if (m_context.m_project == null || m_context.m_project.getSelectedBufferView() == null)
-                return;
+                return false;
 
             // Ok, let's see if we can translate a key
             //
             string key = m_keyboard.getKey(keyAction);
 
             if (key == "")
-                return;
+                return false;
+
+            bool consumed = false;
 
             // Now handle
             //
@@ -2110,14 +2194,17 @@ namespace Xyglo.Brazil.Xna
             {
                 //Logger.logMsg("Writing letter " + key);
                 m_saveFileName += key;
+                consumed = true;
             }
             else if (m_brazilContext.m_state.equals("FileOpen"))
             {
                 m_context.m_fileSystemView.jumpToString(key);
+                consumed = true;
             }
             else if (m_brazilContext.m_state.equals("Configuration") && m_editConfigurationItem) // Configuration item
             {
                 m_editConfigurationItemValue += key;
+                consumed = true;
             }
             else if (m_brazilContext.m_state.equals("FindText"))
             {
@@ -2125,11 +2212,13 @@ namespace Xyglo.Brazil.Xna
                 {
                     BufferView bv = (BufferView)m_context.m_project.getSelectedView();
                     bv.appendToSearchText(key);
+                    consumed = true;
                 }
             }
             else if (m_brazilContext.m_state.equals("GotoLine"))
             {
                 m_gotoLine += key;
+                consumed = true;
             }
             else if (m_brazilContext.m_state.equals("TextEditing"))
             {
@@ -2150,8 +2239,11 @@ namespace Xyglo.Brazil.Xna
                         bv.insertText(m_context.m_project, key);
                     }
                     updateSmartHelp();
+                    consumed = true;
                 }
             }
+
+            return consumed;
         }
 
         /// <summary>
@@ -2371,5 +2463,10 @@ namespace Xyglo.Brazil.Xna
         /// Smarthelp worker - this is the same reference as that from XygloXNA
         /// </summary>
         protected SmartHelpWorker m_smartHelpWorker;
+
+        /// <summary>
+        /// Store a reference to the XygloMouse handler
+        /// </summary>
+        protected XygloMouse m_mouse;
     }
 }
