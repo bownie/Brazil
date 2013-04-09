@@ -87,6 +87,7 @@
     <Compile Include="Paulo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="ACKNOWLEDGEMENTS.txt" />
     <Content Include="APPS.txt" />
     <Content Include="Friendlier.ico" />
     <Content Include="GameThumbnail.png" />

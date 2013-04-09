@@ -348,7 +348,7 @@ namespace Xyglo.Brazil.Xna
             base.Initialize();
             initializeWorld();
 
-            m_context.m_physicsHandler.initialise();
+            //m_context.m_physicsHandler.initialise();
         }
 
         /// <summary>

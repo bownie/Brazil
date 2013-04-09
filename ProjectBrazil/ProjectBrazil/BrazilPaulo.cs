@@ -151,6 +151,7 @@ namespace Xyglo.Brazil
             // Push onto component list
             //
             //m_componentList.Add(block1);
+            block1.setMoveable(false);
             addResource("logo", "xyglo-logo.png", ResourceType.Image, ResourceMode.Centre, block1);
             addComponent("PlayingGame", block1);
 
@@ -161,17 +162,17 @@ namespace Xyglo.Brazil
             addComponent("PlayingGame", block2);
             */
             BrazilFlyingBlock block3 = new BrazilFlyingBlock(BrazilColour.Orange, new BrazilVector3(0, 150, 0), new BrazilVector3(200, 50, 0));
-            block3.setRotation(0.2);
-            block3.setHardness(10);
-            block3.setName("LandingBlock1");
+            //block3.setRotation(0.2);
+            //block3.setHardness(10);
+            //block3.setName("LandingBlock1");
             addComponent("PlayingGame", block3);
             
 
-            BrazilFlyingBlock block4 = new BrazilFlyingBlock(BrazilColour.Green, new BrazilVector3(0, 300, 0), new BrazilVector3(100, 10, 100));
+            BrazilFlyingBlock block4 = new BrazilFlyingBlock(BrazilColour.Green, new BrazilVector3(0, 50, 0), new BrazilVector3(100, 10, 100));
             //block4.setRotation(0.03);
             //block4.setVelocity(new BrazilVector3(-0.5f, -1f, -0.4f));
             //m_componentList.Add(block4);
-            block4.setHardness(10);
+            block4.setHardness(3.0f);
             block4.setMoveable(false);
             block4.setName("LandingBlock2");
             block4.setInitialAngle(Math.PI / 8);

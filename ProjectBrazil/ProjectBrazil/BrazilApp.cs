@@ -220,7 +220,7 @@ namespace Xyglo.Brazil
         }
 
         /// <summary>
-        /// Get teh state
+        /// Get the state
         /// </summary>
         /// <returns></returns>
         public State getState()

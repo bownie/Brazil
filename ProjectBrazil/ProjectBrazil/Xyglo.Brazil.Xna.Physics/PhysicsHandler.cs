@@ -16,7 +16,6 @@ namespace Xyglo.Brazil.Xna.Physics
 {
     public enum BodyTag { DrawMe, DontDrawMe }
 
-
     /// <summary>
     /// The Xyglo wrapper to whatever physics implementation we are going
     /// to use.  Allows us to potentially change physics engines whenever
@@ -37,9 +36,11 @@ namespace Xyglo.Brazil.Xna.Physics
             CollisionSystem collision = new CollisionSystemPersistentSAP();
             m_world = new World(collision);
             m_world.AllowDeactivation = true;
-            m_world.Gravity = new JVector(0, 500, 0);
+            m_world.Gravity = new JVector(0, 9.81f, 0);
+            //m_world.SetDampingFactors(0.8f, 0.8f);
         }
 
+        /*
         public void initialise()
         {
             primitives[(int)Primitives.box] = new Primitives3D.BoxPrimitive(m_context.m_graphics.GraphicsDevice);
@@ -118,7 +119,7 @@ namespace Xyglo.Brazil.Xna.Physics
                     AddShapeToDrawList(ts.Shape, ori, pos);
                 }
             }
-        }
+        }*/
 
         /// <summary>
         /// Accelerate a rigidbody by a certain vector - this is an input to the model
@@ -158,6 +159,37 @@ namespace Xyglo.Brazil.Xna.Physics
             return bodyList;
         }
 
+        /* From Restitution.cs
+         */
+        /*
+        public override void Build()
+        {
+            AddGround();
+
+            for (int i = 0; i < 11; i++)
+            {
+                RigidBody box = new RigidBody(new BoxShape(1, 0.01f, 1));
+                this.Demo.World.AddBody(box);
+                JVector boxPos = new JVector(-15 + i * 3 + 1, 5, 0);
+
+                box.Position = boxPos;
+                box.IsStatic = true;
+
+                RigidBody sphere = new RigidBody(new SphereShape(0.5f));
+                this.Demo.World.AddBody(sphere);
+
+                sphere.Position = boxPos + JVector.Up * 30;
+                sphere.EnableSpeculativeContacts = true;
+
+                // set restitution
+                sphere.Material.Restitution = box.Material.Restitution = 1.0f / 10.0f * i;
+                sphere.LinearVelocity = new JVector(0, 20, 0);
+
+
+                sphere.Damping = RigidBody.DampingType.Angular;
+            }
+        }
+        */
 
         /// <summary>
         /// Run the physics model for a given time
@@ -210,6 +242,7 @@ namespace Xyglo.Brazil.Xna.Physics
                 }
             }
 
+            /*
             // Update XNA model after physics has completed
             //
             foreach (RigidBody body in remainderList)
@@ -234,6 +267,7 @@ namespace Xyglo.Brazil.Xna.Physics
 
                 body.Update();
             }
+            */
         }
 
         /// <summary>
@@ -286,7 +320,7 @@ namespace Xyglo.Brazil.Xna.Physics
             {
                 if (body.IsActive) m_activeBodies++;
                 if (body.Tag is int || body.IsParticle) continue;
-                AddBodyToDrawList(body);
+                //AddBodyToDrawList(body);
             }
 
             foreach (Constraint constr in m_world.Constraints)

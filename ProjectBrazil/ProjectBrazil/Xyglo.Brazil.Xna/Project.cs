@@ -2036,6 +2036,22 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
+        /// Get the zero plane bounding box from the fov angle.  Assume that aspectratio defines the shortest
+        /// fov angle.
+        /// </summary>
+        /// <param name="fov"></param>
+        /// <returns></returns>
+        public BoundingBox getZeroPlaneBoundingBox(float fov, Vector3 position, float aspectRatio)
+        {
+            float y = (float)position.Z  * (float)Math.Tan((double)fov);
+            float x = aspectRatio * y;
+            Vector3 topLeft = new Vector3(position.X - x, position.Y - y, 0);
+            Vector3 bottomRight = new Vector3(position.X + x, position.Y + y, 0);
+            return new BoundingBox(topLeft, bottomRight);
+        }
+
+
+        /// <summary>
         /// Check to see if a Ray passes through one of our BufferViews.  If it does then we
         /// work out whereabouts on the BufferView this hits - we return a ScreenPosition but
         /// this refers not a screen relative position but to a Screen (expanded tabs) position

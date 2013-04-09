@@ -1917,7 +1917,7 @@ namespace Xyglo.Brazil.Xna
 
                 // Draw the palette object
                 //
-                m_context.m_componentPalette.renderObjectPreview(m_context.m_pannerSpriteBatch);
+                //m_context.m_componentPalette.renderObjectPreview(m_context.m_pannerSpriteBatch);
 
                 m_context.m_pannerSpriteBatch.End();
 

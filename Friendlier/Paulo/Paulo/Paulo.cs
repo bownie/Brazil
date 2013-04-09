@@ -165,6 +165,8 @@ namespace Xyglo.Friendlier
             //
             BrazilInterloper paulo = new BrazilInterloper(BrazilColour.White, new BrazilVector3(0, 0, 0), new BrazilVector3(10, 10, 10));
             paulo.setName("Interloper");
+            paulo.setAffectedByGravity(true);
+            paulo.setMoveable(true);
             paulo.setVelocity(new BrazilVector3(250, 0, 0));
             addComponent("PlayingGame", paulo);
 
@@ -182,8 +184,8 @@ namespace Xyglo.Friendlier
             block2.setMoveable(false);
             addComponent("PlayingGame", block2);
 
-            BrazilBaddy baddy = new BrazilBaddy(BrazilColour.Brown, new BrazilVector3(20, 80, 0), new BrazilVector3(20, 20, 20));
-            addComponent("PlayingGame", baddy);
+            //BrazilBaddy baddy = new BrazilBaddy(BrazilColour.Brown, new BrazilVector3(20, 80, 0), new BrazilVector3(20, 20, 20));
+            //addComponent("PlayingGame", baddy);
 
 
             // Invisible walls front and back

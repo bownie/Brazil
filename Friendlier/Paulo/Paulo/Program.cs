@@ -33,9 +33,13 @@ namespace Xyglo.Friendlier
 
                 // Initialise with default state
                 //
-                //app.initialise(State.Test("Menu"));
-                app.initialise(State.Test("PlayingGame"));
+                app.initialise(State.Test("Menu"));
+                //app.initialise(State.Test("PlayingGame"));
                 //app.initialise(State.Test("ComponentTest"));
+
+                // Ensure that the game is running
+                //
+                //app.setTransportState(BrazilAppControl.Play);
             }
 
             // If we have something then run it

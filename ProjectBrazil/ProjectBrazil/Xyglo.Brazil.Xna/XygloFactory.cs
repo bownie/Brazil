@@ -465,6 +465,17 @@ namespace Xyglo.Brazil.Xna
                 //World.AddBody(body);
                 m_context.m_physicsHandler.addRigidBody(body);
 
+
+                //sphere.Position = boxPos + JVector.Up * 30;
+                //sphere.EnableSpeculativeContacts = true;
+
+                // set restitution
+                //sphere.Material.Restitution = box.Material.Restitution = 1.0f / 10.0f * i;
+                //sphere.LinearVelocity = new JVector(0, 20, 0);
+
+
+                //sphere.Damping = RigidBody.DampingType.Angular;
+
                 return body;
             }
             else
@@ -493,6 +504,12 @@ namespace Xyglo.Brazil.Xna
                 // Stop rotations  - this might be wrong!
                 //
                 head.SetMassProperties(JMatrix.Zero, 1.0f / 1000.0f, true);
+                head.Material.Restitution = component.getHardness();
+                head.Damping = RigidBody.DampingType.Angular;
+                head.Mass = component.getMass();
+//                head.SetMassProperties(
+                //body.LinearVelocity = new JVector(0, 0, 0);  
+                
 
                 XygloXnaDrawable bodyDrawable = group.getComponents().Where(item => item.GetType() == typeof(XygloFlyingBlock)).ToList()[0];
                 RigidBody body = createPhysical(component, bodyDrawable);
@@ -500,7 +517,9 @@ namespace Xyglo.Brazil.Xna
                 // See above caveat!
                 //
                 body.SetMassProperties(JMatrix.Zero, 1.0f / 1000.0f, true);
-
+                body.Material.Restitution = component.getHardness();
+                body.Damping = RigidBody.DampingType.Angular;
+                body.Mass = component.getMass();
                 // Connect head and torso with a hard point to point connection like so
                 //
                 PointPointDistance headTorso = new PointPointDistance(head, body, head.Position, body.Position);

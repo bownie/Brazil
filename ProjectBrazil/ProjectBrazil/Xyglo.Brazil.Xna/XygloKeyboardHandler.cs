@@ -1142,15 +1142,18 @@ namespace Xyglo.Brazil.Xna
                     }
                     else
                     {
-                        Logger.logMsg("XygloXNA::processCombinationsCommands() - copying to clipboard");
-                        string text = bv.getSelection(m_context.m_project).getClipboardString();
-
-                        // We can only set this is the text is not empty
-                        if (text != "")
+                        if (bv != null)
                         {
-                            System.Windows.Forms.Clipboard.SetText(text);
+                            Logger.logMsg("XygloXNA::processCombinationsCommands() - copying to clipboard");
+                            string text = bv.getSelection(m_context.m_project).getClipboardString();
+
+                            // We can only set this is the text is not empty
+                            if (text != "")
+                            {
+                                System.Windows.Forms.Clipboard.SetText(text);
+                            }
+                            rC = true;
                         }
-                        rC = true;
                     }
                 }
                 else if (keyList.Contains(Keys.X)) // Cut
@@ -1163,11 +1166,14 @@ namespace Xyglo.Brazil.Xna
                     }
                     else
                     {
-                        Logger.logMsg("XygloXNA::processCombinationsCommands() - cut");
+                        if (bv != null)
+                        {
+                            Logger.logMsg("XygloXNA::processCombinationsCommands() - cut");
 
-                        System.Windows.Forms.Clipboard.SetText(bv.getSelection(m_context.m_project).getClipboardString());
-                        bv.deleteCurrentSelection(m_context.m_project);
-                        rC = true;
+                            System.Windows.Forms.Clipboard.SetText(bv.getSelection(m_context.m_project).getClipboardString());
+                            bv.deleteCurrentSelection(m_context.m_project);
+                            rC = true;
+                        }
                     }
                 }
                 else if (keyList.Contains(Keys.V)) // Paste
@@ -2107,7 +2113,7 @@ namespace Xyglo.Brazil.Xna
             }
             else if (keyList.Contains(Keys.I))
             {
-                insertAppComponent(bv.getApp());
+                insertAppComponent(bv);
                 consumed = true;
             }
 
@@ -2117,15 +2123,23 @@ namespace Xyglo.Brazil.Xna
         /// <summary>
         /// Insert an app component and the currently selected point (somehow decided by mouse position or something)
         /// </summary>
-        protected void insertAppComponent(BrazilApp app)
+        protected void insertAppComponent(BrazilView brazilView)
         {
             //Ray current m_mouse.getPickRay()
             Vector3? position = m_context.m_project.getZeroPlaneIntersection(m_mouse.getPickRay());
             if (position != null)
             {
                 Vector3 placePosition = (Vector3)position;
+
+                
+                // Now we need to allow for the app offset from the top left of the visible 
+                //
+                //Plane zeroPlane = 
+                BoundingBox bb = m_context.m_project.getZeroPlaneBoundingBox(m_context.m_fov, brazilView.getEyePosition(), m_context.m_graphics.GraphicsDevice.Viewport.AspectRatio);
+                Vector3 appPosition = brazilView.getPosition();
+
                 //BrazilFlyingBlock bfb = new BrazilFlyingBlock(BrazilColour.Blue, XygloConvert.getBrazilVector3(placePosition), new BrazilVector3(20, 20, 20));
-                app.addComponent(m_context.m_componentPalette.getComponentInstance(placePosition, 20));
+                brazilView.getApp().addComponent(m_context.m_componentPalette.getComponentInstance(placePosition - appPosition, 20));
             }
         }
 

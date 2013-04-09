@@ -1,0 +1,9 @@
+﻿Friendlier is an original concept by Xyglo Ltd/Richard Bown
+
+The following software has been used with licence and incorporate into some part of Friendlier.
+
+
+Jitter Physics
+DiffMatchPatch from Google
+XNA 4.0
+Nuclex Framework Font Processor
