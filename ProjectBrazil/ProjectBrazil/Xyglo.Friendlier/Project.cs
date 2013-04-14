@@ -17,7 +17,10 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using System.Text.RegularExpressions;
 
-namespace Xyglo.Brazil.Xna
+using Xyglo.Brazil;
+using Xyglo.Brazil.Xna;
+
+namespace Xyglo.Friendlier
 {
     /// <summary>
     /// A Friendlier project file - contains a list of BufferViews and FileBuffers and these
@@ -2043,7 +2046,7 @@ namespace Xyglo.Brazil.Xna
         /// <returns></returns>
         public BoundingBox getZeroPlaneBoundingBox(float fov, Vector3 position, float aspectRatio)
         {
-            float y = (float)position.Z  * (float)Math.Tan((double)fov);
+            float y = (float)position.Z  * (float)Math.Tan((double)fov / 2.0f);
             float x = aspectRatio * y;
             Vector3 topLeft = new Vector3(position.X - x, position.Y - y, 0);
             Vector3 bottomRight = new Vector3(position.X + x, position.Y + y, 0);

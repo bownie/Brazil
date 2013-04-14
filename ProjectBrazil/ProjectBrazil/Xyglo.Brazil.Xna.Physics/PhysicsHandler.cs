@@ -36,7 +36,7 @@ namespace Xyglo.Brazil.Xna.Physics
             CollisionSystem collision = new CollisionSystemPersistentSAP();
             m_world = new World(collision);
             m_world.AllowDeactivation = true;
-            m_world.Gravity = new JVector(0, 9.81f, 0);
+            m_world.Gravity = new JVector(0, 500f, 0);
             //m_world.SetDampingFactors(0.8f, 0.8f);
         }
 

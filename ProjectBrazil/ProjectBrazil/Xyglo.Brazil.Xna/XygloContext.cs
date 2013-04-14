@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Xyglo.Brazil.Xna.Physics;
+using Xyglo.Friendlier;
 
 namespace Xyglo.Brazil.Xna
 {
@@ -169,5 +170,10 @@ namespace Xyglo.Brazil.Xna
         /// Palette for brazil components shown in the BrazilView
         /// </summary>
         public ComponentPalette m_componentPalette;
+
+        /// <summary>
+        /// Template manager for use by Friendlier
+        /// </summary>
+        public TemplateManager m_templateManager;
     }
 }

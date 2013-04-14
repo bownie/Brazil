@@ -17,7 +17,10 @@ using System.Runtime.Serialization;
 using System.Xml;
 using System.Xml.Serialization;
 
-namespace Xyglo.Brazil.Xna
+using Xyglo.Brazil;
+using Xyglo.Brazil.Xna;
+
+namespace Xyglo.Friendlier
 {
     /// <summary>
     /// A view/a buffer.  This can be independent from a FileBuffer but carries a reference to it

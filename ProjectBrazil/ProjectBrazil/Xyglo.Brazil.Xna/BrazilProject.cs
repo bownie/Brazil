@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
+using Xyglo.Friendlier;
 
 namespace Xyglo.Brazil.Xna
 {

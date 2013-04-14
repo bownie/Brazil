@@ -10,6 +10,7 @@ using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
+using Xyglo.Friendlier;
 
 namespace Xyglo.Brazil.Xna
 {

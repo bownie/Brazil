@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
+using Xyglo.Friendlier;
 
 namespace Xyglo.Brazil.Xna
 {
@@ -39,6 +39,10 @@ namespace Xyglo.Brazil.Xna
             // Create the ComponentPalette
             //
             m_context.m_componentPalette = new ComponentPalette(context, brazilContext, eyeHandler);
+
+            // Create the TemplateManager
+            //
+            m_context.m_templateManager = new TemplateManager();
 
             // Populate the user help
             //
@@ -1872,6 +1876,12 @@ namespace Xyglo.Brazil.Xna
             {
                 m_context.m_fileSystemView.drawDirectoryChooser(gameTime, keyboardHandler, tempMessage.getTemporaryMessage(), tempMessage.getTemporaryMessageEndTime());
             }
+            else if (m_brazilContext.m_state.equals("ProjectNew"))
+            {
+                // Present the templates we can open
+                //
+                drawTemplateChooser(gameTime, keyboardHandler);
+            }
             else if (m_brazilContext.m_state.equals("Help"))
             {
                 // Get the text screen length back from the drawing method
@@ -2185,6 +2195,53 @@ namespace Xyglo.Brazil.Xna
                 yPosition += m_context.m_fontManager.getLineSpacing(view.getViewSize());
 
             }
+        }
+
+        /// <summary>
+        /// Draw the template selector showing choice of available projects
+        /// </summary>
+        /// <param name="gameTime"></param>
+        /// <param name="keyboardHandler"></param>
+        protected void drawTemplateChooser(GameTime gameTime, XygloKeyboardHandler keyboardHandler)
+        {
+            List<string> templates = m_context.m_templateManager.getTemplateList();
+
+            // Starting positions
+            //
+            float yPos = 5.5f * m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay);
+            float xPos = 10 * m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay);
+
+            m_context.m_overlaySpriteBatch.Begin();
+            if (templates.Count() == 0)
+            {
+                string text = "No templates are available from which to create a new project.\nPlease context Xyglo support for more information on how to get templates.";
+
+                m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), text, new Vector2((int)xPos, (int)yPos), ColourScheme.getHighlightColour(), 0, Vector2.Zero, 1.0f, 0, 0);
+                m_context.m_overlaySpriteBatch.End();
+                return;
+            }
+
+            //bool editConfigurationItem = keyboardHandler.getEditConfigurationItem();
+            //string editConfigurationItemValue = keyboardHandler.getEditConfigurationItemValue();
+
+            Vector3 fp = m_context.m_project.getSelectedView().getPosition();
+
+            // Start the spritebatch
+            //
+            string headerText = "New project - please choose a template:";
+            m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), headerText, new Vector2((int)xPos, (int)yPos), Color.White, 0, Vector2.Zero, 1.0f, 0, 0);
+            yPos += m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay) * 2;
+            xPos += m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay) * 8;
+
+            // Need to show highlight here
+            //
+            for (int i = 0; i < templates.Count(); i++)
+            {
+                m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), templates[i], new Vector2((int)xPos, (int)yPos), (i == m_context.m_templateManager.getHighlightIndex()) ? ColourScheme.getHighlightColour() : ColourScheme.getItemColour(), 0, Vector2.Zero, 1.0f, 0, 0);
+                yPos += m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay) * 1;
+            }
+
+            m_context.m_overlaySpriteBatch.End();
         }
 
         /// <summary>

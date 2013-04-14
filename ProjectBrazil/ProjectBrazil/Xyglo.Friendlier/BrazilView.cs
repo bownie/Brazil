@@ -6,7 +6,10 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Runtime.Serialization;
 
-namespace Xyglo.Brazil.Xna
+using Xyglo.Brazil;
+using Xyglo.Brazil.Xna;
+
+namespace Xyglo.Friendlier
 {
     /// <summary>
     /// A BrazilView is a XygloView implementation for hosting a BrazilApp.

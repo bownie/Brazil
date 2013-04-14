@@ -22,6 +22,7 @@ using Microsoft.Win32;
 using Xyglo.Brazil;
 using Xyglo.Brazil.Xna.Physics;
 using Xyglo.Gesture;
+using Xyglo.Friendlier;
 
 namespace Xyglo.Brazil.Xna
 {
@@ -84,6 +85,7 @@ namespace Xyglo.Brazil.Xna
             m_keyboardHandler.ChangePositionEvent += new PositionChangeEventHandler(handleFlyToPosition);
             m_keyboardHandler.CleanExitEvent += new CleanExitEventHandler(handleCleanExit);
             m_keyboardHandler.CommandEvent += new CommandEventHandler(handleCommand);
+            m_keyboardHandler.OpenProjectEvent += new OpenProjectEventHandler(handleOpenProject);
             m_keyboardHandler.NewProjectEvent += new NewProjectEventHandler(handleNewProject);
 
             // Temporary Messages
@@ -1554,6 +1556,28 @@ namespace Xyglo.Brazil.Xna
                     doBuildCommand(e.getGameTime());
                     break;
 
+                case XygloCommand.UrhoExport:
+                    if (m_context.m_project != null && m_context.m_project.getSelectedView().GetType() == typeof(BrazilView))
+                    {
+                        setTemporaryMessage("Exporting to Urho3D", 3);
+                        try
+                        {
+                            BrazilView bv = (BrazilView)m_context.m_project.getSelectedView();
+                            UrhoBasicExporter urho = 
+                                new UrhoBasicExporter(m_context, bv.getApp(), 
+                                                      @"C:\devel\bownie-brazil-a3d5d5dd2c10\projects\test3d",
+                                                      @"C:\devel\bownie-brazil-a3d5d5dd2c10\template\3D");
+                            urho.export();
+                        }
+                        catch (Exception exc)
+                        {
+                            setTemporaryMessage("Problem with export - " + exc.Message, 3);
+                        }
+
+                    }
+                    break;
+
+
                 case XygloCommand.AlternateBuild:
                     doBuildCommand(e.getGameTime(), e.getArguments());
                     break;
@@ -1586,11 +1610,11 @@ namespace Xyglo.Brazil.Xna
         }
 
         /// <summary>
-        /// Handle a new project
+        /// Open a project
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        protected void handleNewProject(object sender, NewProjectEventArgs e)
+        protected void handleOpenProject(object sender, OpenProjectEventArgs e)
         {
             Project project = null;
 
@@ -1629,6 +1653,52 @@ namespace Xyglo.Brazil.Xna
                 setTemporaryMessage("Could not load project file " + e.getProjectFile() + " with message " + exp.Message, 5);
             }
 
+        }
+
+        /// <summary>
+        /// Create a new project
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected void handleNewProject(object sender, NewProjectEventArgs e)
+        {
+            Project project = null;
+
+            try
+            {
+                /*
+                if (File.Exists(e.getProjectFile()))
+                {
+                    // Deserialise and set the location of where it came from
+                    //
+                    project = Project.dataContractDeserialise(m_context.m_fontManager, e.getProjectFile());
+                    project.m_projectFile = e.getProjectFile();
+
+                    copyResourceMap(project, m_brazilContext.m_resourceMap);
+                }
+
+                if (project != null)
+                {
+                    project.setLicenced(true);
+                    project.setViewMode(Project.ViewMode.Formal);
+
+                    setProject(project);
+                    initialiseProject();
+
+                    //m_context.m_project = project;
+                    // Set the project
+                    //
+                    //m_context.
+                    //m_viewSpace.setProject(project);
+
+                    m_brazilContext.m_state = State.Test("TextEditing");
+                }*/
+
+            }
+            catch (Exception exp)
+            {
+                setTemporaryMessage("Could not create new project from template", 5);
+            }
         }
 
         /// <summary>

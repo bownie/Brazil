@@ -17,7 +17,10 @@ using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 
-namespace Xyglo.Brazil.Xna
+using Xyglo.Brazil;
+using Xyglo.Brazil.Xna;
+
+namespace Xyglo.Friendlier
 {
     
     /// <summary>

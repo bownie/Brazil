@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Xyglo.Friendlier;
 
 
 // Here are some event specialisations we use within the Xyglo.Xna code.
@@ -182,7 +183,8 @@ namespace Xyglo.Brazil.Xna
         Build,          // perform a build
         AlternateBuild, // perform alernate build
         XygloClient,    // activate a client
-        XygloComponent  // activate a component
+        XygloComponent, // activate a component
+        UrhoExport      // export as Urho AngelScript
     }
 
     /// <summary>
@@ -209,9 +211,9 @@ namespace Xyglo.Brazil.Xna
     /// <summary>
     /// When loading a new project
     /// </summary>
-    public class NewProjectEventArgs : System.EventArgs
+    public class OpenProjectEventArgs : System.EventArgs
     {
-        public NewProjectEventArgs(string projectFile)
+        public OpenProjectEventArgs(string projectFile)
         {
             m_projectFile = projectFile;
         }
@@ -224,6 +226,16 @@ namespace Xyglo.Brazil.Xna
         protected string m_projectFile;
     }
 
+    /// <summary>
+    /// All the details should be stored in the centrally located m_context.m_templateManager
+    /// </summary>
+    public class NewProjectEventArgs : System.EventArgs
+    {
+        public NewProjectEventArgs()
+        {
+        }
+    }
+
     // Declare some delegates
     //
     public delegate void PositionChangeEventHandler(object sender, PositionEventArgs e);
@@ -233,5 +245,6 @@ namespace Xyglo.Brazil.Xna
     public delegate void NewBufferViewEventHandler(object sender, NewViewEventArgs e);
     public delegate void CleanExitEventHandler(object sender, CleanExitEventArgs e);
     public delegate void CommandEventHandler(object sender, CommandEventArgs e);
+    public delegate void OpenProjectEventHandler(object sender, OpenProjectEventArgs e);
     public delegate void NewProjectEventHandler(object sender, NewProjectEventArgs e);
 }

@@ -7,6 +7,7 @@ using System.Security.Permissions;
 using System.Threading;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
+using Xyglo.Friendlier;
 
 namespace Xyglo.Brazil.Xna
 {
@@ -126,6 +127,14 @@ namespace Xyglo.Brazil.Xna
                     m_context.m_fileSystemView.incrementHighlightIndex(-1);
                     consumed = true;
                 }
+                else if (m_brazilContext.m_state.equals("ProjectNew"))
+                {
+                    if (m_context.m_templateManager.getHighlightIndex() > 0)
+                    {
+                        m_context.m_templateManager.setHighlightIndex(m_context.m_templateManager.getHighlightIndex() - 1);
+                        consumed = true;
+                    }
+                }
                 else if (m_brazilContext.m_state.equals("ManageProject") || (m_brazilContext.m_state.equals("Configuration") && m_editConfigurationItem == false)) // Configuration changes
                 {
                     if (m_configPosition > 0)
@@ -189,6 +198,14 @@ namespace Xyglo.Brazil.Xna
                     if (m_configPosition < m_context.m_project.getConfigurationListLength() - 1)
                     {
                         m_configPosition++;
+                        consumed = true;
+                    }
+                }
+                else if (m_brazilContext.m_state.equals("ProjectNew"))
+                {
+                    if (m_context.m_templateManager.getHighlightIndex() < m_context.m_templateManager.getTotalTemplates() - 1)
+                    {
+                        m_context.m_templateManager.setHighlightIndex(m_context.m_templateManager.getHighlightIndex() + 1);
                         consumed = true;
                     }
                 }
@@ -553,21 +570,24 @@ namespace Xyglo.Brazil.Xna
             {
                 if (m_brazilContext.m_state.equals("TextEditing"))
                 {
-                    // Store cursor position
-                    //
-                    ScreenPosition sP = bv.getCursorPosition();
-
-                    bv.pageUp(m_context.m_project);
-
-                    if (m_keyboard.isShiftDown())
+                    if (bv != null)
                     {
-                        bv.extendHighlight(sP); // Extend
+                        // Store cursor position
+                        //
+                        ScreenPosition sP = bv.getCursorPosition();
+
+                        bv.pageUp(m_context.m_project);
+
+                        if (m_keyboard.isShiftDown())
+                        {
+                            bv.extendHighlight(sP); // Extend
+                        }
+                        else
+                        {
+                            bv.noHighlight(); // Disable
+                        }
+                        consumed = true;
                     }
-                    else
-                    {
-                        bv.noHighlight(); // Disable
-                    }
-                    consumed = true;
                 }
                 else if (m_brazilContext.m_state.equals("DiffPicker"))
                 {
@@ -868,9 +888,13 @@ namespace Xyglo.Brazil.Xna
                     }
                     consumed = true;
                 }
+                else if (m_brazilContext.m_state.equals("ProjectNew"))
+                {
+                    OnNewProjectEvent(new NewProjectEventArgs()); // emit
+                }
                 else if (m_brazilContext.m_state.equals("FindText"))
                 {
-                    //doSearch(gameTime);
+                    doSearch(gameTime);
                 }
                 else if (m_brazilContext.m_state.equals("GotoLine"))
                 {
@@ -1427,6 +1451,15 @@ namespace Xyglo.Brazil.Xna
                     m_brazilContext.m_state = State.Test("ProjectOpen");
                     rC = true;
                 }
+                else if (keyList.Contains(Keys.T)) // New project
+                {
+                    m_brazilContext.m_state = State.Test("ProjectNew");
+                    rC = true;
+                }
+                else if (keyList.Contains(Keys.E)) // Export
+                {
+                    OnCommandEvent(new CommandEventArgs(gameTime, XygloCommand.UrhoExport));
+                }
                 else if (keyList.Contains(Keys.H)) // Show the help screen
                 {
                     // Reset page position and set information mode
@@ -1864,7 +1897,7 @@ namespace Xyglo.Brazil.Xna
                         }
                         else if (m_brazilContext.m_state.equals("ProjectOpen"))
                         {
-                            OnNewProjectEvent(new NewProjectEventArgs(fileInfo.FullName));
+                            OnOpenProjectEvent(new OpenProjectEventArgs(fileInfo.FullName));
                         }
                         else if (m_brazilContext.m_state.equals("FileSaveAs"))
                         {
@@ -2100,15 +2133,45 @@ namespace Xyglo.Brazil.Xna
                 consumed = true;
             }
             else if (keyList.Contains(Keys.Left))
-            {
-                foreach (Component component in bv.getApp().getHighlightList())
-                    moveAppComponent(component, -10, 0, 0);
+            {   
+                // If the app is running then move the interloper
+                //
+                if (bv.getApp().isPlaying())
+                {
+                        //case "MoveLeft":
+                        // accelerate will accelerate in mid air or move
+                        if (m_brazilContext.m_interloper != null)
+                            m_context.m_physicsHandler.accelerate(m_context.m_drawableComponents[m_brazilContext.m_interloper], new Vector3(-10, 0, 0));
+
+                        //break;
+
+
+                }
+                else
+                {
+                    foreach (Component component in bv.getApp().getHighlightList())
+                        moveAppComponent(component, -10, 0, 0);
+                }
                 consumed = true;
             }
             else if (keyList.Contains(Keys.Right))
             {
-                foreach (Component component in bv.getApp().getHighlightList())
-                    moveAppComponent(component, 10, 0, 0);
+                // If the app is running then move the interloper
+                //
+                if (bv.getApp().isPlaying())
+                {
+                    //case "MoveRight":
+                        // accelerate will accelerate in mid air or move
+                        if (m_brazilContext.m_interloper != null)
+                            m_context.m_physicsHandler.accelerate(m_context.m_drawableComponents[m_brazilContext.m_interloper], new Vector3(10, 0, 0));
+                      //  break;
+
+                }
+                else
+                {
+                    foreach (Component component in bv.getApp().getHighlightList())
+                        moveAppComponent(component, 10, 0, 0);
+                }
                 consumed = true;
             }
             else if (keyList.Contains(Keys.I))

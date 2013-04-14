@@ -12,6 +12,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using System.Runtime.Serialization;
+using Xyglo.Friendlier;
 
 namespace Xyglo.Brazil.Xna
 {

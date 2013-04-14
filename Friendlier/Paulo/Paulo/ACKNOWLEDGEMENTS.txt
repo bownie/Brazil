@@ -3,7 +3,12 @@
 The following software has been used with licence and incorporate into some part of Friendlier.
 
 
-Jitter Physics
-DiffMatchPatch from Google
-XNA 4.0
-Nuclex Framework Font Processor
+- Jitter Physics
+- DiffMatchPatch from Google
+- XNA 4.0
+- Nuclex Framework Font Processor - and cyglon4
+- Urho3D/Lasse Oorni
+- Bitstream Vera Sans Mono
+- Leap Motion SDK
+- Kinect SDK
+

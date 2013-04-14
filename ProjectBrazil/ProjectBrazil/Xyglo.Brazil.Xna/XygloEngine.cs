@@ -6,6 +6,7 @@ using Xyglo.Brazil.Xna.Physics;
 using Microsoft.Xna.Framework;
 using System.Threading;
 using System.Diagnostics;
+using Xyglo.Friendlier;
 
 namespace Xyglo.Brazil.Xna
 {
@@ -409,6 +410,7 @@ namespace Xyglo.Brazil.Xna
                     case "PositionScreenCopy":
                     case "SplashScreen":
                     case "ProjectOpen":
+                    case "ProjectNew":
                     case "Help":
                         m_brazilContext.m_state = State.Test("TextEditing");
                         m_keyboardHandler.setEditConfigurationItem(false);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Xyglo.Brazil.Xna;
+using Xyglo.Friendlier;
 
 namespace Xyglo.Brazil
 {

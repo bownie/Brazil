@@ -22,6 +22,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using Xyglo.Friendlier;
 
 namespace Xyglo.Brazil.Xna
 {

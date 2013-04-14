@@ -6,6 +6,7 @@ using System.IO;
 using Xyglo.Brazil;
 using Xyglo.Brazil.Xna;
 using Microsoft.Win32;
+using Xyglo.Friendlier;
 
 namespace Xyglo.Friendlier
 {
@@ -143,6 +144,7 @@ namespace Xyglo.Friendlier
             connect("FileOpen", Keys.Escape, "Default");
             connect("DiffPicker", Keys.Escape, "Default");
             connect("ProjectOpen", Keys.Escape, "Default");
+            connect("ProjectNew", Keys.Escape, "Default");
 
             // Save as
             connectEditorKeys("FileSaveAs");
@@ -239,7 +241,7 @@ namespace Xyglo.Friendlier
             // States of the application - where are we in the navigation around the app.  States will affect what 
             // components are showing and how we interact with them.
             //
-            string[] states = { "TextEditing", "DemoExpired", "FileSaveAs", "FileOpen", "ProjectOpen", "Configuration", "PositionScreenOpen", "PositionScreenNew", "PositionScreenCopy", "SplashScreen", "Information", "Help", "DiffPicker", "ManageProject", "FindText", "GotoLine", "FileSave" };
+            string[] states = { "TextEditing", "DemoExpired", "FileSaveAs", "FileOpen", "ProjectOpen", "ProjectNew", "Configuration", "PositionScreenOpen", "PositionScreenNew", "PositionScreenCopy", "SplashScreen", "Information", "Help", "DiffPicker", "ManageProject", "FindText", "GotoLine", "FileSave" };
             foreach (string state in states)
             {
                 addState(state);
@@ -248,7 +250,7 @@ namespace Xyglo.Friendlier
             // Targets are actions we can perform in the application - a default target will usually mean the object
             // in focus within the current State.  This should be defined by the component.
             //
-            string[] targets = { "None", "Default", "CurrentBufferView", "OpenFile", "OpenProject", "SaveFile", "NewBufferView", "CursorUp", "CursorDown", "CursorRight", "CursorLeft", "ShowInformation" , "ManageProject", "Help", "Information", "FindText", "GotoLine"};
+            string[] targets = { "None", "Default", "CurrentBufferView", "OpenFile", "OpenProject", "NewProject", "SaveFile", "NewBufferView", "CursorUp", "CursorDown", "CursorRight", "CursorLeft", "ShowInformation" , "ManageProject", "Help", "Information", "FindText", "GotoLine"};
             foreach (string target in targets)
             {
                 addTarget(target);

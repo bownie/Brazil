@@ -19,6 +19,7 @@ namespace Xyglo.Brazil.Xna
         public event NewBufferViewEventHandler NewBufferViewEvent;
         public event CleanExitEventHandler CleanExitEvent;
         public event CommandEventHandler CommandEvent;
+        public event OpenProjectEventHandler OpenProjectEvent;
         public event NewProjectEventHandler NewProjectEvent;
 
         /// <summary>
@@ -89,6 +90,11 @@ namespace Xyglo.Brazil.Xna
         /// New Project event
         /// </summary>
         /// <param name="e"></param>
+        protected virtual void OnOpenProjectEvent(OpenProjectEventArgs e)
+        {
+            if (OpenProjectEvent != null) OpenProjectEvent(this, e);
+        }
+
         protected virtual void OnNewProjectEvent(NewProjectEventArgs e)
         {
             if (NewProjectEvent != null) NewProjectEvent(this, e);

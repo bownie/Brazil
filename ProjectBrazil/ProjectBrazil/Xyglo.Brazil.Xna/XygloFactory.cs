@@ -11,6 +11,7 @@ using Jitter.LinearMath;
 using Jitter.Collision;
 using Jitter.Collision.Shapes;
 using Jitter.Dynamics.Constraints;
+using Xyglo.Friendlier;
 
 namespace Xyglo.Brazil.Xna
 {
@@ -444,7 +445,7 @@ namespace Xyglo.Brazil.Xna
                 body.Position = Conversion.ToJitterVector(drawable.getPosition());
                 body.AffectedByGravity = component.isAffectedByGravity();
                 body.IsStatic = !component.isMoveable();
-                body.Mass = Math.Max(component.getMass(), 1000);
+                body.Mass = 1.0f; //  Math.Max(component.getMass(), 1000);
 
                 // Set a velocity if we're not static
                 //
@@ -458,7 +459,7 @@ namespace Xyglo.Brazil.Xna
                 body.EnableSpeculativeContacts = true;
 
                 // set restitution
-                body.Material.Restitution = component.getHardness();
+                body.Material.Restitution = 0.1f; //  component.getHardness();
                 //body.LinearVelocity = new JVector(0, 0, 0);  
                 body.Damping = RigidBody.DampingType.Angular;
 
@@ -503,10 +504,11 @@ namespace Xyglo.Brazil.Xna
 
                 // Stop rotations  - this might be wrong!
                 //
-                head.SetMassProperties(JMatrix.Zero, 1.0f / 1000.0f, true);
+                //head.SetMassProperties(JMatrix.Zero, 1.0f / 1000.0f, true);
                 head.Material.Restitution = component.getHardness();
                 head.Damping = RigidBody.DampingType.Angular;
                 head.Mass = component.getMass();
+                head.EnableSpeculativeContacts = true;
 //                head.SetMassProperties(
                 //body.LinearVelocity = new JVector(0, 0, 0);  
                 
@@ -520,6 +522,7 @@ namespace Xyglo.Brazil.Xna
                 body.Material.Restitution = component.getHardness();
                 body.Damping = RigidBody.DampingType.Angular;
                 body.Mass = component.getMass();
+                body.EnableSpeculativeContacts = true;
                 // Connect head and torso with a hard point to point connection like so
                 //
                 PointPointDistance headTorso = new PointPointDistance(head, body, head.Position, body.Position);
@@ -529,11 +532,14 @@ namespace Xyglo.Brazil.Xna
                 //
                 m_context.m_physicsHandler.addConstraint(headTorso);
 
-                //XygloComponentGroup group = (XygloComponentGroup)drawable;
-                //foreach (XygloXnaDrawable subDrawable in group.getComponents())
-                //{
-                //createPhysical(component, subDrawable);
-                //}
+                //sphere.EnableSpeculativeContacts = true;
+
+                // set restitution
+                //sphere.Material.Restitution = box.Material.Restitution = 1.0f / 10.0f * i;
+                //sphere.LinearVelocity = new JVector(0, 20, 0);
+
+
+                //sphere.Damping = RigidBody.DampingType.Angular;
 
                 // Special value for collection to indicate it
                 //

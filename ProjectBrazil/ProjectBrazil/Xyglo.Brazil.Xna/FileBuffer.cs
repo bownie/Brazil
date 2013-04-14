@@ -14,6 +14,7 @@ using System.IO;
 using Microsoft.Xna.Framework;
 using System.Runtime.Serialization;
 using System.Threading;
+using Xyglo.Friendlier;
 
 namespace Xyglo.Brazil.Xna
 {
