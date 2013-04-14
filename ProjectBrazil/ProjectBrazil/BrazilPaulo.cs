@@ -126,13 +126,13 @@ namespace Xyglo.Brazil
             //
             connectKey("PlayingGame", Keys.Left, "MoveLeft");
             connectKey("PlayingGame", Keys.Right, "MoveRight");
-            connectKey("PlayingGame", Keys.Up, "MoveForward");
-            connectKey("PlayingGame", Keys.Down, "MoveBack");
+            //connectKey("PlayingGame", Keys.Up, "MoveForward");
+            //connectKey("PlayingGame", Keys.Down, "MoveBack");
 
             connectKey("PlayingGame", Keys.Left, KeyButtonState.Held, "MoveLeft");
             connectKey("PlayingGame", Keys.Right, KeyButtonState.Held, "MoveRight");
 
-            connectKey("PlayingGame", Keys.Space, "Jump");
+            connectKey("PlayingGame", Keys.Up, "Jump");
 
             // Connect up our test state
             //

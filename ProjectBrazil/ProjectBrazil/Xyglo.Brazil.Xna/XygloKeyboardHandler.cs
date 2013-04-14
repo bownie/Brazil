@@ -2127,9 +2127,16 @@ namespace Xyglo.Brazil.Xna
             }
             else if (keyList.Contains(Keys.Up))
             {
-                foreach (Component component in bv.getApp().getHighlightList())
-                    moveAppComponent(component, 0, -10, 0);
-
+                if (bv.getApp().isPlaying())
+                {
+                    if (m_brazilContext.m_interloper != null)
+                        m_context.m_physicsHandler.accelerate(m_context.m_drawableComponents[m_brazilContext.m_interloper], new Vector3(0, -200, 0));
+                }
+                else
+                {
+                    foreach (Component component in bv.getApp().getHighlightList())
+                        moveAppComponent(component, 0, -10, 0);
+                }
                 consumed = true;
             }
             else if (keyList.Contains(Keys.Left))

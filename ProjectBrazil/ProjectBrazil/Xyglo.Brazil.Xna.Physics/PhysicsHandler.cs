@@ -250,9 +250,9 @@ namespace Xyglo.Brazil.Xna.Physics
                 // Stop rotations  - this might be wrong!
                 //
                 //head.SetMassProperties(JMatrix.Zero, 1.0f / 1000.0f, true);
-                head.Material.Restitution = m_testRestitution; // component.getHardness();
+                head.Material.Restitution = component.getHardness();
                 head.Damping = RigidBody.DampingType.Angular;
-                head.Mass = m_testMass; // component.getMass();
+                head.Mass = component.getMass();
                 head.EnableSpeculativeContacts = true;
 
                 XygloXnaDrawable bodyDrawable = group.getComponents().Where(item => item.GetType() == typeof(XygloFlyingBlock)).ToList()[0];
@@ -261,10 +261,11 @@ namespace Xyglo.Brazil.Xna.Physics
                 // See above caveat!
                 //
                 body.SetMassProperties(JMatrix.Zero, 1.0f / 1000.0f, true);
-                body.Material.Restitution = m_testRestitution; // component.getHardness();
+                body.Material.Restitution = component.getHardness();
                 body.Damping = RigidBody.DampingType.Angular;
-                body.Mass = m_testMass; // component.getMass();
+                body.Mass = component.getMass();
                 body.EnableSpeculativeContacts = true;
+                
                 // Connect head and torso with a hard point to point connection like so
                 //
                 PointPointDistance headTorso = new PointPointDistance(head, body, head.Position, body.Position);
@@ -272,7 +273,14 @@ namespace Xyglo.Brazil.Xna.Physics
 
                 // Add the connection - the body parts are already add implicitly (might want to change that)
                 //
-                m_context.m_physicsHandler.addConstraint(headTorso);
+                addConstraint(headTorso);
+
+                // Add a fixed angle constraint to keep the interloper upright
+                //
+                Jitter.Dynamics.Constraints.SingleBody.FixedAngle fixedAngle = new Jitter.Dynamics.Constraints.SingleBody.FixedAngle(body);
+                fixedAngle.InitialOrientation = new JMatrix(0, 0, 0, 0, 1, 0, 0, 0, 0);
+                //fixedAngle.InitialOrientationBody2 = new JMatrix(1, 0, 0, 0, 1, 0, 0, 0, 1);
+                addConstraint(fixedAngle);
 
                 //sphere.EnableSpeculativeContacts = true;
 
