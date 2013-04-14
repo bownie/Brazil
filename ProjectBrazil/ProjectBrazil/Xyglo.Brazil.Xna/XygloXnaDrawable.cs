@@ -319,6 +319,15 @@ namespace Xyglo.Brazil.Xna
         public void setOrientation(Matrix orientation) { m_orientation = orientation; }
 
         /// <summary>
+        /// Total orientation including any rotation
+        /// </summary>
+        /// <returns></returns>
+        public Matrix getTotalOrientation()
+        {
+            return Matrix.CreateRotationZ((float)m_rotation) * m_orientation;
+        }
+
+        /// <summary>
         /// Position of this block - there might not be an endPosition defined for this shape
         /// </summary>
         protected Vector3 m_position;

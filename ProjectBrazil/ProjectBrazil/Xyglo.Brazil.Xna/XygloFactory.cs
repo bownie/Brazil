@@ -135,7 +135,7 @@ namespace Xyglo.Brazil.Xna
                     // Add to the physics handler if we need to
                     //
                     //m_physicsHandler.
-                    createPhysical(component, drawBlock);
+                    m_context.m_physicsHandler.createPhysical(component, drawBlock);
                 }
                 else
                 {
@@ -162,7 +162,7 @@ namespace Xyglo.Brazil.Xna
                     // Add to the physics handler if we need to
                     //
                     //m_physicsHandler.
-                    createPhysical(component, drawBlock);
+                    m_context.m_physicsHandler.createPhysical(component, drawBlock);
                 }
 
             }
@@ -193,7 +193,7 @@ namespace Xyglo.Brazil.Xna
                 m_context.m_drawableComponents[component] = group;
 
                 //m_physicsHandler.
-                createPhysical(component, group);
+                m_context.m_physicsHandler.createPhysical(component, group);
             }
             else if (component.GetType() == typeof(Xyglo.Brazil.BrazilBannerText))
             {
@@ -276,7 +276,7 @@ namespace Xyglo.Brazil.Xna
                     m_context.m_drawableComponents[component] = coin;
 
                     //m_physicsHandler.
-                    createPhysical(component, coin);
+                    m_context.m_physicsHandler.createPhysical(component, coin);
                 }
                 else
                 {
@@ -312,7 +312,7 @@ namespace Xyglo.Brazil.Xna
                 m_context.m_drawableComponents[component] = group;
 
                 //m_physicsHandler.
-                createPhysical(component, group);
+                m_context.m_physicsHandler.createPhysical(component, group);
             }
             else if (component.GetType() == typeof(Xyglo.Brazil.BrazilFinishBlock))
             {
@@ -346,7 +346,7 @@ namespace Xyglo.Brazil.Xna
                 // Add to the physics handler if we need to
                 //
                 //m_physicsHandler.
-                createPhysical(component, drawBlock);
+                m_context.m_physicsHandler.createPhysical(component, drawBlock);
 
             }
             else if (component.GetType() == typeof(Xyglo.Brazil.BrazilMenu))
@@ -376,9 +376,7 @@ namespace Xyglo.Brazil.Xna
                 block.buildBuffers(m_context.m_graphics.GraphicsDevice);
                 block.draw(m_context.m_graphics.GraphicsDevice);
                 m_context.m_drawableComponents[component] = block;
-
-                //m_physicsHandler.
-                createPhysical(component, block);
+                m_context.m_physicsHandler.createPhysical(component, block);
             }
             else if (component.GetType() == typeof(BrazilInvisibleBlock))
             {
@@ -407,181 +405,7 @@ namespace Xyglo.Brazil.Xna
             return body;
         }
 
-        /// <summary>
-        /// Interpret a Drawable and add it to the Physics model according to type
-        /// </summary>
-        /// <param name="drawable"></param>
-        /// <param name="affectedByGravity"></param>
-        /// <param name="moveable"></param>
-        public RigidBody createPhysical(Component component, XygloXnaDrawable drawable)
-        {
-            RigidBody body = null;
-
-            if (drawable is XygloFlyingBlock)
-            {
-                XygloFlyingBlock fb = (XygloFlyingBlock)drawable;
-                body = new RigidBody(new BoxShape(Conversion.ToJitterVector(fb.getSize())));
-            }
-            else if (drawable is XygloTexturedBlock)
-            {
-                XygloTexturedBlock fb = (XygloTexturedBlock)drawable;
-                JVector size = Conversion.ToJitterVector(fb.getSize());
-                body = new RigidBody(new BoxShape(size));
-            }
-            else if (drawable is XygloSphere)
-            {
-                XygloSphere sphere = (XygloSphere)drawable;
-                body = new RigidBody(new SphereShape(sphere.getRadius()));
-            }
-            else if (drawable is XygloComponentGroup)
-            {
-                createPhysicalComponentGroup(component, (XygloComponentGroup)drawable);
-            }
-
-            // If we've constructed a body then populate and add
-            //
-            if (body != null)
-            {
-                body.Position = Conversion.ToJitterVector(drawable.getPosition());
-                body.AffectedByGravity = component.isAffectedByGravity();
-                body.IsStatic = !component.isMoveable();
-                body.Mass = 1.0f; //  Math.Max(component.getMass(), 1000);
-
-                // Set a velocity if we're not static
-                //
-                if (!body.IsStatic)
-                    body.LinearVelocity = Conversion.ToJitterVector(drawable.getVelocity());
-
-                // Store this relationship in the calling drawable so we can link them back again
-                //
-                drawable.setPhysicsHash(body.GetHashCode());
-
-                body.EnableSpeculativeContacts = true;
-
-                // set restitution
-                body.Material.Restitution = 0.1f; //  component.getHardness();
-                //body.LinearVelocity = new JVector(0, 0, 0);  
-                body.Damping = RigidBody.DampingType.Angular;
-
-                //World.AddBody(body);
-                m_context.m_physicsHandler.addRigidBody(body);
-
-
-                //sphere.Position = boxPos + JVector.Up * 30;
-                //sphere.EnableSpeculativeContacts = true;
-
-                // set restitution
-                //sphere.Material.Restitution = box.Material.Restitution = 1.0f / 10.0f * i;
-                //sphere.LinearVelocity = new JVector(0, 20, 0);
-
-
-                //sphere.Damping = RigidBody.DampingType.Angular;
-
-                return body;
-            }
-            else
-            {
-                Logger.logMsg("Not constructed a physics objects from a XygloDrawable");
-            }
-
-            return null;
-        }
-
-
-        /// <summary>
-        /// Link a set of components to a component group and perform some coupling
-        /// between them.
-        /// </summary>
-        /// <param name="component"></param>
-        /// <param name="group"></param>
-        protected void createPhysicalComponentGroup(Component component, XygloComponentGroup group)
-        {
-
-            if (group.getComponentGroupType() == XygloComponentGroupType.Interloper)
-            {
-                XygloXnaDrawable headDrawable = group.getComponents().Where(item => item.GetType() == typeof(XygloSphere)).ToList()[0];
-                RigidBody head = createPhysical(component, headDrawable);
-
-                // Stop rotations  - this might be wrong!
-                //
-                //head.SetMassProperties(JMatrix.Zero, 1.0f / 1000.0f, true);
-                head.Material.Restitution = component.getHardness();
-                head.Damping = RigidBody.DampingType.Angular;
-                head.Mass = component.getMass();
-                head.EnableSpeculativeContacts = true;
-//                head.SetMassProperties(
-                //body.LinearVelocity = new JVector(0, 0, 0);  
-                
-
-                XygloXnaDrawable bodyDrawable = group.getComponents().Where(item => item.GetType() == typeof(XygloFlyingBlock)).ToList()[0];
-                RigidBody body = createPhysical(component, bodyDrawable);
-
-                // See above caveat!
-                //
-                body.SetMassProperties(JMatrix.Zero, 1.0f / 1000.0f, true);
-                body.Material.Restitution = component.getHardness();
-                body.Damping = RigidBody.DampingType.Angular;
-                body.Mass = component.getMass();
-                body.EnableSpeculativeContacts = true;
-                // Connect head and torso with a hard point to point connection like so
-                //
-                PointPointDistance headTorso = new PointPointDistance(head, body, head.Position, body.Position);
-                headTorso.Softness = 0.00001f;
-
-                // Add the connection - the body parts are already add implicitly (might want to change that)
-                //
-                m_context.m_physicsHandler.addConstraint(headTorso);
-
-                //sphere.EnableSpeculativeContacts = true;
-
-                // set restitution
-                //sphere.Material.Restitution = box.Material.Restitution = 1.0f / 10.0f * i;
-                //sphere.LinearVelocity = new JVector(0, 20, 0);
-
-
-                //sphere.Damping = RigidBody.DampingType.Angular;
-
-                // Special value for collection to indicate it
-                //
-                group.setPhysicsHash(-1);
-            }
-            else if (group.getComponentGroupType() == XygloComponentGroupType.Fiend)
-            {
-                XygloXnaDrawable headDrawable = group.getComponents().Where(item => item.GetType() == typeof(XygloSphere)).ToList()[0];
-                RigidBody head = createPhysical(component, headDrawable);
-
-                // Stop rotations  - this might be wrong!
-                //
-                head.SetMassProperties(JMatrix.Zero, 1.0f / 1000.0f, true);
-
-                XygloXnaDrawable bodyDrawable = group.getComponents().Where(item => item.GetType() == typeof(XygloFlyingBlock)).ToList()[0];
-                RigidBody body = createPhysical(component, bodyDrawable);
-
-                // See above caveat!
-                //
-                body.SetMassProperties(JMatrix.Zero, 1.0f / 1000.0f, true);
-
-                // Connect head and torso with a hard point to point connection like so
-                //
-                PointPointDistance headTorso = new PointPointDistance(head, body, head.Position, body.Position);
-                headTorso.Softness = 0.00001f;
-
-                // Add the connection - the body parts are already add implicitly (might want to change that)
-                //
-                m_context.m_physicsHandler.addConstraint(headTorso);
-
-                //XygloComponentGroup group = (XygloComponentGroup)drawable;
-                //foreach (XygloXnaDrawable subDrawable in group.getComponents())
-                //{
-                //createPhysical(component, subDrawable);
-                //}
-
-                // Special value for collection to indicate it
-                //
-                group.setPhysicsHash(-1);
-            }
-        }
-
+ 
         /// <summary>
         /// The XygloContext
         /// </summary>

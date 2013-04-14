@@ -159,6 +159,166 @@ namespace Xyglo.Brazil.Xna.Physics
             return bodyList;
         }
 
+        /// <summary>
+        /// Interpret a Drawable and add it to the Physics model according to type
+        /// </summary>
+        /// <param name="drawable"></param>
+        /// <param name="affectedByGravity"></param>
+        /// <param name="moveable"></param>
+        public RigidBody createPhysical(Component component, XygloXnaDrawable drawable)
+        {
+            RigidBody body = null;
+
+            if (drawable is XygloFlyingBlock)
+            {
+                XygloFlyingBlock fb = (XygloFlyingBlock)drawable;
+                body = new RigidBody(new BoxShape(Conversion.ToJitterVector(fb.getSize())));
+            }
+            else if (drawable is XygloTexturedBlock)
+            {
+                XygloTexturedBlock fb = (XygloTexturedBlock)drawable;
+                JVector size = Conversion.ToJitterVector(fb.getSize());
+                body = new RigidBody(new BoxShape(size));
+            }
+            else if (drawable is XygloSphere)
+            {
+                XygloSphere sphere = (XygloSphere)drawable;
+                body = new RigidBody(new SphereShape(sphere.getRadius()));
+            }
+            else if (drawable is XygloComponentGroup)
+            {
+                createPhysicalComponentGroup(component, (XygloComponentGroup)drawable);
+            }
+
+            // If we've constructed a body then populate and add
+            //
+            if (body != null)
+            {
+                body.EnableSpeculativeContacts = true;
+                body.Position = Conversion.ToJitterVector(drawable.getPosition());
+                body.AffectedByGravity = component.isAffectedByGravity();
+                body.IsStatic = !component.isMoveable();
+                body.Mass = m_testMass; // Math.Max(component.getMass(), 1000);
+
+                // Ensure that the body is oriented in the same manner as the drawable
+                //
+                body.Orientation = Conversion.ToJitterMatrix(drawable.getTotalOrientation());
+
+                // Set a velocity if we're not static
+                //
+                if (!body.IsStatic)
+                    body.LinearVelocity = Conversion.ToJitterVector(drawable.getVelocity());
+
+                // Store this relationship in the calling drawable so we can link them back again
+                //
+                drawable.setPhysicsHash(body.GetHashCode());
+
+                // Set restitution from hardness
+                //
+                body.Material.Restitution = m_testRestitution; // component.getHardness();
+                body.Damping = RigidBody.DampingType.Angular;
+                m_context.m_physicsHandler.addRigidBody(body);
+
+                return body;
+            }
+            else
+            {
+                Logger.logMsg("Not constructed a physics objects from a XygloDrawable");
+            }
+
+            return null;
+        }
+
+        protected float m_testRestitution = 0.1f;
+        protected float m_testHardness = 0.1f;
+        protected float m_testMass = 1.0f;
+
+        /// <summary>
+        /// Link a set of components to a component group and perform some coupling
+        /// between them.
+        /// </summary>
+        /// <param name="component"></param>
+        /// <param name="group"></param>
+        protected void createPhysicalComponentGroup(Component component, XygloComponentGroup group)
+        {
+
+            if (group.getComponentGroupType() == XygloComponentGroupType.Interloper)
+            {
+                XygloXnaDrawable headDrawable = group.getComponents().Where(item => item.GetType() == typeof(XygloSphere)).ToList()[0];
+                RigidBody head = createPhysical(component, headDrawable);
+
+                // Stop rotations  - this might be wrong!
+                //
+                //head.SetMassProperties(JMatrix.Zero, 1.0f / 1000.0f, true);
+                head.Material.Restitution = m_testRestitution; // component.getHardness();
+                head.Damping = RigidBody.DampingType.Angular;
+                head.Mass = m_testMass; // component.getMass();
+                head.EnableSpeculativeContacts = true;
+
+                XygloXnaDrawable bodyDrawable = group.getComponents().Where(item => item.GetType() == typeof(XygloFlyingBlock)).ToList()[0];
+                RigidBody body = createPhysical(component, bodyDrawable);
+
+                // See above caveat!
+                //
+                body.SetMassProperties(JMatrix.Zero, 1.0f / 1000.0f, true);
+                body.Material.Restitution = m_testRestitution; // component.getHardness();
+                body.Damping = RigidBody.DampingType.Angular;
+                body.Mass = m_testMass; // component.getMass();
+                body.EnableSpeculativeContacts = true;
+                // Connect head and torso with a hard point to point connection like so
+                //
+                PointPointDistance headTorso = new PointPointDistance(head, body, head.Position, body.Position);
+                headTorso.Softness = 0.00001f;
+
+                // Add the connection - the body parts are already add implicitly (might want to change that)
+                //
+                m_context.m_physicsHandler.addConstraint(headTorso);
+
+                //sphere.EnableSpeculativeContacts = true;
+
+                // set restitution
+                //sphere.Material.Restitution = box.Material.Restitution = 1.0f / 10.0f * i;
+                //sphere.LinearVelocity = new JVector(0, 20, 0);
+
+
+                //sphere.Damping = RigidBody.DampingType.Angular;
+
+                // Special value for collection to indicate it
+                //
+                group.setPhysicsHash(-1);
+            }
+            else if (group.getComponentGroupType() == XygloComponentGroupType.Fiend)
+            {
+                XygloXnaDrawable headDrawable = group.getComponents().Where(item => item.GetType() == typeof(XygloSphere)).ToList()[0];
+                RigidBody head = createPhysical(component, headDrawable);
+
+                // Stop rotations  - this might be wrong!
+                //
+                head.SetMassProperties(JMatrix.Zero, 1.0f / 1000.0f, true);
+
+                XygloXnaDrawable bodyDrawable = group.getComponents().Where(item => item.GetType() == typeof(XygloFlyingBlock)).ToList()[0];
+                RigidBody body = createPhysical(component, bodyDrawable);
+
+                // See above caveat!
+                //
+                body.SetMassProperties(JMatrix.Zero, 1.0f / 1000.0f, true);
+
+                // Connect head and torso with a hard point to point connection like so
+                //
+                PointPointDistance headTorso = new PointPointDistance(head, body, head.Position, body.Position);
+                headTorso.Softness = 0.00001f;
+
+                // Add the connection - the body parts are already add implicitly (might want to change that)
+                //
+                m_context.m_physicsHandler.addConstraint(headTorso);
+
+                // Special value for collection to indicate it
+                //
+                group.setPhysicsHash(-1);
+            }
+        }
+
+
         /* From Restitution.cs
          */
         /*
@@ -261,11 +421,13 @@ namespace Xyglo.Brazil.Xna.Physics
                     //
                     Vector3 position = Conversion.ToXNAVector(body.Position);
                     Vector3 oldPosition = drawableList[0].getPosition();
-                    drawableList[0].setPosition(Conversion.ToXNAVector(body.Position));
-                    drawableList[0].setOrientation(Conversion.ToXNAMatrix(body.Orientation));
+                    //drawableList[0].setPosition(Conversion.ToXNAVector(body.Position));
+                    //drawableList[0].setOrientation(Conversion.ToXNAMatrix(body.Orientation));
                 }
 
-                body.Update();
+                // This is causing the disappearance of objects
+                //
+                //body.Update();
             }
             */
         }
