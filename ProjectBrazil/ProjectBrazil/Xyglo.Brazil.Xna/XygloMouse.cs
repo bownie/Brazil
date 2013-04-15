@@ -471,7 +471,7 @@ namespace Xyglo.Brazil.Xna
 
                     // If shift down then scroll current view - otherwise zoom in/out
                     //
-                    if (keyboard.isShiftDown())
+                    if (keyboard.isShiftDown() && bv != null)
                     {
                         int linesDown = -(int)((m_lastMouseWheelValue - mouseAction.m_scrollWheel) / 120.0f);
 

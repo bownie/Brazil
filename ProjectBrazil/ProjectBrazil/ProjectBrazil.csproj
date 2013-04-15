@@ -76,6 +76,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BrazilBall.cs" />
     <Compile Include="BrazilColour.cs" />
     <Compile Include="BrazilFlyingBlock.cs" />
     <Compile Include="BrazilGameTime.cs" />

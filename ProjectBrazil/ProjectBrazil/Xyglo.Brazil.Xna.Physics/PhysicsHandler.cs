@@ -24,6 +24,8 @@ namespace Xyglo.Brazil.Xna.Physics
     /// </summary>
     public class PhysicsHandler
     {
+        CollisionDetectedHandler handler;
+
         /// <summary>
         /// http://cycling74.com/physics/
         /// </summary>
@@ -33,93 +35,63 @@ namespace Xyglo.Brazil.Xna.Physics
 
             // Set up collision and world for physics
             //
-            CollisionSystem collision = new CollisionSystemPersistentSAP();
+            //CollisionSystem collision = new CollisionSystemPersistentSAP();
+            CollisionSystem collision = new CollisionSystemSAP();
             m_world = new World(collision);
+            collision.CollisionDetected += new CollisionDetectedHandler(collisionHandler);
             m_world.AllowDeactivation = true;
-            m_world.Gravity = new JVector(0, 500f, 0);
-            //m_world.SetDampingFactors(0.8f, 0.8f);
+            m_world.Gravity = new JVector(0, 30f, 0);
+            //m_world.SetDampingFactors(0.1f, 0.1f);
+
+            // Can play with this
+            //
+            //m_world.SetInactivityThreshold(0.1f, 1.0f, 0.3f);
         }
 
-        /*
-        public void initialise()
+        /// <summary>
+        /// Perform collision management
+        /// </summary>
+        /// <param name="body1"></param>
+        /// <param name="body2"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="z"></param>
+        /// <param name="value"></param>
+        protected void collisionHandler(RigidBody body1, RigidBody body2, JVector x, JVector y, JVector z, float value)
         {
-            primitives[(int)Primitives.box] = new Primitives3D.BoxPrimitive(m_context.m_graphics.GraphicsDevice);
-            primitives[(int)Primitives.capsule] = new Primitives3D.CapsulePrimitive(m_context.m_graphics.GraphicsDevice);
-            primitives[(int)Primitives.cone] = new Primitives3D.ConePrimitive(m_context.m_graphics.GraphicsDevice);
-            primitives[(int)Primitives.cylinder] = new Primitives3D.CylinderPrimitive(m_context.m_graphics.GraphicsDevice);
-            primitives[(int)Primitives.sphere] = new Primitives3D.SpherePrimitive(m_context.m_graphics.GraphicsDevice);
+            return;
+
+            if (body1.GetHashCode() == -1)
+            {
+                Logger.logMsg("Got interloper from body1");
+            }
+
+            if (body2.GetHashCode() == -1)
+            {
+                Logger.logMsg("Got interloper from body2");
+            }
+
+            XygloXnaDrawable drawable1 = getDrawableForRigidBody(body1);
+            XygloXnaDrawable drawable2 = getDrawableForRigidBody(body2);
+
+            if (drawable1 == null || drawable2 == null)
+            {
+                Logger.logMsg("Failed to find drawable from RigidBody");
+                return;
+            }
+
+            if (drawable1.GetType() == typeof(XygloCoin))
+            {
+                Logger.logMsg("Got coin as drawable 1");
+            }
+
+            if (drawable2.GetType() == typeof(XygloCoin))
+            {
+                Logger.logMsg("Got coin as drawable 2");
+            }
+
+
         }
-
-        private void AddShapeToDrawList(Shape shape, JMatrix ori, JVector pos)
-        {
-            Primitives3D.GeometricPrimitive primitive = null;
-            Matrix scaleMatrix = Matrix.Identity;
-
-            if (shape is BoxShape)
-            {
-                primitive = primitives[(int)Primitives.box];
-                scaleMatrix = Matrix.CreateScale(Conversion.ToXNAVector((shape as BoxShape).Size));
-            }
-            else if (shape is SphereShape)
-            {
-                primitive = primitives[(int)Primitives.sphere];
-                scaleMatrix = Matrix.CreateScale((shape as SphereShape).Radius);
-            }
-            else if (shape is CylinderShape)
-            {
-                primitive = primitives[(int)Primitives.cylinder];
-                CylinderShape cs = shape as CylinderShape;
-                scaleMatrix = Matrix.CreateScale(cs.Radius, cs.Height, cs.Radius);
-            }
-            else if (shape is CapsuleShape)
-            {
-                primitive = primitives[(int)Primitives.capsule];
-                CapsuleShape cs = shape as CapsuleShape;
-                scaleMatrix = Matrix.CreateScale(cs.Radius * 2, cs.Length, cs.Radius * 2);
-
-            }
-            else if (shape is ConeShape)
-            {
-                ConeShape cs = shape as ConeShape;
-                scaleMatrix = Matrix.CreateScale(cs.Radius, cs.Height, cs.Radius);
-                primitive = primitives[(int)Primitives.cone];
-            }
-
-            if (primitive != null)
-                primitive.AddWorldMatrix(scaleMatrix * Conversion.ToXNAMatrix(ori) *
-                            Matrix.CreateTranslation(Conversion.ToXNAVector(pos)));
-        }
-
-        private void AddBodyToDrawList(RigidBody rb)
-        {
-            if (rb.Tag is BodyTag && ((BodyTag)rb.Tag) == BodyTag.DontDrawMe) return;
-
-            bool isCompoundShape = (rb.Shape is CompoundShape);
-
-            if (!isCompoundShape)
-            {
-                AddShapeToDrawList(rb.Shape, rb.Orientation, rb.Position);
-            }
-            else
-            {
-                CompoundShape cShape = rb.Shape as CompoundShape;
-                JMatrix orientation = rb.Orientation;
-                JVector position = rb.Position;
-
-                foreach (var ts in cShape.Shapes)
-                {
-                    JVector pos = ts.Position;
-                    JMatrix ori = ts.Orientation;
-
-                    JVector.Transform(ref pos, ref orientation, out pos);
-                    JVector.Add(ref pos, ref position, out pos);
-
-                    JMatrix.Multiply(ref ori, ref orientation, out ori);
-
-                    AddShapeToDrawList(ts.Shape, ori, pos);
-                }
-            }
-        }*/
 
         /// <summary>
         /// Accelerate a rigidbody by a certain vector - this is an input to the model
@@ -132,7 +104,7 @@ namespace Xyglo.Brazil.Xna.Physics
             List<RigidBody> bodyList = getRigidBodiesForDrawable(drawable);
 
             foreach(RigidBody body in bodyList)
-                body.LinearVelocity += Conversion.ToJitterVector(acceleration);
+                body.LinearVelocity += Conversion.ToJitterVector(acceleration * m_physicScale);
         }
 
         /// <summary>
@@ -160,6 +132,22 @@ namespace Xyglo.Brazil.Xna.Physics
         }
 
         /// <summary>
+        /// Get a drawable for a RigidBody
+        /// </summary>
+        /// <param name="body"></param>
+        /// <returns></returns>
+        public XygloXnaDrawable getDrawableForRigidBody(RigidBody body)
+        {
+            int physicsHash = body.GetHashCode();
+            List<XygloXnaDrawable> drawables = m_context.m_drawableComponents.Values.Where(item => item.getPhysicsHash() == body.GetHashCode()).ToList();
+
+            if (drawables.Count() == 1)
+                return drawables[0];
+
+            return null;
+        }
+
+        /// <summary>
         /// Interpret a Drawable and add it to the Physics model according to type
         /// </summary>
         /// <param name="drawable"></param>
@@ -172,30 +160,31 @@ namespace Xyglo.Brazil.Xna.Physics
             if (drawable is XygloFlyingBlock)
             {
                 XygloFlyingBlock fb = (XygloFlyingBlock)drawable;
-                body = new RigidBody(new BoxShape(Conversion.ToJitterVector(fb.getSize())));
+                body = new RigidBody(new BoxShape(Conversion.ToJitterVector(fb.getSize() * m_physicScale)));
             }
             else if (drawable is XygloTexturedBlock)
             {
                 XygloTexturedBlock fb = (XygloTexturedBlock)drawable;
-                JVector size = Conversion.ToJitterVector(fb.getSize());
+                JVector size = Conversion.ToJitterVector(fb.getSize() * m_physicScale);
                 body = new RigidBody(new BoxShape(size));
             }
             else if (drawable is XygloSphere)
             {
                 XygloSphere sphere = (XygloSphere)drawable;
-                body = new RigidBody(new SphereShape(sphere.getRadius()));
+                body = new RigidBody(new SphereShape(sphere.getRadius() * m_physicScale));
             }
             else if (drawable is XygloComponentGroup)
             {
                 createPhysicalComponentGroup(component, (XygloComponentGroup)drawable);
             }
+            
 
             // If we've constructed a body then populate and add
             //
             if (body != null)
             {
                 body.EnableSpeculativeContacts = true;
-                body.Position = Conversion.ToJitterVector(drawable.getPosition());
+                body.Position = Conversion.ToJitterVector(drawable.getPosition() * m_physicScale);
                 body.AffectedByGravity = component.isAffectedByGravity();
                 body.IsStatic = !component.isMoveable();
                 body.Mass = m_testMass; // Math.Max(component.getMass(), 1000);
@@ -207,7 +196,7 @@ namespace Xyglo.Brazil.Xna.Physics
                 // Set a velocity if we're not static
                 //
                 if (!body.IsStatic)
-                    body.LinearVelocity = Conversion.ToJitterVector(drawable.getVelocity());
+                    body.LinearVelocity = Conversion.ToJitterVector(drawable.getVelocity() * m_physicScale);
 
                 // Store this relationship in the calling drawable so we can link them back again
                 //
@@ -217,6 +206,8 @@ namespace Xyglo.Brazil.Xna.Physics
                 //
                 body.Material.Restitution = m_testRestitution; // component.getHardness();
                 body.Damping = RigidBody.DampingType.Angular;
+                body.Material.KineticFriction = 0.5f;
+                body.Material.StaticFriction = 0.5f;
                 m_context.m_physicsHandler.addRigidBody(body);
 
                 return body;
@@ -229,9 +220,20 @@ namespace Xyglo.Brazil.Xna.Physics
             return null;
         }
 
-        protected float m_testRestitution = 0.1f;
-        protected float m_testHardness = 0.1f;
-        protected float m_testMass = 1.0f;
+        /// <summary>
+        /// Scaling factor between our drawbles and jitter physics
+        /// </summary>
+        protected float m_physicScale = 0.1f;
+
+        /// <summary>
+        /// Test restitution
+        /// </summary>
+        protected float m_testRestitution = 0.5f; //0000001f;
+
+        /// <summary>
+        /// Test mass
+        /// </summary>
+        protected float m_testMass = 0.1f;
 
         /// <summary>
         /// Link a set of components to a component group and perform some coupling
@@ -241,46 +243,57 @@ namespace Xyglo.Brazil.Xna.Physics
         /// <param name="group"></param>
         protected void createPhysicalComponentGroup(Component component, XygloComponentGroup group)
         {
-
             if (group.getComponentGroupType() == XygloComponentGroupType.Interloper)
             {
+                /*
                 XygloXnaDrawable headDrawable = group.getComponents().Where(item => item.GetType() == typeof(XygloSphere)).ToList()[0];
                 RigidBody head = createPhysical(component, headDrawable);
 
                 // Stop rotations  - this might be wrong!
                 //
-                //head.SetMassProperties(JMatrix.Zero, 1.0f / 1000.0f, true);
-                head.Material.Restitution = component.getHardness();
-                head.Damping = RigidBody.DampingType.Angular;
-                head.Mass = component.getMass();
+                head.SetMassProperties(JMatrix.Zero, 1.0f / 1000.0f, true);
+                head.Material.Restitution = 0f; // component.getHardness();
+                head.Damping = RigidBody.DampingType.Linear | RigidBody.DampingType.Angular;
+                head.Mass = m_testMass; // component.getMass();
                 head.EnableSpeculativeContacts = true;
+                */
 
                 XygloXnaDrawable bodyDrawable = group.getComponents().Where(item => item.GetType() == typeof(XygloFlyingBlock)).ToList()[0];
                 RigidBody body = createPhysical(component, bodyDrawable);
 
                 // See above caveat!
                 //
-                body.SetMassProperties(JMatrix.Zero, 1.0f / 1000.0f, true);
-                body.Material.Restitution = component.getHardness();
-                body.Damping = RigidBody.DampingType.Angular;
-                body.Mass = component.getMass();
+                //body.SetMassProperties(JMatrix.Zero, 1.0f / 1000.0f, true);
+                body.Material.Restitution = m_testRestitution; // component.getHardness();
+                body.Damping = RigidBody.DampingType.Linear | RigidBody.DampingType.Angular;
+                body.Mass = m_testMass; // component.getMass();
                 body.EnableSpeculativeContacts = true;
+                body.Material.KineticFriction = 0.5f;
+                body.Material.StaticFriction = 0.5f;
                 
                 // Connect head and torso with a hard point to point connection like so
                 //
-                PointPointDistance headTorso = new PointPointDistance(head, body, head.Position, body.Position);
-                headTorso.Softness = 0.00001f;
-
+                //PointPointDistance headTorso = new PointPointDistance(head, body, head.Position, body.Position);
+                //headTorso.Softness = 0.00001f;
                 // Add the connection - the body parts are already add implicitly (might want to change that)
                 //
-                addConstraint(headTorso);
+                //addConstraint(headTorso);
 
                 // Add a fixed angle constraint to keep the interloper upright
                 //
                 Jitter.Dynamics.Constraints.SingleBody.FixedAngle fixedAngle = new Jitter.Dynamics.Constraints.SingleBody.FixedAngle(body);
-                fixedAngle.InitialOrientation = new JMatrix(0, 0, 0, 0, 1, 0, 0, 0, 0);
-                //fixedAngle.InitialOrientationBody2 = new JMatrix(1, 0, 0, 0, 1, 0, 0, 0, 1);
+                fixedAngle.InitialOrientation = new JMatrix(0, 0, 0, 0, 0.9f, 0, 0, 0, 0);
+                fixedAngle.Softness = 0.1f;
                 addConstraint(fixedAngle);
+
+                // Add another fixed length constraint to attach the head
+                //
+                //FixedAngle headBody = new FixedAngle(head, body);
+                //headBody.InitialOrientationBody1 = new JMatrix(0, 0, 0, 0, 1, 0, 0, 0, 0);
+                //headBody.InitialOrientationBody2 = new JMatrix(0, 0, 0, 0, 1, 0, 0, 0, 0);
+                //headBody.Softness = 0.000001f;
+                //addConstraint(headBody);
+
 
                 //sphere.EnableSpeculativeContacts = true;
 
@@ -326,39 +339,6 @@ namespace Xyglo.Brazil.Xna.Physics
             }
         }
 
-
-        /* From Restitution.cs
-         */
-        /*
-        public override void Build()
-        {
-            AddGround();
-
-            for (int i = 0; i < 11; i++)
-            {
-                RigidBody box = new RigidBody(new BoxShape(1, 0.01f, 1));
-                this.Demo.World.AddBody(box);
-                JVector boxPos = new JVector(-15 + i * 3 + 1, 5, 0);
-
-                box.Position = boxPos;
-                box.IsStatic = true;
-
-                RigidBody sphere = new RigidBody(new SphereShape(0.5f));
-                this.Demo.World.AddBody(sphere);
-
-                sphere.Position = boxPos + JVector.Up * 30;
-                sphere.EnableSpeculativeContacts = true;
-
-                // set restitution
-                sphere.Material.Restitution = box.Material.Restitution = 1.0f / 10.0f * i;
-                sphere.LinearVelocity = new JVector(0, 20, 0);
-
-
-                sphere.Damping = RigidBody.DampingType.Angular;
-            }
-        }
-        */
-
         /// <summary>
         /// Run the physics model for a given time
         /// </summary>
@@ -400,9 +380,10 @@ namespace Xyglo.Brazil.Xna.Physics
                     // Update position
                     //
                     Vector3 position = Conversion.ToXNAVector(body.Position);
-                    Vector3 oldPosition = drawable.getPosition();
-                    drawable.setPosition(Conversion.ToXNAVector(body.Position));
+                    //Vector3 oldPosition = drawable.getPosition() / m_physicScale;
+                    drawable.setPosition(Conversion.ToXNAVector(body.Position) / m_physicScale);
                     drawable.setOrientation(Conversion.ToXNAMatrix(body.Orientation));
+                    drawable.buildBuffers(m_context.m_graphics.GraphicsDevice);
 
                     // Remove from the remainder list
                     //
@@ -410,34 +391,38 @@ namespace Xyglo.Brazil.Xna.Physics
                 }
             }
 
-            /*
+            
             // Update XNA model after physics has completed
             //
             foreach (RigidBody body in remainderList)
             {
-                //int hashCode = body.GetHashCode();
                 List<XygloXnaDrawable> drawableList = includeList.Where(item => item.getPhysicsHash() == body.GetHashCode()).ToList();
 
-//                List<XygloXnaDrawable> componentGroupDrawableList = m_context.m_drawableComponents.Values.Where(item => item.get
-                
-                // We can get more than one object with the same hash code if we have a Collection of
-                // Drawables for example in a ComponentGroup.
-                //
                 foreach (XygloXnaDrawable drawable in drawableList)
                 {
                     // Update position
                     //
-                    Vector3 position = Conversion.ToXNAVector(body.Position);
-                    Vector3 oldPosition = drawableList[0].getPosition();
-                    //drawableList[0].setPosition(Conversion.ToXNAVector(body.Position));
-                    //drawableList[0].setOrientation(Conversion.ToXNAMatrix(body.Orientation));
+                    drawable.setPosition(Conversion.ToXNAVector(body.Position) / m_physicScale);
+
+                    //if (body.Shape is SphereShape)
+                    //{
+                        //Logger.logMsg("Position = " + drawable.getPosition());
+                    //}
+
+                    // Have to rebuild
+                    //
+                    drawable.buildBuffers(m_context.m_graphics.GraphicsDevice);
+
+                    // Don't set the orientation here because in the drawable we measure it in two ways
+                    //
+                    //drawable.setOrientation(Conversion.ToXNAMatrix(body.Orientation));
                 }
 
                 // This is causing the disappearance of objects
                 //
                 //body.Update();
             }
-            */
+            
         }
 
         /// <summary>
@@ -525,7 +510,7 @@ namespace Xyglo.Brazil.Xna.Physics
             m_world.AddBody(m_ground);
 
             //ground.Restitution = 1.0f;
-            m_ground.Material.KineticFriction = 0.0f;
+            m_ground.Material.KineticFriction = 0.5f;
             
             m_quadDrawer = new QuadDrawer(game, m_context, 1000);
 

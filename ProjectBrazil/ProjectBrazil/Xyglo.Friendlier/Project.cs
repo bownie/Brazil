@@ -864,6 +864,7 @@ namespace Xyglo.Friendlier
             knownTypes.Add(typeof(BrazilFlyingBlock));
             knownTypes.Add(typeof(BrazilGoody));
             knownTypes.Add(typeof(BrazilHud));
+            knownTypes.Add(typeof(BrazilBall));
             knownTypes.Add(typeof(BrazilInterloper));
             knownTypes.Add(typeof(BrazilMenu));
             knownTypes.Add(typeof(Component));

@@ -145,12 +145,9 @@ namespace Xyglo.Brazil
         /// </summary>
         protected void generateComponents()
         {
-            BrazilFlyingBlock block1 = new BrazilFlyingBlock(BrazilColour.Blue, new BrazilVector3(-10, -100, 0), new BrazilVector3(200.0f, 100.0f, 10.0f));
-            //block1.setVelocity(new BrazilVector3(-1, 0, 0));
-
-            // Push onto component list
+            // Xyglo block
             //
-            //m_componentList.Add(block1);
+            BrazilFlyingBlock block1 = new BrazilFlyingBlock(BrazilColour.Blue, new BrazilVector3(-10, -100, 0), new BrazilVector3(200.0f, 100.0f, 10.0f));
             block1.setMoveable(false);
             addResource("logo", "xyglo-logo.png", ResourceType.Image, ResourceMode.Centre, block1);
             addComponent("PlayingGame", block1);
@@ -161,9 +158,9 @@ namespace Xyglo.Brazil
             //m_componentList.Add(block2);
             addComponent("PlayingGame", block2);
             */
-            BrazilFlyingBlock block3 = new BrazilFlyingBlock(BrazilColour.Orange, new BrazilVector3(0, 150, 0), new BrazilVector3(400, 50, 100));
+            BrazilFlyingBlock block3 = new BrazilFlyingBlock(BrazilColour.Brown, new BrazilVector3(0, 150, 0), new BrazilVector3(400, 50, 100));
             //block3.setRotation(0.2);
-            block3.setHardness(10);
+            block3.setHardness(300000.0f);
             block3.setMoveable(false);
             //block3.setInitialAngle(Math.PI / 8);
             //block3.setName("LandingBlock1");
@@ -179,7 +176,20 @@ namespace Xyglo.Brazil
             block4.setName("LandingBlock2");
             block4.setInitialAngle(Math.PI / 8);
             addComponent("PlayingGame", block4);
-            
+
+            BrazilVector3 position = new BrazilVector3(80, 120, 0);
+            BrazilGoody newGoody = new BrazilGoody(BrazilGoodyType.Coin, 50, position, new BrazilVector3(4, 10, 10), DateTime.Now);
+            newGoody.setRotation(0.2);
+            addComponent("PlayingGame", newGoody);
+
+            // A ball
+            //
+            BrazilBall ball = new BrazilBall(BrazilColour.Pink, new BrazilVector3(100, 60, 0), 10.0f);
+            ball.setHardness(3.0f);
+            ball.setAffectedByGravity(true);
+            ball.setMoveable(true);
+
+            addComponent("PlayingGame", ball);
 
             // Setup the HUD
             //

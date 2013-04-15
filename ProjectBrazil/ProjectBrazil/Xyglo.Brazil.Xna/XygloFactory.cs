@@ -166,6 +166,17 @@ namespace Xyglo.Brazil.Xna
                 }
 
             }
+            else if (component is BrazilBall)
+            {
+                BrazilBall ball = (BrazilBall)component;
+
+                XygloSphere sphere = new XygloSphere(XygloConvert.getColour(ball.getColour()), m_context.m_lineEffect, viewTranslation + XygloConvert.getVector3(ball.getPosition()) * multiplier, ball.getRadius() * multiplier);
+                sphere.buildBuffers(m_context.m_graphics.GraphicsDevice);
+                sphere.draw(m_context.m_graphics.GraphicsDevice);
+
+                m_context.m_drawableComponents[component] = sphere;
+                m_context.m_physicsHandler.createPhysical(component, sphere);
+            }
             else if (component.GetType() == typeof(Xyglo.Brazil.BrazilInterloper))
             {
                 BrazilInterloper il = (Xyglo.Brazil.BrazilInterloper)component;
@@ -218,7 +229,7 @@ namespace Xyglo.Brazil.Xna
                 }
 
                 m_context.m_drawableComponents[component] = bannerText;
-                
+
             }
             else if (component.GetType() == typeof(Xyglo.Brazil.BrazilHud))
             {
