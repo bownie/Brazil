@@ -2148,7 +2148,7 @@ namespace Xyglo.Brazil.Xna
                         //case "MoveLeft":
                         // accelerate will accelerate in mid air or move
                         if (m_brazilContext.m_interloper != null)
-                            m_context.m_physicsHandler.accelerate(m_context.m_drawableComponents[m_brazilContext.m_interloper], new Vector3(-10, 0, 0));
+                            m_context.m_physicsHandler.accelerate(m_context.m_drawableComponents[m_brazilContext.m_interloper], new Vector3(-100, 0, 0));
 
                         //break;
 
@@ -2170,7 +2170,7 @@ namespace Xyglo.Brazil.Xna
                     //case "MoveRight":
                         // accelerate will accelerate in mid air or move
                         if (m_brazilContext.m_interloper != null)
-                            m_context.m_physicsHandler.accelerate(m_context.m_drawableComponents[m_brazilContext.m_interloper], new Vector3(10, 0, 0));
+                            m_context.m_physicsHandler.accelerate(m_context.m_drawableComponents[m_brazilContext.m_interloper], new Vector3(100, 0, 0));
                       //  break;
 
                 }
@@ -2196,7 +2196,7 @@ namespace Xyglo.Brazil.Xna
         protected void insertAppComponent(BrazilView brazilView)
         {
             //Ray current m_mouse.getPickRay()
-            Vector3? position = m_context.m_project.getZeroPlaneIntersection(m_mouse.getPickRay());
+            Vector3? position = m_context.m_project.getZeroPlaneIntersection(m_mouse.getPickRay(), m_context.m_graphics.GraphicsDevice.Viewport.AspectRatio);
             if (position != null)
             {
                 Vector3 placePosition = (Vector3)position;
@@ -2209,7 +2209,8 @@ namespace Xyglo.Brazil.Xna
                 Vector3 appPosition = brazilView.getPosition();
 
                 //BrazilFlyingBlock bfb = new BrazilFlyingBlock(BrazilColour.Blue, XygloConvert.getBrazilVector3(placePosition), new BrazilVector3(20, 20, 20));
-                brazilView.getApp().addComponent(m_context.m_componentPalette.getComponentInstance(placePosition - appPosition, 20));
+                //Component newComponent = m_context.m_componentPalette.getComponentInstance(placePosition - appPosition);
+                brazilView.getApp().addComponent(m_context.m_componentPalette.getComponentInstance(placePosition - appPosition));
             }
         }
 

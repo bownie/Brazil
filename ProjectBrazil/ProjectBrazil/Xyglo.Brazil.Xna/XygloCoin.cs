@@ -277,9 +277,17 @@ namespace Xyglo.Brazil.Xna
             return m_indices.Count() / 3;
         }
 
+        /// <summary>
+        /// Get radius of the coin
+        /// </summary>
+        /// <returns></returns>
+        public float getRadius()
+        {
+            return m_radius;
+        }
+
         // ----- MEMBER VARIABLES -----
         //
-
         /// <summary>
         /// Radius of coin
         /// </summary>

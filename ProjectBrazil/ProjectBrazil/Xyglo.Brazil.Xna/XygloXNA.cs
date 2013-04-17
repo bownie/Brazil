@@ -218,7 +218,7 @@ namespace Xyglo.Brazil.Xna
 
             // Create our physics handler
             //
-            m_context.m_physicsHandler = new PhysicsHandler(this, m_context);
+            m_context.m_physicsHandler = new PhysicsHandler(this, m_context, m_brazilContext);
             //m_physicsHandler.addGround(this);
         }
 

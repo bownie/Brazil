@@ -2022,7 +2022,7 @@ namespace Xyglo.Friendlier
         /// currently reside.
         /// </summary>
         /// <returns></returns>
-        public Vector3? getZeroPlaneIntersection(Ray ray)
+        public Vector3? getZeroPlaneIntersection(Ray ray, float aspectRatio = 1.0f)
         {
             Plane zeroPlane = new Plane(0, 0, 1, 0);
             Vector3 rP = Vector3.Zero;

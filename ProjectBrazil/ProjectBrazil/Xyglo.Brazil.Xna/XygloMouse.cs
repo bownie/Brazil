@@ -195,7 +195,7 @@ namespace Xyglo.Brazil.Xna
                             // Generate a simulcrum of the highlighted text and make a moving ghost of it.
                             //
                             //Vector3 position = m_project.getActualTestRayIntersection(getPickRay());
-                            Vector3? position = m_context.m_project.getZeroPlaneIntersection(getPickRay());
+                            Vector3? position = m_context.m_project.getZeroPlaneIntersection(getPickRay(), m_context.m_graphics.GraphicsDevice.Viewport.AspectRatio);
 
                             // There is some interesting stuff on setData here:
                             //
@@ -231,7 +231,7 @@ namespace Xyglo.Brazil.Xna
                             // We already have a ghost - move it
                             //
                             //Vector3 position = m_project.getActualTestRayIntersection(getPickRay());
-                            Vector3? position = m_context.m_project.getZeroPlaneIntersection(getPickRay());
+                            Vector3? position = m_context.m_project.getZeroPlaneIntersection(getPickRay(), m_context.m_graphics.GraphicsDevice.Viewport.AspectRatio);
 
                             if (position != null)
                             {

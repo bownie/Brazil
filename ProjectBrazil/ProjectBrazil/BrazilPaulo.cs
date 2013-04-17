@@ -145,9 +145,12 @@ namespace Xyglo.Brazil
         /// </summary>
         protected void generateComponents()
         {
-            // Xyglo block
-            //
             BrazilFlyingBlock block1 = new BrazilFlyingBlock(BrazilColour.Blue, new BrazilVector3(-10, -100, 0), new BrazilVector3(200.0f, 100.0f, 10.0f));
+            //block1.setVelocity(new BrazilVector3(-1, 0, 0));
+
+            // Push onto component list
+            //
+            //m_componentList.Add(block1);
             block1.setMoveable(false);
             addResource("logo", "xyglo-logo.png", ResourceType.Image, ResourceMode.Centre, block1);
             addComponent("PlayingGame", block1);
@@ -182,14 +185,10 @@ namespace Xyglo.Brazil
             newGoody.setRotation(0.2);
             addComponent("PlayingGame", newGoody);
 
-            // A ball
-            //
-            BrazilBall ball = new BrazilBall(BrazilColour.Pink, new BrazilVector3(100, 60, 0), 10.0f);
-            ball.setHardness(3.0f);
-            ball.setAffectedByGravity(true);
-            ball.setMoveable(true);
-
-            addComponent("PlayingGame", ball);
+            BrazilVector3 position2 = new BrazilVector3(100, 120, 0);
+            BrazilGoody newGoody2 = new BrazilGoody(BrazilGoodyType.Coin, 50, position2, new BrazilVector3(4, 10, 10), DateTime.Now);
+            newGoody2.setRotation(0.2);
+            addComponent("PlayingGame", newGoody2);
 
             // Setup the HUD
             //

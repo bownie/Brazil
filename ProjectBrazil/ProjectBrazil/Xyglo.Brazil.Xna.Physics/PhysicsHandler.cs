@@ -24,14 +24,13 @@ namespace Xyglo.Brazil.Xna.Physics
     /// </summary>
     public class PhysicsHandler
     {
-        CollisionDetectedHandler handler;
-
         /// <summary>
         /// http://cycling74.com/physics/
         /// </summary>
-        public PhysicsHandler(Game game, XygloContext context)
+        public PhysicsHandler(Game game, XygloContext context, BrazilContext brazilContext)
         {
             m_context = context;
+            m_brazilContext = brazilContext;
 
             // Set up collision and world for physics
             //
@@ -40,7 +39,7 @@ namespace Xyglo.Brazil.Xna.Physics
             m_world = new World(collision);
             collision.CollisionDetected += new CollisionDetectedHandler(collisionHandler);
             m_world.AllowDeactivation = true;
-            m_world.Gravity = new JVector(0, 30f, 0);
+            m_world.Gravity = new JVector(0, 10f, 0);
             //m_world.SetDampingFactors(0.1f, 0.1f);
 
             // Can play with this
@@ -59,39 +58,158 @@ namespace Xyglo.Brazil.Xna.Physics
         /// <param name="value"></param>
         protected void collisionHandler(RigidBody body1, RigidBody body2, JVector x, JVector y, JVector z, float value)
         {
-            return;
+            // Ignore everything that doesn't have anything to do with the interloper
+            //
+            RigidBody interloperBody = m_world.RigidBodies.Where(item => item.GetHashCode() == m_interloperBodyPhysicsHash).ToList()[0];
+            if (body1 != interloperBody && body2 != interloperBody)
+                return;
 
-            if (body1.GetHashCode() == -1)
+            List<RigidBody> bodyList = new List<RigidBody>();
+            bodyList.Add(body1);
+            bodyList.Add(body2);
+
+            List<XygloXnaDrawable> drawables = getDrawableForRigidBodies(bodyList);
+            //XygloXnaDrawable drawable2 = getDrawableForRigidBody(body2);
+
+            if (drawables.Count() != 2)
             {
-                Logger.logMsg("Got interloper from body1");
-            }
-
-            if (body2.GetHashCode() == -1)
-            {
-                Logger.logMsg("Got interloper from body2");
-            }
-
-            XygloXnaDrawable drawable1 = getDrawableForRigidBody(body1);
-            XygloXnaDrawable drawable2 = getDrawableForRigidBody(body2);
-
-            if (drawable1 == null || drawable2 == null)
-            {
-                Logger.logMsg("Failed to find drawable from RigidBody");
+                Logger.logMsg("Failed to find drawables from RigidBodies");
                 return;
             }
 
-            if (drawable1.GetType() == typeof(XygloCoin))
+            // Ok we need to check if the interloper bottom block is in contact with a flying block
+            //
+            bool grounded = (drawables[0] is XygloFlyingBlock && drawables[1] is XygloFlyingBlock);
+
+            
+
+            /*
+            if (grounded != m_interloperGrounded)
             {
-                Logger.logMsg("Got coin as drawable 1");
+                Logger.logMsg("Grounding state changed");
+                m_interloperGrounded = grounded;
             }
+            */
 
-            if (drawable2.GetType() == typeof(XygloCoin))
+            XygloCoin coin = null;
+
+            if (drawables[0] is XygloCoin)
+                coin = (XygloCoin)drawables[0];
+
+            if (drawables[1] is XygloCoin)
+                coin = (XygloCoin)drawables[1];
+
+            // We've got a coin
+            //
+            if (coin != null)
             {
-                Logger.logMsg("Got coin as drawable 2");
+                BrazilGoody brazilCoin = (BrazilGoody)getComponentForDrawable(coin);
+
+                if (brazilCoin != null)
+                {
+                    m_brazilContext.m_interloper.incrementScore(brazilCoin.m_worth);
+                    coin.setDestroy(true);
+                }
             }
-
-
         }
+
+        protected Component getComponentForDrawable(XygloXnaDrawable drawable)
+        {
+            foreach (Component component in m_context.m_drawableComponents.Keys)
+            {
+                if (m_context.m_drawableComponents[component] == drawable)
+                    return component;
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// Is the interloper grounded and ready for jumping?
+        /// </summary>
+        //protected bool m_interloperGrounded = false;
+
+        /// <summary>
+        ///  From 
+        /// </summary>
+        private void DrawIslands()
+        {
+            JBBox box;
+
+            foreach (CollisionIsland island in m_world.Islands)
+            {
+                box = JBBox.SmallBox;
+
+                foreach (RigidBody body in island.Bodies)
+                {
+                    box = JBBox.CreateMerged(box, body.BoundingBox);
+                }
+
+                DebugDrawer.DrawAabb(box.Min, box.Max, island.IsActive() ? Color.Green : Color.Yellow);
+            }
+        }
+
+        /// <summary>
+        /// Check to see if the interloper is in contact with a rigidbody and capable of pushing off
+        /// </summary>
+        /// <returns></returns>
+        protected bool isInterloperGrounded()
+        {
+            RigidBody interloperBody = m_world.RigidBodies.Where(item => item.GetHashCode() == m_interloperBodyPhysicsHash).ToList()[0];
+
+            // Want to get a list of blocks at the top level - none of these will be componentgroups so we're safe
+            //
+            List<XygloXnaDrawable> blocks = m_context.m_drawableComponents.Values.Where(item => item.GetType() == typeof(XygloFlyingBlock)).ToList();
+            List<RigidBody> bodies = getRigidBodiesForDrawables(blocks);
+            List<RigidBody> bodiesIamInContactWith = new List<RigidBody>();
+
+            // every body "b" in the island is likely to touch our character "body"
+            foreach (RigidBody b in interloperBody.CollisionIsland.Bodies)
+            {
+                foreach (RigidBody blockBody in bodies)
+                {
+                    // check if it's a direct contact, which means there is an arbiter in the global arbitermap
+                    // which holds all arbiters
+                    if (m_world.ArbiterMap.ContainsArbiter(blockBody, b))
+                        bodiesIamInContactWith.Add(b);
+                }
+            }
+
+            return (bodiesIamInContactWith.Count() > 0);
+        }
+
+
+        /// <summary>
+        /// Test to see if the Interloper base block is on another flying block
+        /// </summary>
+        /// <returns></returns>
+        protected bool isInterloperGroundedTest1()
+        {
+            // Flags for finding the interloper block on same island as another flying block
+            //
+            bool foundInterloperBase = false;
+            bool foundFlyingBlock = false;
+            foreach (CollisionIsland island in m_world.Islands)
+            {
+                foreach(XygloXnaDrawable drawable in getDrawableForRigidBodies(island.Bodies.ToList()))
+                {
+                    if (drawable is XygloFlyingBlock)
+                    {
+                        if (drawable.getPhysicsHash() == m_interloperBodyPhysicsHash)
+                            foundInterloperBase = true;
+                        else
+                            foundFlyingBlock = true;
+                    }
+                }
+
+                // Check for both found in the same island
+                //
+                if (foundInterloperBase && foundFlyingBlock)
+                    return true;
+            }
+
+            return false;
+        }
+
 
         /// <summary>
         /// Accelerate a rigidbody by a certain vector - this is an input to the model
@@ -100,6 +218,12 @@ namespace Xyglo.Brazil.Xna.Physics
         /// <param name="acceleration"></param>
         public void accelerate(XygloXnaDrawable drawable, Vector3 acceleration)
         {
+            if (!isInterloperGrounded())
+                return;
+
+            //if (!m_interloperGrounded)
+                //return;
+
             // First search in the 
             List<RigidBody> bodyList = getRigidBodiesForDrawable(drawable);
 
@@ -107,44 +231,97 @@ namespace Xyglo.Brazil.Xna.Physics
                 body.LinearVelocity += Conversion.ToJitterVector(acceleration * m_physicScale);
         }
 
+        protected List<RigidBody> getRigidBodiesForDrawable(XygloXnaDrawable drawable)
+        {
+            List<XygloXnaDrawable> drawableList = new List<XygloXnaDrawable>();
+            drawableList.Add(drawable);
+            return getRigidBodiesForDrawables(drawableList);
+        }
+
+        /// <summary>
+        /// Do a recursive pull of all the drawable components
+        /// </summary>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        protected List<XygloXnaDrawable> getExpandedDrawables(List<XygloXnaDrawable> list = null)
+        {
+            List<XygloXnaDrawable> rL = new List<XygloXnaDrawable>();
+
+            if (list == null)
+            {
+                list = m_context.m_drawableComponents.Values.ToList();
+            }
+
+            foreach (XygloXnaDrawable drawable in list)
+            {
+                if (drawable is XygloComponentGroup)
+                {
+                    rL.AddRange(getExpandedDrawables(((XygloComponentGroup)drawable).getComponents()));
+                }
+                else
+                    rL.Add(drawable);
+            }
+            return rL;
+        }
+
         /// <summary>
         /// Get a RigidBody for an Xna drawable
         /// </summary>
         /// <param name="drawable"></param>
         /// <returns></returns>
-        public List<RigidBody> getRigidBodiesForDrawable(XygloXnaDrawable drawable)
+        protected List<RigidBody> getRigidBodiesForDrawables(List<XygloXnaDrawable> drawables)
         {
-            List<RigidBody> bodyList = m_world.RigidBodies.Where(item => item.GetHashCode() == drawable.getPhysicsHash()).ToList();
-
+            List<RigidBody> bodyList = new List<RigidBody>();
+            
+            // Build body list
+            foreach(XygloXnaDrawable drawable in drawables)
+            {
+                if (drawable.GetType() == typeof(XygloComponentGroup))
+                {
+                    XygloComponentGroup xCG = (XygloComponentGroup)drawable;
+                    bodyList.AddRange(getRigidBodiesForDrawables(xCG.getComponents()));
+                }
+                else
+                {
+                    bodyList.AddRange(m_world.RigidBodies.Where(item => item.GetHashCode() == drawable.getPhysicsHash()).ToList());
+                }
+            }
+            
+            /*
             // If no match then check for ComponentGroup
             //
             if (bodyList.Count == 0)
             {
-                if (drawable.GetType() == typeof(XygloComponentGroup))
-                {
+                
                     XygloComponentGroup group = (XygloComponentGroup)drawable;
                     foreach (XygloXnaDrawable subDrawable in group.getComponents())
                         bodyList.AddRange(m_world.RigidBodies.Where(item => item.GetHashCode() == subDrawable.getPhysicsHash()).ToList());
                 }
-            }
+            }*/
 
             return bodyList;
         }
 
         /// <summary>
-        /// Get a drawable for a RigidBody
+        /// Get a drawable for a RigidBody - if we have component groups then we
+        /// recursively call this method.
         /// </summary>
         /// <param name="body"></param>
         /// <returns></returns>
-        public XygloXnaDrawable getDrawableForRigidBody(RigidBody body)
+        public List<XygloXnaDrawable> getDrawableForRigidBodies(List<RigidBody> bodies)
         {
-            int physicsHash = body.GetHashCode();
-            List<XygloXnaDrawable> drawables = m_context.m_drawableComponents.Values.Where(item => item.getPhysicsHash() == body.GetHashCode()).ToList();
+            List<XygloXnaDrawable> rL = new List<XygloXnaDrawable>();
 
-            if (drawables.Count() == 1)
-                return drawables[0];
+            foreach (XygloXnaDrawable drawable in getExpandedDrawables())
+            {
+                foreach (RigidBody body in bodies)
+                {
+                    if (drawable.getPhysicsHash() == body.GetHashCode())
+                        rL.Add(drawable);
+                }
+            }
 
-            return null;
+            return rL;
         }
 
         /// <summary>
@@ -167,6 +344,12 @@ namespace Xyglo.Brazil.Xna.Physics
                 XygloTexturedBlock fb = (XygloTexturedBlock)drawable;
                 JVector size = Conversion.ToJitterVector(fb.getSize() * m_physicScale);
                 body = new RigidBody(new BoxShape(size));
+            }
+            else if (drawable is XygloCoin)
+            {
+                XygloCoin coin = (XygloCoin)drawable;
+                body = new RigidBody(new SphereShape(coin.getRadius() * m_physicScale));
+
             }
             else if (drawable is XygloSphere)
             {
@@ -223,7 +406,7 @@ namespace Xyglo.Brazil.Xna.Physics
         /// <summary>
         /// Scaling factor between our drawbles and jitter physics
         /// </summary>
-        protected float m_physicScale = 0.1f;
+        protected float m_physicScale = 0.01f;
 
         /// <summary>
         /// Test restitution
@@ -235,6 +418,8 @@ namespace Xyglo.Brazil.Xna.Physics
         /// </summary>
         protected float m_testMass = 0.1f;
 
+        protected int m_interloperBodyPhysicsHash = 0;
+
         /// <summary>
         /// Link a set of components to a component group and perform some coupling
         /// between them.
@@ -245,18 +430,16 @@ namespace Xyglo.Brazil.Xna.Physics
         {
             if (group.getComponentGroupType() == XygloComponentGroupType.Interloper)
             {
-                /*
                 XygloXnaDrawable headDrawable = group.getComponents().Where(item => item.GetType() == typeof(XygloSphere)).ToList()[0];
                 RigidBody head = createPhysical(component, headDrawable);
 
                 // Stop rotations  - this might be wrong!
                 //
-                head.SetMassProperties(JMatrix.Zero, 1.0f / 1000.0f, true);
-                head.Material.Restitution = 0f; // component.getHardness();
-                head.Damping = RigidBody.DampingType.Linear | RigidBody.DampingType.Angular;
-                head.Mass = m_testMass; // component.getMass();
-                head.EnableSpeculativeContacts = true;
-                */
+                head.SetMassProperties(JMatrix.Zero, 0.5f, true);
+                //head.Material.Restitution = m_testRestitution; // component.getHardness();
+                //head.Damping = RigidBody.DampingType.Linear | RigidBody.DampingType.Angular;
+                //head.Mass = 0.0f; // component.getMass();
+                //head.EnableSpeculativeContacts = true;
 
                 XygloXnaDrawable bodyDrawable = group.getComponents().Where(item => item.GetType() == typeof(XygloFlyingBlock)).ToList()[0];
                 RigidBody body = createPhysical(component, bodyDrawable);
@@ -264,27 +447,37 @@ namespace Xyglo.Brazil.Xna.Physics
                 // See above caveat!
                 //
                 //body.SetMassProperties(JMatrix.Zero, 1.0f / 1000.0f, true);
-                body.Material.Restitution = m_testRestitution; // component.getHardness();
-                body.Damping = RigidBody.DampingType.Linear | RigidBody.DampingType.Angular;
-                body.Mass = m_testMass; // component.getMass();
-                body.EnableSpeculativeContacts = true;
-                body.Material.KineticFriction = 0.5f;
-                body.Material.StaticFriction = 0.5f;
-                
-                // Connect head and torso with a hard point to point connection like so
+                //body.Material.Restitution = m_testRestitution; // component.getHardness();
+                //body.Damping = RigidBody.DampingType.Linear | RigidBody.DampingType.Angular;
+                //body.Mass = m_testMass; // component.getMass();
+                //body.EnableSpeculativeContacts = true;
+                body.Material.KineticFriction = 0.3f;
+                body.Material.StaticFriction = 0.0f;
+
+                // Store the body RigidBody hashcode
                 //
-                //PointPointDistance headTorso = new PointPointDistance(head, body, head.Position, body.Position);
-                //headTorso.Softness = 0.00001f;
-                // Add the connection - the body parts are already add implicitly (might want to change that)
-                //
-                //addConstraint(headTorso);
+                m_interloperBodyPhysicsHash = body.GetHashCode();
+
+                // connect head and torso
+                //PointPointDistance headTorso = new PointPointDistance(head, torso,
+                    //position + new JVector(0, 1.6f, 0), position + new JVector(0, 1.5f, 0));
+
+                //JVector headConnection = new JVector(head.Position.X, head.BoundingBox.Max.Y, head.Position.Z);
+                //PointPointDistance headTorso = new PointPointDistance(head, body, headConnection, headConnection + new JVector(0, -0.1f,0));
+                PointPointDistance headTorso = new PointPointDistance(head, body, head.Position, body.Position);
+                headTorso.Softness = 0.01f; // make sure this is within tolerance otherwise weird effects can happen!
+                addConstraint(headTorso);
 
                 // Add a fixed angle constraint to keep the interloper upright
                 //
-                Jitter.Dynamics.Constraints.SingleBody.FixedAngle fixedAngle = new Jitter.Dynamics.Constraints.SingleBody.FixedAngle(body);
-                fixedAngle.InitialOrientation = new JMatrix(0, 0, 0, 0, 0.9f, 0, 0, 0, 0);
-                fixedAngle.Softness = 0.1f;
-                addConstraint(fixedAngle);
+                //Jitter.Dynamics.Constraints.SingleBody.FixedAngle fixedAngle = new Jitter.Dynamics.Constraints.SingleBody.FixedAngle(body);
+                //fixedAngle.InitialOrientation = new JMatrix(0, 0, 0, 0, 0.9f, 0, 0, 0, 0);
+                //fixedAngle.Softness = 0.1f;
+                //addConstraint(fixedAngle);
+
+                // Use this instead of the fixed angle constraint
+                //
+                body.SetMassProperties(JMatrix.Zero, 1, true);
 
                 // Add another fixed length constraint to attach the head
                 //
@@ -599,5 +792,10 @@ namespace Xyglo.Brazil.Xna.Physics
         /// Or indeed this..
         /// </summary>
         protected QuadDrawer m_quadDrawer = null;
+
+        /// <summary>
+        /// Brazil context
+        /// </summary>
+        protected BrazilContext m_brazilContext = null;
     }
 }

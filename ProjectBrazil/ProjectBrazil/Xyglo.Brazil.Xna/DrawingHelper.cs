@@ -215,7 +215,7 @@ namespace Xyglo.Brazil.Xna
 
             p1.Y += height;
             p1.X += 1;
-            m_context.m_drawingHelper.drawBox(spriteBatch, p1, p2, Color.DarkGray, 0.8f);
+            drawBox(spriteBatch, p1, p2, Color.DarkGray, 0.8f);
 
             // Draw CPU load over the top
             //
@@ -226,7 +226,7 @@ namespace Xyglo.Brazil.Xna
             p2.Y += height - (systemAnalyser.getSystemLoad() * height / 100.0f);
             p1.X += 1;
 
-            m_context.m_drawingHelper.drawBox(spriteBatch, p1, p2, Color.DarkGreen, 0.8f);
+            drawBox(spriteBatch, p1, p2, Color.DarkGreen, 0.8f);
 
             // Draw background for Memory counter
             //
@@ -237,7 +237,7 @@ namespace Xyglo.Brazil.Xna
             p1.Y += height;
             p1.X += 1;
 
-            m_context.m_drawingHelper.drawBox(spriteBatch, p1, p2, Color.DarkGray, 0.8f);
+            drawBox(spriteBatch, p1, p2, Color.DarkGray, 0.8f);
 
             // Draw Memory over the top
             //
@@ -248,8 +248,7 @@ namespace Xyglo.Brazil.Xna
             p2.Y += height - (height * systemAnalyser.getAvailableMemory() / systemAnalyser.getPhysicalMemory());
             p1.X += 1;
 
-            m_context.m_drawingHelper.drawBox(spriteBatch, p1, p2, Color.DarkOrange, 0.8f);
-            //m_pannerSpriteBatch.End();
+            drawBox(spriteBatch, p1, p2, Color.DarkOrange, 0.8f);
         }
 
         /// <summary>
@@ -475,7 +474,7 @@ namespace Xyglo.Brazil.Xna
         /// <param name="bottomRight"></param>
         /// <param name="colour"></param>
         /// <param name="width"></param>
-        public void drawBox(SpriteBatch spriteBatch, Vector2 topLeft, Vector2 bottomRight, Color colour, float alpha = 1.0f, int width = 1)
+        protected void drawBox(SpriteBatch spriteBatch, Vector2 topLeft, Vector2 bottomRight, Color colour, float alpha = 1.0f, int width = 1)
         {
             Vector2 xDiff = bottomRight - topLeft;
             Vector2 yDiff = xDiff;
@@ -1802,8 +1801,8 @@ namespace Xyglo.Brazil.Xna
 
             Color myColour = Color.White;
 
-            m_context.m_drawingHelper.drawBox(spriteBatch, differ.getLeftBox(), differ.getLeftBoxEnd(), myColour, 0.5f);
-            m_context.m_drawingHelper.drawBox(spriteBatch, differ.getRightBox(), differ.getRightBoxEnd(), myColour, 0.5f);
+            drawBox(spriteBatch, differ.getLeftBox(), differ.getLeftBoxEnd(), myColour, 0.5f);
+            drawBox(spriteBatch, differ.getRightBox(), differ.getRightBoxEnd(), myColour, 0.5f);
 
             // Modify alpha according to the type of the line
             //
@@ -1912,6 +1911,8 @@ namespace Xyglo.Brazil.Xna
                 drawViewMap(gameTime, m_context.m_overlaySpriteBatch);
                 m_context.m_overlaySpriteBatch.End();
 
+                m_context.m_componentPalette.renderObjectPreview(m_context.m_pannerSpriteBatch);
+
                 // Draw any differ overlay
                 //
                 m_context.m_pannerSpriteBatch.Begin(SpriteSortMode.Texture, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.DepthRead, RasterizerState.CullNone /*, m_pannerEffect */ );
@@ -1927,8 +1928,6 @@ namespace Xyglo.Brazil.Xna
 
                 // Draw the palette object
                 //
-                //m_context.m_componentPalette.renderObjectPreview(m_context.m_pannerSpriteBatch);
-
                 m_context.m_pannerSpriteBatch.End();
 
                 //m_context.m_spriteBatch.Begin(SpriteSortMode.Texture, BlendState.Additive, SamplerState.AnisotropicClamp, DepthStencilState.DepthRead, RasterizerState.CullNone, m_context.m_basicEffect);
@@ -1982,10 +1981,10 @@ namespace Xyglo.Brazil.Xna
                     // to be grabby enough.
                     //
                     //if (m_context.m_frustrum.Intersects(bb))
-                    if (m_context.m_frustrum.Contains(bb) != ContainmentType.Disjoint)
-                    {
+                    //if (m_context.m_frustrum.Contains(bb) != ContainmentType.Disjoint)
+                    //{
                         drawFileBuffer(m_context.m_spriteBatch, m_context.m_project.getBufferViews()[i], gameTime, m_brazilContext.m_state, buildStdOutView, buildStdErrView, m_context.m_zoomLevel, keyboardHandler.getCurrentFontScale());
-                    }
+                    //}
 
                     // Draw a background square for all buffer views if they are coloured
                     //

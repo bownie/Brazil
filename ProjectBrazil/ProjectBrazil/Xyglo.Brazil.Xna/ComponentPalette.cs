@@ -120,10 +120,11 @@ namespace Xyglo.Brazil.Xna
             float yPos = (bottomRight.Y - topLeft.Y - m_context.m_fontManager.getLineSpacing(FontManager.FontType.Overlay))/ 2.0f;
             float xPos = (2 * bottomRight.X - topLeft.X - selectedItem.Length * m_context.m_fontManager.getCharWidth(FontManager.FontType.Overlay)) / 2.0f;
 
-            m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), selectedItem, new Vector2((int)xPos, (int)yPos), Color.White, 0, Vector2.Zero, 2.0f, 0, 0);
+            m_context.m_overlaySpriteBatch.DrawString(m_context.m_fontManager.getOverlayFont(), selectedItem, new Vector2((int)xPos, (int)yPos), Color.White, 0, Vector2.Zero, 1.0f, 0, 0);
 
             //m_context.m_overlaySpriteBatch.End();
         }
+
 
         /// <summary>
         /// Create a component at a position for insertion into the model
@@ -131,24 +132,30 @@ namespace Xyglo.Brazil.Xna
         /// <param name="position"></param>
         /// <param name="size"></param>
         /// <returns></returns>
-        public Component getComponentInstance(Vector3 position, float size)
+        public Component getComponentInstance(Vector3 position)
         {
             Component rC = null;
+            Vector3 size = new Vector3(100, 20, 50);
 
             switch (m_selectedComponent)
             {
                 case BrazilComponentType.PlainBlock:
-                    rC = new BrazilFlyingBlock(BrazilColour.Blue, XygloConvert.getBrazilVector3(position), new BrazilVector3(size, size, size));
+                    rC = new BrazilFlyingBlock(BrazilColour.Blue, XygloConvert.getBrazilVector3(position), XygloConvert.getBrazilVector3(size));
+                    rC.setAffectedByGravity(false);
+                    rC.setMoveable(false);
                     break;
 
                 case BrazilComponentType.TextureBlock:
-                    rC = new BrazilFlyingBlock(BrazilColour.Red, XygloConvert.getBrazilVector3(position), new BrazilVector3(size, size, size));
+                    rC = new BrazilFlyingBlock(BrazilColour.Red, XygloConvert.getBrazilVector3(position), XygloConvert.getBrazilVector3(size));
+                    rC.setAffectedByGravity(false);
+                    rC.setMoveable(false);
                     // and add a texture to it
                     //m_palette[type] = new XygloTexturedBlock(Color.Blue, m_context.m_physicsEffect, position, size);
                     break;
 
                 case BrazilComponentType.Coin:
-                    rC = new BrazilGoody(BrazilGoodyType.Coin, 20, XygloConvert.getBrazilVector3(position), new BrazilVector3(size, size, size), DateTime.Now);
+                    size = new Vector3(3, 3, 3);
+                    rC = new BrazilGoody(BrazilGoodyType.Coin, 5, XygloConvert.getBrazilVector3(position), XygloConvert.getBrazilVector3(size), DateTime.Now);
                     BrazilGoody coin = (BrazilGoody)rC;
                     coin.setRotation(0.2f);
                     break;
@@ -230,26 +237,37 @@ namespace Xyglo.Brazil.Xna
             if (m_previewTarget == null || m_previewRectangle == null)
                 return;
 
+
+            Color[] foregroundColors = new Color[1];
+            foregroundColors[0] = Color.White;
+            Texture2D testTexture = new Texture2D(m_context.m_graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
+            testTexture.SetData(foregroundColors);
+
             // Set the render target and clear the buffer
             //
-            m_context.m_graphics.GraphicsDevice.SetRenderTarget(m_previewTarget);
-            m_context.m_graphics.GraphicsDevice.Clear(Color.Yellow);
+            //m_context.m_graphics.GraphicsDevice.SetRenderTarget(null);
+            //m_context.m_graphics.GraphicsDevice.Clear(Color.Yellow);
 
+            /*
             XygloXnaDrawable drawable = paletteFactory(m_selectedComponent);
             drawable.buildBuffers(m_context.m_graphics.GraphicsDevice);
             drawable.draw(m_context.m_graphics.GraphicsDevice);
+            */
 
             // Now reset the render target to the back buffer
             //
-            m_context.m_graphics.GraphicsDevice.SetRenderTarget(null);
+            //m_context.m_graphics.GraphicsDevice.SetRenderTarget(null);
 
-            spriteBatch.Draw(m_previewTarget, m_previewRectangle, Color.Red);
+            //spriteBatch.Begin();
+            //spriteBatch.Draw(testTexture, m_previewRectangle, Color.LightCoral * 0.3f);
 
-            //spriteBatch.Draw(m_previewRectangle, 
-            spriteBatch.Draw(m_previewTarget, new Vector2(0, 0), null, Color.White, 0, new Vector2(0, 0), 0.4f, SpriteEffects.None, 1);
+            //spriteBatch.Draw(m_previewTarget, new Vector2(0, 0), null, Color.White, 0, new Vector2(0, 0), 0.4f, SpriteEffects.None, 1);
+
             //spriteBatch.Draw(m_previewTarget, new Rectangle(0, 0, 500, 500), Color.Red);
-
             //m_context.m_textScrollTexture = (Texture2D)m_context.m_textScroller;
+
+            //spriteBatch.End();
+
         }
 
         /// <summary>

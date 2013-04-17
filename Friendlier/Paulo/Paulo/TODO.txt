@@ -1,8 +1,22 @@
 ﻿Brazil Framework and Paulo
 --------------------------
 
+TOFIX/FINISH
+------------
+
+- drawable previews - do these properly
+- related is doing previews on the component palette correctly
+- light sources and shadow maps
+
+
 TODO
 ----
+
+- Oh, lots still
+
+
+
+
 - paulo run modes and how to progress them
 
   - show paulo frames run, show position/stepping
@@ -13,8 +27,6 @@ TODO
 - Template for android game app
 - attaching images to shapes
 - Previews during directory traverse [IMAGES DONE]
-
-
 
 
 Done
