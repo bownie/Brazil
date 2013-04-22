@@ -711,6 +711,39 @@ namespace Xyglo.Brazil.Xna
             return pickRay;
         }
 
+        /// <summary>
+        /// Get a ray from the current eye position directly down onto the canvas
+        /// </summary>
+        /// <returns></returns>
+        public Ray getEyeRay()
+        {
+            // Get the mouse state
+            //
+            MouseState mouseState = Microsoft.Xna.Framework.Input.Mouse.GetState();
+
+            int mouseX = mouseState.X;
+            int mouseY = mouseState.Y;
+
+            Vector3 nearsource = new Vector3((float)mouseX, (float)mouseY, m_context.m_zoomLevel);
+            Vector3 farsource = new Vector3((float)mouseX, (float)mouseY, 0);
+
+            Matrix world = Matrix.CreateScale(1, -1, 1); //Matrix.CreateTranslation(0, 0, 0);
+
+            Vector3 nearPoint = m_context.m_graphics.GraphicsDevice.Viewport.Unproject(nearsource, m_context.m_projection, m_context.m_viewMatrix, world);
+            Vector3 farPoint = nearPoint;
+            farPoint.Z = 0;
+
+            //farPoint.X = nearPoint.X;
+            //farPoint.Y = nearPoint.Y;
+
+            // Create a ray from the near clip plane to the far clip plane.
+            //
+            Vector3 direction = farPoint - nearPoint;
+            direction.Normalize();
+            Ray pickRay = new Ray(nearPoint, direction);
+            return pickRay;
+        }
+
                 /// <summary>
         /// Double click handler
         /// </summary>

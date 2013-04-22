@@ -13,21 +13,20 @@ namespace Xyglo.Brazil.Xna
         PlainBlock,
         TextureBlock,
         //Interloper,
-        Coin
-        //Baddy,
+        Coin,
+        Baddy
         //Sphere
     }
 
     /// <summary>
     /// Show the BrazilComponents and allows us to pick them in a BrazilView
     /// </summary>
-    public class ComponentPalette
+    public class ComponentPalette : Xyglo.Friendlier.FriendlierWidget
     {
-        public ComponentPalette(XygloContext context, BrazilContext brazilContext, EyeHandler eyeHandler)
+        public ComponentPalette(XygloContext context, BrazilContext brazilContext, EyeHandler eyeHandler):
+            base(context, brazilContext, eyeHandler)
         {
-            m_context = context;
-            m_brazilContext = brazilContext;
-            m_eyeHandler = eyeHandler;
+
 
             // Default component to show
             m_selectedComponent = BrazilComponentType.PlainBlock;
@@ -37,7 +36,7 @@ namespace Xyglo.Brazil.Xna
         /// Object palette - this is a display area on the screen which is used to select objects for placement in
         /// the BrazilApp
         /// </summary>
-        public void draw(GameTime gameTime)
+        public override void draw(GameTime gameTime)
         {
             float outsideBorder = 6.0f;
             Vector2 topLeft = new Vector2(m_context.m_graphics.GraphicsDevice.Viewport.Width / 2, outsideBorder);
@@ -97,9 +96,9 @@ namespace Xyglo.Brazil.Xna
                     rS = "Coin";
                     break;
 
-                //case BrazilComponentType.Baddy:
-                    //rS = "Baddy";
-                    //break;
+                case BrazilComponentType.Baddy:
+                    rS = "Baddy";
+                    break;
 
                 default:
                     rS = "<default>";
@@ -275,7 +274,7 @@ namespace Xyglo.Brazil.Xna
         /// </summary>
         public void incrementSelection()
         {
-            if (m_selectedComponent == BrazilComponentType.Coin)
+            if (m_selectedComponent == BrazilComponentType.Baddy)
                 m_selectedComponent = BrazilComponentType.PlainBlock;
             else
                 m_selectedComponent++;
@@ -287,7 +286,7 @@ namespace Xyglo.Brazil.Xna
         public void decrementSelection()
         {
             if (m_selectedComponent == BrazilComponentType.PlainBlock)
-                m_selectedComponent = BrazilComponentType.Coin;
+                m_selectedComponent = BrazilComponentType.Baddy;
             else
                 m_selectedComponent--;
         }
@@ -301,16 +300,6 @@ namespace Xyglo.Brazil.Xna
         Dictionary<BrazilComponentType, XygloXnaDrawable> m_palette = new Dictionary<BrazilComponentType,XygloXnaDrawable>();
 
         /// <summary>
-        /// Context
-        /// </summary>
-        protected XygloContext m_context;
-
-        /// <summary>
-        /// BrazilContext
-        /// </summary>
-        protected BrazilContext m_brazilContext;
-
-        /// <summary>
         /// Currently selected component type
         /// </summary>
         protected BrazilComponentType m_selectedComponent;
@@ -319,10 +308,5 @@ namespace Xyglo.Brazil.Xna
         /// Target rectangle for the preview
         /// </summary>
         protected Rectangle m_previewRectangle;
-
-        /// <summary>
-        /// Eye handler reference
-        /// </summary>
-        protected EyeHandler m_eyeHandler;
     }
 }

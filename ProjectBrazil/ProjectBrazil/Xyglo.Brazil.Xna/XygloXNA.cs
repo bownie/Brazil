@@ -1563,20 +1563,27 @@ namespace Xyglo.Brazil.Xna
                         try
                         {
                             BrazilView bv = (BrazilView)m_context.m_project.getSelectedView();
+
+                            // Generate Uhro exporter with some paths relative to our VS directory - need to 
+                            // modify this for release.
+                            //
+                            string dir = Directory.GetCurrentDirectory();
+
                             UrhoBasicExporter urho = 
                                 new UrhoBasicExporter(m_context, bv.getApp(), 
-                                                      @"C:\devel\bownie-brazil-a3d5d5dd2c10\projects\test3d",
-                                                      @"C:\devel\bownie-brazil-a3d5d5dd2c10\template\3D");
+                                                      dir + @"\..\..\..\..\..\..\projects\testproject\AndroidExport\",
+                                                      dir + @"\..\..\..\..\..\..\template\3D\Android");
+
+                            // Export
                             urho.export();
+
                         }
                         catch (Exception exc)
                         {
                             setTemporaryMessage("Problem with export - " + exc.Message, 3);
                         }
-
                     }
                     break;
-
 
                 case XygloCommand.AlternateBuild:
                     doBuildCommand(e.getGameTime(), e.getArguments());

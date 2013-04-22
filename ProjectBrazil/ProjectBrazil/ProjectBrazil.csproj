@@ -87,6 +87,7 @@
     <Compile Include="BrazilTemporary.cs" />
     <Compile Include="BrazilTransport.cs" />
     <Compile Include="BrazilVector2.cs" />
+    <Compile Include="Xyglo.Brazil.Xna\ComponentProperties.cs" />
     <Compile Include="Xyglo.Friendlier\BrazilView.cs" />
     <Compile Include="Xyglo.Friendlier\BufferView.cs" />
     <Compile Include="Component3D.cs" />
@@ -114,6 +115,7 @@
     <Compile Include="IBrazilScriptable.cs" />
     <Compile Include="IBrazilTechnology.cs" />
     <Compile Include="IPhysicalObject.cs" />
+    <Compile Include="Xyglo.Friendlier\FriendlierWidget.cs" />
     <Compile Include="Xyglo.Friendlier\Project.cs" />
     <Compile Include="Resource.cs" />
     <Compile Include="Xyglo.Friendlier\ScriptExporter.cs" />

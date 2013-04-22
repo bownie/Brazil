@@ -29,7 +29,7 @@ namespace Xyglo.Friendlier
             : base(app, outputDirectory, templateDirectory)
         {
             m_context = context;
-            checkProjectStructure();
+            checkExportStructure();
         }
 
         /// <summary>
@@ -43,22 +43,38 @@ namespace Xyglo.Friendlier
         /// 
         /// Also certain files listed 
         /// </summary>
-        protected void checkProjectStructure()
+        protected void checkExportStructure()
         {
             // Check project directory
             //
-            if (!checkDir(m_projectDirectory))
+            if (!checkDir(m_exportDirectory))
             {
-                throw new Exception("Couldn't access project directory " + m_projectDirectory);
+                try
+                {
+                    makeDir(m_exportDirectory);
+                }
+                catch (Exception e)
+                {
+                    throw new Exception("Couldn't create export directory " + m_exportDirectory + " with " + e.Message);
+                }
             }
 
             string[] dirsToCheck = { "assets", @"assets\Data", @"assets\Data\Scripts", @"assets\Data\Scenes", "bin", "libs", "res", "src" };
             foreach(string dir in dirsToCheck)
             {
-                string dirToCheck = m_projectDirectory + @"\" + dir;
+                string dirToCheck = m_exportDirectory + @"\" + dir;
                 if (!checkDir(dirToCheck))
                 {
-                    throw new Exception("Couldn't find required directory " + dirToCheck);
+                    // Build directory
+                    //
+                    try
+                    {
+                        makeDir(dirToCheck);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception("Couldn't create directory " + dirToCheck);
+                    }
                 }
             }
         }
@@ -75,7 +91,7 @@ namespace Xyglo.Friendlier
         /// <param name="fileName"></param>
         public override void export()
         {
-            string exportFile = m_projectDirectory + @"\assets\Data\" + m_urhoExportFile;
+            string exportFile = m_exportDirectory + @"\assets\Data\" + m_urhoExportFile;
 
             // Test to see if this file is writeable
             //
@@ -90,7 +106,7 @@ namespace Xyglo.Friendlier
 
             // We need to generate some other files as part of this export - set path so that references work
             //
-            m_gameSceneXML = m_projectDirectory + @"\assets\Data\Scenes\Scene.xml";  // equiv of NinjaSnowWar.xml
+            m_gameSceneXML = escapeBackslashes(m_exportDirectory + @"\assets\Data\Scenes\Scene.xml");  // equiv of NinjaSnowWar.xml
 
             // First the main export file - header
             //
@@ -100,13 +116,21 @@ namespace Xyglo.Friendlier
             //
             appendFile(exportFile, m_templateDirectory + @"\template_parts\Scripts\Player.as");
 
+            // Append network code
+            //
+            appendFile(exportFile, m_templateDirectory + @"\..\..\Common\Android\Network.as");
+
             // Go and generate
             //
-            appendText(exportFile, buildBody());
-
+            appendText(exportFile, @buildBody());
+            
             // Add a template add-on
             //
             appendFile(exportFile, m_templateDirectory + @"\template_parts\Scripts\Handlers.as");
+
+            // Add the AI controller
+            //
+            appendFile(exportFile, m_templateDirectory + @"\template_parts\Scripts\AIController.as");
 
             // Now generate the scene.xml
             //
@@ -114,6 +138,21 @@ namespace Xyglo.Friendlier
 
             // Now we generate or copy and required asset files
             //
+            foreach (string filetoCopy in m_templateFilesToCopy)
+            {
+                copyFile(m_templateDirectory + @"\" + filetoCopy, m_exportDirectory);
+            }
+
+            // Copy the directories
+            //
+            foreach (string dirToCopy in m_templateDirsToCopy)
+            {
+                copyDir(m_templateDirectory + @"\" + dirToCopy, m_exportDirectory + @"\" + dirToCopy);
+            }
+
+            // Ensure that escapes are escaped
+            //
+            //postProcessEscapes(exportFile);
         }
 
         /// <summary>
@@ -146,22 +185,22 @@ namespace Xyglo.Friendlier
             //
             //string indent = "";
 
-            string rS = Globals(indent);
+            string rS = @Globals(indent);
 
             // Roll in all these standard method calls whether then return anything or not
             //
-            rS += Start(indent);
-            rS += Stop(indent);
-            rS += DelayedStart(indent);
-            rS += Update(indent);
-            rS += PostUpdate(indent);
-            rS += FixedUpdate(indent);
-            rS += FixedPostUpdate(indent);
-            rS += Save(indent);
-            rS += Load(indent);
-            rS += WriteNetworkUpdate(indent);
-            rS += ReadNetworkUpdate(indent);
-            rS += ApplyAttributes(indent);
+            rS += @Start(indent);
+            rS += @Stop(indent);
+            rS += @DelayedStart(indent);
+            rS += @Update(indent);
+            rS += @PostUpdate(indent);
+            rS += @FixedUpdate(indent);
+            rS += @FixedPostUpdate(indent);
+            rS += @Save(indent);
+            rS += @Load(indent);
+            rS += @WriteNetworkUpdate(indent);
+            rS += @ReadNetworkUpdate(indent);
+            rS += @ApplyAttributes(indent);
 
             // If there are components spread across more than one state then we can't do this export
             // so first check the state of all the components.
@@ -270,17 +309,19 @@ namespace Xyglo.Friendlier
 
             // Completes the Start method - now the callees
             //
-            rS += InitAudio(indent);
-            rS += InitConsole(indent);
-            rS += InitScene(indent);
-            rS += InitNetworking(indent);
-            rS += CreateCamera(indent);
-            rS += CreateOverlays(indent);
+            rS += @InitAudio(indent);
+            rS += @InitConsole(indent);
+            rS += @InitScene(indent);
+            rS += @InitNetworking(indent);
+            rS += @CreateCamera(indent);
+            rS += @CreateOverlays(indent);
 
 
-            rS += SetMessage(indent);
+            rS += @SetMessage(indent);
 
-            rS += StartGame(indent);
+            // We have this defined in the template_parts Handlers script too so don't duplicate
+            //
+            //rS += @StartGame(indent);
 
             return rS;
         }
@@ -452,7 +493,7 @@ namespace Xyglo.Friendlier
             rS += indent + m_tabSpace + "if (runClient)\n";
             rS += indent + getTabPrefix(2) + "return;\n";
 
-            rS += indent + m_tabSpace + @"gameScene.LoadXML(cache.GetFile(""" + m_gameSceneXML + @"""));" + "\n";
+            rS += indent + m_tabSpace + @"gameScene.LoadXML(cache.GetFile(""" + @m_gameSceneXML + @"""));" + "\n";
 
             rS += indent + m_tabSpace + "// On mobile devices render the shadowmap first\n";
 
@@ -600,7 +641,7 @@ namespace Xyglo.Friendlier
         protected string SetMessage(string indent)
         {
             string rS = indent + "// " + getCurrentMethod() + " method\n//\n";
-            rS += indent + "void " + getCurrentMethod() + "() {\n";
+            rS += indent + "void " + getCurrentMethod() + "(const String&in message) {\n";
             rS += indent + m_tabSpace + "if (messageText !is null)\n";
             rS += indent + getTabPrefix(2) + "messageText.text = message;\n";
             rS += indent + "}\n\n";
@@ -611,7 +652,7 @@ namespace Xyglo.Friendlier
         protected string StartGame(string indent)
         {
             string rS = indent + "// " + getCurrentMethod() + " method\n//\n";
-            rS += indent + "void " + getCurrentMethod() + "() {\n";
+            rS += indent + "void " + getCurrentMethod() + "(Connection@ connection) {\n";
 
             rS += indent + m_tabSpace + "// Clear the scene of all existing scripted objects\n";
             rS += indent + m_tabSpace + "{\n";
@@ -638,6 +679,15 @@ namespace Xyglo.Friendlier
             return rS;
         }
 
+        /// <summary>
+        /// Template files to copy into project
+        /// </summary>
+        protected string[] m_templateFilesToCopy = { "AndroidManifest.xml", "build.xml", "local.properties", "proguard-project.txt", "project.properties" };
+
+        /// <summary>
+        /// Template directories to copy
+        /// </summary>
+        protected string[] m_templateDirsToCopy = { "res", "libs", "src" };
         /// <summary>
         /// This has to match the name hard-coded in Urho3D.cpp
         /// </summary>

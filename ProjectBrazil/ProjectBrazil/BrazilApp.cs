@@ -611,7 +611,6 @@ namespace Xyglo.Brazil
         {
             checkState(state);
             component.addState(state);
-            component.setApp(this); // ensure we add a back ref to this app
             m_componentList.Add(component);
         }
 
@@ -624,7 +623,6 @@ namespace Xyglo.Brazil
         {
             checkState(stateAction.getState());
             component.addStateAction(stateAction);
-            component.setApp(this); // ensure we add a back ref to this app
             m_componentList.Add(component);
         }
 

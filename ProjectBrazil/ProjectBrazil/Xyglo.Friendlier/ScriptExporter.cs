@@ -7,6 +7,7 @@ using Xyglo.Brazil;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace Xyglo.Friendlier
 {
@@ -15,10 +16,10 @@ namespace Xyglo.Friendlier
     /// </summary>
     public abstract class ScriptExporter //: IBrazilExporter
     {
-        public ScriptExporter(BrazilApp app, string projectDir, string templateDir)
+        public ScriptExporter(BrazilApp app, string exportDir, string templateDir)
         {
             m_app = app;
-            m_projectDirectory = projectDir;
+            m_exportDirectory = exportDir;
             m_templateDirectory = templateDir;
         }
 
@@ -30,6 +31,15 @@ namespace Xyglo.Friendlier
         protected bool checkDir(string directory)
         {
             return (Directory.Exists(directory));
+        }
+
+        /// <summary>
+        /// Make a directory
+        /// </summary>
+        /// <param name="directory"></param>
+        protected void makeDir(string directory)
+        {
+            Directory.CreateDirectory(directory);
         }
 
         /// <summary>
@@ -50,12 +60,12 @@ namespace Xyglo.Friendlier
         /// <param name="text"></param>
         protected void writeAll(string filePath, string text)
         {
-            File.WriteAllText(filePath, text);
+            File.WriteAllText(filePath, @text);
         }
 
         protected void appendText(string filePath, string text)
         {
-            File.AppendAllText(filePath, text);
+            File.AppendAllText(filePath, @text);
         }
 
         /// <summary>
@@ -67,6 +77,43 @@ namespace Xyglo.Friendlier
         {
             File.AppendAllText(outputFilePath, File.ReadAllText(appendFilePath).Replace("\r\n", "\n"));
         }
+
+        /// <summary>
+        /// Copy a file with overwrite
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="destinationDirectory"></param>
+        protected void copyFile(string filePath, string destinationDirectory, bool overwrite = true)
+        {
+            string destFile = destinationDirectory + @"\" + System.IO.Path.GetFileName(filePath);
+            File.Copy(filePath, destFile, overwrite);
+        }
+
+        /// <summary>
+        /// Copy directory
+        /// </summary>
+        /// <param name="sourcePath"></param>
+        /// <param name="destPath"></param>
+        protected void copyDir(string sourcePath, string destPath, bool overwrite = true)
+        {
+            if (!Directory.Exists(destPath))
+            {
+    	        Directory.CreateDirectory(destPath);
+            }
+
+            foreach (string file in Directory.GetFiles(sourcePath))
+            {
+    	        string dest = Path.Combine(destPath, Path.GetFileName(file));
+                File.Copy(file, dest, overwrite);
+            }
+
+            foreach (string folder in Directory.GetDirectories(sourcePath))
+            {
+    	        string dest = Path.Combine(destPath, Path.GetFileName(folder));
+    	        copyDir(folder, dest, overwrite);
+            }
+        }
+
 
         /// <summary>
         /// Use this to get the current method name - useful for creating methods of the same name
@@ -97,9 +144,55 @@ namespace Xyglo.Friendlier
         }
 
         /// <summary>
-        /// This must be defined in subclasses
+        /// Run the export
         /// </summary>
         public abstract void export();
+
+        /// <summary>
+        /// Clean the export directory
+        /// </summary>
+        public void clean()
+        {
+            Directory.Delete(m_exportDirectory, true);
+        }
+
+        /// <summary>
+        /// Modify a string to a double escaped one
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        protected string escapeBackslashes(string filePath)
+        {
+            string pattern = @"([^\\])\\([^\\])";
+            Regex rgx = new Regex(pattern);
+            string rS = rgx.Replace(filePath, @"$1\\$2");
+            return rS;
+        }
+
+        /// <summary>
+        /// Do some postprocessing of our text output file
+        /// </summary>
+        /// <param name="exportFile"></param>
+        protected void postProcessEscapes(string exportFile)
+        {
+            string tmpFile = exportFile + ".post.txt";
+            // Delete the file if it exists. 
+            if (File.Exists(tmpFile))
+                File.Delete(tmpFile);
+
+            // Create the file. 
+            StreamWriter outfile = new StreamWriter(tmpFile);
+
+            using (StreamReader sr = File.OpenText(exportFile))
+            {
+                string s = "";
+                while ((s = sr.ReadLine()) != null)
+                {
+                    outfile.WriteLine(escapeBackslashes(s));
+                }
+            }
+        }
+
 
         /// <summary>
         /// App handle
@@ -107,9 +200,9 @@ namespace Xyglo.Friendlier
         protected readonly BrazilApp m_app;
 
         /// <summary>
-        /// Directory to build into
+        /// Directory to export into
         /// </summary>
-        protected string m_projectDirectory;
+        protected string m_exportDirectory;
 
         /// <summary>
         /// Template directory - sometimes we need to fetch files from the template when exporting

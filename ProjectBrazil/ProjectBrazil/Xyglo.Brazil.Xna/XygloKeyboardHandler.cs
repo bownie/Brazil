@@ -2209,8 +2209,12 @@ namespace Xyglo.Brazil.Xna
                 Vector3 appPosition = brazilView.getPosition();
 
                 //BrazilFlyingBlock bfb = new BrazilFlyingBlock(BrazilColour.Blue, XygloConvert.getBrazilVector3(placePosition), new BrazilVector3(20, 20, 20));
-                //Component newComponent = m_context.m_componentPalette.getComponentInstance(placePosition - appPosition);
-                brazilView.getApp().addComponent(m_context.m_componentPalette.getComponentInstance(placePosition - appPosition));
+
+                // Create component and set the app back reference
+                //
+                Component newComponent = m_context.m_componentPalette.getComponentInstance(placePosition - appPosition);
+                newComponent.setApp(brazilView.getApp());
+                brazilView.getApp().addComponent(newComponent);
             }
         }
 
