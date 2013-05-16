@@ -1,4 +1,5 @@
-//#include "Scripts/Utilities/Network.as"
+#include "Brazil/Interloper.as"
+#include "Brazil/Coin.as"
 
 Scene@ testScene;
 Camera@ camera;
@@ -8,8 +9,12 @@ float yaw = 0.0;
 float pitch = 0.0;
 int drawDebug = 0;
 Node@ interloperNode;
+RigidBody@ interloperBody;
+RigidBody@ interloperHead;
 
 Text@ downloadsText;
+
+Array<Node@> m_coins;
 
 void Start()
 {
@@ -25,6 +30,13 @@ void Start()
 
     InitScene();
 
+	for(uint i = 0; i < 10; i++)
+	{
+		addCoin(Vector3((i * 2) + 10 , 0, 0));
+	}
+
+	//attemptCoinLoad();
+	
     SubscribeToEvent("Update", "HandleUpdate");
     SubscribeToEvent("KeyDown", "HandleKeyDown");
     SubscribeToEvent("MouseMove", "HandleMouseMove");
@@ -34,7 +46,6 @@ void Start()
     SubscribeToEvent("SpawnBox", "HandleSpawnBox");
 
     network.RegisterRemoteEvent("SpawnBox");
-
 }
 
 void InitConsole()
@@ -66,6 +77,36 @@ void InitUI()
     ui.root.AddChild(downloadsText);
 }
 
+void attemptCoinLoad()
+{
+	// New Coin
+	//
+	Print("Creating coin\r\n");
+	Node @coinNode = SpawnObject(Vector3(0, -10, 0), Quaternion(), "Coin");
+	Coin@ coin= cast<Coin>(coinNode.scriptObject);
+	Print("Created coin\r\n");
+    //interloper.buildBody();
+
+}
+
+void addCoin(Vector3 position)
+{
+    Node@ coinNode = testScene.CreateChild("Coin");
+    coinNode.position = position;
+    coinNode.scale = Vector3(0.2, 0.2, 0.2);
+
+	StaticModel@ coinObject = coinNode.CreateComponent("StaticModel");
+	coinObject.model = cache.GetResource("Model", "Models/Coin.mdl");
+	coinObject.material = cache.GetResource("Material", "Materials/BrightYellowUnlit.xml");
+	coinObject.castShadows = true;
+
+	// Store the new coin
+	//
+	int coinIndex = m_coins.length;
+    m_coins.Resize(coinIndex + 1);
+	m_coins[coinIndex] = coinNode;
+}
+
 void InitScene()
 {
     testScene = Scene("TestScene");
@@ -77,7 +118,7 @@ void InitScene()
     // Create the camera outside the scene so it is unaffected by scene load/save
     cameraNode = Node();
     camera = cameraNode.CreateComponent("Camera");
-    cameraNode.position = Vector3(0, 2, -20);
+    cameraNode.position = Vector3(0, 2, -50);
 
     if (!engine.headless)
     {
@@ -101,8 +142,8 @@ void InitScene()
 
     Node@ zoneNode = testScene.CreateChild("Zone");
     Zone@ zone = zoneNode.CreateComponent("Zone");
-    zone.ambientColor = Color(0.15, 0.15, 0.15);
-    zone.fogColor = Color(0.5, 0.5, 0.7);
+    zone.ambientColor = Color(0, 0, 0);
+    zone.fogColor = Color(0, 0, 0);
     zone.fogStart = 100.0;
     zone.fogEnd = 300.0;
     zone.boundingBox = BoundingBox(-1000, 1000);
@@ -119,6 +160,7 @@ void InitScene()
         light.specularIntensity = 0.5;
     }
 
+	/*
     {
         Node@ objectNode = testScene.CreateChild("Floor");
         objectNode.position = Vector3(0, -0.5, 0);
@@ -131,13 +173,19 @@ void InitScene()
         RigidBody@ body = objectNode.CreateComponent("RigidBody");
         CollisionShape@ shape = objectNode.CreateComponent("CollisionShape");
         shape.SetBox(Vector3(1, 1, 1));
-    }
+    }*/
+
+	// New Interloper
+	//
+	Node @interloperNodeNew = SpawnObject(Vector3(0, -10, 0), Quaternion(), "Interloper");
+	//Interloper@ interloper = cast<Interloper>(interloperNodeNew.scriptObject);
+    //interloper.buildBody();
 
 	// Interloper
 	//
 	{
 		interloperNode = testScene.CreateChild("Interloper");
-		interloperNode.position = Vector3(5, 4, 0);
+		interloperNode.position = Vector3(0, 15, 0);
 		interloperNode.SetScale(1);
 
 		StaticModel@ object = interloperNode.CreateComponent("StaticModel");
@@ -145,11 +193,12 @@ void InitScene()
         object.material = cache.GetResource("Material", "Materials/BrightRedUnlit.xml");
         object.castShadows = true;
 
-        RigidBody@ body = interloperNode.CreateComponent("RigidBody");
-        body.mass = 10.0;
-        body.friction = 1.0;
-		body.SetAttribute("Use Gravity", true);
-        body.collisionEventMode = COLLISION_NEVER;
+        interloperBody = interloperNode.CreateComponent("RigidBody");
+        interloperBody.mass = 10.0;
+        interloperBody.friction = 1.0;
+		interloperBody.SetAttribute("Use Gravity", true);
+        interloperBody.collisionEventMode = COLLISION_NEVER;
+
         CollisionShape@ shape = interloperNode.CreateComponent("CollisionShape");
         shape.SetBox(Vector3(1, 1, 1));
 
@@ -165,11 +214,12 @@ void InitScene()
         headObject.material = cache.GetResource("Material", "Materials/BrightRedUnlit.xml");
         headObject.castShadows = true;
 
-		RigidBody@ headBody = headNode.CreateComponent("RigidBody");
-        headBody.mass = 10.0;
-        headBody.friction = 1.0;
-		headBody.SetAttribute("Use Gravity", true);
-        headBody.collisionEventMode = COLLISION_NEVER;
+		interloperHead = headNode.CreateComponent("RigidBody");
+        interloperHead.mass = 10.0;
+        interloperHead.friction = 1.0;
+		interloperHead.SetAttribute("Use Gravity", true);
+        interloperHead.collisionEventMode = COLLISION_NEVER;
+
         CollisionShape@ headShape = headNode.CreateComponent("CollisionShape");
         headShape.SetBox(Vector3(1, 1, 1));
 
@@ -179,11 +229,11 @@ void InitScene()
 		constraint.constraintType = CONSTRAINT_HINGE;
 		constraint.disableCollision = true;
 		// The connected body must be specified before setting the world position
-		constraint.otherBody = headBody;
+		constraint.otherBody = interloperHead;
 		constraint.worldPosition = interloperNode.worldPosition;
 		constraint.axis = Vector3(0, 0, -1); 
 		constraint.otherAxis = Vector3(0, 0, -1);
-		constraint.highLimit = Vector2(90, 0);
+		constraint.highLimit = Vector2(0, 0);
 		constraint.lowLimit = Vector2(0, 0);
 	}
 
@@ -201,11 +251,11 @@ void InitScene()
         object.castShadows = true;
 
         RigidBody@ body = objectNode.CreateComponent("RigidBody");
-        body.mass = 10.0;
-        body.friction = 1.0;
+        //body.mass = 10.0;
+        //body.friction = 1.0;
 		float iFloat = i;
 		body.SetAttribute("Use Gravity", (i / 2 == iFloat / 2));
-		body.SetAttribute("Is Kinematic", false);
+		//body.SetAttribute("Is Kinematic", false);
         // When object count is high, disabling collision events gives a significant performance increase
         body.collisionEventMode = COLLISION_NEVER;
         CollisionShape@ shape = objectNode.CreateComponent("CollisionShape");
@@ -213,10 +263,17 @@ void InitScene()
 
 		// Constraint
 		//
-		//Constraint@ constraint = objectNode.CreateComponent("Constraint", LOCAL);
-		//constraint.constraintType = CONSTRAINT_POINT;
-		//constraint.disableCollision = true;
-		//constraint.worldPosition = objectNode.worldPosition;
+
+		/*
+		Constraint@ constraint = objectNode.CreateComponent("Constraint", LOCAL);
+		constraint.constraintType = CONSTRAINT_HINGE;
+		constraint.otherBody = body;
+		constraint.disableCollision = true;
+		constraint.worldPosition = objectNode.worldPosition;
+		constraint.axis = Vector3(0, 0, -1); 
+		constraint.otherAxis = Vector3(0, 0, -1);
+		constraint.highLimit = Vector2(90, 0);
+		constraint.lowLimit = Vector2(0, 0);*/
     }
 
 	/*
@@ -236,6 +293,12 @@ void InitScene()
         CollisionShape@ shape = objectNode.CreateComponent("CollisionShape");
         shape.SetTriangleMesh(cache.GetResource("Model", "Models/Mushroom.mdl"), 0);
     }*/
+}
+
+Node@ SpawnObject(const Vector3&in position, const Quaternion&in rotation, const String&in className)
+{
+    XMLFile@ xml = cache.GetResource("XMLFile", "Objects/" + className + ".xml");
+    return scene.InstantiateXML(xml, position, rotation);
 }
 
 void CreateRagdollConstraint(Node@ root, const String&in boneName, const String&in parentName, ConstraintType type,
@@ -263,6 +326,19 @@ void HandleUpdate(StringHash eventType, VariantMap& eventData)
 {
     float timeStep = eventData["TimeStep"].GetFloat();
 
+	// Update coins
+	//
+	for (uint i = 0; i < m_coins.length; ++i)
+    {
+        if (m_coins[i] !is null)
+        {
+            //Print("Rotating coin " + i + " at timestep " + timeStep + "\r\n");
+			Quaternion rot = m_coins[i].rotation;
+			//rot. += 0.02;
+			m_coins[i].rotation = rot * Quaternion(0, 2, 0);
+        }
+    }
+
     if (ui.focusElement is null)
     {
         float speedMultiplier = 1.0;
@@ -270,6 +346,9 @@ void HandleUpdate(StringHash eventType, VariantMap& eventData)
             speedMultiplier = 5.0;
         if (input.keyDown[KEY_LCTRL])
             speedMultiplier = 0.1;
+
+		//if (input.keyDown'Up')
+		    
 
         if (input.keyDown['W'])
             cameraNode.TranslateRelative(Vector3(0, 0, 10) * timeStep * speedMultiplier);
@@ -301,12 +380,12 @@ void HandleKeyDown(StringHash eventType, VariantMap& eventData)
 
     if (key == KEY_ESC)
     {
-        if (ui.focusElement is null)
+        //if (ui.focusElement is null)
             engine.Exit();
-        else
-            console.visible = false;
+        //else
+            //console.visible = false;
     }
-    
+
     if (key == KEY_F1)
         console.Toggle();
 
@@ -390,6 +469,18 @@ void HandleKeyDown(StringHash eventType, VariantMap& eventData)
                 testScene.LoadXML(xmlFile);
         }
     }
+   
+	if (key == KEY_UP)
+	{
+		interloperHead.linearVelocity = Vector3(0, 10, 0);
+	}
+	else if (key == KEY_LEFT)
+	{
+		interloperHead.linearVelocity = interloperHead.linearVelocity + Vector3(-10, 0, 0);
+	} else if (key == KEY_RIGHT)
+	{
+		interloperHead.linearVelocity = interloperHead.linearVelocity + Vector3(10, 0, 0);
+	}
 }
 
 void HandleMouseMove(StringHash eventType, VariantMap& eventData)
