@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Friendlier", "Paulo\Paulo\Friendlier.csproj", "{048212BB-7B45-4F86-ACD7-BDC687C4A3FF}"
 	ProjectSection(ProjectDependencies) = postProject
 		{046697D5-E49B-41F7-8D84-63C2C430ED07} = {046697D5-E49B-41F7-8D84-63C2C430ED07}
