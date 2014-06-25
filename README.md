@@ -30,6 +30,8 @@ an Android app.
 Recommended next steps
 ----------------------
 
+- Replace XNA with monogame (content pipeline potential gotchas)
+- Xamarin/monodevelop port
 - heap of more graphics components and effects need adding
 - optimisation of the graphics routines
 - further integration of third party libraries such as physics, sound
